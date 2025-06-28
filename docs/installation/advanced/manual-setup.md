@@ -85,7 +85,7 @@ Follow these steps to manually install AliasVault on your own server.
 
 7. **Configuring private email domains**
 
-   By default, the AliasVault private email domains feature is disabled. If you wish to enable this so you can use your own private domains to create email aliases with, please read the `Email Server Setup` section in the main installation guide [Basic Install](../install.md#3-email-server-setup).
+   By default, the AliasVault private email domains feature is disabled. If you wish to enable this to use your own private domains to create email aliases with, please read the `Email Server Setup` section in the main installation guide [Basic Install](../install.md#3-email-server-setup).
 
    For more information, read the article explaining the differences between AliasVault's [private and public domains](../../misc/private-vs-public-email.md).
 
