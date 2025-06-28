@@ -157,7 +157,12 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const generateRandomAlias = useCallback(async (): Promise<void> => {
     const { identityGenerator, passwordGenerator } = await initializeGenerators();
 
-    const identity = identityGenerator.generateRandomIdentity();
+    // Get gender preference from database
+    const genderPreference = await dbContext.sqliteClient!.getDefaultIdentityGender();
+
+    // Generate identity with gender preference
+    const identity = identityGenerator.generateRandomIdentity(genderPreference);
+
     const password = passwordGenerator.generateRandomPassword();
     const defaultEmailDomain = await dbContext.sqliteClient!.getDefaultEmailDomain();
     const email = defaultEmailDomain ? `${identity.emailPrefix}@${defaultEmailDomain}` : identity.emailPrefix;
@@ -316,7 +321,14 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const generateRandomUsername = async () : Promise<void> => {
     try {
       const { identityGenerator } = await initializeGenerators();
-      const identity = identityGenerator.generateRandomIdentity();
+
+      // Get gender preference from database
+      const genderPreference = await dbContext.sqliteClient!.getDefaultIdentityGender();
+
+      // Generate identity with gender preference
+      const identity = identityGenerator.generateRandomIdentity(genderPreference);
+
+      // Set the username to the identity's nickname
       setValue('Username', identity.nickName);
     } catch (error) {
       console.error('Error generating random username:', error);

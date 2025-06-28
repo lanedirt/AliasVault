@@ -425,6 +425,13 @@ class SqliteClient {
   }
 
   /**
+   * Get the default identity gender preference from the database.
+   */
+  public async getDefaultIdentityGender(): Promise<string> {
+    return this.getSetting('DefaultIdentityGender', 'random');
+  }
+
+  /**
    * Get the password settings from the database.
    */
   public async getPasswordSettings(): Promise<PasswordSettings> {
