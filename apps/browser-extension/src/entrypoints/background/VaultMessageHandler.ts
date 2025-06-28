@@ -6,6 +6,7 @@ import { EncryptionUtility } from '@/utils/EncryptionUtility';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
+import { IdentitySettingsResponse } from '@/utils/types/messaging/IdentitySettingsResponse';
 import { PasswordSettingsResponse as messagePasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import { StoreVaultRequest } from '@/utils/types/messaging/StoreVaultRequest';
 import { StringResponse as stringResponse } from '@/utils/types/messaging/StringResponse';
@@ -276,18 +277,25 @@ export function handleGetDefaultEmailDomain(): Promise<stringResponse> {
 }
 
 /**
- * Get the default identity language.
+ * Get the default identity settings.
  */
-export async function handleGetDefaultIdentityLanguage(
-) : Promise<stringResponse> {
+export async function handleGetDefaultIdentitySettings(
+) : Promise<IdentitySettingsResponse> {
   try {
     const sqliteClient = await createVaultSqliteClient();
-    const settingValue = sqliteClient.getDefaultIdentityLanguage();
+    const language = sqliteClient.getDefaultIdentityLanguage();
+    const gender = sqliteClient.getDefaultIdentityGender();
 
-    return { success: true, value: settingValue };
+    return {
+      success: true,
+      settings: {
+        language,
+        gender
+      }
+    };
   } catch (error) {
-    console.error('Error getting default identity language:', error);
-    return { success: false, error: 'Failed to get default identity language' };
+    console.error('Error getting default identity settings:', error);
+    return { success: false, error: 'Failed to get default identity settings' };
   }
 }
 
