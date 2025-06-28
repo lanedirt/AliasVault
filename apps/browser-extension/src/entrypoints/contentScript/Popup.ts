@@ -10,6 +10,7 @@ import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
+import { IdentitySettingsResponse } from '@/utils/types/messaging/IdentitySettingsResponse';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
 
@@ -244,9 +245,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         };
       } else {
         // Generate new random identity using identity generator.
-        const identityLanguage = await sendMessage('GET_DEFAULT_IDENTITY_LANGUAGE', {}, 'background') as StringResponse;
-        const identityGenerator = CreateIdentityGenerator(identityLanguage.value ?? 'en');
-        const identity = identityGenerator.generateRandomIdentity();
+        const identitySettings = await sendMessage('GET_DEFAULT_IDENTITY_SETTINGS', {}, 'background') as IdentitySettingsResponse;
+        const identityGenerator = CreateIdentityGenerator(identitySettings.settings?.language ?? 'en');
+        const identity = identityGenerator.generateRandomIdentity(identitySettings.settings?.gender);
 
         // Get password settings from background
         const passwordSettingsResponse = await sendMessage('GET_PASSWORD_SETTINGS', {}, 'background') as PasswordSettingsResponse;

@@ -2,7 +2,7 @@ import { onMessage, sendMessage } from "webext-bridge/background";
 
 import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 import { handleOpenPopup, handlePopupWithCredential, handleToggleContextMenu } from '@/entrypoints/background/PopupMessageHandler';
-import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentityLanguage, handleGetDerivedKey, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
+import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentitySettings, handleGetDerivedKey, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
 
 import { GLOBAL_CONTEXT_MENU_ENABLED_KEY } from '@/utils/Constants';
 
@@ -23,7 +23,7 @@ export default defineBackground({
     onMessage('GET_CREDENTIALS', () => handleGetCredentials());
     onMessage('CREATE_IDENTITY', ({ data }) => handleCreateIdentity(data));
     onMessage('GET_DEFAULT_EMAIL_DOMAIN', () => handleGetDefaultEmailDomain());
-    onMessage('GET_DEFAULT_IDENTITY_LANGUAGE', () => handleGetDefaultIdentityLanguage());
+    onMessage('GET_DEFAULT_IDENTITY_SETTINGS', () => handleGetDefaultIdentitySettings());
     onMessage('GET_PASSWORD_SETTINGS', () => handleGetPasswordSettings());
     onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
     onMessage('OPEN_POPUP', () => handleOpenPopup());
