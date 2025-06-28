@@ -17,7 +17,7 @@ type Identity = {
 };
 
 interface IIdentityGenerator {
-    generateRandomIdentity(): Identity;
+    generateRandomIdentity(gender?: string | 'random'): Identity;
 }
 
 /**
@@ -42,7 +42,7 @@ declare abstract class IdentityGenerator implements IIdentityGenerator {
     /**
      * Generate a random identity.
      */
-    generateRandomIdentity(): Identity;
+    generateRandomIdentity(gender?: string | 'random'): Identity;
 }
 
 /**

@@ -172,7 +172,7 @@ var IdentityGenerator = class {
   /**
    * Generate a random identity.
    */
-  generateRandomIdentity() {
+  generateRandomIdentity(gender) {
     const identity = {
       firstName: "",
       lastName: "",
@@ -181,12 +181,26 @@ var IdentityGenerator = class {
       emailPrefix: "",
       nickName: ""
     };
-    if (this.random() < 0.5) {
-      identity.firstName = this.firstNamesMale[Math.floor(this.random() * this.firstNamesMale.length)];
-      identity.gender = "Male" /* Male */;
+    let selectedGender;
+    if (gender === "random" || gender === void 0) {
+      selectedGender = this.random() < 0.5 ? "Male" /* Male */ : "Female" /* Female */;
     } else {
+      if (gender === "male") {
+        selectedGender = "Male" /* Male */;
+      } else if (gender === "female") {
+        selectedGender = "Female" /* Female */;
+      } else {
+        selectedGender = "Male" /* Male */;
+      }
+    }
+    identity.gender = selectedGender;
+    if (selectedGender === "Male" /* Male */) {
+      identity.firstName = this.firstNamesMale[Math.floor(this.random() * this.firstNamesMale.length)];
+    } else if (selectedGender === "Female" /* Female */) {
       identity.firstName = this.firstNamesFemale[Math.floor(this.random() * this.firstNamesFemale.length)];
-      identity.gender = "Female" /* Female */;
+    } else {
+      const usesMaleNames = this.random() < 0.5;
+      identity.firstName = usesMaleNames ? this.firstNamesMale[Math.floor(this.random() * this.firstNamesMale.length)] : this.firstNamesFemale[Math.floor(this.random() * this.firstNamesFemale.length)];
     }
     identity.lastName = this.lastNames[Math.floor(this.random() * this.lastNames.length)];
     identity.birthDate = this.generateRandomDateOfBirth();
