@@ -40,7 +40,7 @@
     <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
     <div class="mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            If you want to export your AliasVault credentials to another AliasVault instance (e.g. from cloud to self-hosted or vice-versa) or to another service altogether, you can export it here. Note that all exports are unencrypted so store it in a safe place and delete it when you no longer need it.
+            If you want to export your AliasVault credentials to another AliasVault server (e.g. from cloud to self-hosted or vice-versa) or to another service altogether, you can export it here. Note that all exports are unencrypted so store it in a safe place and delete it when you no longer need it.
         </p>
         <div>
             <Button OnClick="@(() => ShowExportConfirmation(ExportType.Csv))">Export vault to unencrypted CSV file</Button>

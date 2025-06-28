@@ -1071,7 +1071,7 @@ create_env_file() {
 populate_hostname() {
     if ! grep -q "^HOSTNAME=" "$ENV_FILE" || [ -z "$(grep "^HOSTNAME=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         while true; do
-            read -p "Enter the (public) hostname where this AliasVault instance can be accessed from (e.g. aliasvault.net): " USER_HOSTNAME
+            read -p "Enter the (public) hostname where this AliasVault server can be accessed from (e.g. aliasvault.net): " USER_HOSTNAME
             if [ -n "$USER_HOSTNAME" ]; then
                 HOSTNAME="$USER_HOSTNAME"
                 break
@@ -1292,7 +1292,7 @@ handle_registration_configuration() {
     CURRENT_SETTING=$(grep "^PUBLIC_REGISTRATION_ENABLED=" "$ENV_FILE" | cut -d '=' -f2)
 
     printf "${CYAN}About Public Registration:${NC}\n"
-    printf "Public registration allows new users to create their own accounts on your AliasVault instance.\n"
+    printf "Public registration allows new users to create their own accounts on your AliasVault server.\n"
     printf "When disabled, no new accounts can be created.\n"
     printf "\n"
     printf "${CYAN}Current Configuration:${NC}\n"
@@ -2537,7 +2537,7 @@ handle_hostname_configuration() {
         exit 1
     fi
 
-    printf "The hostname is the domain name where your AliasVault instance will be accessible.\n"
+    printf "The hostname is the domain name where your AliasVault server will be accessible.\n"
     printf "A valid hostname is required for Let's Encrypt SSL certificate generation.\n"
     printf "The hostname must be a real domain that points to this server (not localhost).\n"
     printf "\n"
