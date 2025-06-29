@@ -432,6 +432,27 @@ class SqliteClient {
   }
 
   /**
+   * Update a setting in the database.
+   * @param key The setting key
+   * @param value The setting value
+   */
+  public async updateSetting(key: string, value: string): Promise<void> {
+    await NativeVaultManager.beginTransaction();
+
+    const currentDateTime = new Date().toISOString()
+      .replace('T', ' ')
+      .replace('Z', '')
+      .substring(0, 23);
+
+    const query = `
+      INSERT OR REPLACE INTO Settings (Key, Value, CreatedAt, UpdatedAt, IsDeleted)
+      VALUES (?, ?, ?, ?, ?)`;
+
+    await this.executeUpdate(query, [key, value, currentDateTime, currentDateTime, 0]);
+    await NativeVaultManager.commitTransaction();
+  }
+
+  /**
    * Get the password settings from the database.
    */
   public async getPasswordSettings(): Promise<PasswordSettings> {

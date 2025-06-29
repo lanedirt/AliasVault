@@ -57,6 +57,13 @@ export default function SettingsLayout(): React.ReactNode {
         }}
       />
       <Stack.Screen
+        name="identity-generator"
+        options={{
+          title: 'Identity Generator Settings',
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
         name="security/index"
         options={{
           title: 'Security Settings',
