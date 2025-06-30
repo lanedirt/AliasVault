@@ -326,26 +326,26 @@ export default function SettingsScreen() : React.ReactNode {
         <View style={styles.section}>
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => router.push('/(tabs)/settings/security')}
-          >
-            <View style={styles.settingItemIcon}>
-              <Ionicons name="shield-checkmark" size={20} color={colors.text} />
-            </View>
-            <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Security Settings</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-            </View>
-          </TouchableOpacity>
-          <View style={styles.separator} />
-          <TouchableOpacity
-            style={styles.settingItem}
             onPress={handleIdentityGeneratorPress}
           >
             <View style={styles.settingItemIcon}>
               <Ionicons name="person-outline" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Identity Generator Settings</ThemedText>
+              <ThemedText style={styles.settingItemText}>Identity Generator</ThemedText>
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.separator} />
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => router.push('/(tabs)/settings/security')}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="shield-checkmark" size={20} color={colors.text} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={styles.settingItemText}>Security</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
