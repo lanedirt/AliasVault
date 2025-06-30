@@ -13,6 +13,7 @@
 @inject HttpClient HttpClient
 @inject ILogger<Home> Logger
 @inject MinDurationLoadingService LoadingService
+@implements IAsyncDisposable
 
 <LayoutPageTitle>Emails</LayoutPageTitle>
 
@@ -26,6 +27,10 @@
     Title="Emails"
     Description="You can view all emails received by your private email addresses below.">
     <CustomActions>
+        @if (DbService.Settings.AutoEmailRefresh)
+        {
+            <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="Auto-refresh enabled"></div>
+        }
         <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
     </CustomActions>
 </PageHeader>
@@ -96,7 +101,8 @@ else
                             <EmailRow
                                 Email="email"
                                 OnEmailClick="ShowAliasVaultEmailInModal"
-                                IsSelected="false" />
+                                IsSelected="false"
+                                IsNewEmail="@(NewEmailIds.Contains(email.Id))" />
                         }
                     }
                 </ul>
@@ -104,65 +110,71 @@ else
         </div>
 
         <!-- Desktop Layout (lg and up) - Sidebar and Preview with Load More -->
-        <div class="hidden lg:flex mt-6 h-[calc(100vh-300px)] min-h-[600px] rounded-lg overflow-hidden">
-            <!-- Left Sidebar - Email List -->
-            <div class="w-1/4 bg-white border border-r-0 dark:bg-gray-800 dark:border-gray-700 flex flex-col">
-                <div class="flex-1 overflow-y-auto" id="email-list-container">
-                    <ul>
-                        @if (EmailList.Count == 0)
-                        {
-                            <li class="p-4 text-center text-gray-500 dark:text-gray-300">
-                                No emails have been received yet.
-                            </li>
-                        }
-                        else
-                        {
-                            @foreach (var email in EmailList)
-                            {
-                                <EmailRow
-                                    Email="email"
-                                    OnEmailClick="SelectEmailForPreview"
-                                    IsSelected="@(SelectedEmailId == email.Id)" />
-                            }
-                        }
-                        <!-- Load More Button for Desktop -->
-                        @if (HasMoreEmails && EmailList.Count > 0)
-                        {
-                            <li class="border-t border-gray-200 dark:border-gray-600 p-3 bg-gray-50 dark:bg-gray-700">
-                                <button @onclick="LoadMoreEmails"
-                                        disabled="@IsLoadingMore"
-                                        class="w-full px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed dark:text-primary-400 dark:bg-primary-900/20 dark:border-primary-800 dark:hover:bg-primary-900/30">
-                                    @if (IsLoadingMore)
-                                    {
-                                        <span class="flex items-center justify-center">
-                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Loading...
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span>Load More (@(TotalRecords - EmailList.Count) remaining)</span>
-                                    }
-                                </button>
-                            </li>
-                        }
-                    </ul>
+        <div class="hidden lg:flex mt-6 rounded-lg overflow-hidden">
+            @if (EmailList.Count == 0)
+            {
+                <!-- Single row message for desktop when no emails -->
+                <div class="w-full bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
+                    <div class="p-4 text-center text-gray-500 dark:text-gray-300">
+                        No emails have been received yet.
+                    </div>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="w-full h-[calc(100vh-300px)] min-h-[600px] flex rounded-lg overflow-hidden">
+                    <!-- Left Sidebar - Email List -->
+                    <div class="w-1/4 bg-white border border-r-0 dark:bg-gray-800 dark:border-gray-700 flex flex-col">
+                        <div class="flex-1 overflow-y-auto" id="email-list-container">
+                            <ul>
+                                @foreach (var email in EmailList)
+                                {
+                                    <EmailRow
+                                        Email="email"
+                                        OnEmailClick="SelectEmailForPreview"
+                                        IsSelected="@(SelectedEmailId == email.Id)"
+                                        IsNewEmail="@(NewEmailIds.Contains(email.Id))" />
+                                }
+                                <!-- Load More Button for Desktop -->
+                                @if (HasMoreEmails && EmailList.Count > 0)
+                                {
+                                    <li class="border-t border-gray-200 dark:border-gray-600 p-3 bg-gray-50 dark:bg-gray-700">
+                                        <button @onclick="LoadMoreEmails"
+                                                disabled="@IsLoadingMore"
+                                                class="w-full px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 border border-primary-200 rounded-md hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed dark:text-primary-400 dark:bg-primary-900/20 dark:border-primary-800 dark:hover:bg-primary-900/30">
+                                            @if (IsLoadingMore)
+                                            {
+                                                <span class="flex items-center justify-center">
+                                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Loading...
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>Load More (@(TotalRecords - EmailList.Count) remaining)</span>
+                                            }
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
 
-            <!-- Right Panel - Email Preview -->
-            <div class="w-3/4">
-                <EmailPreview
-                    Email="SelectedEmail"
-                    IsSpamOk="false"
-                    OnEmailDeleted="HandleEmailDeleted"
-                    CredentialId="@GetSelectedEmailCredentialId()"
-                    CredentialName="@GetSelectedEmailCredentialName()"
-                    OnCredentialClick="NavigateToCredential" />
-            </div>
+                    <!-- Right Panel - Email Preview -->
+                    <div class="w-3/4">
+                        <EmailPreview
+                            Email="SelectedEmail"
+                            IsSpamOk="false"
+                            OnEmailDeleted="HandleEmailDeleted"
+                            CredentialId="@GetSelectedEmailCredentialId()"
+                            CredentialName="@GetSelectedEmailCredentialName()"
+                            OnCredentialClick="NavigateToCredential" />
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }
@@ -180,6 +192,241 @@ else
     private EmailApiModel? SelectedEmail { get; set; }
     private bool IsLoadingMore { get; set; }
     private bool HasMoreEmails => TotalRecords > EmailList.Count;
+
+    // Auto-refresh related properties
+    private const int ACTIVE_TAB_REFRESH_INTERVAL = 2000; // 2 seconds
+    private CancellationTokenSource? _pollingCts;
+    private DotNetObjectReference<Home>? _dotNetRef;
+    private bool _isPageVisible = true;
+    private HashSet<int> NewEmailIds { get; set; } = new();
+    private HashSet<int> _knownEmailIds = new();
+
+    /// <summary>
+    /// Callback invoked by JavaScript when the page visibility changes. This is used to start/stop the polling for new emails.
+    /// </summary>
+    /// <param name="isVisible">Indicates whether the page is visible or not.</param>
+    [JSInvokable]
+    public void OnVisibilityChange(bool isVisible)
+    {
+        _isPageVisible = isVisible;
+
+        if (isVisible && DbService.Settings.AutoEmailRefresh)
+        {
+            // Start polling if visible and auto-refresh is enabled
+            StartPolling();
+        }
+        else
+        {
+            // Stop polling if hidden
+            StopPolling();
+        }
+
+        // If becoming visible, do an immediate refresh
+        if (isVisible)
+        {
+            _ = CheckForNewEmails();
+        }
+    }
+
+    private void StartPolling()
+    {
+        // If already polling, no need to start again
+        if (_pollingCts != null) {
+            return;
+        }
+
+        _pollingCts = new CancellationTokenSource();
+
+        // Start polling task
+        _ = PollForNewEmails(_pollingCts.Token);
+    }
+
+    private void StopPolling()
+    {
+        if (_pollingCts != null)
+        {
+            _pollingCts.Cancel();
+            _pollingCts.Dispose();
+            _pollingCts = null;
+        }
+    }
+
+    private async Task PollForNewEmails(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                await CheckForNewEmails();
+                await Task.Delay(ACTIVE_TAB_REFRESH_INTERVAL, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Normal cancellation, ignore.
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error in email refresh polling");
+        }
+    }
+
+    /// <summary>
+    /// Check for new emails without disrupting the current view.
+    /// </summary>
+    private async Task CheckForNewEmails()
+    {
+        if (!_isPageVisible || !DbService.Settings.AutoEmailRefresh)
+        {
+            return;
+        }
+
+        try
+        {
+            var emailClaimList = await DbService.GetEmailClaimListAsync();
+
+            if (emailClaimList.Count == 0)
+            {
+                return;
+            }
+
+            var requestModel = new MailboxBulkRequest
+            {
+                Page = 1,
+                PageSize = 10, // Only check the latest 10 emails for new ones
+                Addresses = emailClaimList,
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
+            request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
+
+            var response = await HttpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var mailbox = await response.Content.ReadFromJsonAsync<MailboxBulkResponse>();
+                if (mailbox?.Mails != null)
+                {
+                    var context = await DbService.GetDbContextAsync();
+                    var credentialLookup = await context.Credentials
+                        .Include(x => x.Service)
+                        .Include(x => x.Alias)
+                        .Where(x => x.Alias.Email != null)
+                        .GroupBy(x => x.Alias.Email!.ToLower())
+                        .ToDictionaryAsync(
+                            g => g.Key,
+                            g => new { Id = g.First().Id, ServiceName = g.First().Service.Name ?? "Unknown" }
+                        );
+
+                    List<MailboxEmailApiModel> decryptedEmailList;
+                    try
+                    {
+                        decryptedEmailList = await EmailService.DecryptEmailList(mailbox.Mails);
+                    }
+                    catch (InvalidOperationException ex) when (ex.Message.Contains("Sequence contains no matching element"))
+                    {
+                        // Handle case where encryption keys are not available for some emails
+                        Logger.LogWarning(ex, "Failed to decrypt some emails due to missing encryption keys");
+                        return;
+                    }
+
+                    var newEmails = decryptedEmailList.Select(email =>
+                    {
+                        var toEmail = email.ToLocal + "@" + email.ToDomain;
+                        var credentialInfo = credentialLookup.TryGetValue(toEmail.ToLower(), out var info)
+                            ? info
+                            : new { Id = Guid.Empty, ServiceName = "Unknown" };
+
+                        return new MailListViewModel
+                        {
+                            Id = email.Id,
+                            Date = email.DateSystem,
+                            FromName = email.FromDisplay,
+                            FromEmail = email.FromLocal + "@" + email.FromDomain,
+                            ToEmail = toEmail,
+                            Subject = email.Subject,
+                            MessagePreview = email.MessagePreview,
+                            CredentialId = credentialInfo.Id,
+                            CredentialName = credentialInfo.ServiceName,
+                            HasAttachments = email.HasAttachments,
+                        };
+                    }).ToList();
+
+                    // Check for new emails
+                    var newEmailIds = new HashSet<int>();
+                    foreach (var email in newEmails)
+                    {
+                        if (!_knownEmailIds.Contains(email.Id))
+                        {
+                            newEmailIds.Add(email.Id);
+                        }
+                    }
+
+                    // Update the known email IDs
+                    foreach (var email in newEmails)
+                    {
+                        _knownEmailIds.Add(email.Id);
+                    }
+
+                    // Add new emails to the list and mark them as new
+                    if (newEmailIds.Count > 0)
+                    {
+                        // Add new emails to the beginning of the list
+                        var emailsToAdd = newEmails.Where(e => newEmailIds.Contains(e.Id)).ToList();
+                        EmailList.InsertRange(0, emailsToAdd);
+
+                        // Update total records
+                        TotalRecords += emailsToAdd.Count;
+
+                        // Mark emails as new
+                        NewEmailIds.UnionWith(newEmailIds);
+
+                        // Remove new email indicators after 30 seconds
+                        _ = Task.Delay(30000).ContinueWith(_ =>
+                        {
+                            NewEmailIds.ExceptWith(newEmailIds);
+                            InvokeAsync(StateHasChanged);
+                        });
+
+                        StateHasChanged();
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "An error occurred while checking for new emails");
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Create a single object reference for JS interop
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JsInteropService.RegisterVisibilityCallback(_dotNetRef);
+
+        // Only start polling if auto-refresh is enabled and page is visible
+        if (DbService.Settings.AutoEmailRefresh && _isPageVisible)
+        {
+            StartPolling();
+        }
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        // Stop polling
+        StopPolling();
+
+        // Unregister the visibility callback using the same reference
+        if (_dotNetRef != null)
+        {
+            await JsInteropService.UnregisterVisibilityCallback(_dotNetRef);
+            _dotNetRef.Dispose();
+        }
+    }
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -211,6 +458,8 @@ else
         // Reset pagination for fresh load
         CurrentPage = 1;
         EmailList.Clear();
+        NewEmailIds.Clear();
+        _knownEmailIds.Clear();
 
         var emailClaimList = await DbService.GetEmailClaimListAsync();
 
@@ -353,6 +602,10 @@ else
         else
         {
             EmailList = newEmails;
+            // Initialize known email IDs for auto-refresh - don't mark existing emails as new
+            _knownEmailIds = new HashSet<int>(newEmails.Select(e => e.Id));
+            // Clear any existing new email indicators since this is the initial load
+            NewEmailIds.Clear();
         }
 
         CurrentPage = model.CurrentPage;
@@ -373,6 +626,9 @@ else
     /// </summary>
     private async Task ShowAliasVaultEmailInModal(int emailId)
     {
+        // Remove new email mark when email is clicked
+        NewEmailIds.Remove(emailId);
+
         EmailApiModel? mail = await HttpClient.GetFromJsonAsync<EmailApiModel>($"v1/Email/{emailId}");
         if (mail != null)
         {
@@ -412,6 +668,9 @@ else
     /// </summary>
     private async Task SelectEmailForPreview(int emailId)
     {
+        // Remove new email mark when email is clicked
+        NewEmailIds.Remove(emailId);
+
         SelectedEmailId = emailId;
         await LoadSelectedEmailForPreview(emailId);
     }
@@ -456,6 +715,10 @@ else
             SelectedEmailId = null;
             SelectedEmail = null;
         }
+
+        // Remove from new email indicators
+        NewEmailIds.Remove(emailId);
+        _knownEmailIds.Remove(emailId);
 
         // Refresh the email list
         await RefreshData();
