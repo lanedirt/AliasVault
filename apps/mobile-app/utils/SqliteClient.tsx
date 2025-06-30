@@ -444,11 +444,26 @@ class SqliteClient {
       .replace('Z', '')
       .substring(0, 23);
 
-    const query = `
-      INSERT OR REPLACE INTO Settings (Key, Value, CreatedAt, UpdatedAt, IsDeleted)
-      VALUES (?, ?, ?, ?, ?)`;
+    // First check if the setting already exists
+    const checkQuery = `SELECT COUNT(*) as count FROM Settings WHERE Key = ?`;
+    const checkResults = await this.executeQuery<{ count: number }>(checkQuery, [key]);
+    const exists = checkResults[0]?.count > 0;
 
-    await this.executeUpdate(query, [key, value, currentDateTime, currentDateTime, 0]);
+    if (exists) {
+      // Update existing record
+      const updateQuery = `
+        UPDATE Settings
+        SET Value = ?, UpdatedAt = ?
+        WHERE Key = ?`;
+      await this.executeUpdate(updateQuery, [value, currentDateTime, key]);
+    } else {
+      // Insert new record
+      const insertQuery = `
+        INSERT INTO Settings (Key, Value, CreatedAt, UpdatedAt, IsDeleted)
+        VALUES (?, ?, ?, ?, ?)`;
+      await this.executeUpdate(insertQuery, [key, value, currentDateTime, currentDateTime, 0]);
+    }
+
     await NativeVaultManager.commitTransaction();
   }
 
