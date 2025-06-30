@@ -403,14 +403,7 @@ else
                 var (newEmails, _, _, _) = result.Value;
 
                 // Check for new emails
-                var newEmailIds = new HashSet<int>();
-                foreach (var email in newEmails)
-                {
-                    if (!_knownEmailIds.Contains(email.Id))
-                    {
-                        newEmailIds.Add(email.Id);
-                    }
-                }
+                var newEmailIds = newEmails.Where(email => !_knownEmailIds.Contains(email.Id)).Select(email => email.Id).ToList();
 
                 // Update the known email IDs
                 foreach (var email in newEmails)
