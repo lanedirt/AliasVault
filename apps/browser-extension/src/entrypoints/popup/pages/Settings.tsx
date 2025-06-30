@@ -358,7 +358,7 @@ const Settings: React.FC = () => {
                 {settings.isGloballyEnabled && (
                   <button
                     onClick={toggleCurrentSite}
-                    className={`px-4 py-2 rounded-md transition-colors ${
+                    className={`px-4 py-2 ml-1 rounded-md transition-colors ${
                       settings.isEnabled
                         ? 'bg-green-500 hover:bg-green-600 text-white'
                         : 'bg-red-500 hover:bg-red-600 text-white'

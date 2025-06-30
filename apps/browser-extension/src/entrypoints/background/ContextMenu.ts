@@ -62,9 +62,7 @@ export function handleContextMenuClick(info: Browser.contextMenus.OnClickData, t
         args: [password]
       });
     }
-  }
-
-  if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
+  } else if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
     // First get the active element's identifier
     browser.scripting.executeScript({
       target: { tabId: tab.id },
