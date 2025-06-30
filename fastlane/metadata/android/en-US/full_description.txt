@@ -1,0 +1,5 @@
+AliasVault – Encrypted Password & Alias Manager
+
+AliasVault for Android lets you securely access your passwords and email aliases on the go. Seamlessly create and use aliases directly on websites with full support for Android native autofill, no copy-pasting required.
+
+AliasVault is an open-source password and alias manager designed to protect your digital identity. It generates unique passwords and email addresses for every service you use, shielding your real information from trackers, data breaches, and spam.
