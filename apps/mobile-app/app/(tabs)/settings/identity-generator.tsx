@@ -159,7 +159,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
     return (
       <ThemedContainer>
         <CollapsibleHeader
-          title="Identity Generator Settings"
+          title="Identity Generator"
           scrollY={scrollY}
           showBackButton={true}
           onBackPress={() => router.back()}
