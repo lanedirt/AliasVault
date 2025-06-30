@@ -1,16 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
-import { useRef, useState, useCallback } from 'react';
-import { StyleSheet, View, ScrollView, Alert, Animated, Platform, TouchableOpacity } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useState, useCallback } from 'react';
+import { StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
-import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
+import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 import { ThemedText } from '@/components/themed/ThemedText';
-import { CollapsibleHeader } from '@/components/ui/CollapsibleHeader';
-import { TitleContainer } from '@/components/ui/TitleContainer';
 import { useDb } from '@/context/DbContext';
 
 const LANGUAGE_OPTIONS = [
@@ -31,12 +29,9 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
   const colors = useColors();
   const dbContext = useDb();
   const { executeVaultMutation } = useVaultMutate();
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
 
   const [language, setLanguage] = useState<string>('en');
   const [gender, setGender] = useState<string>('random');
-  const [isFirstLoad, setIsFirstLoad] = useMinDurationLoading(true, 100);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,16 +47,14 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
 
           setLanguage(currentLanguage);
           setGender(currentGender);
-          setIsFirstLoad(false);
         } catch (error) {
           console.error('Error loading identity generator settings:', error);
           Alert.alert('Error', 'Failed to load identity generator settings.');
-          setIsFirstLoad(false);
         }
       };
 
       loadSettings();
-    }, [dbContext.sqliteClient, setIsFirstLoad])
+    }, [dbContext.sqliteClient])
   );
 
   /**
@@ -72,7 +65,6 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       executeVaultMutation(async () => {
         // Update the default language setting
         await dbContext.sqliteClient!.updateSetting('DefaultIdentityLanguage', newLanguage);
-        console.log('Updated default language setting to:', newLanguage);
       });
       setLanguage(newLanguage);
     } catch (error) {
@@ -88,7 +80,6 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
     try {
       executeVaultMutation(async () => {
         await dbContext.sqliteClient!.updateSetting('DefaultIdentityGender', newGender);
-        console.log('Updated default gender setting to:', newGender);
       });
       setGender(newGender);
     } catch (error) {
@@ -102,17 +93,11 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       color: colors.textMuted,
       fontSize: 14,
       lineHeight: 20,
-      marginTop: 8,
     },
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
       marginBottom: 8,
-    },
-    loadingContainer: {
-      alignItems: 'center',
-      flex: 1,
-      justifyContent: 'center',
     },
     option: {
       alignItems: 'center',
@@ -135,19 +120,12 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       flex: 1,
       fontSize: 16,
     },
-    scrollContent: {
-      paddingBottom: 40,
-      paddingTop: Platform.OS === 'ios' ? 42 : 16,
-    },
-    scrollView: {
-      flex: 1,
-    },
     sectionTitle: {
       color: colors.text,
       fontSize: 18,
       fontWeight: '600',
       marginBottom: 8,
-      marginTop: 24,
+      marginTop: 16,
     },
     selectedIcon: {
       color: colors.primary,
@@ -155,37 +133,11 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
     },
   });
 
-  if (isFirstLoad) {
-    return (
-      <ThemedContainer>
-        <CollapsibleHeader
-          title="Identity Generator"
-          scrollY={scrollY}
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
-        <View style={styles.loadingContainer}>
-          <ThemedText>Loading...</ThemedText>
-        </View>
-      </ThemedContainer>
-    );
-  }
-
   return (
     <ThemedContainer>
-      <Animated.ScrollView
-        ref={scrollViewRef}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
-        contentContainerStyle={styles.scrollContent}
-        scrollIndicatorInsets={{ bottom: 40 }}
-        style={styles.scrollView}
-      >
+      <ThemedScrollView>
         <ThemedText style={styles.headerText}>
-          Configure the default language and gender preferences for generating new identities.
+          Configure the default language and gender preference for generating new identities.
         </ThemedText>
 
         <ThemedText style={styles.sectionTitle}>Language</ThemedText>
@@ -231,7 +183,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
             );
           })}
         </View>
-      </Animated.ScrollView>
+      </ThemedScrollView>
     </ThemedContainer>
   );
 }
