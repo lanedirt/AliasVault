@@ -52,7 +52,6 @@ export default function LoginScreen() : React.ReactNode {
     username: '',
     password: '',
   });
-  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
@@ -260,7 +259,7 @@ export default function LoginScreen() : React.ReactNode {
       const validationResponse = await srpUtil.validateLogin(
         ConversionUtility.normalizeUsername(credentials.username),
         passwordHashString,
-        rememberMe,
+        true,
         initiateLoginResponse
       );
 
@@ -335,7 +334,7 @@ export default function LoginScreen() : React.ReactNode {
       const validationResponse = await srpUtil.validateLogin2Fa(
         ConversionUtility.normalizeUsername(credentials.username),
         passwordHashString,
-        rememberMe,
+        true,
         initiateLoginResponse,
         parseInt(twoFactorCode)
       );
@@ -507,15 +506,7 @@ export default function LoginScreen() : React.ReactNode {
     },
     primaryButton: {
       backgroundColor: colors.primary,
-    },
-    rememberMeContainer: {
-      alignItems: 'center',
-      flexDirection: 'row',
-      gap: 8,
-    },
-    rememberMeText: {
-      color: colors.text,
-      fontSize: 14,
+      marginTop: 16,
     },
     scrollContent: {
       flexGrow: 1,
@@ -665,15 +656,6 @@ export default function LoginScreen() : React.ReactNode {
                       autoCorrect={false}
                       autoCapitalize="none"
                     />
-                  </View>
-                  <View style={styles.rememberMeContainer}>
-                    <TouchableOpacity
-                      style={styles.checkbox}
-                      onPress={() => setRememberMe(!rememberMe)}
-                    >
-                      <View style={[styles.checkboxInner, rememberMe && styles.checkboxChecked]} />
-                    </TouchableOpacity>
-                    <Text style={styles.rememberMeText}>Remember me</Text>
                   </View>
                   <TouchableOpacity
                     style={[styles.button, styles.primaryButton]}
