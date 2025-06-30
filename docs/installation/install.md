@@ -145,11 +145,11 @@ Configure the following DNS records **on your subdomain setup** (for example, `a
 | Name                     | Type | Priority | Content                       | TTL |
 |---------------------------|------|----------|-------------------------------|-----|
 | mail.aliasvault           | A    |          | `<your-server-public-ip>`     | 3600 |
-| aliasvault.example.com    | MX   | 10       | `mail.aliasvault.example.com` | 3600 |
+| aliasvault    | MX   | 10       | `mail.aliasvault.example.com` | 3600 |
 
 > 🔹 Explanation:
 > - `mail.aliasvault` creates a DNS A record for `mail.aliasvault.example.com` pointing to your server IP.
-> - The MX record on `aliasvault.example.com` directs mail to `mail.aliasvault.example.com`.
+> - The MX record on `aliasvault.example` tells senders to send their mail addressed to `%@aliasvault.example.com` to `mail.aliasvault.example.com`.
 
 > Replace `<your-server-public-ip>` with your actual server’s IP address.
 
