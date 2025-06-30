@@ -272,34 +272,27 @@ else
     }
 
     /// <summary>
-    /// Check for new emails without disrupting the current view.
+    /// Load emails from the server with the given parameters.
     /// </summary>
-    private async Task CheckForNewEmails()
+    private async Task<(List<MailListViewModel> Emails, int TotalRecords, int CurrentPage, int PageSize)?> LoadEmailsFromServerAsync(int page, int pageSize, List<string> emailClaimList)
     {
-        if (!_isPageVisible || !DbService.Settings.AutoEmailRefresh)
+        if (emailClaimList.Count == 0)
         {
-            return;
+            return null;
         }
+
+        var requestModel = new MailboxBulkRequest
+        {
+            Page = page,
+            PageSize = pageSize,
+            Addresses = emailClaimList,
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
+        request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
 
         try
         {
-            var emailClaimList = await DbService.GetEmailClaimListAsync();
-
-            if (emailClaimList.Count == 0)
-            {
-                return;
-            }
-
-            var requestModel = new MailboxBulkRequest
-            {
-                Page = 1,
-                PageSize = 10, // Only check the latest 10 emails for new ones
-                Addresses = emailClaimList,
-            };
-
-            var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
-            request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
-
             var response = await HttpClient.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -326,10 +319,10 @@ else
                     {
                         // Handle case where encryption keys are not available for some emails
                         Logger.LogWarning(ex, "Failed to decrypt some emails due to missing encryption keys");
-                        return;
+                        return null;
                     }
 
-                    var newEmails = decryptedEmailList.Select(email =>
+                    var emails = decryptedEmailList.Select(email =>
                     {
                         var toEmail = email.ToLocal + "@" + email.ToDomain;
                         var credentialInfo = credentialLookup.TryGetValue(toEmail.ToLower(), out var info)
@@ -351,44 +344,101 @@ else
                         };
                     }).ToList();
 
-                    // Check for new emails
-                    var newEmailIds = new HashSet<int>();
-                    foreach (var email in newEmails)
-                    {
-                        if (!_knownEmailIds.Contains(email.Id))
+                    return (emails, mailbox.TotalRecords, mailbox.CurrentPage, mailbox.PageSize);
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(errorContent);
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        if (errorResponse != null)
                         {
-                            newEmailIds.Add(email.Id);
+                            switch (errorResponse.Code)
+                            {
+                                case "CLAIM_DOES_NOT_EXIST":
+                                    GlobalNotificationService.AddErrorMessage("An error occurred while trying to load the emails. Please try to edit and " +
+                                                                              "save any credential entry to synchronize the database, then try again.", true);
+                                    break;
+                                default:
+                                    throw new ArgumentException(errorResponse.Message);
+                            }
                         }
-                    }
+                        break;
+                    case HttpStatusCode.Unauthorized:
+                        throw new UnauthorizedAccessException(errorResponse?.Message);
+                    default:
+                        throw new WebException(errorResponse?.Message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage(ex.Message, true);
+            Logger.LogError(ex, "An error occurred while loading emails from server");
+        }
 
-                    // Update the known email IDs
-                    foreach (var email in newEmails)
+        return null;
+    }
+
+    /// <summary>
+    /// Check for new emails without disrupting the current view.
+    /// </summary>
+    private async Task CheckForNewEmails()
+    {
+        if (!_isPageVisible || !DbService.Settings.AutoEmailRefresh)
+        {
+            return;
+        }
+
+        try
+        {
+            var emailClaimList = await DbService.GetEmailClaimListAsync();
+            var result = await LoadEmailsFromServerAsync(1, 5, emailClaimList);
+
+            if (result.HasValue)
+            {
+                var (newEmails, _, _, _) = result.Value;
+
+                // Check for new emails
+                var newEmailIds = new HashSet<int>();
+                foreach (var email in newEmails)
+                {
+                    if (!_knownEmailIds.Contains(email.Id))
                     {
-                        _knownEmailIds.Add(email.Id);
+                        newEmailIds.Add(email.Id);
                     }
+                }
 
-                    // Add new emails to the list and mark them as new
-                    if (newEmailIds.Count > 0)
+                // Update the known email IDs
+                foreach (var email in newEmails)
+                {
+                    _knownEmailIds.Add(email.Id);
+                }
+
+                // Add new emails to the list and mark them as new
+                if (newEmailIds.Count > 0)
+                {
+                    // Add new emails to the beginning of the list
+                    var emailsToAdd = newEmails.Where(e => newEmailIds.Contains(e.Id)).ToList();
+                    EmailList.InsertRange(0, emailsToAdd);
+
+                    // Update total records
+                    TotalRecords += emailsToAdd.Count;
+
+                    // Mark emails as new
+                    NewEmailIds.UnionWith(newEmailIds);
+
+                    // Remove new email indicators after 30 seconds
+                    _ = Task.Delay(30000).ContinueWith(_ =>
                     {
-                        // Add new emails to the beginning of the list
-                        var emailsToAdd = newEmails.Where(e => newEmailIds.Contains(e.Id)).ToList();
-                        EmailList.InsertRange(0, emailsToAdd);
+                        NewEmailIds.ExceptWith(newEmailIds);
+                        InvokeAsync(StateHasChanged);
+                    });
 
-                        // Update total records
-                        TotalRecords += emailsToAdd.Count;
-
-                        // Mark emails as new
-                        NewEmailIds.UnionWith(newEmailIds);
-
-                        // Remove new email indicators after 30 seconds
-                        _ = Task.Delay(30000).ContinueWith(_ =>
-                        {
-                            NewEmailIds.ExceptWith(newEmailIds);
-                            InvokeAsync(StateHasChanged);
-                        });
-
-                        StateHasChanged();
-                    }
+                    StateHasChanged();
                 }
             }
         }
@@ -470,56 +520,12 @@ else
             return;
         }
 
-        var requestModel = new MailboxBulkRequest
-        {
-            Page = CurrentPage,
-            PageSize = PageSize,
-            Addresses = emailClaimList,
-        };
+        var result = await LoadEmailsFromServerAsync(CurrentPage, PageSize, emailClaimList);
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
-        request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
-
-        try
+        if (result.HasValue)
         {
-            var response = await HttpClient.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var mailbox = await response.Content.ReadFromJsonAsync<MailboxBulkResponse>();
-                await UpdateMailboxEmails(mailbox);
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(errorContent);
-                switch (response.StatusCode)
-                {
-                    case HttpStatusCode.BadRequest:
-                        if (errorResponse != null)
-                        {
-                            switch (errorResponse.Code)
-                            {
-                                case "CLAIM_DOES_NOT_EXIST":
-                                    GlobalNotificationService.AddErrorMessage("An error occurred while trying to load the emails. Please try to edit and " +
-                                                                              "save any credential entry to synchronize the database, then try again.", true);
-                                    break;
-                                default:
-                                    throw new ArgumentException(errorResponse.Message);
-                            }
-                        }
-
-                        break;
-                    case HttpStatusCode.Unauthorized:
-                        throw new UnauthorizedAccessException(errorResponse?.Message);
-                    default:
-                        throw new WebException(errorResponse?.Message);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-           GlobalNotificationService.AddErrorMessage(ex.Message, true);
-           Logger.LogError(ex, "An error occurred while refreshing data");
+            var (emails, totalRecords, currentPage, pageSize) = result.Value;
+            await UpdateMailboxEmails(emails, totalRecords, currentPage, pageSize, false);
         }
 
         LoadingService.FinishLoading("emails", StateHasChanged);
@@ -528,96 +534,31 @@ else
     /// <summary>
     /// Update the local mailbox emails.
     /// </summary>
-    private async Task UpdateMailboxEmails(MailboxBulkResponse? model, bool appendToList = false)
+    private async Task UpdateMailboxEmails(List<MailListViewModel> emails, int totalRecords, int currentPage, int pageSize, bool appendToList = false)
     {
-        if (model == null)
-        {
-            if (!appendToList)
-            {
-                EmailList = [];
-                TotalRecords = 0;
-            }
-            return;
-        }
-
-        var context = await DbService.GetDbContextAsync();
-
-        // Fetch all credentials in a single query and create a lookup dictionary
-        var credentialLookup = await context.Credentials
-            .Include(x => x.Service)
-            .Include(x => x.Alias)
-            .Where(x => x.Alias.Email != null)
-            .GroupBy(x => x.Alias.Email!.ToLower())
-            .ToDictionaryAsync(
-                g => g.Key,
-                g => new { Id = g.First().Id, ServiceName = g.First().Service.Name ?? "Unknown" }
-            );
-
-        // Convert the email list to view models and add credential info in a single pass
-        List<MailboxEmailApiModel> decryptedEmailList;
-        try
-        {
-            decryptedEmailList = await EmailService.DecryptEmailList(model.Mails);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("Sequence contains no matching element"))
-        {
-            // Handle case where encryption keys are not available for some emails
-            GlobalNotificationService.AddErrorMessage("Some emails could not be decrypted due to missing encryption keys. Please try syncing your vault.", true);
-            Logger.LogWarning(ex, "Failed to decrypt some emails due to missing encryption keys");
-
-            // Return empty list or skip problematic emails
-            if (!appendToList)
-            {
-                EmailList = [];
-                TotalRecords = 0;
-            }
-            return;
-        }
-        var newEmails = decryptedEmailList.Select(email =>
-        {
-            var toEmail = email.ToLocal + "@" + email.ToDomain;
-            var credentialInfo = credentialLookup.TryGetValue(toEmail.ToLower(), out var info)
-                ? info
-                : new { Id = Guid.Empty, ServiceName = "Unknown" };
-
-            return new MailListViewModel
-            {
-                Id = email.Id,
-                Date = email.DateSystem,
-                FromName = email.FromDisplay,
-                FromEmail = email.FromLocal + "@" + email.FromDomain,
-                ToEmail = toEmail,
-                Subject = email.Subject,
-                MessagePreview = email.MessagePreview,
-                CredentialId = credentialInfo.Id,
-                CredentialName = credentialInfo.ServiceName,
-                HasAttachments = email.HasAttachments,
-            };
-        }).ToList();
-
         if (appendToList)
         {
-            EmailList.AddRange(newEmails);
+            EmailList.AddRange(emails);
         }
         else
         {
-            EmailList = newEmails;
+            EmailList = emails;
             // Initialize known email IDs for auto-refresh - don't mark existing emails as new
-            _knownEmailIds = new HashSet<int>(newEmails.Select(e => e.Id));
+            _knownEmailIds = new HashSet<int>(emails.Select(e => e.Id));
             // Clear any existing new email indicators since this is the initial load
             NewEmailIds.Clear();
         }
 
-        CurrentPage = model.CurrentPage;
-        PageSize = model.PageSize;
-        TotalRecords = model.TotalRecords;
+        CurrentPage = currentPage;
+        PageSize = pageSize;
+        TotalRecords = totalRecords;
 
         // Auto-select first email on desktop layout if none is selected and emails exist (only for initial load)
         if (!appendToList && EmailList.Count > 0 && SelectedEmailId == null)
         {
             var firstEmail = EmailList[0];
             SelectedEmailId = firstEmail.Id;
-            _ = LoadSelectedEmailForPreview(firstEmail.Id);
+            await LoadSelectedEmailForPreview(firstEmail.Id);
         }
     }
 
@@ -709,19 +650,45 @@ else
     /// </summary>
     private async Task HandleEmailDeleted(int emailId)
     {
-        // Clear the selected email if it was deleted
+        // Remove the deleted email from the list
+        var deletedEmailIndex = EmailList.FindIndex(e => e.Id == emailId);
+        EmailList.RemoveAll(e => e.Id == emailId);
+
+        // Remove from tracking sets
+        NewEmailIds.Remove(emailId);
+        _knownEmailIds.Remove(emailId);
+
+        // Update total records
+        TotalRecords = Math.Max(0, TotalRecords - 1);
+
+        // Handle selection logic
         if (SelectedEmailId == emailId)
         {
             SelectedEmailId = null;
             SelectedEmail = null;
+
+            // Try to select the next email in the list
+            if (EmailList.Count > 0)
+            {
+                // If we deleted the first email, select the new first email
+                if (deletedEmailIndex == 0)
+                {
+                    var nextEmail = EmailList[0];
+                    SelectedEmailId = nextEmail.Id;
+                    await LoadSelectedEmailForPreview(nextEmail.Id);
+                }
+                // If we deleted an email in the middle, select the email at the same index (or the last one if index is out of bounds)
+                else if (deletedEmailIndex > 0)
+                {
+                    var newIndex = Math.Min(deletedEmailIndex, EmailList.Count - 1);
+                    var nextEmail = EmailList[newIndex];
+                    SelectedEmailId = nextEmail.Id;
+                    await LoadSelectedEmailForPreview(nextEmail.Id);
+                }
+            }
         }
 
-        // Remove from new email indicators
-        NewEmailIds.Remove(emailId);
-        _knownEmailIds.Remove(emailId);
-
-        // Refresh the email list
-        await RefreshData();
+        StateHasChanged();
     }
 
     /// <summary>
@@ -759,53 +726,12 @@ else
         try
         {
             var emailClaimList = await DbService.GetEmailClaimListAsync();
+            var result = await LoadEmailsFromServerAsync(CurrentPage + 1, PageSize, emailClaimList);
 
-            if (emailClaimList.Count == 0)
+            if (result.HasValue)
             {
-                return;
-            }
-
-            var requestModel = new MailboxBulkRequest
-            {
-                Page = CurrentPage + 1,
-                PageSize = PageSize,
-                Addresses = emailClaimList,
-            };
-
-            var request = new HttpRequestMessage(HttpMethod.Post, $"v1/EmailBox/bulk");
-            request.Content = new StringContent(JsonSerializer.Serialize(requestModel), Encoding.UTF8, "application/json");
-
-            var response = await HttpClient.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var mailbox = await response.Content.ReadFromJsonAsync<MailboxBulkResponse>();
-                await UpdateMailboxEmails(mailbox, true); // Append to existing list
-            }
-            else
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(errorContent);
-                switch (response.StatusCode)
-                {
-                    case HttpStatusCode.BadRequest:
-                        if (errorResponse != null)
-                        {
-                            switch (errorResponse.Code)
-                            {
-                                case "CLAIM_DOES_NOT_EXIST":
-                                    GlobalNotificationService.AddErrorMessage("An error occurred while trying to load more emails. Please try to edit and " +
-                                                                              "save any credential entry to synchronize the database, then try again.", true);
-                                    break;
-                                default:
-                                    throw new ArgumentException(errorResponse.Message);
-                            }
-                        }
-                        break;
-                    case HttpStatusCode.Unauthorized:
-                        throw new UnauthorizedAccessException(errorResponse?.Message);
-                    default:
-                        throw new WebException(errorResponse?.Message);
-                }
+                var (emails, totalRecords, currentPage, pageSize) = result.Value;
+                await UpdateMailboxEmails(emails, totalRecords, currentPage, pageSize, true); // Append to existing list
             }
         }
         catch (Exception ex)
