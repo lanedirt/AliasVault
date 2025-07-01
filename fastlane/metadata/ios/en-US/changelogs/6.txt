@@ -1,0 +1,3 @@
+- Move notes to the bottom of the credential details screen to match the edit screen
+- Fixes issue where non-aliasvault emails could throw an error in the recent email display
+- Fixes issue in iOS autofill where the "view details" long press menu option didn't work

@@ -1,0 +1,4 @@
+- Full vault management: create, edit, delete credentials directly in the browser extension
+- Improved popup behavior and dialogs
+- Autofill fixes and UI tweaks
+- Version display fix in settings

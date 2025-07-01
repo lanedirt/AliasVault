@@ -1,0 +1,3 @@
+- Automatically open last visited page when re-opening the browser extension popup
+- Move notes to the bottom of the credential details screen to match the edit screen
+- Fixes issue where non-aliasvault emails could throw an error in the recent email display
