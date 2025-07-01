@@ -6,9 +6,9 @@ import { Platform } from 'react-native';
  */
 export class AppInfo {
   /**
-   * The current extension version. This should be updated with each release of the extension.
+   * The current mobile app version. This should be updated with each release of the mobile app.
    */
-  public static readonly VERSION = '0.20.0';
+  public static readonly VERSION = '0.20.1';
 
   /**
    * The minimum supported AliasVault server (API) version. If the server version is below this, the
