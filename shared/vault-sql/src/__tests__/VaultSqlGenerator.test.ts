@@ -13,10 +13,10 @@ describe('VaultSqlGenerator', () => {
       expect(result.version).toBe(generator.getLatestVersion().version);
       expect(result.migrationNumber).toBe(generator.getLatestVersion().revision);
 
-      // Should include PRAGMA and schema creation
-      expect(result.sqlCommands[0]).toBe('PRAGMA foreign_keys = ON;');
+      // Should include schema creation
+      expect(result.sqlCommands[0]).toContain('CREATE TABLE');
       expect(result.sqlCommands.some(cmd => cmd.includes('CREATE TABLE "Aliases"'))).toBe(true);
-      expect(result.sqlCommands.some(cmd => cmd.includes('vault_version'))).toBe(true);
+      expect(result.sqlCommands.some(cmd => cmd.includes('__EFMigrationsHistory'))).toBe(true);
     });
   });
 
@@ -36,9 +36,9 @@ describe('VaultSqlGenerator', () => {
       expect(result.success).toBe(true);
       expect(result.sqlCommands.length).toBeGreaterThan(0);
 
-      // Should include PRAGMA and version updates
-      expect(result.sqlCommands[0]).toBe('PRAGMA foreign_keys = ON;');
-      expect(result.sqlCommands.some(cmd => cmd.includes('vault_version'))).toBe(true);
+      // Should include migration SQL
+      expect(result.sqlCommands[0]).toContain('BEGIN TRANSACTION');
+      expect(result.sqlCommands.some(cmd => cmd.includes('__EFMigrationsHistory'))).toBe(true);
     });
 
     it('should handle invalid target migration number', () => {
@@ -46,6 +46,21 @@ describe('VaultSqlGenerator', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('not found');
+    });
+
+    it('should handle upgrade from revision 9 to 10 without returning null sqlCommands', () => {
+      const result = generator.getUpgradeVaultSql(9, 10);
+
+      expect(result.success).toBe(true);
+      expect(result.sqlCommands).not.toBeNull();
+      expect(Array.isArray(result.sqlCommands)).toBe(true);
+
+      expect(result.sqlCommands.length).toBeGreaterThan(0);
+      expect(result.sqlCommands[0]).toContain('BEGIN TRANSACTION');
+      expect(result.sqlCommands.some(cmd => cmd.includes('__EFMigrationsHistory'))).toBe(true);
+
+      expect(result.version).toBeDefined();
+      expect(result.migrationNumber).toBe(10);
     });
   });
 
@@ -127,11 +142,18 @@ describe('VaultSqlGenerator', () => {
       expect(isValid).toBe(false);
     });
 
-    it('should handle case-insensitive table names', () => {
-      const tables = ['aliases', 'services', 'credentials', 'passwords'];
+    it('should handle case-sensitive table names', () => {
+      const tables = ['Aliases', 'Services', 'Credentials', 'Passwords', 'Settings'];
       const isValid = generator.validateVaultStructure(tables);
 
       expect(isValid).toBe(true);
+    });
+
+    it('should reject case-mismatched table names', () => {
+      const tables = ['aliases', 'services', 'credentials', 'passwords', 'settings'];
+      const isValid = generator.validateVaultStructure(tables);
+
+      expect(isValid).toBe(false);
     });
   });
 
@@ -153,7 +175,8 @@ describe('VaultSqlGenerator', () => {
       const sql = generator.getMigrationSql(1);
 
       expect(sql).toBeDefined();
-      expect(sql).toContain('CREATE TABLE');
+      expect(sql).toContain('BEGIN TRANSACTION');
+      expect(sql).toContain('__EFMigrationsHistory');
     });
 
     it('should return complete schema SQL', () => {

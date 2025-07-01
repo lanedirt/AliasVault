@@ -84,7 +84,11 @@ export class VaultSqlGenerator {
         };
       }
 
-      // Get migrations to apply
+      /*
+       * Get migrations to apply.
+       * Note: when migrating from 9 to 10, we need to execute migration 9 (not 10)
+       * because the migration key represents the migration that gets you FROM the source to the next version.
+       */
       const migrationsToApply = VAULT_VERSIONS.filter(
         v => v.revision > currentMigrationNumber &&
              v.revision <= targetMigration
@@ -94,7 +98,9 @@ export class VaultSqlGenerator {
 
       // Add migration SQL commands
       for (const migration of migrationsToApply) {
-        const migrationSql = MIGRATION_SCRIPTS[migration.revision];
+        // Use the previous migration number as the key
+        const migrationKey = migration.revision - 1;
+        const migrationSql = MIGRATION_SCRIPTS[migrationKey];
         if (migrationSql) {
           sqlCommands.push(migrationSql);
         }
