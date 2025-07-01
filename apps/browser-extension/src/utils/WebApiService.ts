@@ -337,7 +337,7 @@ export class WebApiService {
    */
   private async getApiUrl(): Promise<string> {
     const result = await storage.getItem('local:apiUrl') as string;
-    if (result.length === 0) {
+    if (!result || result.length === 0) {
       return AppInfo.DEFAULT_API_URL;
     }
 
