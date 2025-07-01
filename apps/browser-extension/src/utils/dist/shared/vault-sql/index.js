@@ -593,7 +593,8 @@ var VaultSqlGenerator = class {
       );
       const sqlCommands = [];
       for (const migration of migrationsToApply) {
-        const migrationSql = MIGRATION_SCRIPTS[migration.revision];
+        const migrationKey = migration.revision - 1;
+        const migrationSql = MIGRATION_SCRIPTS[migrationKey];
         if (migrationSql) {
           sqlCommands.push(migrationSql);
         }
