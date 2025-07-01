@@ -1,0 +1,1 @@
+- Fixes an issue with login where the default API URL was not always determined correctly
