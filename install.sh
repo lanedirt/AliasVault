@@ -1012,14 +1012,12 @@ check_install_script_version() {
         printf "\n${YELLOW}> Could not determine script versions. Falling back to file comparison...${NC}\n"
         if ! cmp -s "install.sh" "install.sh.tmp"; then
             printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
-            rm -f install.sh.tmp
             printf " ${GREEN}✓${NC}\n"
             return 2
         fi
     else
         if [ "$current_version" != "$target_script_version" ]; then
             printf "${YELLOW}> Install script needs updating to match version ${target_version}${NC}\n"
-            rm -f install.sh.tmp
             printf " ${GREEN}✓${NC}\n"
             return 2
         fi
