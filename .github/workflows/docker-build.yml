@@ -32,6 +32,23 @@ jobs:
             echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
           fi
 
+      - uses: actions/checkout@v2
+
+      - name: Check local docker-compose.yml for :latest tags
+        run: |
+          # Check for explicit version tags instead of :latest
+          if grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml; then
+            echo "❌ Error: docker-compose.yml contains explicit version tags instead of :latest"
+            echo "Found the following explicit versions:"
+            grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml
+            echo ""
+            echo "All AliasVault images in docker-compose.yml must use ':latest' tags, not explicit versions."
+            echo "Please update docker-compose.yml to use ':latest' for all AliasVault images."
+            exit 1
+          fi
+
+          echo "✅ docker-compose.yml correctly uses :latest tags for all AliasVault images"
+
       - name: Download install script from current branch
         run: |
           INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO_FULL_NAME/$BRANCH_NAME/install.sh"
@@ -142,6 +159,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Check local docker-compose.yml for :latest tags
+        run: |
+          # Check for explicit version tags instead of :latest
+          if grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml; then
+            echo "❌ Error: docker-compose.yml contains explicit version tags instead of :latest"
+            echo "Found the following explicit versions:"
+            grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml
+            echo ""
+            echo "All AliasVault images in docker-compose.yml must use ':latest' tags, not explicit versions."
+            echo "Please update docker-compose.yml to use ':latest' for all AliasVault images."
+            exit 1
+          fi
+
+          echo "✅ docker-compose.yml correctly uses :latest tags for all AliasVault images"
 
       - name: Create .env file with custom SMTP port
         run: echo "SMTP_PORT=2525" > .env
