@@ -3,6 +3,7 @@ import { onMessage } from "webext-bridge/content-script";
 
 import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/entrypoints/contentScript/Form';
 import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup, createUpgradeRequiredPopup } from '@/entrypoints/contentScript/Popup';
+import { detectAliasVaultWebClient, offerSSOLogin } from '@/entrypoints/contentScript/SSO';
 
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
@@ -27,6 +28,11 @@ export default defineContentScript({
 
     // Wait for 750ms to give the host page time to load and to increase the chance that the body is available and ready.
     await new Promise(resolve => setTimeout(resolve, 750));
+    
+    // Check if this is an AliasVault web client and offer SSO login
+    if (await detectAliasVaultWebClient()) {
+      await offerSSOLogin();
+    }
 
     // Create a shadow root UI for isolation
     const ui = await createShadowRootUi(ctx, {

@@ -509,6 +509,77 @@ public sealed class DbService : IDisposable
     }
 
     /// <summary>
+    /// Loads vault data from pre-encrypted vault data (for SSO authentication).
+    /// </summary>
+    /// <param name="encryptedVaultData">The encrypted vault data as base64 string.</param>
+    /// <param name="vaultRevisionNumber">The vault revision number.</param>
+    /// <returns>True if successful, false otherwise.</returns>
+    public async Task<bool> LoadVaultFromEncryptedDataAsync(string encryptedVaultData, int vaultRevisionNumber)
+    {
+        try
+        {
+            _state.UpdateState(DbServiceState.DatabaseStatus.Loading);
+            _logger.LogInformation("Loading vault from SSO encrypted data...");
+
+            // Ensure database connection is initialized
+            if (_sqlConnection == null)
+            {
+                var (connection, context) = InitializeEmptyDatabase();
+                _sqlConnection = connection;
+                _dbContext = context;
+            }
+
+            // Store the vault revision number
+            StoreVaultRevisionNumber(vaultRevisionNumber);
+
+            // Check if vault data is empty
+            if (string.IsNullOrEmpty(encryptedVaultData))
+            {
+                _logger.LogInformation("Empty vault data provided, initializing empty database");
+                _state.UpdateState(DbServiceState.DatabaseStatus.Creating);
+                return true;
+            }
+
+            // Decrypt the vault data using the stored encryption key
+            string decryptedBase64String = await _jsInteropService.SymmetricDecrypt(encryptedVaultData, _authService.GetEncryptionKeyAsBase64Async());
+
+            // Import the decrypted data into the database
+            await ImportDbContextFromBase64Async(decryptedBase64String, _sqlConnection!);
+
+            // Refresh the db context with the new database to invalidate any cached data
+            _dbContext = new AliasClientDbContext(_sqlConnection!, log => _logger.LogDebug("{Message}", log));
+
+            // Check if database is up-to-date with migrations
+            try
+            {
+                if (await HasPendingMigrationsAsync())
+                {
+                    _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
+                    return false;
+                }
+            }
+            catch (DataException)
+            {
+                // If there's a data exception during migration check, the database structure might be invalid
+                _logger.LogWarning("Database structure validation failed, may need recreation");
+                _state.UpdateState(DbServiceState.DatabaseStatus.PendingMigrations);
+                return false;
+            }
+
+            _state.UpdateState(DbServiceState.DatabaseStatus.Ready);
+            _isSuccessfullyInitialized = true;
+            _logger.LogInformation("Successfully loaded vault from SSO data");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading vault from SSO encrypted data");
+            _state.UpdateState(DbServiceState.DatabaseStatus.DecryptionFailed, ex.Message);
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Implements the IDisposable interface.
     /// </summary>
     public void Dispose()

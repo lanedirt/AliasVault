@@ -448,6 +448,59 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
 }
 
 /**
+ * Get SSO authentication data for sharing with web client
+ */
+export async function handleGetSSOAuthData(): Promise<{
+  success: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  encryptedVault?: string;
+  derivedKey?: string;
+  username?: string;
+  vaultRevisionNumber?: number;
+  error?: string;
+}> {
+  try {
+    // Check if user is authenticated and vault is unlocked
+    const username = await storage.getItem('local:username');
+
+    /*
+     * TODO: when passing refresh token to another client that uses it, the old refresh token
+     * will be invalidated which will cause one of the clients that are reusing it to fail.
+     * So the current approach will only work up to a few minutes, and then one of the clients
+     * will need to login again. So this is not feasible.
+     */
+    const accessToken = await storage.getItem('local:accessToken');
+    const refreshToken = await storage.getItem('local:refreshToken');
+    const encryptedVault = await storage.getItem('session:encryptedVault');
+    const derivedKey = await storage.getItem('session:derivedKey');
+    const vaultRevisionNumber = await storage.getItem('session:vaultRevisionNumber');
+
+    if (!username || !accessToken || !encryptedVault || !derivedKey) {
+      return {
+        success: false,
+        error: 'Extension not authenticated or vault locked'
+      };
+    }
+
+    return {
+      success: true,
+      accessToken: accessToken as string,
+      refreshToken: refreshToken as string,
+      encryptedVault: encryptedVault as string,
+      derivedKey: derivedKey as string,
+      username: username as string,
+      vaultRevisionNumber: vaultRevisionNumber as number || 0,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Failed to get SSO auth data: ${error}`
+    };
+  }
+}
+
+/**
  * Create a new sqlite client for the stored vault.
  */
 async function createVaultSqliteClient() : Promise<SqliteClient> {

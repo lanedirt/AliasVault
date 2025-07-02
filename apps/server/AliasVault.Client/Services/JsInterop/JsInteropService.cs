@@ -9,7 +9,12 @@ namespace AliasVault.Client.Services.JsInterop;
 
 using System.Security.Cryptography;
 using System.Text.Json;
+using AliasVault.Client.Providers;
+using AliasVault.Client.Services.Auth;
+using AliasVault.Client.Services.Database;
 using AliasVault.Client.Services.JsInterop.Models;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -24,6 +29,133 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
     private IJSObjectReference? _identityGeneratorModule;
     private IJSObjectReference? _passwordGeneratorModule;
     private IJSObjectReference? _vaultSqlInteropModule;
+
+    /// <summary>
+    /// Gets or sets the static service provider for resolving services in static methods.
+    /// This is set during application startup.
+    /// </summary>
+    public static IServiceProvider? ServiceProvider { get; set; }
+
+    /// <summary>
+    /// Sets SSO authentication data received from browser extension (static wrapper for JavaScript interop).
+    /// </summary>
+    /// <param name="ssoData">SSO authentication data.</param>
+    /// <returns>Success result.</returns>
+    [JSInvokable]
+    public static async Task<SSOAuthResult> SetSSOAuthData(SSOAuthData ssoData)
+    {
+        try
+        {
+            if (ServiceProvider == null)
+            {
+                return new SSOAuthResult
+                {
+                    Success = false,
+                    Error = "Service provider not initialized",
+                };
+            }
+
+            var jsInteropService = ServiceProvider.GetRequiredService<JsInteropService>();
+            return await jsInteropService.SetSSOAuthDataAsync(ssoData);
+        }
+        catch (Exception ex)
+        {
+            return new SSOAuthResult
+            {
+                Success = false,
+                Error = $"Failed to resolve services for SSO authentication: {ex.Message}",
+            };
+        }
+    }
+
+    /// <summary>
+    /// Sets SSO authentication data received from browser extension (instance method).
+    /// </summary>
+    /// <param name="ssoData">SSO authentication data.</param>
+    /// <returns>Success result.</returns>
+    public async Task<SSOAuthResult> SetSSOAuthDataAsync(SSOAuthData ssoData)
+    {
+        try
+        {
+            if (ServiceProvider == null)
+            {
+                return new SSOAuthResult
+                {
+                    Success = false,
+                    Error = "Service provider not initialized",
+                };
+            }
+
+            // Validate required fields
+            if (string.IsNullOrEmpty(ssoData.Username) || string.IsNullOrEmpty(ssoData.DerivedKey))
+            {
+                return new SSOAuthResult
+                {
+                    Success = false,
+                    Error = "Missing required SSO authentication data (username and derived key are required)",
+                };
+            }
+
+            // Resolve services from the service provider to avoid circular dependency
+            var authService = ServiceProvider.GetRequiredService<AuthService>();
+            var authStateProvider = ServiceProvider.GetRequiredService<AuthenticationStateProvider>();
+            var dbService = ServiceProvider.GetRequiredService<DbService>();
+
+            // Store the username
+            authService.StoreUsername(ssoData.Username);
+
+            // Convert and store the encryption key
+            var encryptionKey = Convert.FromBase64String(ssoData.DerivedKey);
+            await authService.StoreEncryptionKeyAsync(encryptionKey);
+
+            // Store access token if provided
+            if (!string.IsNullOrEmpty(ssoData.AccessToken))
+            {
+                await authService.StoreAccessTokenAsync(ssoData.AccessToken);
+            }
+
+            // Store refresh token if provided
+            if (!string.IsNullOrEmpty(ssoData.RefreshToken))
+            {
+                await authService.StoreRefreshTokenAsync(ssoData.RefreshToken);
+            }
+
+            // If encrypted vault data is provided, initialize the database
+            if (!string.IsNullOrEmpty(ssoData.EncryptedVault))
+            {
+                // Set up the vault data in the database service
+                var vaultRevision = ssoData.VaultRevisionNumber;
+                var vaultLoaded = await dbService.LoadVaultFromEncryptedDataAsync(ssoData.EncryptedVault, vaultRevision);
+
+                if (!vaultLoaded)
+                {
+                    return new SSOAuthResult
+                    {
+                        Success = false,
+                        Error = "Failed to load vault data from SSO authentication",
+                    };
+                }
+            }
+            else
+            {
+                // If no vault data provided, trigger normal database initialization
+                await dbService.InitializeDatabaseAsync();
+            }
+
+            // Update authentication state to reflect the new login
+            await authStateProvider.GetAuthenticationStateAsync();
+
+            return new SSOAuthResult { Success = true };
+        }
+        catch (Exception ex)
+        {
+            return new SSOAuthResult
+            {
+                Success = false,
+                Error = $"Failed to set SSO auth data: {ex.Message}",
+            };
+        }
+    }
 
     /// <summary>
     /// Initialize the identity generator module.
@@ -564,6 +696,58 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Represents SSO authentication data from browser extension.
+    /// </summary>
+    public sealed class SSOAuthData
+    {
+        /// <summary>
+        /// Gets or sets the access token for API authentication.
+        /// </summary>
+        public string? AccessToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the refresh token for token renewal.
+        /// </summary>
+        public string? RefreshToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the encrypted vault data.
+        /// </summary>
+        public string? EncryptedVault { get; set; }
+
+        /// <summary>
+        /// Gets or sets the derived encryption key.
+        /// </summary>
+        public string? DerivedKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the username.
+        /// </summary>
+        public string? Username { get; set; }
+
+        /// <summary>
+        /// Gets or sets the vault revision number.
+        /// </summary>
+        public int VaultRevisionNumber { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the result of SSO authentication.
+    /// </summary>
+    public sealed class SSOAuthResult
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the operation was successful.
+        /// </summary>
+        public bool Success { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message if the operation failed.
+        /// </summary>
+        public string? Error { get; set; }
     }
 
     /// <summary>

@@ -45,6 +45,17 @@ window.blazorNavigate = (url) => {
     Blazor.navigateTo(url);
 };
 
+// SSO Authentication function called from browser extension
+window.blazorSetSSOAuthData = async (ssoData) => {
+    try {
+        // Call the C# method via JSInterop
+        return await DotNet.invokeMethodAsync('AliasVault.Client', 'SetSSOAuthData', ssoData);
+    } catch (error) {
+        console.error('Error calling SetSSOAuthData:', error);
+        return { success: false, error: error.message };
+    }
+};
+
 window.focusElement = (elementId) => {
     const element = document.getElementById(elementId);
     if (element) {

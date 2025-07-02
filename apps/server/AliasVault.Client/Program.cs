@@ -8,6 +8,7 @@
 using AliasVault.Client;
 using AliasVault.Client.Main.Services;
 using AliasVault.Client.Providers;
+using AliasVault.Client.Services.JsInterop;
 using AliasVault.RazorComponents.Services;
 using AliasVault.Shared.Core;
 using Blazored.LocalStorage;
@@ -82,4 +83,10 @@ builder.Services.AddScoped<QuickCreateStateService>();
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
-await builder.Build().RunAsync();
+
+var app = builder.Build();
+
+// Set up the service provider for static access in JsInteropService
+JsInteropService.ServiceProvider = app.Services;
+
+await app.RunAsync();
