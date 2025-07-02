@@ -8,7 +8,7 @@ export class AppInfo {
   /**
    * The current mobile app version. This should be updated with each release of the mobile app.
    */
-  public static readonly VERSION = '0.20.1';
+  public static readonly VERSION = '0.20.2';
 
   /**
    * The minimum supported AliasVault server (API) version. If the server version is below this, the

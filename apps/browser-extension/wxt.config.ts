@@ -6,7 +6,7 @@ export default defineConfig({
   manifest: {
     name: "AliasVault",
     description: "AliasVault Browser AutoFill Extension. Keeping your personal information private.",
-    version: "0.20.1",
+    version: "0.20.2",
     content_security_policy: {
       extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
     },
