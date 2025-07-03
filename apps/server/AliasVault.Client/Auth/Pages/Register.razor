@@ -2,7 +2,7 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-@inject IStringLocalizer<AliasVault.Client.Resources.Components.Auth.Register> Localizer
+@inject IStringLocalizerFactory LocalizerFactory
 @inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
@@ -54,6 +54,8 @@
     private readonly RegisterModel _registerModel = new();
     private FullScreenLoadingIndicator _loadingIndicator = new();
     private ServerValidationErrors _serverValidationErrors = new();
+
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Register", "AliasVault.Client");
 
     private async Task HandleRegister()
     {
