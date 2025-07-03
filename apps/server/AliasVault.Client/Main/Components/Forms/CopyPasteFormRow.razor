@@ -1,6 +1,10 @@
 ﻿@inject ClipboardCopyService ClipboardCopyService
 @inject JsInteropService JsInteropService
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @implements IDisposable
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 @if (Label != null)
 {
@@ -12,12 +16,14 @@
     @if (Copied)
     {
         <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500 dark:text-green-400">
-            Copied!
+            @Localizer["CopiedMessage"]
         </span>
     }
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Forms.CopyPasteFormRow", "AliasVault.Client");
+
     /// <summary>
     /// Id for the input field. Defaults to a random GUID if not provided.
     /// </summary>

@@ -2,14 +2,18 @@
 @inject NavigationManager NavigationManager
 @inject KeyboardShortcutService KeyboardShortcutService
 @inject JsInteropService JsInteropService
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @implements IAsyncDisposable
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="searchWidgetContainer">
     <div class="relative" id="searchWidgetContainer">
         <input
             id="searchWidget"
             type="text"
-            placeholder="Search vault..."
+            placeholder="@Localizer["SearchVaultPlaceholder"]"
             autocomplete="off"
             class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
             @bind-value="SearchTerm"
@@ -22,15 +26,15 @@
             <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
                 @if (string.IsNullOrEmpty(SearchTerm))
                 {
-                    <p>Type a term to search for, this can be the service name, description or email address.</p>
+                    <p>@Localizer["SearchHelpText"]</p>
                 }
                 else if (SearchTerm.Length == 1)
                 {
-                    <p>Please type more chars</p>
+                    <p>@Localizer["SearchTooShortMessage"]</p>
                 }
                 else
                 {
-                    <p>Searching for "@SearchTerm"</p>
+                    <p>@string.Format(Localizer["SearchingForMessage"], SearchTerm)</p>
                 }
             </div>
         }
@@ -66,7 +70,7 @@
             {
                 <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
                     <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                        No results found
+                        @Localizer["NoResultsFoundMessage"]
                     </div>
                 </div>
             }
@@ -75,6 +79,8 @@
 </ClickOutsideHandler>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Widgets.SearchWidget", "AliasVault.Client");
+
     private string SearchTerm { get; set; } = string.Empty;
     private List<Credential> SearchResults { get; set; } = new();
     private bool ShowResults { get; set; }
