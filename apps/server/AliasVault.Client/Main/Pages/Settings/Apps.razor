@@ -2,22 +2,26 @@
 @inherits MainBase
 @inject IJSRuntime JsRuntime
 @inject ILogger<Apps> Logger
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Shared.Core.BrowserExtensions
 @using AliasVault.Shared.Core.MobileApps
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
-<LayoutPageTitle>Extensions & Apps</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Extensions & Apps"
-    Description="Install browser extensions and mobile apps to access your vault from all your devices and automatically fill credentials on websites.">
+    Title="@Localizer["PageTitle"]"
+    Description="@Localizer["PageDescription"]">
 </PageHeader>
 
 <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="mb-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Browser Extensions</h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">@Localizer["BrowserExtensionsTitle"]</h3>
         <p class="text-gray-600 dark:text-gray-400">
-            The AliasVault browser extension allows you to autofill existing credentials on any website. It also allows you to generate new aliases during registration, access received emails on all of your aliases, and view your aliases and identities.
+            @Localizer["BrowserExtensionsDescription"]
         </p>
     </div>
 
@@ -37,13 +41,13 @@
                         <a href="@extension.DownloadUrl"
                            target="_blank"
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                            Install
+                            @Localizer["InstallButton"]
                         </a>
                     }
                     else
                     {
                         <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                            Coming soon
+                            @Localizer["ComingSoonText"]
                         </span>
                     }
                 </div>
@@ -52,9 +56,9 @@
     </div>
 
     <div class="mb-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Mobile Apps</h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">@Localizer["MobileAppsTitle"]</h3>
         <p class="text-gray-600 dark:text-gray-400 mb-4">
-            The AliasVault mobile app allows you to access your aliases and identities on the go, view and manage received emails, and generate new aliases anytime. Your data is fully protected with on-device biometric authentication.
+            @Localizer["MobileAppsDescription"]
         </p>
     </div>
 
@@ -71,13 +75,13 @@
                     <a href="@app.DownloadUrl"
                        target="_blank"
                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900">
-                        Download
+                        @Localizer["DownloadButton"]
                     </a>
                 }
                 else
                 {
                     <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg dark:text-gray-400 dark:bg-gray-800">
-                        Coming soon
+                        @Localizer["ComingSoonText"]
                     </span>
                 }
             </div>
@@ -86,6 +90,8 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Settings.Apps", "AliasVault.Client");
+
     private BrowserType CurrentBrowser { get; set; }
     private BrowserExtensionInfo? CurrentBrowserExtension { get; set; } = null;
 
@@ -93,7 +99,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Extensions & Apps" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbTitle"] });
 
         try
         {
