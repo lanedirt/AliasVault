@@ -52,26 +52,26 @@ else
     else
     {
         <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
-            Enter your master password to unlock your vault.
+            @Localizer["EnterMasterPasswordDescription"]
         </p>
 
         <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
             <DataAnnotationsValidator/>
             <div>
-                <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+                <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["YourPasswordLabel"]</label>
                 <InputTextField id="password" @bind-Value="_unlockModel.Password" type="password" placeholder="••••••••"/>
                 <ValidationMessage For="() => _unlockModel.Password"/>
             </div>
 
             <button type="submit" class="w-full inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                 <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
-                Unlock
+                @Localizer["UnlockButton"]
             </button>
         </EditForm>
     }
 
     <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-6">
-        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Log out</a>
+        @Localizer["SwitchAccountsText"] <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">@Localizer["LogOutLink"]</a>
     </div>
 }
 
@@ -89,6 +89,7 @@ else
     private readonly UnlockModel _unlockModel = new();
     private FullScreenLoadingIndicator _loadingIndicator = new();
     private ServerValidationErrors _serverValidationErrors = new();
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Auth.Unlock", "AliasVault.Client");
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -118,7 +119,7 @@ else
     /// </summary>
     private async Task UnlockSubmit()
     {
-        _loadingIndicator.Show("Unlocking vault...");
+        _loadingIndicator.Show(Localizer["UnlockingVaultMessage"]);
         _serverValidationErrors.Clear();
 
         try
@@ -143,7 +144,7 @@ else
             var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
-                _serverValidationErrors.AddError("An error occurred while processing the unlock request.");
+                _serverValidationErrors.AddError(Localizer["UnlockRequestError"]);
                 return;
             }
 
@@ -155,7 +156,7 @@ else
 
             if (!validPassword)
             {
-                _serverValidationErrors.AddError("The password is incorrect. Please try entering your password again, or log out and log in again.");
+                _serverValidationErrors.AddError(Localizer["IncorrectPasswordError"]);
                 return;
             }
 
@@ -184,7 +185,7 @@ else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError(Localizer["GenericUnlockError"]);
         }
 #endif
         finally
@@ -203,7 +204,7 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == false) {
             // Not authenticated (anymore), redirect to login page.
-            GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
+            GlobalNotificationService.AddErrorMessage(Localizer["SessionTimedOutError"]);
             NavigationManager.NavigateTo("/user/login");
             return;
         }
@@ -215,7 +216,7 @@ else
             // Clear all tokens and redirect to login page.
             await AuthService.RemoveTokensAsync();
             GlobalNotificationService.ClearMessages();
-            GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
+            GlobalNotificationService.AddErrorMessage(Localizer["SessionTimedOutError"]);
             NavigationManager.NavigateTo("/user/login");
             return;
         }
@@ -229,7 +230,7 @@ else
             await AuthService.RemoveTokensAsync();
             await AuthStateProvider.GetAuthenticationStateAsync();
             GlobalNotificationService.ClearMessages();
-            GlobalNotificationService.AddErrorMessage("Your session has timed out. Please log in again.");
+            GlobalNotificationService.AddErrorMessage(Localizer["SessionTimedOutError"]);
             NavigationManager.NavigateTo("/user/login");
             return;
         }
@@ -242,7 +243,7 @@ else
         }
         catch (Exception ex)
         {
-            _serverValidationErrors.AddError("Connection with the AliasVault servers failed. Please try again (later).");
+            _serverValidationErrors.AddError(Localizer["ConnectionFailedError"]);
             Logger.LogError(ex, "An error occurred while checking the user status.");
             StateHasChanged();
         }
@@ -285,7 +286,7 @@ else
             }
             catch (NotSupportedException)
             {
-                GlobalNotificationService.AddErrorMessage("Your current browser does not support the WebAuthn PRF extension. Please login with your password instead.", true);
+                GlobalNotificationService.AddErrorMessage(Localizer["WebAuthnNotSupportedError"], true);
             }
             catch (Exception ex)
             {
