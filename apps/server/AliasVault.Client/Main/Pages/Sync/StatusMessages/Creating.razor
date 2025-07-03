@@ -1,13 +1,17 @@
 ﻿@inject DbService DbService
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <div class="relative p-6 sm:p-8 bg-white dark:bg-gray-700 rounded-lg sm:shadow-xl max-w-md w-full mx-auto">
     <div class="text-center">
         <div class="space-y-4">
             <BoldLoadingIndicator />
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Welcome to AliasVault</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">@Localizer["WelcomeTitle"]</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-               Your new encrypted vault is being initialized. This process may take a moment. Please wait.
+               @Localizer["CreatingDescription"]
             </p>
 
             <div>
@@ -21,6 +25,7 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Sync.StatusMessages.Creating", "AliasVault.Client");
     private string ErrorMessage { get; set; } = string.Empty;
 
     /// <inheritdoc />
@@ -61,13 +66,13 @@
             else
             {
                 // Migration failed
-                ErrorMessage = "Vault creation successful but failed to save to server. Please refresh the page and try again or contact support.";
+                ErrorMessage = Localizer["SaveFailedError"];
             }
         }
         else
         {
             // Migration failed
-            ErrorMessage = "Vault creation failed. Please try again or contact support.";
+            ErrorMessage = Localizer["CreationFailedError"];
         }
 
         StateHasChanged();
