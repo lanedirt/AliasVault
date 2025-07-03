@@ -5,6 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Globalization;
 using AliasVault.Client;
 using AliasVault.Client.Main.Services;
 using AliasVault.Client.Providers;
@@ -14,6 +15,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Localization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -28,6 +30,14 @@ if (config.PrivateEmailDomains == null || config.PrivateEmailDomains.Count == 0)
 }
 
 builder.Services.AddSingleton(config);
+
+// Add localization services
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// Set default culture to English
+var defaultCulture = new CultureInfo("en");
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 builder.Services.AddLogging(logging =>
 {
