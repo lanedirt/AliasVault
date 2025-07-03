@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+
+  <!-- Page title and description -->
+  <data name="PageTitle">
+    <value>Algemene instellingen</value>
+    <comment>Page title for general settings</comment>
+  </data>
+  <data name="PageDescription">
+    <value>Configureer algemene AliasVault instellingen.</value>
+    <comment>Page description for general settings</comment>
+  </data>
+  <data name="BreadcrumbTitle">
+    <value>Algemene instellingen</value>
+    <comment>Breadcrumb title for general settings</comment>
+  </data>
+
+  <!-- Email Settings Section -->
+  <data name="EmailSettingsTitle">
+    <value>E-mail Instellingen</value>
+    <comment>Title for email settings section</comment>
+  </data>
+  <data name="DefaultEmailDomainLabel">
+    <value>Standaard e-maildomein</value>
+    <comment>Label for default email domain setting</comment>
+  </data>
+  <data name="DefaultEmailDomainDescription">
+    <value>Stel het standaard e-maildomein in dat wordt gebruikt bij het aanmaken van nieuwe inloggegevens.</value>
+    <comment>Description for default email domain setting</comment>
+  </data>
+  <data name="PrivateDomainsLabel">
+    <value>Privé Domeinen</value>
+    <comment>Label for private domains group</comment>
+  </data>
+  <data name="PublicDomainsLabel">
+    <value>Publieke Domeinen</value>
+    <comment>Label for public domains group</comment>
+  </data>
+  <data name="AutoEmailRefreshLabel">
+    <value>Automatisch e-mailinhoud verversen wanneer nieuwe berichten aankomen</value>
+    <comment>Label for auto email refresh setting</comment>
+  </data>
+
+  <!-- Alias Settings Section -->
+  <data name="AliasSettingsTitle">
+    <value>Alias Instellingen</value>
+    <comment>Title for alias settings section</comment>
+  </data>
+  <data name="AliasGenerationLanguageLabel">
+    <value>Taal voor alias generatie</value>
+    <comment>Label for alias generation language setting</comment>
+  </data>
+  <data name="AliasGenerationLanguageDescription">
+    <value>Stel de standaardtaal in die wordt gebruikt bij het genereren van nieuwe identiteiten.</value>
+    <comment>Description for alias generation language setting</comment>
+  </data>
+  <data name="EnglishOption">
+    <value>Engels</value>
+    <comment>English language option</comment>
+  </data>
+  <data name="DutchOption">
+    <value>Nederlands</value>
+    <comment>Dutch language option</comment>
+  </data>
+  <data name="AliasGenerationGenderLabel">
+    <value>Geslacht voor alias generatie</value>
+    <comment>Label for alias generation gender setting</comment>
+  </data>
+  <data name="AliasGenerationGenderDescription">
+    <value>Stel de standaard geslachtsvoorkeur in voor het genereren van nieuwe identiteiten.</value>
+    <comment>Description for alias generation gender setting</comment>
+  </data>
+  <data name="RandomOption">
+    <value>Willekeurig</value>
+    <comment>Random gender option</comment>
+  </data>
+  <data name="MaleOption">
+    <value>Man</value>
+    <comment>Male gender option</comment>
+  </data>
+  <data name="FemaleOption">
+    <value>Vrouw</value>
+    <comment>Female gender option</comment>
+  </data>
+
+  <!-- Password Settings Section -->
+  <data name="PasswordSettingsTitle">
+    <value>Wachtwoord Instellingen</value>
+    <comment>Title for password settings section</comment>
+  </data>
+</root>

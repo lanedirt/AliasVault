@@ -1,5 +1,9 @@
 @page "/user/setup"
 @using AliasVault.Client.Auth.Pages.Setup.Components
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using AliasVault.Client.Resources
+@using Microsoft.Extensions.Localization
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.EmptyLayout
 @attribute [AllowAnonymous]
@@ -60,7 +64,7 @@
                 {
                     <button @onclick="GoNext"
                             class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out">
-                        Create Account
+                        @Localizer["CreateAccountButton"]
                     </button>
                 }
                 else if (_currentStep != SetupStep.Creating)
@@ -68,7 +72,7 @@
                     <button @onclick="GoNext"
                             class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300 ease-in-out @(IsNextEnabled ? "" : "opacity-50 cursor-not-allowed")"
                             disabled="@(!IsNextEnabled)">
-                        Continue
+                        @Localizer["ContinueButton"]
                     </button>
                 }
             </div>
@@ -77,6 +81,8 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Auth.Setup.Setup", "AliasVault.Client");
+    
     private SetupStep _currentStep = SetupStep.TermsAndConditions;
     private readonly SetupData _setupData = new();
 
@@ -96,15 +102,15 @@
     /// </summary>
     /// <param name="step">The current setup step.</param>
     /// <returns>The title for the setup step.</returns>
-    private static string GetStepTitle(SetupStep step)
+    private string GetStepTitle(SetupStep step)
     {
         return step switch
         {
-            SetupStep.TermsAndConditions => "Using AliasVault",
-            SetupStep.Username => "Choose Username",
-            SetupStep.Password => "Set Password",
-            SetupStep.Creating => "Creating Vault",
-            _ => "Setup"
+            SetupStep.TermsAndConditions => Localizer["TermsAndConditionsStepTitle"],
+            SetupStep.Username => Localizer["UsernameStepTitle"],
+            SetupStep.Password => Localizer["PasswordStepTitle"],
+            SetupStep.Creating => Localizer["CreatingStepTitle"],
+            _ => Localizer["SetupStepTitle"]
         };
     }
 

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+
+  <!-- Instructions -->
+  <data name="PleaseReadAndAgree">
+    <value>Lees en ga akkoord met de volgende algemene voorwaarden voordat u verdergaat.</value>
+    <comment>Instructions to read and agree to terms</comment>
+  </data>
+
+  <!-- Terms and Conditions title -->
+  <data name="TermsAndConditionsTitle">
+    <value>Algemene voorwaarden</value>
+    <comment>Title for the terms and conditions section</comment>
+  </data>
+
+  <!-- Terms content -->
+  <data name="TermsContent">
+    <value>AliasVault is ontworpen om uw online beveiliging te verbeteren en uw privacy te beschermen. Met AliasVault kunt u unieke identiteiten en e-mailaliassen maken voor uw verschillende online accounts, waardoor u controle houdt over uw persoonlijke informatie en het risico op identiteitsdiefstal vermindert.
+
+Door AliasVault te gebruiken, gaat u akkoord met de volgende voorwaarden:
+
+1. U zult AliasVault niet gebruiken voor illegale doeleinden, inclusief maar niet beperkt tot fraude, identiteitsdiefstal of het zich voordoen als echte personen.
+
+2. U bent verantwoordelijk voor het behouden van de vertrouwelijkheid van uw account en alle aliassen die zijn gemaakt via AliasVault.
+
+3. AliasVault behoudt zich het recht voor om uw account te beëindigen als we misbruik of schending van deze voorwaarden vermoeden.
+
+4. U begrijpt dat hoewel AliasVault uw privacy verbetert, geen enkel systeem volledig waterdicht is, en u gebruikt de service op eigen risico.</value>
+    <comment>Full terms and conditions content</comment>
+  </data>
+
+  <!-- Agreement checkbox -->
+  <data name="AgreementCheckboxLabel">
+    <value>Ik heb de algemene voorwaarden gelezen en ga er mee akkoord</value>
+    <comment>Label for the agreement checkbox</comment>
+  </data>
+</root>

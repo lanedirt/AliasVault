@@ -1,5 +1,9 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @implements IDisposable
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using AliasVault.Client.Resources
+@using Microsoft.Extensions.Localization
 @using System.Timers
 
 <div class="w-full mx-auto">
@@ -13,17 +17,17 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6 mb-6">
             <div class="flex items-start mb-4">
                 <div class="flex-shrink-0">
-                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="AliasVault Assistant">
+                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="@Localizer["AssistantAvatarAlt"]">
                 </div>
                 <div class="ml-3 bg-blue-100 dark:bg-blue-900 rounded-lg p-3">
                     <p class="text-sm text-gray-900 dark:text-white">
-                        Great! Now, let's set up your username for AliasVault.
+                        @Localizer["GreatNowLetsSetupUsername"]
                     </p>
                     <p class="text-sm text-gray-900 dark:text-white mt-3">
-                        Please enter a username you'd like to use. This can be your email address or any unique name you prefer.
+                        @Localizer["EnterUsernameInstructions"]
                     </p>
                     <p class="text-sm text-gray-900 dark:text-white mt-3 font-semibold">
-                        Remember: This is what you'll use to log in later, so make sure it's something you'll remember!
+                        @Localizer["RememberUsernameNote"]
                     </p>
                 </div>
             </div>
@@ -31,14 +35,14 @@
 
         <div class="space-y-4">
             <div>
-                <EditFormRow Id="username" Label="Username" @bind-Value="Username" Placeholder="Enter your desired username or email" OnFocus="@OnUsernameInputFocus" />
+                <EditFormRow Id="username" Label="@Localizer["UsernameLabel"]" @bind-Value="Username" Placeholder="@Localizer["UsernamePlaceholder"]" OnFocus="@OnUsernameInputFocus" />
                 @if (_isValidating)
                 {
-                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">Validating username...</div>
+                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">@Localizer["ValidatingUsernameMessage"]</div>
                 }
                 else if (_isValid)
                 {
-                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">Username is available!</div>
+                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">@Localizer["UsernameAvailableMessage"]</div>
                 }
                 else if (!string.IsNullOrEmpty(_errorMessage))
                 {
@@ -50,6 +54,7 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Setup.UsernameStep", "AliasVault.Client");
     /// <summary>
     /// The username that is previously entered by the user. When a user navigates with back/continue
     /// and entered a username already, the existing username might be provided by the parent component.
@@ -161,7 +166,7 @@
             {
                 _isValidating = false;
                 _isValid = false;
-                _errorMessage = "Username is required.";
+                _errorMessage = Localizer["UsernameRequiredError"];
                 await OnUsernameChange.InvokeAsync(string.Empty);
                 StateHasChanged();
                 return;
@@ -187,7 +192,7 @@
             }
             catch
             {
-                _errorMessage = "An error occurred during communication with the AliasVault server.";
+                _errorMessage = Localizer["ServerCommunicationError"];
                 _isValid = false;
                 await OnUsernameChange.InvokeAsync(string.Empty);
             }
