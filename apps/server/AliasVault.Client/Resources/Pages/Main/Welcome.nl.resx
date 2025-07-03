@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+
+  <!-- Step titles -->
+  <data name="WelcomeStepTitle">
+    <value>Welkom bij AliasVault</value>
+    <comment>Title for the welcome step</comment>
+  </data>
+  <data name="HowAliasVaultWorksStepTitle">
+    <value>Hoe AliasVault werkt</value>
+    <comment>Title for the how it works step</comment>
+  </data>
+  <data name="TipsStepTitle">
+    <value>Tips</value>
+    <comment>Title for the tips step</comment>
+  </data>
+  <data name="GetStartedStepTitle">
+    <value>Aan de slag</value>
+    <comment>Title for the get started step</comment>
+  </data>
+  <data name="TutorialStepTitle">
+    <value>Tutorial</value>
+    <comment>Default tutorial step title</comment>
+  </data>
+
+  <!-- Welcome step content -->
+  <data name="WelcomeMessage">
+    <value>Uw kluis is succesvol aangemaakt! Bescherm uw online privacy door unieke aliassen te maken voor elke service waarvoor u zich aanmeldt. Laten we leren hoe AliasVault werkt en vervolgens uw eerste veilige alias maken.</value>
+    <comment>Welcome message on the first tutorial step</comment>
+  </data>
+
+  <!-- How it works step content -->
+  <data name="HowItWorksIntro">
+    <value>Wanneer u zich moet aanmelden voor een nieuwe service:</value>
+    <comment>Introduction text for how it works step</comment>
+  </data>
+  <data name="HowItWorksStep1">
+    <value>AliasVault genereert een willekeurige identiteit met een veilig privé e-mailadres</value>
+    <comment>First step in how it works explanation</comment>
+  </data>
+  <data name="HowItWorksStep2">
+    <value>Gebruik deze informatie om u aan te melden voor de service</value>
+    <comment>Second step in how it works explanation</comment>
+  </data>
+  <data name="HowItWorksStep3">
+    <value>Ontvangen e-mails verschijnen in deze app en kunnen worden geopend in uw browser</value>
+    <comment>Third step in how it works explanation</comment>
+  </data>
+  <data name="HowItWorksStep4">
+    <value>Uw echte e-mailadres en andere persoonlijke informatie blijven privé</value>
+    <comment>Fourth step in how it works explanation</comment>
+  </data>
+
+  <!-- Tips step content -->
+  <data name="MasterPasswordTipTitle">
+    <value>Houd uw hoofdwachtwoord veilig</value>
+    <comment>Title for master password tip</comment>
+  </data>
+  <data name="MasterPasswordTipContent">
+    <value>Uw hoofdwachtwoord is vereist om uw kluis te ontsleutelen. Deel het nooit met iemand en bewaar het op een veilige locatie. Waarschuwing: Als u uw hoofdwachtwoord verliest, kunnen uw gegevens niet worden hersteld - zelfs niet door ons team.</value>
+    <comment>Content for master password tip</comment>
+  </data>
+  <data name="TwoFactorTipTitle">
+    <value>Schakel twee-factor authenticatie in bij beveiligingsinstellingen</value>
+    <comment>Title for two-factor authentication tip</comment>
+  </data>
+  <data name="TwoFactorTipContent">
+    <value>Twee-factor authenticatie voegt een extra beveiligingslaag toe aan uw account. Het vereist dat u een code invoert vanuit uw authenticator-app of een herstelcode verstrekt voordat uw versleutelde kluis kan worden geopend.</value>
+    <comment>Content for two-factor authentication tip</comment>
+  </data>
+  <data name="ExtensionsAppsTipTitle">
+    <value>Browser-extensies en mobiele apps</value>
+    <comment>Title for browser extensions and mobile apps tip</comment>
+  </data>
+  <data name="ExtensionsAppsTipContent">
+    <value>Installeer de AliasVault browser-extensie en mobiele app om aliassen te maken en formulieren automatisch in te vullen direct vanuit uw browser en smartphone.</value>
+    <comment>Content for browser extensions and mobile apps tip</comment>
+  </data>
+
+  <!-- Create first identity step content -->
+  <data name="ReadyToStartTitle">
+    <value>Klaar om te beginnen?</value>
+    <comment>Title for ready to start section</comment>
+  </data>
+  <data name="ReadyToStartMessage">
+    <value>Nu u weet hoe AliasVault werkt, laten we uw eerste veilige identiteit maken!</value>
+    <comment>Message encouraging user to create first identity</comment>
+  </data>
+  <data name="CreateFirstIdentityButton">
+    <value>Maak uw eerste identiteit</value>
+    <comment>Button text for creating first identity</comment>
+  </data>
+
+  <!-- Navigation buttons -->
+  <data name="ContinueButton">
+    <value>Doorgaan</value>
+    <comment>Continue button text</comment>
+  </data>
+  <data name="GetStartedButton">
+    <value>Aan de slag</value>
+    <comment>Get started button text</comment>
+  </data>
+
+  <!-- Loading and status messages -->
+  <data name="FinishingTutorialMessage">
+    <value>Tutorial afronden...</value>
+    <comment>Loading message when finishing tutorial</comment>
+  </data>
+
+  <!-- Extension and app labels -->
+  <data name="ComingSoonLabel">
+    <value>Binnenkort beschikbaar</value>
+    <comment>Label for features coming soon</comment>
+  </data>
+  <data name="DownloadForPrefix">
+    <value>Download voor</value>
+    <comment>Prefix for download links (e.g., "Download voor iOS")</comment>
+  </data>
+  <data name="SoonSuffix">
+    <value>(Binnenkort)</value>
+    <comment>Suffix indicating feature coming soon</comment>
+  </data>
+</root>

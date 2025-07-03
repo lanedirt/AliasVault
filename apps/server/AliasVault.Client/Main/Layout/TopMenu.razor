@@ -1,4 +1,8 @@
 ﻿@inherits AliasVault.Client.Main.Pages.MainBase
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using AliasVault.Client.Resources
+@using Microsoft.Extensions.Localization
 @implements IDisposable
 
 <header>
@@ -9,17 +13,17 @@
                     <img src="/img/icon-nopadding.png" class="mr-3 h-8 w-10" alt="AliasVault Logo">
                     <span class="self-center hidden sm:flex text-2xl font-semibold content-start align-top whitespace-nowrap dark:text-white">
                         AliasVault
-                        <span class="text-primary-500 text-[10px] ml-1 font-normal hidden sm:inline-block">BETA</span>
+                        <span class="text-primary-500 text-[10px] ml-1 font-normal hidden sm:inline-block">@Localizer["BetaLabel"]</span>
                     </span>
                 </a>
 
                 <div class="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1">
                     <ul class="flex flex-col mt-4 space-x-6 text-sm font-medium lg:flex-row xl:space-x-8 lg:mt-0">
                         <NavLink href="/credentials" class="block text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Credentials
+                            @Localizer["CredentialsNav"]
                         </NavLink>
                         <NavLink href="/emails" class="block text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Emails
+                            @Localizer["EmailsNav"]
                         </NavLink>
                     </ul>
                 </div>
@@ -35,7 +39,7 @@
                 <DbLockButton />
                 <DbStatusIndicator />
                <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center p-2 text-gray-500 rounded-lg md:ml-2 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
-                    <span class="sr-only">Open menu</span>
+                    <span class="sr-only">@Localizer["OpenMenuLabel"]</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
             </div>
@@ -44,12 +48,12 @@
                 <ul class="lg:hidden py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
                     <li>
                         <NavLink href="/credentials" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.Prefix">
-                            Credentials
+                            @Localizer["CredentialsNav"]
                         </NavLink>
                     </li>
                     <li>
                         <NavLink href="/emails" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Emails
+                            @Localizer["EmailsNav"]
                         </NavLink>
                     </li>
                 </ul>
@@ -59,37 +63,37 @@
                 <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
                     <li>
                         <NavLink href="/settings/general" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            General settings
+                            @Localizer["GeneralSettingsNav"]
                         </NavLink>
                     </li>
                     <li>
                         <NavLink href="/settings/security" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Security settings
+                            @Localizer["SecuritySettingsNav"]
                         </NavLink>
                     </li>
                     <li>
                         <NavLink href="/settings/import-export" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Import / Export
+                            @Localizer["ImportExportNav"]
                         </NavLink>
                     </li>
                     <li class="border-t border-b border-gray-100 dark:border-gray-600">
                         <NavLink href="/settings/apps" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Extensions & Apps
+                            @Localizer["ExtensionsAppsNav"]
                             <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
-                                NEW
+                                @Localizer["NewLabel"]
                             </span>
                         </NavLink>
                     </li>
                     <li>
                         <button id="theme-toggle" data-tooltip-target="tooltip-toggle" type="button" class="w-full text-start py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
-                            Toggle dark mode
+                            @Localizer["ToggleDarkMode"]
                             <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                             <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                         </button>
                     </li>
                     <li>
                         <NavLink href="/user/logout" class="block py-2 px-4 font-bold text-sm text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-primary-200 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            Log out
+                            @Localizer["LogOut"]
                         </NavLink>
                     </li>
                 </ul>
@@ -100,6 +104,7 @@
 </header>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Layout.TopMenu", "AliasVault.Client");
     private bool IsUserMenuOpen { get; set; } = false;
     private bool IsMobileMenuOpen { get; set; } = false;
     private string Username { get; set; } = string.Empty;
