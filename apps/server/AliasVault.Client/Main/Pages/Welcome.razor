@@ -1,7 +1,11 @@
 ﻿@page "/welcome"
 @inherits MainBase
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Shared.Core.BrowserExtensions
 @using AliasVault.Shared.Core.MobileApps
+@using AliasVault.Client.Resources
+@using Microsoft.Extensions.Localization
 
 <div class="bg-gray-100 dark:bg-gray-900 flex flex-col lg:items-center lg:justify-center">
     <div class="w-full mt-4 lg:mt-16 mx-auto lg:max-w-4xl lg:bg-white lg:dark:bg-gray-800 lg:shadow-xl lg:rounded-lg lg:overflow-hidden flex flex-col">
@@ -25,7 +29,7 @@
                     case TutorialStep.Welcome:
                         <div class="space-y-4">
                             <p class="text-gray-600 dark:text-gray-400">
-                                Your vault has been successfully created! Protect your online privacy by creating unique aliases for each service you sign up for. Let's learn how AliasVault works and then create your first secure alias.
+                                @Localizer["WelcomeMessage"]
                             </p>
                         </div>
                         break;
@@ -33,13 +37,13 @@
                     case TutorialStep.HowAliasVaultWorks:
                         <div class="space-y-4">
                             <p class="text-gray-600 dark:text-gray-400">
-                                When you need to sign up for a new service:
+                                @Localizer["HowItWorksIntro"]
                             </p>
                             <ol class="list-decimal list-inside space-y-2 text-gray-600 dark:text-gray-400">
-                                <li>AliasVault generates a random identity with a secure private email address</li>
-                                <li>Use this information to sign up for the service</li>
-                                <li>Received emails show up in this app and can be opened in your browser</li>
-                                <li>Your real email address and other personal information stay private</li>
+                                <li>@Localizer["HowItWorksStep1"]</li>
+                                <li>@Localizer["HowItWorksStep2"]</li>
+                                <li>@Localizer["HowItWorksStep3"]</li>
+                                <li>@Localizer["HowItWorksStep4"]</li>
                             </ol>
                         </div>
                         break;
@@ -48,18 +52,18 @@
                         <div class="space-y-4">
                             <div class="space-y-3">
                                 <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">Keep Your Master Password Safe</h4>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">@Localizer["MasterPasswordTipTitle"]</h4>
                                     <p class="text-gray-600 dark:text-gray-400">
-                                        Your master password is required to decrypt your vault. Never share it with anyone and store it in a secure location. Warning: If you lose your master password, your data cannot be recovered - not even by our team.
+                                        @Localizer["MasterPasswordTipContent"]
                                     </p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">Enable Two-Factor Authentication In Security Settings</h4>
-                                    <p class="text-gray-600 dark:text-gray-400">Two-factor authentication adds an extra layer of security to your account. It requires you to enter a code from your authenticator app or provide a recovery code before your encrypted vault can be accessed.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">@Localizer["TwoFactorTipTitle"]</h4>
+                                    <p class="text-gray-600 dark:text-gray-400">@Localizer["TwoFactorTipContent"]</p>
                                 </div>
                                 <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white">Browser Extensions and Mobile Apps</h4>
-                                    <p class="text-gray-600 dark:text-gray-400 mb-4">Install the AliasVault browser extension and mobile app to create aliases and autofill forms directly from your browser and smartphone.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white">@Localizer["ExtensionsAppsTipTitle"]</h4>
+                                    <p class="text-gray-600 dark:text-gray-400 mb-4">@Localizer["ExtensionsAppsTipContent"]</p>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                                         @foreach (var extension in Shared.Core.BrowserExtensions.Constants.Extensions.Where(x => x.Key != BrowserType.Unknown).Select(x => x.Value))
                                         {
@@ -79,7 +83,7 @@
                                                 <div class="flex flex-col items-center p-3 rounded-lg bg-gray-200 dark:bg-gray-600">
                                                     <img src="@extension.IconPath" alt="@extension.Name" class="w-8 h-8 mb-2 opacity-50">
                                                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                        Coming Soon
+                                                        @Localizer["ComingSoonLabel"]
                                                     </span>
                                                 </div>
                                             }
@@ -93,7 +97,7 @@
                                                    class="flex flex-col items-center p-3 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
                                                     <img src="@app.IconPath" alt="@app.Name" class="w-8 h-8 mb-2">
                                                     <span class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
-                                                        Download for @app.Name
+                                                        @Localizer["DownloadForPrefix"] @app.Name
                                                     </span>
                                                 </a>
                                             }
@@ -102,7 +106,7 @@
                                                 <div class="flex flex-col items-center p-3 rounded-lg bg-gray-200 dark:bg-gray-600">
                                                     <img src="@app.IconPath" alt="@app.Name" class="w-8 h-8 mb-2 opacity-50">
                                                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                                                        @app.Name (Soon)
+                                                        @app.Name @Localizer["SoonSuffix"]
                                                     </span>
                                                 </div>
                                             }
@@ -115,14 +119,14 @@
 
                     case TutorialStep.CreateFirstIdentity:
                         <div class="space-y-4">
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Ready to Start?</h3>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">@Localizer["ReadyToStartTitle"]</h3>
                             <p class="text-gray-600 dark:text-gray-400">
-                                Now that you know how AliasVault works, let's create your first secure identity!
+                                @Localizer["ReadyToStartMessage"]
                             </p>
                             <div class="mt-4">
                                 <button @onclick="CreateFirstIdentity"
                                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300">
-                                    Create Your First Identity
+                                    @Localizer["CreateFirstIdentityButton"]
                                 </button>
                             </div>
                         </div>
@@ -135,14 +139,14 @@
                 {
                     <button @onclick="GoNext"
                             class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition duration-300">
-                        Continue
+                        @Localizer["ContinueButton"]
                     </button>
                 }
                 else
                 {
                     <button @onclick="FinishTutorial"
                             class="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-300">
-                        Get Started
+                        @Localizer["GetStartedButton"]
                     </button>
                 }
             </div>
@@ -151,6 +155,8 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Welcome", "AliasVault.Client");
+    
     private TutorialStep _currentStep = TutorialStep.Welcome;
 
     private enum TutorialStep
@@ -161,15 +167,15 @@
         CreateFirstIdentity
     }
 
-    private static string GetStepTitle(TutorialStep step)
+    private string GetStepTitle(TutorialStep step)
     {
         return step switch
         {
-            TutorialStep.Welcome => "Welcome to AliasVault",
-            TutorialStep.HowAliasVaultWorks => "How AliasVault Works",
-            TutorialStep.Tips => "Tips",
-            TutorialStep.CreateFirstIdentity => "Get Started",
-            _ => "Tutorial"
+            TutorialStep.Welcome => Localizer["WelcomeStepTitle"],
+            TutorialStep.HowAliasVaultWorks => Localizer["HowAliasVaultWorksStepTitle"],
+            TutorialStep.Tips => Localizer["TipsStepTitle"],
+            TutorialStep.CreateFirstIdentity => Localizer["GetStartedStepTitle"],
+            _ => Localizer["TutorialStepTitle"]
         };
     }
 
@@ -205,7 +211,7 @@
 
     private async Task FinishTutorial()
     {
-        GlobalLoadingSpinner.Show("Finishing tutorial...");
+        GlobalLoadingSpinner.Show(Localizer["FinishingTutorialMessage"]);
         await DbService.Settings.SetTutorialDoneAsync(true);
         NavigationManager.NavigateTo("credentials");
         GlobalLoadingSpinner.Hide();
