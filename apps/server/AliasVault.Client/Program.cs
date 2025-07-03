@@ -32,10 +32,10 @@ if (config.PrivateEmailDomains == null || config.PrivateEmailDomains.Count == 0)
 builder.Services.AddSingleton(config);
 
 // Add localization services
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddLocalization();
 
-// Set default culture to English
-var defaultCulture = new CultureInfo("en");
+// Configure culture for Blazor WASM
+var defaultCulture = new CultureInfo("nl-NL");
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
