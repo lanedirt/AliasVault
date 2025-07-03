@@ -6,15 +6,19 @@
 @inject AuthService AuthService
 @inject GlobalNotificationService GlobalNotificationService
 @inject DbService DbService
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <div class="fixed inset-0 flex flex-col items-center justify-center px-6 pt-8 pb-8 h-full w-full">
     <div class="relative p-6 sm:p-8 bg-white dark:bg-gray-700 rounded-lg sm:shadow-xl max-w-md w-full mx-auto">
         <div class="text-center">
             <div class="space-y-4">
                 <BoldLoadingIndicator />
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Logging out</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">@Localizer["LoggingOutTitle"]</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Securely unloading your data and logging you out. Please wait.
+                    @Localizer["LoggingOutDescription"]
                 </p>
             </div>
         </div>
@@ -22,6 +26,8 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Auth.Logout", "AliasVault.Client");
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
