@@ -77,6 +77,7 @@
       <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
     </ItemGroup>
 
+
     <ItemGroup>
       <ProjectReference Include="..\Databases\AliasClientDb\AliasClientDb.csproj" />
       <ProjectReference Include="..\Shared\AliasVault.RazorComponents\AliasVault.RazorComponents.csproj" />
