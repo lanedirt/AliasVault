@@ -2,7 +2,7 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.MainLayout
 @inject Config Config
-@inject IStringLocalizer<AliasVault.Client.Resources.Components.Auth.Login> Localizer
+@inject IStringLocalizerFactory LocalizerFactory
 @inject IStringLocalizer<SharedResources> SharedLocalizer
 @attribute [AllowAnonymous]
 @using System.Text.Json
@@ -128,6 +128,8 @@ else
     private ServerValidationErrors _serverValidationErrors = new();
     private bool _showTwoFactorAuthStep;
     private bool _showLoginWithRecoveryCodeStep;
+
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Login", "AliasVault.Client");
 
     private SrpEphemeral _clientEphemeral = new();
     private SrpSession _clientSession = new();

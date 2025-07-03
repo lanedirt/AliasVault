@@ -15,7 +15,6 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Localization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -32,9 +31,9 @@ if (config.PrivateEmailDomains == null || config.PrivateEmailDomains.Count == 0)
 builder.Services.AddSingleton(config);
 
 // Add localization services
-builder.Services.AddLocalization();
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// Configure culture for Blazor WASM
+// Configure culture for Blazor WASM - default to English
 var defaultCulture = new CultureInfo("nl-NL");
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
