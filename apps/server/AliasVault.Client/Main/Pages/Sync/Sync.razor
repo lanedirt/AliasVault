@@ -8,8 +8,12 @@
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager NavigationManager
 @inject ILogger<Sync> Logger
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
-<LayoutPageTitle>Sync</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <div class="fixed inset-0 flex flex-col items-center justify-center px-6 pt-8 pb-8 h-full w-full">
     @if (CurrentDbState.Status == DbServiceState.DatabaseStatus.DecryptionFailed)
@@ -42,12 +46,13 @@
     }
 
     <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-6">
-        Switch accounts? <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">Logout</a>
+        @Localizer["SwitchAccountsText"] <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">@Localizer["LogoutLink"]</a>
     </div>
 </div>
 
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Sync.Sync", "AliasVault.Client");
     private DbServiceState.DatabaseState CurrentDbState { get; set; } = new();
     private const int MinimumLoadingTimeMs = 800;
 
