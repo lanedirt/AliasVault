@@ -2,6 +2,8 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.MainLayout
 @inject Config Config
+@inject IStringLocalizer<Login> Localizer
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @attribute [AllowAnonymous]
 @using System.Text.Json
 @using AliasVault.Shared.Models.WebApi.Auth
@@ -9,21 +11,23 @@
 @using AliasVault.Client.Utilities
 @using AliasVault.Cryptography.Client
 @using SecureRemotePassword
+@using AliasVault.Client.Resources
+@using Microsoft.Extensions.Localization
 
 @if (_showTwoFactorAuthStep)
 {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        Two-factor authentication
+        @Localizer["TwoFactorAuthenticationTitle"]
     </h2>
 
     <ServerValidationErrors @ref="_serverValidationErrors" />
 
-    <p class="text-gray-700 dark:text-gray-300 mb-6">Your login is protected with an authenticator app. Enter your authenticator code below.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-6">@Localizer["TwoFactorAuthenticationDescription"]</p>
     <div class="w-full">
         <EditForm Model="_loginModel2Fa" FormName="login-with-2fa" OnValidSubmit="Handle2Fa" method="post" class="space-y-6">
             <DataAnnotationsValidator/>
             <div>
-                <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Authenticator code</label>
+                <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["AuthenticatorCodeLabel"]</label>
                 <InputNumber @bind-Value="_loginModel2Fa.TwoFactorCode"
                             id="two-factor-code"
                             @oninput="OnTwoFactorCodeInput"
@@ -36,49 +40,48 @@
                     <InputCheckbox @bind-Value="_loginModel2Fa.RememberMachine" id="remember-machine" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"/>
                 </div>
                 <div class="ml-3 text-sm">
-                    <label for="remember-machine" class="font-medium text-gray-900 dark:text-white">Remember this machine</label>
+                    <label for="remember-machine" class="font-medium text-gray-900 dark:text-white">@Localizer["RememberMachineLabel"]</label>
                 </div>
             </div>
-            <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Log in</button>
+            <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">@Localizer["LoginButton"]</button>
         </EditForm>
     </div>
     <p class="mt-6 text-sm text-gray-700 dark:text-gray-300">
-        Don't have access to your authenticator device? You can
-        <button @onclick="LoginWithRecoveryCode" class="text-primary-600 hover:underline dark:text-primary-500">log in with a recovery code</button>.
+        @Localizer["DontHaveAuthenticatorText"]
+        <button @onclick="LoginWithRecoveryCode" class="text-primary-600 hover:underline dark:text-primary-500">@Localizer["LoginWithRecoveryCodeLink"]</button>.
     </p>
 }
 else if (_showLoginWithRecoveryCodeStep)
 {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        Recovery code verification
+        @Localizer["RecoveryCodeVerificationTitle"]
     </h2>
 
     <ServerValidationErrors @ref="_serverValidationErrors" />
 
     <p class="text-gray-700 dark:text-gray-300 mb-6">
-        You have requested to log in with a recovery code. A recovery code is a one-time code that can be used to log in to your account.
-        Note that if you don't manually disable 2FA after login, you will be asked for an authenticator code again at the next login.
+        @Localizer["RecoveryCodeDescription"]
     </p>
     <div class="w-full">
         <EditForm Model="_loginModelRecoveryCode" FormName="login-with-recovery-code" OnValidSubmit="HandleRecoveryCode" method="post" class="space-y-6">
             <DataAnnotationsValidator/>
             <div>
-                <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Recovery Code</label>
+                <label for="two-factor-code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["RecoveryCodeLabel"]</label>
                 <InputText @bind-Value="_loginModelRecoveryCode.RecoveryCode" id="recovery-code" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" autocomplete="off"/>
                 <ValidationMessage For="() => _loginModelRecoveryCode.RecoveryCode" class="text-red-600 dark:text-red-400 text-sm mt-1"/>
             </div>
-            <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Log in</button>
+            <button type="submit" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">@Localizer["LoginButton"]</button>
         </EditForm>
     </div>
     <p class="mt-6 text-sm text-gray-700 dark:text-gray-300">
-        Regained access to your authenticator device? You can
-        <button @onclick="LoginWithAuthenticator" class="text-primary-600 hover:underline dark:text-primary-500">log in with authenticator code</button> instead.
+        @Localizer["RegainedAccessText"]
+        <button @onclick="LoginWithAuthenticator" class="text-primary-600 hover:underline dark:text-primary-500">@Localizer["LoginWithAuthenticatorLink"]</button> instead.
     </p>
 }
 else
 {
     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Log in to AliasVault
+        @Localizer["PageTitle"]
     </h2>
 
     <FullScreenLoadingIndicator @ref="_loadingIndicator"/>
@@ -87,13 +90,13 @@ else
         <ServerValidationErrors @ref="_serverValidationErrors"/>
         <DataAnnotationsValidator/>
         <div>
-            <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username or email</label>
-            <InputTextField id="email" @bind-Value="_loginModel.Username" type="text" placeholder="name / name@company.com" autocapitalize="off" autocorrect="off"/>
+            <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["UsernameOrEmailLabel"]</label>
+            <InputTextField id="email" @bind-Value="_loginModel.Username" type="text" placeholder="@Localizer["UsernamePlaceholder"]" autocapitalize="off" autocorrect="off"/>
             <ValidationMessage For="() => _loginModel.Username"/>
         </div>
         <div>
-            <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-            <InputTextField id="password" @bind-Value="_loginModel.Password" type="password" placeholder="••••••••"/>
+            <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["PasswordLabel"]</label>
+            <InputTextField id="password" @bind-Value="_loginModel.Password" type="password" placeholder="@Localizer["PasswordPlaceholder"]"/>
             <ValidationMessage For="() => _loginModel.Password"/>
         </div>
 
@@ -102,16 +105,16 @@ else
                 <InputCheckbox @bind-Value="_loginModel.RememberMe" id="remember" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
             </div>
             <div class="ml-3 text-sm">
-                <label for="remember" class="font-medium text-gray-900 dark:text-white">Remember me</label>
+                <label for="remember" class="font-medium text-gray-900 dark:text-white">@Localizer["RememberMeLabel"]</label>
             </div>
-            <a href="/user/forgot-password" class="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">Lost Password?</a>
+            <a href="/user/forgot-password" class="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">@Localizer["LostPasswordLink"]</a>
         </div>
 
-        <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to your account</button>
+        <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">@Localizer["LoginToAccountButton"]</button>
         @if (Config.PublicRegistrationEnabled)
         {
             <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                No account yet? <a href="/user/setup" class="text-primary-700 hover:underline dark:text-primary-500">Create new vault</a>
+                @Localizer["NoAccountYetText"] <a href="/user/setup" class="text-primary-700 hover:underline dark:text-primary-500">@Localizer["CreateNewVaultLink"]</a>
             </div>
         }
     </EditForm>
@@ -173,7 +176,7 @@ else
     /// </summary>
     private async Task HandleLogin()
     {
-        _loadingIndicator.Show("Logging in...");
+        _loadingIndicator.Show(Localizer["LoggingInMessage"]);
         _serverValidationErrors.Clear();
 
         try
@@ -194,7 +197,7 @@ else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError(Localizer["LoginErrorMessage"]);
         }
 #endif
         finally
@@ -228,7 +231,7 @@ else
         {
             return
             [
-                "An error occurred while processing the login request.",
+                Localizer["LoginRequestErrorMessage"],
         ];
         }
 
@@ -259,7 +262,7 @@ else
         {
             return
             [
-                "An error occurred while processing the login request.",
+                Localizer["LoginRequestErrorMessage"],
         ];
         }
 
@@ -279,7 +282,7 @@ else
     /// </summary>
     private async Task HandleRecoveryCode()
     {
-        _loadingIndicator.Show("Verifying recovery code...");
+        _loadingIndicator.Show(Localizer["VerifyingRecoveryCodeMessage"]);
         _serverValidationErrors.Clear();
 
         try
@@ -303,7 +306,7 @@ else
             var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
             if (validateLoginResponse == null)
             {
-                _serverValidationErrors.AddError("An error occurred while processing the login request.");
+                _serverValidationErrors.AddError(Localizer["LoginRequestErrorMessage"]);
                 return;
             }
 
@@ -323,7 +326,7 @@ else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError(Localizer["LoginErrorMessage"]);
         }
 #endif
         finally
@@ -337,7 +340,7 @@ else
     /// </summary>
     private async Task Handle2Fa()
     {
-        _loadingIndicator.Show("Verifying 2FA code...");
+        _loadingIndicator.Show(Localizer["VerifyingTwoFactorCodeMessage"]);
         _serverValidationErrors.Clear();
 
         try
@@ -361,7 +364,7 @@ else
             var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
             if (validateLoginResponse == null)
             {
-                _serverValidationErrors.AddError("An error occurred while processing the login request.");
+                _serverValidationErrors.AddError(Localizer["LoginRequestErrorMessage"]);
                 return;
             }
 
@@ -381,7 +384,7 @@ else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError("An error occurred while processing the login request. Try again (later).");
+            _serverValidationErrors.AddError(Localizer["LoginErrorMessage"]);
         }
 #endif
         finally

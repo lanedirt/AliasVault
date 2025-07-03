@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Page titles -->
+  <data name="PageTitle" xml:space="preserve">
+    <value>Inloggen bij AliasVault</value>
+    <comment>Main login page title</comment>
+  </data>
+  <data name="TwoFactorAuthenticationTitle" xml:space="preserve">
+    <value>Twee-factor authenticatie</value>
+    <comment>Title for 2FA step</comment>
+  </data>
+  <data name="RecoveryCodeVerificationTitle" xml:space="preserve">
+    <value>Herstelcode verificatie</value>
+    <comment>Title for recovery code step</comment>
+  </data>
+  
+  <!-- Form labels -->
+  <data name="UsernameOrEmailLabel" xml:space="preserve">
+    <value>Uw gebruikersnaam of e-mail</value>
+    <comment>Label for username/email input field</comment>
+  </data>
+  <data name="PasswordLabel" xml:space="preserve">
+    <value>Uw wachtwoord</value>
+    <comment>Label for password input field</comment>
+  </data>
+  <data name="AuthenticatorCodeLabel" xml:space="preserve">
+    <value>Authenticator code</value>
+    <comment>Label for 2FA code input field</comment>
+  </data>
+  <data name="RecoveryCodeLabel" xml:space="preserve">
+    <value>Herstelcode</value>
+    <comment>Label for recovery code input field</comment>
+  </data>
+  <data name="RememberMeLabel" xml:space="preserve">
+    <value>Onthoud mij</value>
+    <comment>Label for remember me checkbox</comment>
+  </data>
+  <data name="RememberMachineLabel" xml:space="preserve">
+    <value>Onthoud dit apparaat</value>
+    <comment>Label for remember machine checkbox</comment>
+  </data>
+  
+  <!-- Buttons -->
+  <data name="LoginButton" xml:space="preserve">
+    <value>Inloggen</value>
+    <comment>Login button text</comment>
+  </data>
+  <data name="LoginToAccountButton" xml:space="preserve">
+    <value>Inloggen op uw account</value>
+    <comment>Extended login button text</comment>
+  </data>
+  
+  <!-- Links -->
+  <data name="LostPasswordLink" xml:space="preserve">
+    <value>Wachtwoord vergeten?</value>
+    <comment>Link text for password recovery</comment>
+  </data>
+  <data name="CreateNewVaultLink" xml:space="preserve">
+    <value>Nieuwe kluis aanmaken</value>
+    <comment>Link text for creating a new vault</comment>
+  </data>
+  <data name="LoginWithRecoveryCodeLink" xml:space="preserve">
+    <value>inloggen met een herstelcode</value>
+    <comment>Link text for logging in with recovery code</comment>
+  </data>
+  <data name="LoginWithAuthenticatorLink" xml:space="preserve">
+    <value>inloggen met authenticator code</value>
+    <comment>Link text for logging in with authenticator</comment>
+  </data>
+  
+  <!-- Descriptions and help text -->
+  <data name="TwoFactorAuthenticationDescription" xml:space="preserve">
+    <value>Uw login is beveiligd met een authenticator app. Voer uw authenticator code hieronder in.</value>
+    <comment>Description for 2FA step</comment>
+  </data>
+  <data name="RecoveryCodeDescription" xml:space="preserve">
+    <value>U heeft gevraagd om in te loggen met een herstelcode. Een herstelcode is een eenmalige code die gebruikt kan worden om in te loggen op uw account. Let op: als u 2FA niet handmatig uitschakelt na het inloggen, zal u bij de volgende login opnieuw gevraagd worden om een authenticator code.</value>
+    <comment>Description for recovery code step</comment>
+  </data>
+  <data name="NoAccountYetText" xml:space="preserve">
+    <value>Nog geen account?</value>
+    <comment>Text before registration link</comment>
+  </data>
+  <data name="DontHaveAuthenticatorText" xml:space="preserve">
+    <value>Geen toegang tot uw authenticator apparaat? U kunt</value>
+    <comment>Text before recovery code link</comment>
+  </data>
+  <data name="RegainedAccessText" xml:space="preserve">
+    <value>Weer toegang tot uw authenticator apparaat? U kunt</value>
+    <comment>Text before authenticator login link</comment>
+  </data>
+  
+  <!-- Loading and status messages -->
+  <data name="LoggingInMessage" xml:space="preserve">
+    <value>Inloggen...</value>
+    <comment>Loading message during login process</comment>
+  </data>
+  <data name="VerifyingTwoFactorCodeMessage" xml:space="preserve">
+    <value>2FA code verifiëren...</value>
+    <comment>Loading message during 2FA verification</comment>
+  </data>
+  <data name="VerifyingRecoveryCodeMessage" xml:space="preserve">
+    <value>Herstelcode verifiëren...</value>
+    <comment>Loading message during recovery code verification</comment>
+  </data>
+  
+  <!-- Error messages -->
+  <data name="LoginErrorMessage" xml:space="preserve">
+    <value>Er is een fout opgetreden bij het verwerken van het inlogverzoek. Probeer het (later) opnieuw.</value>
+    <comment>Generic login error message</comment>
+  </data>
+  <data name="LoginRequestErrorMessage" xml:space="preserve">
+    <value>Er is een fout opgetreden bij het verwerken van het inlogverzoek.</value>
+    <comment>Login request processing error message</comment>
+  </data>
+  
+  <!-- Placeholders -->
+  <data name="UsernamePlaceholder" xml:space="preserve">
+    <value>naam / naam@bedrijf.com</value>
+    <comment>Placeholder text for username input</comment>
+  </data>
+  <data name="PasswordPlaceholder" xml:space="preserve">
+    <value>••••••••</value>
+    <comment>Placeholder text for password input</comment>
+  </data>
+</root>
