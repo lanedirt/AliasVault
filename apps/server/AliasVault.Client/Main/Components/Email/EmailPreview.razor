@@ -3,12 +3,14 @@
 @using AliasVault.Shared.Core;
 @using AliasVault.Client.Main.Components.Layout
 @using AliasVault.RazorComponents.Services
+@using Microsoft.Extensions.Localization
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
 @inject EmailService EmailService
 @inject HttpClient HttpClient
 @inject ConfirmModalService ConfirmModalService
+@inject IStringLocalizerFactory LocalizerFactory
 
 <div class="h-full flex flex-col bg-white border-l border-gray-200 dark:border-gray-700 rounded-l-lg">
     @if (Email != null)
@@ -35,14 +37,14 @@
             <!-- 2-column layout for email details -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                 <div class="space-y-1">
-                    <p><span class="font-medium">From:</span> @(Email.FromLocal)@@@(Email.FromDomain)</p>
-                    <p><span class="font-medium">To:</span> @(Email.ToLocal)@@@(Email.ToDomain)</p>
+                    <p><span class="font-medium">@Localizer["FromLabel"]</span> @(Email.FromLocal)@@@(Email.FromDomain)</p>
+                    <p><span class="font-medium">@Localizer["ToLabel"]</span> @(Email.ToLocal)@@@(Email.ToDomain)</p>
                 </div>
                 <div class="space-y-1">
-                    <p><span class="font-medium">Date:</span> @Email.DateSystem</p>
+                    <p><span class="font-medium">@Localizer["DateLabel"]</span> @Email.DateSystem</p>
                     @if (!string.IsNullOrEmpty(CredentialName) && CredentialId != Guid.Empty)
                     {
-                        <p><span class="font-medium">Credential:</span>
+                        <p><span class="font-medium">@Localizer["CredentialLabel"]</span>
                             <button @onclick="@(() => OnCredentialClick.InvokeAsync(CredentialId))"
                                     class="text-blue-600 hover:underline dark:text-blue-400 cursor-pointer">
                                 @CredentialName
@@ -51,7 +53,7 @@
                     }
                     else
                     {
-                        <p><span class="font-medium">Credential:</span> <span class="text-gray-400 dark:text-gray-500">None</span></p>
+                        <p><span class="font-medium">@Localizer["CredentialLabel"]</span> <span class="text-gray-400 dark:text-gray-500">@Localizer["NoneValue"]</span></p>
                     }
                 </div>
             </div>
@@ -71,7 +73,7 @@
             {
                 <!-- Attachments Section - Fixed height -->
                 <div class="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-800">
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Attachments:</h3>
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@Localizer["AttachmentsLabel"]</h3>
                     <div class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
                         @foreach (var attachment in Email.Attachments)
                         {
@@ -97,13 +99,14 @@
                 <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                <p class="mt-2 text-sm">Select an email to view its contents</p>
+                <p class="mt-2 text-sm">@Localizer["SelectEmailMessage"]</p>
             </div>
         </div>
     }
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Email.EmailPreview", "AliasVault.Client");
     /// <summary>
     /// The email to show in the preview.
     /// </summary>
@@ -156,8 +159,8 @@
         }
 
         var result = await ConfirmModalService.ShowConfirmation(
-            "Delete Email",
-            "Are you sure you want to delete this email? This action cannot be undone."
+            Localizer["DeleteEmailTitle"],
+            Localizer["DeleteEmailConfirmation"]
         );
 
         if (result)
@@ -208,17 +211,17 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["EmailDeletedSuccess"], true);
             }
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+                GlobalNotificationService.AddErrorMessage($"{Localizer["EmailDeleteFailed"]}: {errorMessage}", true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["GenericError"]}: {ex.Message}", true);
         }
     }
 
@@ -238,16 +241,16 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage($"Email deleted successfully.", true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["EmailDeletedSuccess"], true);
             }
             else
             {
-                GlobalNotificationService.AddErrorMessage($"Failed to delete email.", true);
+                GlobalNotificationService.AddErrorMessage(Localizer["EmailDeleteFailed"], true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Failed to delete email: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["EmailDeleteFailed"]}: {ex.Message}", true);
         }
     }
 
@@ -272,7 +275,7 @@
             else
             {
                 // No HTML and no plain text available
-                EmailBody = "[This email has no body.]";
+                EmailBody = Localizer["NoEmailBody"];
             }
         }
     }
@@ -299,7 +302,7 @@
                 }
                 else
                 {
-                    GlobalNotificationService.AddErrorMessage("Failed to download attachment", true);
+                    GlobalNotificationService.AddErrorMessage(Localizer["AttachmentDownloadFailed"], true);
                 }
             }
             else
@@ -322,13 +325,13 @@
                 }
                 else
                 {
-                    GlobalNotificationService.AddErrorMessage("Failed to download attachment", true);
+                    GlobalNotificationService.AddErrorMessage(Localizer["AttachmentDownloadFailed"], true);
                 }
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Error downloading attachment: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["AttachmentDownloadError"]}: {ex.Message}", true);
         }
     }
 }
