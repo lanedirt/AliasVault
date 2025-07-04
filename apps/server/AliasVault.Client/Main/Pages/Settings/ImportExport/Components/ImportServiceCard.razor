@@ -4,6 +4,9 @@
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
 @inject HttpClient HttpClient
+@inject IStringLocalizerFactory LocalizerFactory
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @using AliasVault.ImportExport.Importers
 @using AliasVault.ImportExport.Models
 @using AliasVault.Shared.Models.WebApi.Favicon
@@ -18,7 +21,7 @@
             else
             {
                 <div class="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
-                    <span class="text-gray-500 dark:text-gray-400 text-xs">No logo</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-xs">@Localizer["NoLogoText"]</span>
                 </div>
             }
         </div>
@@ -39,7 +42,7 @@
             <div id="importServiceModal" class="relative top-20 mx-auto p-5 shadow-lg rounded-md bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-400 md:min-w-[32rem]">
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-4 w-full mx-auto">
                     <div class="flex justify-between items-center mb-4">
-                        <div class="flex"><img src="@LogoUrl" alt="@ServiceName logo" class="w-8 h-8 float-left mr-4" /><h3 class="text-xl font-semibold dark:text-white">Import from @ServiceName</h3></div>
+                        <div class="flex"><img src="@LogoUrl" alt="@ServiceName logo" class="w-8 h-8 float-left mr-4" /><h3 class="text-xl font-semibold dark:text-white">@string.Format(Localizer["ImportFromServiceTitle"], ServiceName)</h3></div>
                         <button @onclick="CloseModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -69,11 +72,11 @@
                                 <div class="@(IsImporting ? "hidden" : "")">
                                     @ChildContent
                                     <div class="mb-4 bg-amber-50 border border-amber-400 dark:bg-amber-800/30 dark:border-amber-500/50 rounded-lg p-4">
-                                        <p class="mb-4 text-gray-700 dark:text-gray-200">Upload your @ServiceName export file:</p>
+                                        <p class="mb-4 text-gray-700 dark:text-gray-200">@string.Format(Localizer["UploadExportFileText"], ServiceName)</p>
                                         <InputFile OnChange="HandleFileUpload" class="text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-primary-900/40 dark:file:text-primary-300 dark:hover:file:bg-primary-800/60" />
                                     </div>
                                     <div class="flex justify-end mt-6 space-x-2">
-                                        <Button OnClick="@CloseModal" Color="secondary">Cancel</Button>
+                                        <Button OnClick="@CloseModal" Color="secondary">@Localizer["CancelButton"]</Button>
                                     </div>
                                 </div>
                             </div>
@@ -135,7 +138,7 @@
                                 <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
                                 @if (ImportedCredentials.Count > 0)
                                 {
-                                    <Button OnClick="@HandleNextStep" Color="primary">Next</Button>
+                                    <Button OnClick="@HandleNextStep" Color="primary">@Localizer["NextButton"]</Button>
                                 }
                             </div>
                             break;
@@ -173,8 +176,8 @@
                                         }
                                     </div>
                                     <div class="flex justify-end mt-6 space-x-2">
-                                        <Button OnClick="@HandlePreviousStep" Color="secondary">Back</Button>
-                                        <Button OnClick="@HandleModalConfirm" Color="primary">Import</Button>
+                                        <Button OnClick="@HandlePreviousStep" Color="secondary">@Localizer["BackButton"]</Button>
+                                        <Button OnClick="@HandleModalConfirm" Color="primary">@Localizer["ImportButton"]</Button>
                                     </div>
                                 }
                             </div>
@@ -187,6 +190,8 @@
 }
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServiceCard", "AliasVault.Client");
+
     private enum ImportStep
     {
         FileUpload,
