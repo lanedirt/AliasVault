@@ -3,22 +3,26 @@
 @inject CredentialService CredentialService
 @inject ILogger<ImportExport> Logger
 @inject ConfirmModalService ConfirmModalService
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @using AliasVault.RazorComponents.Services
 @using AliasVault.Client.Main.Pages.Settings.ImportExport.Components
 @using AliasVault.ImportExport
 
-<LayoutPageTitle>Import / Export</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Import / Export"
-    Description="On this page you can import and export your vault.">
+    Title="@Localizer["PageTitle"]"
+    Description="@Localizer["PageDescription"]">
 </PageHeader>
 
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-4 text-xl font-semibold dark:text-white">Import passwords</h3>
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">@Localizer["ImportSectionTitle"]</h3>
     <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        Select a service to import from. If you are using a service that is not listed here and would like to see it supported, please raise an issue on <a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700">GitHub</a> or contact us.
+        @((MarkupString)Localizer["ImportSectionDescription"].Value)
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <ImportService1Password />
@@ -37,21 +41,23 @@
 </div>
 
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-4 text-xl font-semibold dark:text-white">Export vault</h3>
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">@Localizer["ExportSectionTitle"]</h3>
     <div class="mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            If you want to export your AliasVault credentials to another AliasVault server (e.g. from cloud to self-hosted or vice-versa) or to another service altogether, you can export it here. Note that all exports are unencrypted so store it in a safe place and delete it when you no longer need it.
+            @Localizer["ExportSectionDescription"]
         </p>
         <div>
-            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Csv))">Export vault to unencrypted CSV file</Button>
+            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Csv))">@Localizer["ExportCsvButton"]</Button>
         </div>
         <div class="mt-6">
-            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Sqlite))">Export vault to unencrypted SQLite file</Button>
+            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Sqlite))">@Localizer["ExportSqliteButton"]</Button>
         </div>
     </div>
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Settings.ImportExport.ImportExport", "AliasVault.Client");
+
     private ExportType _currentExportType;
 
     private enum ExportType
@@ -64,21 +70,15 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Import / Export" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["PageTitle"] });
     }
 
     private async Task ShowExportConfirmation(ExportType exportType)
     {
         _currentExportType = exportType;
-        var confirmMessage = @"Warning: Exporting your vault to an unencrypted file will expose all of your passwords and sensitive information in plain text. Only do this on trusted computers and ensure you:
+        var confirmMessage = Localizer["ExportWarningMessage"];
 
-• Store the exported file in a secure location
-• Delete the file when you no longer need it
-• Never share the exported file with others
-
-Are you sure you want to continue with the export?";
-
-        var result = await ConfirmModalService.ShowConfirmation("Export vault", confirmMessage);
+        var result = await ConfirmModalService.ShowConfirmation(Localizer["ExportConfirmTitle"], confirmMessage);
         if (!result)
         {
             return;

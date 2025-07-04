@@ -1,8 +1,11 @@
 ﻿@inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IStringLocalizerFactory LocalizerFactory
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Two-factor authentication</h3>
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">@Localizer["Title"]</h3>
 
     @if (IsLoading)
     {
@@ -12,18 +15,20 @@
     {
         @if (TwoFactorEnabled)
         {
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently enabled.</div>
-            <Button Color="danger" OnClick="DisableTwoFactor">Disable Two-Factor Authentication</Button>
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">@Localizer["EnabledMessage"]</div>
+            <Button Color="danger" OnClick="DisableTwoFactor">@Localizer["DisableButton"]</Button>
         }
         else
         {
-            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently disabled. In order to improve your account security we advise you to enable it.</div>
-            <Button Color="success" OnClick="EnableTwoFactor">Enable Two-Factor Authentication</Button>
+            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">@Localizer["DisabledMessage"]</div>
+            <Button Color="success" OnClick="EnableTwoFactor">@Localizer["EnableButton"]</Button>
         }
     }
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.Security.TwoFactorAuthenticationSection", "AliasVault.Client");
+
     /// <summary>
     /// Gets or sets a value indicating whether Two-Factor Authentication is enabled.
     /// </summary>

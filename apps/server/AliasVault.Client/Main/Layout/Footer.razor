@@ -1,12 +1,16 @@
 ﻿@inject NavigationManager NavigationManager
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Shared.Core
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @implements IDisposable
 
 <footer class="relative -z-10 lg:fixed bottom-0 left-0 right-0 dark:bg-gray-900 @(ShowBorder ? "border-t border-gray-200 dark:border-gray-700" : "")">
     <div class="container mx-auto px-4 py-4">
         <div class="flex flex-col lg:flex-row justify-between items-center">
             <p class="text-sm text-center text-gray-500 mb-4 lg:mb-0">
-                © 2024 <span>@AppInfo.ApplicationName v@(AppInfo.GetFullVersion())</span>. All rights reserved.
+                © 2024 <span>@AppInfo.ApplicationName v@(AppInfo.GetFullVersion())</span>. @Localizer["CopyrightText"]
             </p>
             <div class="hidden lg:block text-center text-gray-400 text-sm">@_randomQuote</div>
             <ul class="flex flex-wrap items-center justify-center">
@@ -25,12 +29,14 @@
     [Parameter]
     public bool ShowBorder { get; set; } = true;
 
-    private static readonly string[] Quotes =
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Layout.Footer", "AliasVault.Client");
+
+    private string[] Quotes => 
     [
-        "Tip: Use the g+c (go create) keyboard shortcut to quickly create a new alias.",
-        "Tip: Use the g+f (go find) keyboard shortcut to focus the search field.",
-        "Tip: Use the g+h (go home) keyboard shortcut to go to the homepage.",
-        "Tip: Use the g+l (go lock) keyboard shortcut to lock the vault.",
+        Localizer["TipCreateShortcut"],
+        Localizer["TipFindShortcut"],
+        Localizer["TipHomeShortcut"],
+        Localizer["TipLockShortcut"],
     ];
 
     private string _randomQuote = string.Empty;
