@@ -1,12 +1,15 @@
 ﻿@using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inherits AliasVault.Client.Main.Pages.MainBase
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @inject AliasVault.Client.Services.QuickCreateStateService QuickCreateStateService
+@inject IStringLocalizerFactory LocalizerFactory
 @implements IAsyncDisposable
 
 <button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
-    + <span class="hidden md:inline">New Alias</span>
+    @Localizer["NewAliasButtonShort"] <span class="hidden md:inline">@Localizer["NewAliasButtonText"].Value.Substring(1).Trim()</span>
 </button>
 
 @if (IsPopupVisible)
@@ -14,25 +17,25 @@
     <ClickOutsideHandler OnClose="ClosePopup" ContentId="quickIdentityPopup,quickIdentityButton">
         <div id="quickIdentityPopup" class="absolute z-50 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-300 dark:bg-gray-800 dark:border-gray-400"
              style="@PopupStyle">
-            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Create New Alias</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">@Localizer["CreateNewAliasTitle"]</h3>
             <EditForm Model="Model" OnValidSubmit="CreateIdentity">
                 <DataAnnotationsValidator />
                 <div class="mb-4">
-                    <EditFormRow Id="serviceName" Label="Service Name" Placeholder="E.g. Facebook" @bind-Value="Model.ServiceName"></EditFormRow>
+                    <EditFormRow Id="serviceName" Label="@Localizer["ServiceNameLabel"]" Placeholder="@Localizer["ServiceNamePlaceholder"]" @bind-Value="Model.ServiceName"></EditFormRow>
                     <ValidationMessage For="() => Model.ServiceName"/>
                 </div>
                 <div class="mb-4">
-                    <EditFormRow Id="serviceUrl" Label="Service URL" OnFocus="OnFocusUrlInput" @bind-Value="Model.ServiceUrl"></EditFormRow>
+                    <EditFormRow Id="serviceUrl" Label="@Localizer["ServiceUrlLabel"]" OnFocus="OnFocusUrlInput" @bind-Value="Model.ServiceUrl"></EditFormRow>
                     <ValidationMessage For="() => Model.ServiceUrl"/>
                 </div>
                 <div class="flex justify-between items-center">
                     <button id="quickIdentitySubmit" type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                        Create
+                        @Localizer["CreateButton"]
                     </button>
                 </div>
                 <div class="pt-2">
                     <a href="#" @onclick="OpenAdvancedMode" @onclick:preventDefault class="text-sm text-blue-500 hover:text-blue-700">
-                        Create via advanced mode
+                        @Localizer["AdvancedModeLink"]
                     </a>
                 </div>
             </EditForm>
@@ -41,6 +44,8 @@
 }
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Widgets.CreateNewIdentityWidget", "AliasVault.Client");
+
     private bool IsPopupVisible = false;
     private bool IsCreating = false;
     private CreateModel Model = new();
@@ -147,7 +152,7 @@
         }
 
         IsCreating = true;
-        GlobalLoadingSpinner.Show("Creating new alias...");
+        GlobalLoadingSpinner.Show(Localizer["CreatingNewAliasMessage"]);
         StateHasChanged();
 
         var credential = new Credential();
@@ -170,12 +175,12 @@
             // Error saving.
             IsCreating = false;
             GlobalLoadingSpinner.Hide();
-            GlobalNotificationService.AddErrorMessage("Error creating a new credential. Please try again (later) or log-out and in again.", true);
+            GlobalNotificationService.AddErrorMessage(Localizer["CreateCredentialErrorMessage"], true);
             return;
         }
 
         // No error, add success message.
-        GlobalNotificationService.AddSuccessMessage("Credential created successfully.");
+        GlobalNotificationService.AddSuccessMessage(Localizer["CredentialCreatedSuccessMessage"]);
 
         NavigationManager.NavigateTo("/credentials/" + id);
 

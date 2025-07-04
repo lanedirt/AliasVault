@@ -1,18 +1,23 @@
 @inject ILogger<ImportServiceAliasVault> Logger
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
 @using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <ImportServiceCard
     ServiceName="AliasVault"
-    Description="Import passwords from another AliasVault server or manual back-up"
+    Description="@Localizer["AliasVaultDescription"]"
     LogoUrl="img/logo.svg"
     ProcessFileCallback="ProcessFile">
-    <p class="text-gray-700 dark:text-gray-300 mb-4">If you have a CSV file back-up of your AliasVault database (from a different AliasVault server), you can import it here.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["AliasVaultInstructionsPart1"]</p>
 </ImportServiceCard>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServices", "AliasVault.Client");
+
     private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         var importedCredentials = await Task.Run(() =>

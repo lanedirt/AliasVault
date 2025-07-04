@@ -1,19 +1,24 @@
 @inject ILogger<ImportServiceKeePass> Logger
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
 @using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <ImportServiceCard
     ServiceName="KeePass"
-    Description="Import passwords from KeePass"
+    Description="@Localizer["KeePassDescription"]"
     LogoUrl="img/importers/keepass.svg"
     ProcessFileCallback="ProcessFile">
-    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your KeePass vault, you need to export it as a CSV file. You can do this by going to the 'File' menu and selecting 'Export' (to CSV).</p>
-    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["KeePassInstructionsPart1"]</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["KeePassInstructionsPart2"]</p>
 </ImportServiceCard>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServices", "AliasVault.Client");
+
     private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await KeePassImporter.ImportFromCsvAsync(fileContents);

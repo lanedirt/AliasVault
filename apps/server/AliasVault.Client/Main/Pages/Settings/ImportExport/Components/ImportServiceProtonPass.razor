@@ -1,19 +1,24 @@
 @using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
 @inject ILogger<ImportServiceProtonPass> Logger
 
 <ImportServiceCard
     ServiceName="Proton Pass"
-    Description="Import passwords from Proton Pass"
+    Description="@Localizer["ProtonPassDescription"]"
     LogoUrl="img/importers/protonpass.svg"
     ProcessFileCallback="ProcessFile">
-    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your Proton Pass passwords, you need to export it as a CSV file. You can do this by logging into Proton Pass (web), clicking on the 'Settings' menu > 'Export' > 'File format: CSV'. Then click on 'Export'.</p>
-    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["ProtonPassInstructionsPart1"]</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["ProtonPassInstructionsPart2"]</p>
 </ImportServiceCard>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServices", "AliasVault.Client");
+
     private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await ProtonPassImporter.ImportFromCsvAsync(fileContents);

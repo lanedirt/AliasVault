@@ -1,19 +1,24 @@
 @using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
 @inject ILogger<ImportServiceChrome> Logger
 
 <ImportServiceCard
     ServiceName="Chrome"
-    Description="Import passwords from your Chrome Password Manager"
+    Description="@Localizer["ChromeDescription"]"
     LogoUrl="img/importers/chrome.svg"
     ProcessFileCallback="ProcessFile">
-    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your Chrome Password Manager, you need to export it as a CSV file. You can do this by logging into your Chrome browser, going to the 'Settings' menu > 'Password and AutoFill' > 'Google Password Manager'. Then click on 'Export passwords'.</p>
-    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["ChromeInstructionsPart1"]</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["ChromeInstructionsPart2"]</p>
 </ImportServiceCard>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServices", "AliasVault.Client");
+
     private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await ChromeImporter.ImportFromCsvAsync(fileContents);
