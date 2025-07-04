@@ -1,37 +1,42 @@
 @using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
 @inject ILogger<ImportServiceGenericCsv> Logger
 @inject JsInteropService JsInteropService
 
 <ImportServiceCard
     ServiceName="Generic CSV"
-    Description="Import credentials using a template CSV format"
+    Description="@Localizer["GenericCsvDescription"]"
     LogoUrl="img/importers/generic-csv.svg"
     ProcessFileCallback="ProcessFile">
-    <p class="text-gray-700 dark:text-gray-300 mb-4">Is the password manager you are using not supported? You can always import your credentials into AliasVault using a generic CSV template format instead.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["GenericCsvInstructionsPart1"]</p>
     <ol class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
         <li class="flex items-start space-x-2">
             <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">1</span>
-            <span>Download the <button @onclick="DownloadTemplate" class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 underline">AliasVault Import CSV template</button></span>
+            <span>@Localizer["GenericCsvStep1"] <button @onclick="DownloadTemplate" class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 underline">template</button></span>
         </li>
         <li class="flex items-start space-x-2">
             <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">2</span>
-            <span>Open it in a spreadsheet program (Microsoft Excel, Google Sheets, etc.)</span>
+            <span>@Localizer["GenericCsvStep2"]</span>
         </li>
         <li class="flex items-start space-x-2">
             <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">3</span>
-            <span>Fill in your credentials (replace the example data)</span>
+            <span>@Localizer["GenericCsvStep3"]</span>
         </li>
         <li class="flex items-start space-x-2">
             <span class="flex-shrink-0 w-5 h-5 bg-amber-400 text-white text-xs rounded-full flex items-center justify-center">4</span>
-            <span>Save as CSV format and upload it below</span>
+            <span>@Localizer["GenericCsvStep4"]</span>
         </li>
     </ol>
 </ImportServiceCard>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServices", "AliasVault.Client");
+
     private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await GenericCsvImporter.ImportFromCsvAsync(fileContents);
@@ -54,7 +59,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error downloading CSV template");
-            GlobalNotificationService.AddErrorMessage("Failed to download CSV template. Please try again.", true);
+            GlobalNotificationService.AddErrorMessage(Localizer["GenericCsvTemplateDownloadError"], true);
         }
     }
 }

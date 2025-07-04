@@ -1,19 +1,24 @@
 @using AliasVault.ImportExport.Models
 @using AliasVault.ImportExport.Importers
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inject NavigationManager NavigationManager
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
 @inject ILogger<ImportServiceFirefox> Logger
 
 <ImportServiceCard
     ServiceName="Firefox"
-    Description="Import passwords from your Firefox Password Manager"
+    Description="@Localizer["FirefoxDescription"]"
     LogoUrl="img/importers/firefox.svg"
     ProcessFileCallback="ProcessFile">
-    <p class="text-gray-700 dark:text-gray-300 mb-4">In order to import your Firefox passwords, you need to export it as a CSV file. You can do this by opening your Firefox browser, going to menu > 'Passwords'. Then click on the menu icon in the top right corner and select 'Export passwords'.</p>
-    <p class="text-gray-700 dark:text-gray-300 mb-4">Once you have exported the file, you can upload it below.</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["FirefoxInstructionsPart1"]</p>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">@Localizer["FirefoxInstructionsPart2"]</p>
 </ImportServiceCard>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.ImportExport.ImportServices", "AliasVault.Client");
+
     private static async Task<List<ImportedCredential>> ProcessFile(string fileContents)
     {
         return await FirefoxImporter.ImportFromCsvAsync(fileContents);

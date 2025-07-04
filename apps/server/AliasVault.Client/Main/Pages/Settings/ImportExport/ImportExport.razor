@@ -78,7 +78,7 @@
         _currentExportType = exportType;
         var confirmMessage = Localizer["ExportWarningMessage"];
 
-        var result = await ConfirmModalService.ShowConfirmation(Localizer["ExportConfirmTitle"], confirmMessage);
+        var result = await ConfirmModalService.ShowConfirmation(Localizer["ExportConfirmTitle"], confirmMessage, SharedLocalizer["Confirm"], SharedLocalizer["Cancel"]);
         if (!result)
         {
             return;

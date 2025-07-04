@@ -33,6 +33,16 @@ public class ConfirmModalService
     public string Message { get; private set; } = "Are you sure you want to do this?";
 
     /// <summary>
+    /// Gets the confirm button text.
+    /// </summary>
+    public string ConfirmButtonText { get; private set; } = "Confirm";
+
+    /// <summary>
+    /// Gets the cancel button text.
+    /// </summary>
+    public string CancelButtonText { get; private set; } = "Cancel";
+
+    /// <summary>
     /// Gets a value indicating whether the modal is visible.
     /// </summary>
     public bool IsVisible { get; private set; }
@@ -45,8 +55,23 @@ public class ConfirmModalService
     /// <returns>A task that completes when the user responds, returning true if confirmed, false if cancelled.</returns>
     public Task<bool> ShowConfirmation(string title, string message)
     {
+        return ShowConfirmation(title, message, "Confirm", "Cancel");
+    }
+
+    /// <summary>
+    /// Shows the confirmation modal and waits for user response.
+    /// </summary>
+    /// <param name="title">The title of the modal.</param>
+    /// <param name="message">The message to display in the modal.</param>
+    /// <param name="confirmButtonText">The text for the confirm button.</param>
+    /// <param name="cancelButtonText">The text for the cancel button.</param>
+    /// <returns>A task that completes when the user responds, returning true if confirmed, false if cancelled.</returns>
+    public Task<bool> ShowConfirmation(string title, string message, string confirmButtonText, string cancelButtonText)
+    {
         Title = title;
         Message = message;
+        ConfirmButtonText = confirmButtonText;
+        CancelButtonText = cancelButtonText;
         IsVisible = true;
         _modalTaskCompletionSource = new TaskCompletionSource<bool>();
         NotifyStateChanged();
