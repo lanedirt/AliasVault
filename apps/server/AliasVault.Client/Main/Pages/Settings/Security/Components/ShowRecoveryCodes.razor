@@ -1,16 +1,18 @@
-﻿<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Recovery codes</h3>
+﻿@inject IStringLocalizerFactory LocalizerFactory
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">@Localizer["Title"]</h3>
     <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        The recovery codes below are used to access your account in case you lose access to your authenticator device.
-        Make a photo or write them down and store them in a secure location. Do not share them with anyone.
+        @Localizer["Description"]
     </div>
     <div class="bg-primary-100 border-l-4 border-primary-500 text-primary-700 p-4 mb-4 dark:bg-gray-700 dark:border-primary-500 dark:text-gray-200">
         <p class="font-semibold">
-            Store these recovery codes in a safe place.
+            @Localizer["WarningTitle"]
         </p>
         <p>
-            If you lose your device and don't have the recovery codes you will lose access to your account. These
-            codes are only shown once!
+            @Localizer["WarningDescription"]
         </p>
     </div>
 
@@ -25,6 +27,8 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.Security.ShowRecoveryCodes", "AliasVault.Client");
+
     /// <summary>
     /// The recovery codes to show.
     /// </summary>

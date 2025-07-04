@@ -13,9 +13,13 @@
 @inject HttpClient HttpClient
 @inject ILogger<Home> Logger
 @inject MinDurationLoadingService LoadingService
+@inject IStringLocalizerFactory LocalizerFactory
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @implements IAsyncDisposable
 
-<LayoutPageTitle>Emails</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 @if (EmailModalVisible)
 {
@@ -24,14 +28,14 @@
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="Emails"
-    Description="You can view all emails received by your private email addresses below.">
+    Title="@Localizer["PageTitle"]"
+    Description="@Localizer["PageDescription"]">
     <CustomActions>
         @if (DbService.Settings.AutoEmailRefresh)
         {
-            <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="Auto-refresh enabled"></div>
+            <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="@Localizer["AutoRefreshEnabledTooltip"]"></div>
         }
-        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+        <RefreshButton OnClick="RefreshData" ButtonText="@Localizer["RefreshButton"]" />
     </CustomActions>
 </PageHeader>
 
@@ -75,7 +79,7 @@ else if (NoEmailClaims)
 {
     <div class="p-4 mx-4 mt-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="px-4 py-2 text-gray-400 rounded">
-            <p class="text-gray-500 dark:text-gray-400">You are not using any private email addresses (yet). Create a new alias and use a private email address supported by AliasVault. All emails received by these private email addresses will show up here.</p>
+            <p class="text-gray-500 dark:text-gray-400">@Localizer["NoEmailClaimsMessage"]</p>
         </div>
     </div>
 }
@@ -91,7 +95,7 @@ else
                     @if (EmailList.Count == 0)
                     {
                         <li class="p-4 text-center text-gray-500 dark:text-gray-300">
-                            No emails have been received yet.
+                            @Localizer["NoEmailsReceivedMessage"]
                         </li>
                     }
                     else
@@ -116,7 +120,7 @@ else
                 <!-- Single row message for desktop when no emails -->
                 <div class="w-full bg-white border rounded-lg dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
                     <div class="p-4 text-center text-gray-500 dark:text-gray-300">
-                        No emails have been received yet.
+                        @Localizer["NoEmailsReceivedMessage"]
                     </div>
                 </div>
             }
@@ -149,12 +153,12 @@ else
                                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
-                                                    Loading...
+                                                    @Localizer["LoadingText"]
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span>Load More (@(TotalRecords - EmailList.Count) remaining)</span>
+                                                <span>@string.Format(Localizer["LoadMoreButtonText"], TotalRecords - EmailList.Count)</span>
                                             }
                                         </button>
                                     </li>
@@ -180,6 +184,7 @@ else
 }
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Emails.Home", "AliasVault.Client");
     private List<MailListViewModel> EmailList { get; set; } = [];
     private bool IsLoading => LoadingService.IsLoading("emails");
     private int CurrentPage { get; set; } = 1;
@@ -359,8 +364,7 @@ else
                             switch (errorResponse.Code)
                             {
                                 case "CLAIM_DOES_NOT_EXIST":
-                                    GlobalNotificationService.AddErrorMessage("An error occurred while trying to load the emails. Please try to edit and " +
-                                                                              "save any credential entry to synchronize the database, then try again.", true);
+                                    GlobalNotificationService.AddErrorMessage(Localizer["ClaimDoesNotExistError"], true);
                                     break;
                                 default:
                                     throw new ArgumentException(errorResponse.Message);
@@ -633,7 +637,7 @@ else
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Failed to load email: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage(string.Format(Localizer["LoadEmailsFailedMessage"], ex.Message), true);
             Logger.LogError(ex, "An error occurred while loading email for preview");
         }
     }
@@ -729,7 +733,7 @@ else
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Failed to load more emails: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage(string.Format(Localizer["LoadMoreEmailsFailedMessage"], ex.Message), true);
             Logger.LogError(ex, "An error occurred while loading more emails");
         }
         finally

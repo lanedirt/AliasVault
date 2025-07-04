@@ -1,10 +1,13 @@
 ﻿@using AliasVault.Shared.Models.WebApi.Security
 @inject HttpClient Http
 @inject GlobalNotificationService GlobalNotificationService
+@inject IStringLocalizerFactory LocalizerFactory
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 
 <div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Recent Auth Logs</h3>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Below you can find an overview of recent login attempts to your account.</p>
+    <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">@Localizer["Title"]</h3>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">@Localizer["Description"]</p>
 
     @if (IsLoading)
     {
@@ -14,7 +17,7 @@
     {
     @if (!AuthLogs.Any())
     {
-        <p class="text-sm text-gray-600 dark:text-gray-400">No authentication logs found.</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">@Localizer["NoLogsMessage"]</p>
     }
     else
     {
@@ -22,12 +25,12 @@
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                        <th scope="col" class="px-6 py-3">Timestamp</th>
-                        <th scope="col" class="px-6 py-3">Event Type</th>
-                        <th scope="col" class="px-6 py-3">Client</th>
-                        <th scope="col" class="px-6 py-3">IP Address</th>
-                        <th scope="col" class="px-6 py-3">Device</th>
-                        <th scope="col" class="px-6 py-3">Success</th>
+                        <th scope="col" class="px-6 py-3">@Localizer["TimestampColumn"]</th>
+                        <th scope="col" class="px-6 py-3">@Localizer["EventTypeColumn"]</th>
+                        <th scope="col" class="px-6 py-3">@Localizer["ClientColumn"]</th>
+                        <th scope="col" class="px-6 py-3">@Localizer["IpAddressColumn"]</th>
+                        <th scope="col" class="px-6 py-3">@Localizer["DeviceColumn"]</th>
+                        <th scope="col" class="px-6 py-3">@Localizer["SuccessColumn"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -39,7 +42,7 @@
                             <td class="px-6 py-4">@authLog.Client</td>
                             <td class="px-6 py-4">@authLog.IpAddress</td>
                             <td class="px-6 py-4">@authLog.UserAgent</td>
-                            <td class="px-4 py-4"><StatusPill Enabled="authLog.IsSuccess" TextTrue="Success" TextFalse="Failed" /></td>
+                            <td class="px-4 py-4"><StatusPill Enabled="authLog.IsSuccess" TextTrue="@Localizer["SuccessStatus"]" TextFalse="@Localizer["FailedStatus"]" /></td>
                         </tr>
                     }
                 </tbody>
@@ -50,6 +53,7 @@
 </div>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Settings.Security.RecentAuthLogsSection", "AliasVault.Client");
 
     /// <summary>
     /// Gets or sets the list of active sessions (refresh tokens) for the current user.
