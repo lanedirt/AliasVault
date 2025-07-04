@@ -1,4 +1,6 @@
 @using AliasVault.Client.Main.Pages.Emails.Models
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizerFactory LocalizerFactory
 
 <li class="@($"hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out cursor-pointer {(IsSelected ? "bg-primary-50 dark:bg-primary-900/30 border-l-4 border-primary-500" : "")}")">
     <div @onclick="@(() => OnEmailClick.InvokeAsync(Email.Id))" class="p-4 flex justify-start items-start">
@@ -19,7 +21,7 @@
                         }
                         @if (IsNewEmail)
                         {
-                            <div class="w-2 h-2 ml-1 bg-yellow-500 rounded-full animate-pulse flex-shrink-0" title="New email"></div>
+                            <div class="w-2 h-2 ml-1 bg-yellow-500 rounded-full animate-pulse flex-shrink-0" title="@Localizer["NewEmailTooltip"]"></div>
                         }
                     </div>
                     <!-- Subject (smaller, below from) -->
@@ -41,6 +43,7 @@
 </li>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Email.EmailRow", "AliasVault.Client");
     /// <summary>
     /// The email model.
     /// </summary>

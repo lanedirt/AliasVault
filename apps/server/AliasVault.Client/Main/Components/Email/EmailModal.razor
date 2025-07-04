@@ -3,12 +3,15 @@
 @using AliasVault.Shared.Core;
 @using AliasVault.Client.Main.Components.Layout
 @using AliasVault.RazorComponents.Services
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inject JsInteropService JsInteropService
 @inject GlobalNotificationService GlobalNotificationService
 @inject IHttpClientFactory HttpClientFactory
 @inject EmailService EmailService
 @inject HttpClient HttpClient
 @inject ConfirmModalService ConfirmModalService
+@inject IStringLocalizerFactory LocalizerFactory
 
 <ClickOutsideHandler OnClose="OnClose" ContentId="emailModal">
     <ModalWrapper OnEnter="Close">
@@ -35,12 +38,12 @@
                 <!-- 2-column layout for email details -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <div class="space-y-1">
-                        <p>From: @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
-                        <p>To: @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
+                        <p>@Localizer["FromLabel"] @(Email?.FromLocal)@@@(Email?.FromDomain)</p>
+                        <p>@Localizer["ToLabel"] @(Email?.ToLocal)@@@(Email?.ToDomain)</p>
                     </div>
                     <div class="space-y-1">
-                        <p>Date: @Email?.DateSystem</p>
-                        <p>Actions: <button @onclick="ShowDeleteConfirmation" class="text-red-500 hover:text-red-700 text-sm">Delete</button></p>
+                        <p>@Localizer["DateLabel"] @Email?.DateSystem</p>
+                        <p>@Localizer["ActionsLabel"] <button @onclick="ShowDeleteConfirmation" class="text-red-500 hover:text-red-700 text-sm">@Localizer["DeleteButton"]</button></p>
                     </div>
                 </div>
             </div>
@@ -57,7 +60,7 @@
                     @if (Email?.Attachments?.Any() == true)
                     {
                         <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
-                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Attachments:</h3>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@Localizer["AttachmentsLabel"]</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 @foreach (var attachment in Email.Attachments)
                                 {
@@ -76,7 +79,7 @@
                     }
                 </div>
                 <div class="mt-6 flex justify-end space-x-4">
-                    <button id="close-email-modal" @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+                    <button id="close-email-modal" @onclick="Close" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">@Localizer["CloseButton"]</button>
                 </div>
             </div>
         </div>
@@ -84,6 +87,8 @@
 </ClickOutsideHandler>
 
 @code {
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Email.EmailModal", "AliasVault.Client");
+
     /// <summary>
     /// The email to show in the modal.
     /// </summary>
@@ -124,8 +129,8 @@
         }
 
         var result = await ConfirmModalService.ShowConfirmation(
-            "Delete Email",
-            "Are you sure you want to delete this email? This action cannot be undone."
+            Localizer["DeleteEmailTitle"],
+            Localizer["DeleteEmailConfirmation"]
         );
 
         if (result)
@@ -185,18 +190,18 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage("Email deleted successfully", true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["EmailDeletedSuccess"], true);
                 await Close();
             }
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                GlobalNotificationService.AddErrorMessage($"Failed to delete email: {errorMessage}", true);
+                GlobalNotificationService.AddErrorMessage($"{Localizer["EmailDeleteFailed"]}: {errorMessage}", true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"An error occurred: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["GenericError"]}: {ex.Message}", true);
         }
     }
 
@@ -216,16 +221,16 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage($"Email deleted successfully.", true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["EmailDeletedSuccess"], true);
             }
             else
             {
-                GlobalNotificationService.AddErrorMessage($"Failed to delete email.", true);
+                GlobalNotificationService.AddErrorMessage(Localizer["EmailDeleteFailed"], true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Failed to delete email: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["EmailDeleteFailed"]}: {ex.Message}", true);
         }
     }
 
@@ -251,7 +256,7 @@
             else
             {
                 // No HTML and no plain text available
-                EmailBody = "[This email has no body.]";
+                EmailBody = Localizer["NoEmailBody"];
             }
         }
     }
@@ -278,7 +283,7 @@
                 }
                 else
                 {
-                    GlobalNotificationService.AddErrorMessage("Failed to download attachment", true);
+                    GlobalNotificationService.AddErrorMessage(Localizer["AttachmentDownloadFailed"], true);
                 }
             }
             else
@@ -301,13 +306,13 @@
                 }
                 else
                 {
-                    GlobalNotificationService.AddErrorMessage("Failed to download attachment", true);
+                    GlobalNotificationService.AddErrorMessage(Localizer["AttachmentDownloadFailed"], true);
                 }
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"Error downloading attachment: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["AttachmentDownloadError"]}: {ex.Message}", true);
         }
     }
 }
