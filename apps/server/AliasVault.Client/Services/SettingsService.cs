@@ -69,6 +69,12 @@ public sealed class SettingsService
     public string CredentialsSortOrder => GetSetting("CredentialsSortOrder", "asc")!;
 
     /// <summary>
+    /// Gets the AppLanguage setting.
+    /// </summary>
+    /// <returns>App language as two-letter code.</returns>
+    public string AppLanguage => GetSetting("AppLanguage", "en")!;
+
+    /// <summary>
     /// Gets the password settings from the database. If it fails, we use the model's default values.
     /// </summary>
     public PasswordSettings PasswordSettings
@@ -142,6 +148,13 @@ public sealed class SettingsService
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
     public Task SetCredentialsSortOrder(string value) => SetSettingAsync("CredentialsSortOrder", value);
+
+    /// <summary>
+    /// Sets the AppLanguage setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetAppLanguage(string value) => SetSettingAsync("AppLanguage", value);
 
     /// <summary>
     /// Gets a setting value by key.

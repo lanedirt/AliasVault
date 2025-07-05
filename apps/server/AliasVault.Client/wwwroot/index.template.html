@@ -222,6 +222,20 @@
 
         window.addEventListener('load', manageLoadingScreen);
     </script>
+    
+    <script>
+        window.blazorCulture = {
+            get: function() {
+                return localStorage.getItem('blazorCulture') || 
+                       localStorage.getItem('AppLanguage') || 
+                       (navigator.language.split('-')[0] === 'nl' ? 'nl' : 'en');
+            },
+            set: function(culture) {
+                localStorage.setItem('blazorCulture', culture);
+            }
+        };
+    </script>
+    
     <script src="js/crypto.js?v=@CacheBuster" async></script>
     <script src="js/utilities.js?v=@CacheBuster" async></script>
     <script src="_framework/blazor.webassembly.js?v=@CacheBuster" async></script>

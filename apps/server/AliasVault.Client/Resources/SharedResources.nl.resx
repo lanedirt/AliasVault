@@ -253,4 +253,10 @@
     <value>Informatie</value>
     <comment>Information status message</comment>
   </data>
+  
+  <!-- Loading screen messages -->
+  <data name="RefreshPageText" xml:space="preserve">
+    <value>Als het laden vastloopt, kunt u op de onderstaande knop klikken om de pagina te vernieuwen.</value>
+    <comment>Text shown above refresh button on loading screen</comment>
+  </data>
 </root>

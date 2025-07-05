@@ -27,7 +27,7 @@
 
     <div class="mb-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            @foreach (var extension in Shared.Core.BrowserExtensions.Constants.Extensions
+            @foreach (var extension in AliasVault.Shared.Core.BrowserExtensions.Constants.Extensions
                 .Where(x => x.Key != BrowserType.Unknown)
                 .Select(x => x.Value))
             {
@@ -63,7 +63,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        @foreach (var app in Shared.Core.MobileApps.Constants.MobileApps)
+        @foreach (var app in AliasVault.Shared.Core.MobileApps.Constants.MobileApps)
         {
             <div class="p-4 border rounded-lg dark:border-gray-700 flex justify-between items-center">
                 <div class="flex items-center">
@@ -92,49 +92,10 @@
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Settings.Apps", "AliasVault.Client");
 
-    private BrowserType CurrentBrowser { get; set; }
-    private BrowserExtensionInfo? CurrentBrowserExtension { get; set; } = null;
-
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbTitle"] });
-
-        try
-        {
-            CurrentBrowser = await DetermineBrowser();
-            CurrentBrowserExtension = Shared.Core.BrowserExtensions.Constants.Extensions[CurrentBrowser];
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error determining browser type");
-        }
-    }
-
-    private async Task<BrowserType> DetermineBrowser()
-    {
-        try
-        {
-            var isBrave = await JsRuntime.InvokeAsync<bool>("eval", "navigator.brave?.isBrave() || false");
-            if (isBrave)
-            {
-                return BrowserType.Brave;
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error checking for Brave browser");
-        }
-
-        var userAgent = await JsRuntime.InvokeAsync<string>("eval", "navigator.userAgent");
-        return userAgent.ToLower() switch
-        {
-            var x when x.Contains("firefox") => BrowserType.Firefox,
-            var x when x.Contains("chrome") && !x.Contains("edg") => BrowserType.Chrome,
-            var x when x.Contains("safari") && !x.Contains("chrome") => BrowserType.Safari,
-            var x when x.Contains("edg") => BrowserType.Edge,
-            _ => BrowserType.Unknown
-        };
     }
 }
