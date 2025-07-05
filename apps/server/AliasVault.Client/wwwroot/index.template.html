@@ -48,8 +48,8 @@
                                     <div class="index-dot-inline index-delay-4"></div>
                                 </div>
                             </div>
-                            <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">AliasVault is loading</h2>
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            <h2 id="loading-title" class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">AliasVault is loading</h2>
+                            <p id="loading-message" class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 Initializing secure environment. AliasVault prioritizes your privacy by running entirely in your browser. The first load might take a short while.
                             </p>
                             <div class="loading-progress-text text-sm font-medium text-gray-700 dark:text-gray-300 mt-4"></div>
@@ -101,9 +101,9 @@
                 </div>
 
                 <div id="refresh-button" class="text-center w-full mt-4 p-6 sm:p-8 bg-white rounded-lg shadow dark:bg-gray-800 hidden">
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">If loading seems stuck, you can click the button below to refresh the page.</p>
+                    <p id="refresh-text" class="text-sm text-gray-600 dark:text-gray-400 mb-2">If loading seems stuck, you can click the button below to refresh the page.</p>
                     <a href="javascript:window.location.reload(true)" class="inline-block px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                        Refresh Page
+                        <span id="refresh-button-text">Refresh Page</span>
                     </a>
                 </div>
             </div>
@@ -120,14 +120,14 @@
                     <svg class="w-8 h-8 text-white mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
-                    <span>An unhandled error has occurred. Please try reloading the page. If the issue persists, please contact support.</span>
+                    <span id="unhandled-error-text">An unhandled error has occurred. Please try reloading the page. If the issue persists, please contact support.</span>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="" class="reload flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md transition-colors duration-150">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Reload Page
+                        <span id="reload-page-text">Reload Page</span>
                     </a>
                     <a class="dismiss hover:text-red-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,20 +140,117 @@
     </div>
 
     <script>
-        const securityQuotes = [
-            "Your identity is your most valuable asset. Protect it like one.",
-            "In the digital world, a strong password is your first line of defense.",
-            "Security is not a product, but a process.",
-            "The weakest link in the security chain is the human element.",
-            "Security is always excessive until it's not enough.",
-            "Trust, but verify - especially online.",
-            "Your data is only as secure as your weakest password.",
-            "The most secure password is the one you can't remember.",
-        ];
+        // Pre-loading localization system with JSON loading
+        let translations = {};
 
-        const quoteElement = document.getElementById('security-quote');
-        const randomIndex = Math.floor(Math.random() * securityQuotes.length);
-        quoteElement.textContent = `"${securityQuotes[randomIndex]}"`;
+        function getCurrentLanguage() {
+            return localStorage.getItem('blazorCulture') ||
+                   localStorage.getItem('AppLanguage') ||
+                   (navigator.language.split('-')[0] === 'nl' ? 'nl' : 'en');
+        }
+
+        async function loadTranslations() {
+            const lang = getCurrentLanguage();
+            try {
+                const response = await fetch(`/locales/${lang}.json`);
+                if (response.ok) {
+                    translations = await response.json();
+                } else {
+                    // Fallback to English if the language file is not found
+                    const fallbackResponse = await fetch('/locales/en.json');
+                    translations = await fallbackResponse.json();
+                }
+            } catch (error) {
+                console.warn('Failed to load localization files, using fallback strings');
+                // Fallback translations
+                translations = {
+                    loading: {
+                        title: 'AliasVault is loading',
+                        message: 'Initializing secure environment. AliasVault prioritizes your privacy by running entirely in your browser. The first load might take a short while.',
+                        refreshText: 'If loading seems stuck, you can click the button below to refresh the page.',
+                        refreshButtonText: 'Refresh Page'
+                    },
+                    errors: {
+                        unhandledError: 'An unhandled error has occurred. Please try reloading the page. If the issue persists, please contact support.',
+                        webAssemblyError: 'AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.',
+                        reloadPageText: 'Reload Page'
+                    },
+                    quotes: {
+                        security: [
+                            "Your identity is your most valuable asset. Protect it like one.",
+                            "In the digital world, a strong password is your first line of defense.",
+                            "Security is not a product, but a process."
+                        ]
+                    }
+                };
+            }
+        }
+
+        function getTranslation(path) {
+            const keys = path.split('.');
+            let value = translations;
+            for (const key of keys) {
+                value = value?.[key];
+                if (!value) break;
+            }
+            return value || '';
+        }
+
+        function localizeContent() {
+            // Localize main loading screen
+            const loadingTitle = document.getElementById('loading-title');
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingTitle) {
+                loadingTitle.textContent = getTranslation('loading.title');
+            }
+            if (loadingMessage) {
+                loadingMessage.textContent = getTranslation('loading.message');
+            }
+
+            // Localize refresh button section
+            const refreshText = document.getElementById('refresh-text');
+            const refreshButtonText = document.getElementById('refresh-button-text');
+            if (refreshText) {
+                refreshText.textContent = getTranslation('loading.refreshText');
+            }
+            if (refreshButtonText) {
+                refreshButtonText.textContent = getTranslation('loading.refreshButtonText');
+            }
+
+            // Localize error section
+            const unhandledErrorText = document.getElementById('unhandled-error-text');
+            const reloadPageText = document.getElementById('reload-page-text');
+            if (unhandledErrorText) {
+                unhandledErrorText.textContent = getTranslation('errors.unhandledError');
+            }
+            if (reloadPageText) {
+                reloadPageText.textContent = getTranslation('errors.reloadPageText');
+            }
+
+            // Set random security quote
+            const securityQuotes = getTranslation('quotes.security');
+            if (securityQuotes && securityQuotes.length > 0) {
+                const quoteElement = document.getElementById('security-quote');
+                const randomIndex = Math.floor(Math.random() * securityQuotes.length);
+                if (quoteElement) {
+                    quoteElement.textContent = `"${securityQuotes[randomIndex]}"`;
+                }
+            }
+        }
+
+        // Initialize localization
+        async function initializeLocalization() {
+            await loadTranslations();
+            localizeContent();
+        }
+
+        // Apply localization immediately
+        document.addEventListener('DOMContentLoaded', initializeLocalization);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeLocalization);
+        } else {
+            initializeLocalization();
+        }
 
         function manageLoadingScreen() {
             const startTime = new Date().getTime();
@@ -187,7 +284,7 @@
                     clearInterval(intervalId);
                 } else if (elapsedTime % 1000 < checkInterval) {
                     if (!('WebAssembly' in window)) {
-                        showError("AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.");
+                        showError(getTranslation('errors.webAssemblyError'));
                         clearInterval(intervalId);
                     }
                 }
@@ -209,25 +306,25 @@
         // Listen for unhandled errors
         window.addEventListener('error', function(event) {
             if (event.error && event.error.message && event.error.message.includes('WebAssembly')) {
-                showError("AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.");
+                showError(getTranslation('errors.webAssemblyError'));
             }
         });
 
         // Listen for unhandled promise rejections
         window.addEventListener('unhandledrejection', function(event) {
             if (event.reason && event.reason.message && event.reason.message.includes('WebAssembly')) {
-                showError("AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.");
+                showError(getTranslation('errors.webAssemblyError'));
             }
         });
 
         window.addEventListener('load', manageLoadingScreen);
     </script>
-    
+
     <script>
         window.blazorCulture = {
             get: function() {
-                return localStorage.getItem('blazorCulture') || 
-                       localStorage.getItem('AppLanguage') || 
+                return localStorage.getItem('blazorCulture') ||
+                       localStorage.getItem('AppLanguage') ||
                        (navigator.language.split('-')[0] === 'nl' ? 'nl' : 'en');
             },
             set: function(culture) {
@@ -235,7 +332,7 @@
             }
         };
     </script>
-    
+
     <script src="js/crypto.js?v=@CacheBuster" async></script>
     <script src="js/utilities.js?v=@CacheBuster" async></script>
     <script src="_framework/blazor.webassembly.js?v=@CacheBuster" async></script>
