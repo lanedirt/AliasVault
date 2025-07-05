@@ -253,4 +253,10 @@
     <value>Info</value>
     <comment>Information status message</comment>
   </data>
+  
+  <!-- Loading screen messages -->
+  <data name="RefreshPageText" xml:space="preserve">
+    <value>If loading seems stuck, you can click the button below to refresh the page.</value>
+    <comment>Text shown above refresh button on loading screen</comment>
+  </data>
 </root>

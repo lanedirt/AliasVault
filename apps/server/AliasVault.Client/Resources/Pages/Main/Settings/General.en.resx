@@ -107,4 +107,18 @@
     <value>Password Settings</value>
     <comment>Title for password settings section</comment>
   </data>
+
+  <!-- App Language Settings Section -->
+  <data name="AppLanguageTitle">
+    <value>Application Language</value>
+    <comment>Title for app language settings section</comment>
+  </data>
+  <data name="AppLanguageLabel">
+    <value>Language</value>
+    <comment>Label for app language setting</comment>
+  </data>
+  <data name="AppLanguageDescription">
+    <value>Set the language for the application interface.</value>
+    <comment>Description for app language setting</comment>
+  </data>
 </root>

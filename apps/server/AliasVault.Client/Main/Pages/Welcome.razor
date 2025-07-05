@@ -65,7 +65,7 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white">@Localizer["ExtensionsAppsTipTitle"]</h4>
                                     <p class="text-gray-600 dark:text-gray-400 mb-4">@Localizer["ExtensionsAppsTipContent"]</p>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                                        @foreach (var extension in Shared.Core.BrowserExtensions.Constants.Extensions.Where(x => x.Key != BrowserType.Unknown).Select(x => x.Value))
+                                        @foreach (var extension in AliasVault.Shared.Core.BrowserExtensions.Constants.Extensions.Where(x => x.Key != BrowserType.Unknown).Select(x => x.Value))
                                         {
                                             @if (extension.IsAvailable)
                                             {
@@ -88,7 +88,7 @@
                                                 </div>
                                             }
                                         }
-                                        @foreach (var app in Shared.Core.MobileApps.Constants.MobileApps)
+                                        @foreach (var app in AliasVault.Shared.Core.MobileApps.Constants.MobileApps)
                                         {
                                             @if (app.IsAvailable)
                                             {
@@ -156,7 +156,7 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Welcome", "AliasVault.Client");
-    
+
     private TutorialStep _currentStep = TutorialStep.Welcome;
 
     private enum TutorialStep

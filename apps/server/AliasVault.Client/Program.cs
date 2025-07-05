@@ -9,6 +9,7 @@ using System.Globalization;
 using AliasVault.Client;
 using AliasVault.Client.Main.Services;
 using AliasVault.Client.Providers;
+using AliasVault.Client.Services;
 using AliasVault.RazorComponents.Services;
 using AliasVault.Shared.Core;
 using Blazored.LocalStorage;
@@ -33,8 +34,9 @@ builder.Services.AddSingleton(config);
 // Add localization services
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// Configure culture for Blazor WASM - default to Dutch for debugging and testing
-var defaultCulture = new CultureInfo("nl-NL");
+// Configure default culture for Blazor WASM
+// Culture will be properly set by LanguageService after app initialization
+var defaultCulture = new CultureInfo("en");
 CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
@@ -88,7 +90,15 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddSingleton<ClipboardCopyService>();
 builder.Services.AddScoped<ConfirmModalService>();
 builder.Services.AddScoped<QuickCreateStateService>();
+builder.Services.AddScoped<LanguageService>();
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
-await builder.Build().RunAsync();
+
+var app = builder.Build();
+
+// Initialize language service
+var languageService = app.Services.GetRequiredService<LanguageService>();
+await languageService.InitializeAsync();
+
+await app.RunAsync();

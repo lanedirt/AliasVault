@@ -2,8 +2,10 @@
 @inherits MainBase
 @inject IStringLocalizerFactory LocalizerFactory
 @inject IStringLocalizer<SharedResources> SharedLocalizer
+@inject LanguageService LanguageService
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Resources
+@using AliasVault.Client.Services
 
 <LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
@@ -43,6 +45,23 @@
     <div class="flex items-center mb-4">
         <input @bind="AutoEmailRefresh"  @bind:after="UpdateAutoEmailRefresh" id="autoEmailRefresh" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
         <label for="autoEmailRefresh" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">@Localizer["AutoEmailRefreshLabel"]</label>
+    </div>
+</div>
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">@Localizer["AppLanguageTitle"]</h3>
+
+    <div class="mb-4">
+        <label for="appLanguage" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["AppLanguageLabel"]</label>
+        <select @bind="AppLanguage" @bind:after="UpdateAppLanguage" id="appLanguage" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            @foreach (var language in LanguageService.GetSupportedLanguages())
+            {
+                <option value="@language.Key">@language.Value</option>
+            }
+        </select>
+        <span class="block text-sm font-normal text-gray-500 truncate dark:text-gray-400">
+            @Localizer["AppLanguageDescription"]
+        </span>
     </div>
 </div>
 
@@ -90,6 +109,7 @@
     private bool AutoEmailRefresh { get; set; }
     private string DefaultIdentityLanguage { get; set; } = string.Empty;
     private string DefaultIdentityGender { get; set; } = string.Empty;
+    private string AppLanguage { get; set; } = string.Empty;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -112,6 +132,7 @@
         AutoEmailRefresh = DbService.Settings.AutoEmailRefresh;
         DefaultIdentityLanguage = DbService.Settings.DefaultIdentityLanguage;
         DefaultIdentityGender = DbService.Settings.DefaultIdentityGender;
+        AppLanguage = DbService.Settings.AppLanguage;
     }
 
     /// <summary>
@@ -147,6 +168,15 @@
     private async Task UpdateDefaultIdentityGender()
     {
         await DbService.Settings.SetDefaultIdentityGender(DefaultIdentityGender);
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Updates the app language setting.
+    /// </summary>
+    private async Task UpdateAppLanguage()
+    {
+        await LanguageService.SetLanguageAsync(AppLanguage);
         StateHasChanged();
     }
 }

@@ -1,5 +1,6 @@
 ﻿@inject DbService DbService
 @inject GlobalNotificationService GlobalNotificationService
+@inject LanguageService LanguageService
 @inject IStringLocalizerFactory LocalizerFactory
 @inject IStringLocalizer<SharedResources> SharedLocalizer
 @using Microsoft.Extensions.Localization
@@ -57,6 +58,9 @@
         // Migrate (create) the database.
         if (await DbService.CreateNewVaultAsync())
         {
+            // Initialize vault settings with user's browser language preference
+            await InitializeVaultSettings();
+
             // Save the database to the server.
             if (await DbService.SaveDatabaseAsync())
             {
@@ -76,5 +80,26 @@
         }
 
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// Initialize vault settings with user preferences detected from the browser.
+    /// </summary>
+    private async Task InitializeVaultSettings()
+    {
+        try
+        {
+            // Get the current browser language preference
+            var browserLanguage = await LanguageService.GetBrowserLanguageAsync();
+            
+            // Set the AppLanguage setting in the vault to match the browser preference
+            await DbService.Settings.SetAppLanguage(browserLanguage);
+        }
+        catch (Exception ex)
+        {
+            // Log the error but don't fail the vault creation process
+            // The language can be changed later by the user if needed
+            Console.WriteLine($"Warning: Failed to initialize language setting: {ex.Message}");
+        }
     }
 }
