@@ -46,6 +46,34 @@ public class LanguageService(
     }
 
     /// <summary>
+    /// Gets the list of supported languages with flag emojis.
+    /// </summary>
+    /// <returns>Dictionary of language codes and display names with flag emojis.</returns>
+    public static Dictionary<string, string> GetSupportedLanguagesWithFlags()
+    {
+        return new Dictionary<string, string>
+        {
+            ["en"] = "🇺🇸 English",
+            ["nl"] = "🇳🇱 Nederlands",
+        };
+    }
+
+    /// <summary>
+    /// Gets the flag emoji for a specific language code.
+    /// </summary>
+    /// <param name="languageCode">The language code.</param>
+    /// <returns>Flag emoji string.</returns>
+    public static string GetLanguageFlag(string languageCode)
+    {
+        return languageCode switch
+        {
+            "en" => "🇺🇸",
+            "nl" => "🇳🇱",
+            _ => "🌐",
+        };
+    }
+
+    /// <summary>
     /// Gets the current language from the browser.
     /// </summary>
     /// <returns>Browser language code.</returns>

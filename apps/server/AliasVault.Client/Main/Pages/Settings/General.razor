@@ -54,7 +54,7 @@
         <select @bind="AppLanguage" @bind:after="UpdateAppLanguage" id="appLanguage" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             @foreach (var language in LanguageService.GetSupportedLanguages())
             {
-                <option value="@language.Key">@language.Value</option>
+                <option value="@language.Key">@LanguageService.GetLanguageFlag(language.Key) @language.Value</option>
             }
         </select>
         <span class="block text-sm font-normal text-gray-500 truncate dark:text-gray-400">
@@ -69,8 +69,8 @@
     <div class="mb-4">
         <label for="defaultIdentityLanguage" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["AliasGenerationLanguageLabel"]</label>
         <select @bind="DefaultIdentityLanguage" @bind:after="UpdateDefaultIdentityLanguage" id="defaultIdentityLanguage" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option value="en">@Localizer["EnglishOption"]</option>
-            <option value="nl">@Localizer["DutchOption"]</option>
+            <option value="en">@LanguageService.GetLanguageFlag("en") @Localizer["EnglishOption"]</option>
+            <option value="nl">@LanguageService.GetLanguageFlag("nl") @Localizer["DutchOption"]</option>
         </select>
         <span class="block text-sm font-normal text-gray-500 truncate dark:text-gray-400">
             @Localizer["AliasGenerationLanguageDescription"]

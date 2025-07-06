@@ -127,6 +127,7 @@ public class LoginBase : OwningComponentBase, IDisposable
     {
         LanguageService.LanguageChanged -= OnLanguageChanged;
         Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     /// <inheritdoc />
