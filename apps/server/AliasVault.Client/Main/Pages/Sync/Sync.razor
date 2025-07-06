@@ -9,7 +9,7 @@
 @inject NavigationManager NavigationManager
 @inject ILogger<Sync> Logger
 @inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
+@inject LanguageService LanguageService
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Resources
 
@@ -126,6 +126,18 @@
 
     private async Task NavigateToHome()
     {
+        // Apply vault language settings after database is ready
+        try
+        {
+            var currentLanguage = await LanguageService.GetCurrentLanguageAsync();
+            await LanguageService.SetLanguageAsync(currentLanguage);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to apply vault language settings");
+            // Continue with navigation even if language setting fails
+        }
+
         var disallowedUrls = new[] { "/sync", "/unlock", "/user/logout" };
         var localStorageReturnUrl = await LocalStorage.GetItemAsync<string>(LoginBase.ReturnUrlKey);
 

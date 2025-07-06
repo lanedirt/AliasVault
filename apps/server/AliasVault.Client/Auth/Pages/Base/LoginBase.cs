@@ -7,11 +7,13 @@
 
 namespace AliasVault.Client.Auth.Pages.Base;
 
+using AliasVault.Client.Services;
 using AliasVault.Client.Services.Auth;
 using AliasVault.Shared.Models.WebApi;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Localization;
 using Microsoft.JSInterop;
 
 /// <summary>
@@ -19,7 +21,7 @@ using Microsoft.JSInterop;
 /// All pages that inherit from this class will require the user to be logged in and have a confirmed email.
 /// Also, a default set of breadcrumbs is added in the parent OnInitialized method.
 /// </summary>
-public class LoginBase : OwningComponentBase
+public class LoginBase : OwningComponentBase, IDisposable
 {
     /// <summary>
     /// LocalStorage key for storing the return url that should be redirected to after a succesful
@@ -58,6 +60,12 @@ public class LoginBase : OwningComponentBase
     public required GlobalNotificationService GlobalNotificationService { get; set; }
 
     /// <summary>
+    /// Gets or sets the LocalizerFactory.
+    /// </summary>
+    [Inject]
+    public required IStringLocalizerFactory LocalizerFactory { get; set; }
+
+    /// <summary>
     /// Gets or sets the IJSRuntime.
     /// </summary>
     [Inject]
@@ -88,6 +96,12 @@ public class LoginBase : OwningComponentBase
     public required ILocalStorageService LocalStorage { get; set; }
 
     /// <summary>
+    /// Gets or sets the LanguageService.
+    /// </summary>
+    [Inject]
+    public required LanguageService LanguageService { get; set; }
+
+    /// <summary>
     /// Parses the response content and displays the server validation errors.
     /// </summary>
     /// <param name="responseContent">Response content.</param>
@@ -106,5 +120,30 @@ public class LoginBase : OwningComponentBase
         }
 
         return returnErrors;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        LanguageService.LanguageChanged -= OnLanguageChanged;
+        Dispose(true);
+    }
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Subscribe to language changes to refresh the component when language switches
+        LanguageService.LanguageChanged += OnLanguageChanged;
+    }
+
+    /// <summary>
+    /// Handles language change events and triggers component refresh.
+    /// </summary>
+    /// <param name="languageCode">The new language code.</param>
+    private void OnLanguageChanged(string languageCode)
+    {
+        InvokeAsync(StateHasChanged);
     }
 }

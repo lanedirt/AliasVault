@@ -1,6 +1,4 @@
 ﻿@inherits AliasVault.Client.Main.Pages.MainBase
-@inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Client.Resources
 @using Microsoft.Extensions.Localization
 @implements IDisposable
@@ -149,6 +147,7 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             await JsInteropService.InitTopMenu();

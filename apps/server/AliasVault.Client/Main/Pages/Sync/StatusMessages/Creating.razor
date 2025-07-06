@@ -2,7 +2,6 @@
 @inject GlobalNotificationService GlobalNotificationService
 @inject LanguageService LanguageService
 @inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Resources
 
@@ -91,7 +90,7 @@
         {
             // Get the current browser language preference
             var browserLanguage = await LanguageService.GetBrowserLanguageAsync();
-            
+
             // Set the AppLanguage setting in the vault to match the browser preference
             await DbService.Settings.SetAppLanguage(browserLanguage);
         }

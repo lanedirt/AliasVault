@@ -3,7 +3,6 @@
 @inject KeyboardShortcutService KeyboardShortcutService
 @inject JsInteropService JsInteropService
 @inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @implements IAsyncDisposable
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Resources
@@ -80,7 +79,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Widgets.SearchWidget", "AliasVault.Client");
-
     private string SearchTerm { get; set; } = string.Empty;
     private List<Credential> SearchResults { get; set; } = new();
     private bool ShowResults { get; set; }
@@ -98,6 +96,8 @@
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             await KeyboardShortcutService.RegisterShortcutAsync("gs", FocusSearchField);

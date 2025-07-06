@@ -12,6 +12,7 @@ using AliasVault.Client.Providers;
 using AliasVault.Client.Services;
 using AliasVault.RazorComponents.Services;
 using AliasVault.Shared.Core;
+using Blazor.WebAssembly.DynamicCulture.Loader;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -96,6 +97,12 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
+
+// Load all supported cultures for dynamic switching
+await app.LoadSatelliteCultureAssembliesCultureAsync([
+    new CultureInfo("en"),
+    new CultureInfo("nl"),
+]);
 
 // Initialize language service
 var languageService = app.Services.GetRequiredService<LanguageService>();

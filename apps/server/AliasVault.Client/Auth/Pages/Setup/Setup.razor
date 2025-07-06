@@ -1,7 +1,5 @@
 @page "/user/setup"
 @using AliasVault.Client.Auth.Pages.Setup.Components
-@inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Client.Resources
 @using Microsoft.Extensions.Localization
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
@@ -82,7 +80,7 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Auth.Setup.Setup", "AliasVault.Client");
-    
+
     private SetupStep _currentStep = SetupStep.TermsAndConditions;
     private readonly SetupData _setupData = new();
 
