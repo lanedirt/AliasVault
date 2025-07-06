@@ -1,7 +1,5 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @implements IDisposable
-@inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Client.Resources
 @using Microsoft.Extensions.Localization
 @using System.Timers
@@ -94,10 +92,11 @@
     private Timer? _loadingTimer;
 
     /// <inheritdoc />
-    public void Dispose()
+    public new void Dispose()
     {
         _loadingTimer?.Dispose();
         _debounceTimer?.Dispose();
+        base.Dispose();
     }
 
     /// <inheritdoc />

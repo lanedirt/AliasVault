@@ -153,16 +153,18 @@ public class LanguageService(
             }
         }
 
-        // For Blazor WASM, we need to store the culture preference and reload
-        // Store in blazorCulture for Program.cs to pick up on next load
+        // Set the culture dynamically without page reload
+        var culture = new CultureInfo(languageCode);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+        // Store in blazorCulture for consistency
         await _jsRuntime.InvokeVoidAsync("blazorCulture.set", languageCode);
 
-        // Notify listeners
+        // Notify listeners that language has changed
         LanguageChanged?.Invoke(languageCode);
-
-        // Navigate to current page with force reload to apply new culture
-        var currentUri = await _jsRuntime.InvokeAsync<string>("eval", "window.location.href");
-        await _jsRuntime.InvokeVoidAsync("eval", $"window.location.href = '{currentUri}'");
     }
 
     /// <summary>

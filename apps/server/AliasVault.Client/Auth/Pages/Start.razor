@@ -4,8 +4,6 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @layout Auth.Layout.EmptyLayout
 @inject Config Config
-@inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @attribute [AllowAnonymous]
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Resources
@@ -57,6 +55,8 @@
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         await AuthStateProvider.GetAuthenticationStateAsync();
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == true) {

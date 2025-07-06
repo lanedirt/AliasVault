@@ -14,6 +14,7 @@ using AliasVault.RazorComponents.Models;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Localization;
 
 /// <summary>
 /// Base authorized page that all pages that are part of the logged in website should inherit from.
@@ -47,6 +48,12 @@ public abstract class MainBase : OwningComponentBase
     /// </summary>
     [Inject]
     public GlobalLoadingService GlobalLoadingSpinner { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the LocalizerFactory.
+    /// </summary>
+    [Inject]
+    public IStringLocalizerFactory LocalizerFactory { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the JsInteropService.

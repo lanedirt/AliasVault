@@ -1,6 +1,5 @@
 ﻿@inject NavigationManager NavigationManager
 @inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Shared.Core
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Resources
@@ -31,7 +30,7 @@
 
     private IStringLocalizer Localizer => LocalizerFactory.Create("Layout.Footer", "AliasVault.Client");
 
-    private string[] Quotes => 
+    private string[] Quotes =>
     [
         Localizer["TipCreateShortcut"],
         Localizer["TipFindShortcut"],

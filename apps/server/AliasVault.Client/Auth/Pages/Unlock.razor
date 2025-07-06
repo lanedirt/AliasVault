@@ -2,8 +2,6 @@
 @page "/unlock/{SkipWebAuthn:bool}"
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @inject ILogger<Unlock> Logger
-@inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @layout Auth.Layout.MainLayout
 @using System.Text.Json
 @using AliasVault.Client.Auth.Components

@@ -1,9 +1,8 @@
 @implements IDisposable
-@inject IStringLocalizerFactory LocalizerFactory
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using AliasVault.Client.Resources
 @using Microsoft.Extensions.Localization
 @using System.Timers
+@inject IStringLocalizerFactory LocalizerFactory
 
 <div class="w-full mx-auto">
     @if (_isLoading)
