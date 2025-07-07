@@ -1,9 +1,7 @@
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Services
-@using AliasVault.Client.Resources
 @implements IDisposable
 @inject LanguageService LanguageService
-@inject IStringLocalizerFactory LocalizerFactory
 
 <div class="relative">
     <button type="button" @onclick="ToggleDropdown" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
@@ -33,14 +31,24 @@
 </div>
 
 @code {
-    private IStringLocalizer Localizer => LocalizerFactory.Create(typeof(SharedResources));
     private bool _isDropdownOpen = false;
     private string _currentLanguage = "en";
+
+    public void Dispose()
+    {
+        LanguageService.LanguageChanged -= OnLanguageChanged;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         _currentLanguage = await LanguageService.GetCurrentLanguageAsync();
         LanguageService.LanguageChanged += OnLanguageChanged;
+    }
+
+    private static string GetLanguageDisplayName(string languageCode)
+    {
+        var supportedLanguages = LanguageService.GetSupportedLanguages();
+        return supportedLanguages.GetValueOrDefault(languageCode, "English");
     }
 
     private void OnLanguageChanged(string languageCode)
@@ -58,16 +66,5 @@
     {
         _isDropdownOpen = false;
         await LanguageService.SetLanguageAsync(languageCode);
-    }
-
-    private string GetLanguageDisplayName(string languageCode)
-    {
-        var supportedLanguages = LanguageService.GetSupportedLanguages();
-        return supportedLanguages.GetValueOrDefault(languageCode, "English");
-    }
-
-    public void Dispose()
-    {
-        LanguageService.LanguageChanged -= OnLanguageChanged;
     }
 }

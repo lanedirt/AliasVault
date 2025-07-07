@@ -21,7 +21,7 @@ using Microsoft.JSInterop;
 /// All pages that inherit from this class will require the user to be logged in and have a confirmed email.
 /// Also, a default set of breadcrumbs is added in the parent OnInitialized method.
 /// </summary>
-public class LoginBase : OwningComponentBase, IDisposable
+public class LoginBase : OwningComponentBase
 {
     /// <summary>
     /// LocalStorage key for storing the return url that should be redirected to after a succesful
@@ -123,11 +123,10 @@ public class LoginBase : OwningComponentBase, IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
         LanguageService.LanguageChanged -= OnLanguageChanged;
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        base.Dispose(disposing);
     }
 
     /// <inheritdoc />

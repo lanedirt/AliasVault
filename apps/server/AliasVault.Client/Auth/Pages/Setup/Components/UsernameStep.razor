@@ -1,6 +1,4 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
-@implements IDisposable
-@using AliasVault.Client.Resources
 @using Microsoft.Extensions.Localization
 @using System.Timers
 
@@ -92,11 +90,11 @@
     private Timer? _loadingTimer;
 
     /// <inheritdoc />
-    public new void Dispose()
+    protected override void Dispose(bool disposing)
     {
         _loadingTimer?.Dispose();
         _debounceTimer?.Dispose();
-        base.Dispose();
+        base.Dispose(disposing);
     }
 
     /// <inheritdoc />

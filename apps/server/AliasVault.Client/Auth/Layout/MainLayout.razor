@@ -25,9 +25,9 @@
         var currentPath = NavigationManager.Uri;
 
         // Show on login, forgot password, and register pages, not during setup or unlock
-        return currentPath.Contains("/user/login") ||
-               currentPath.Contains("/user/forgot-password") ||
-               currentPath.Contains("/user/register") ||
-               currentPath.EndsWith("/");
+        return currentPath.Contains("/user/login", StringComparison.OrdinalIgnoreCase) ||
+               currentPath.Contains("/user/forgot-password", StringComparison.OrdinalIgnoreCase) ||
+               currentPath.Contains("/user/register", StringComparison.OrdinalIgnoreCase) ||
+               currentPath.EndsWith('/');
     }
 }
