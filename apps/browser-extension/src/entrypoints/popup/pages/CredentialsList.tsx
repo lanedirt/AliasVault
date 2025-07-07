@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import CredentialCard from '@/entrypoints/popup/components/CredentialCard';
@@ -21,6 +22,7 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
  * Credentials list page.
  */
 const CredentialsList: React.FC = () => {
+  const { t } = useTranslation('credentials');
   const dbContext = useDb();
   const webApi = useWebApi();
   const navigate = useNavigate();

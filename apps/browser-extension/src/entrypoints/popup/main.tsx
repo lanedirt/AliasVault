@@ -1,5 +1,7 @@
 import ReactDOM from 'react-dom/client';
 
+import '@/utils/i18n';
+
 import App from '@/entrypoints/popup/App';
 import { AuthProvider } from '@/entrypoints/popup/context/AuthContext';
 import { DbProvider } from '@/entrypoints/popup/context/DbContext';
