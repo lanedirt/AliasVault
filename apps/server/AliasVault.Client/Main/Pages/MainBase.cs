@@ -98,6 +98,11 @@ public abstract class MainBase : OwningComponentBase
     public ILocalStorageService LocalStorage { get; set; } = null!;
 
     /// <summary>
+    /// Gets the SharedLocalizer. This is used to access shared resource translations like buttons, etc.
+    /// </summary>
+    protected IStringLocalizer SharedLocalizer => LocalizerFactory.Create("SharedResources", "AliasVault.Client");
+
+    /// <summary>
     /// Gets or sets the breadcrumb items for the page. A default set of breadcrumbs is added in the parent OnInitialized method.
     /// </summary>
     protected List<BreadcrumbItem> BreadcrumbItems { get; set; } = [];
