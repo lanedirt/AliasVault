@@ -329,6 +329,10 @@ public sealed class DbService : IDisposable
             {
                 await _dbContext.Database.ExecuteSqlRawAsync(sqlCommand);
             }
+
+            // Init settings service.
+            _isSuccessfullyInitialized = true;
+            await _settingsService.InitializeAsync(this);
         }
         catch (Exception ex)
         {

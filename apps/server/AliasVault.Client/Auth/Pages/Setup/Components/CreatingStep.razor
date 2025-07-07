@@ -52,18 +52,8 @@
 
         if (success)
         {
-            // After successful registration, persist the current language to vault settings
-            try
-            {
-                var currentLanguage = await LanguageService.GetCurrentLanguageAsync();
-                await DbService.Settings.SetSettingAsync("AppLanguage", currentLanguage);
-            }
-            catch
-            {
-                // Ignore errors in language setting, don't fail the registration process
-            }
-
             NavigationManager.NavigateTo("/");
+            return;
         }
         else
         {

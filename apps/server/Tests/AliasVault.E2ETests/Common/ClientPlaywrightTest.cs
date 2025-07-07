@@ -403,9 +403,6 @@ public class ClientPlaywrightTest : PlaywrightTest
         if (checkForSuccess)
         {
             await WaitForUrlAsync("welcome**", WelcomeMessage);
-
-            // Wait for 100ms as without this the welcome redirect sometimes is not fully awaited and is triggered again.
-            await Task.Delay(100);
         }
     }
 }
