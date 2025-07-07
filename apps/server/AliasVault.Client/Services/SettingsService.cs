@@ -9,6 +9,7 @@ namespace AliasVault.Client.Services;
 
 using System;
 using System.Data;
+using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AliasClientDb;
@@ -230,12 +231,12 @@ public sealed class SettingsService
 
         if (typeof(T) == typeof(int))
         {
-            return (T)(object)int.Parse(value);
+            return (T)(object)int.Parse(value, CultureInfo.InvariantCulture);
         }
 
         if (typeof(T) == typeof(double))
         {
-            return (T)(object)double.Parse(value);
+            return (T)(object)double.Parse(value, CultureInfo.InvariantCulture);
         }
 
         if (typeof(T) == typeof(string))

@@ -22,6 +22,7 @@ public class LanguageService(
     AuthenticationStateProvider authenticationStateProvider,
     DbService dbService)
 {
+    private const string AppLanguageKey = "AppLanguage";
     private readonly ILocalStorageService _localStorage = localStorage;
     private readonly IJSRuntime _jsRuntime = jsRuntime;
     private readonly AuthenticationStateProvider _authenticationStateProvider = authenticationStateProvider;
@@ -106,7 +107,7 @@ public class LanguageService(
             // User is authenticated, get language from vault settings
             try
             {
-                var language = await _dbService.Settings.GetSettingAsync<string>("AppLanguage");
+                var language = await _dbService.Settings.GetSettingAsync<string>(AppLanguageKey);
                 if (!string.IsNullOrEmpty(language))
                 {
                     return language;
@@ -121,7 +122,7 @@ public class LanguageService(
         // User is not authenticated or no language preference set, check local storage
         try
         {
-            var storedLanguage = await _localStorage.GetItemAsync<string>("AppLanguage");
+            var storedLanguage = await _localStorage.GetItemAsync<string>(AppLanguageKey);
             if (!string.IsNullOrEmpty(storedLanguage))
             {
                 return storedLanguage;
@@ -161,7 +162,7 @@ public class LanguageService(
             // User is authenticated, save to vault settings
             try
             {
-                await _dbService.Settings.SetSettingAsync("AppLanguage", languageCode);
+                await _dbService.Settings.SetSettingAsync(AppLanguageKey, languageCode);
             }
             catch
             {
@@ -173,7 +174,7 @@ public class LanguageService(
             // User is not authenticated, save to local storage
             try
             {
-                await _localStorage.SetItemAsync("AppLanguage", languageCode);
+                await _localStorage.SetItemAsync(AppLanguageKey, languageCode);
             }
             catch
             {

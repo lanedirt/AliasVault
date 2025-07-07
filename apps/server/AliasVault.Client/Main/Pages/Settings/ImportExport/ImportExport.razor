@@ -3,9 +3,7 @@
 @inject CredentialService CredentialService
 @inject ILogger<ImportExport> Logger
 @inject ConfirmModalService ConfirmModalService
-@inject IStringLocalizer<SharedResources> SharedLocalizer
 @using Microsoft.Extensions.Localization
-@using AliasVault.Client.Resources
 @using AliasVault.RazorComponents.Services
 @using AliasVault.Client.Main.Pages.Settings.ImportExport.Components
 @using AliasVault.ImportExport
@@ -56,7 +54,7 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Settings.ImportExport.ImportExport", "AliasVault.Client");
-
+    private IStringLocalizer SharedLocalizer => LocalizerFactory.Create("SharedResources", "AliasVault.Client");
     private ExportType _currentExportType;
 
     private enum ExportType

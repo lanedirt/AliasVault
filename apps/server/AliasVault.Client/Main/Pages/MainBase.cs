@@ -214,7 +214,7 @@ public abstract class MainBase : OwningComponentBase
             if (string.IsNullOrEmpty(localStorageReturnUrl))
             {
                 var currentUrl = NavigationManager.Uri;
-                if (!currentUrl.Contains("unlock"))
+                if (!currentUrl.Contains("unlock", StringComparison.OrdinalIgnoreCase))
                 {
                     var currentRelativeUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
                     await LocalStorage.SetItemAsync(LoginBase.ReturnUrlKey, currentRelativeUrl);

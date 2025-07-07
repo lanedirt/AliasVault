@@ -161,7 +161,7 @@
                     translations = await fallbackResponse.json();
                 }
             } catch (error) {
-                console.warn('Failed to load localization files, using fallback strings');
+                console.warn('Failed to load localization files, using fallback strings:', error);
                 // Fallback translations
                 translations = {
                     loading: {
