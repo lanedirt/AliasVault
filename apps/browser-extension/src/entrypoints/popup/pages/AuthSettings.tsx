@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
+import LanguageSwitcher from '@/entrypoints/popup/components/LanguageSwitcher';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 import { AppInfo } from '@/utils/AppInfo';
@@ -52,6 +54,7 @@ const urlSchema = Yup.object().shape({
  * Auth settings page only shown when user is not logged in.
  */
 const AuthSettings: React.FC = () => {
+  const { t } = useTranslation('settings');
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [customUrl, setCustomUrl] = useState<string>('');
   const [customClientUrl, setCustomClientUrl] = useState<string>('');
@@ -167,7 +170,7 @@ const AuthSettings: React.FC = () => {
     <div className="p-4">
       <div className="mb-6">
         <label htmlFor="api-connection" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          API Connection
+          {t('serverUrl')}
         </label>
         <select
           value={selectedOption}
@@ -222,7 +225,7 @@ const AuthSettings: React.FC = () => {
       {/* Autofill Popup Settings Section */}
       <div className="mb-6">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">Autofill popup</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('autofillEnabled')}</p>
           <button
             onClick={toggleGlobalPopup}
             className={`px-4 py-2 rounded-md transition-colors ${
@@ -231,13 +234,21 @@ const AuthSettings: React.FC = () => {
                 : 'bg-red-200 text-red-800 hover:bg-red-300 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
             }`}
           >
-            {isGloballyEnabled ? 'Enabled' : 'Disabled'}
+            {isGloballyEnabled ? t('common:enabled', 'Enabled') : t('common:disabled', 'Disabled')}
           </button>
         </div>
       </div>
 
+      {/* Language Settings Section */}
+      <div className="mb-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('language')}</p>
+          <LanguageSwitcher variant="dropdown" size="sm" />
+        </div>
+      </div>
+
       <div className="text-center text-gray-400 dark:text-gray-600">
-        Version: {AppInfo.VERSION}
+        {t('version')}: {AppInfo.VERSION}
       </div>
     </div>
   );

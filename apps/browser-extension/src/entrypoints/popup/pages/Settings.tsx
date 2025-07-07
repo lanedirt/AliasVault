@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { sendMessage } from 'webext-bridge/popup';
 
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
+import LanguageSwitcher from '@/entrypoints/popup/components/LanguageSwitcher';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
@@ -32,6 +34,7 @@ type PopupSettings = {
  * Settings page component.
  */
 const Settings: React.FC = () => {
+  const { t } = useTranslation('settings');
   const { theme, setTheme } = useTheme();
   const authContext = useAuth();
   const { setHeaderButtons } = useHeaderButtons();
@@ -423,6 +426,13 @@ const Settings: React.FC = () => {
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Dark</span>
                 </label>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('language')}</p>
+                <LanguageSwitcher variant="dropdown" size="sm" />
               </div>
             </div>
           </div>
