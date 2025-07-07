@@ -1,7 +1,10 @@
 @using Microsoft.Extensions.Localization
 @using AliasVault.Client.Services
+@using Microsoft.JSInterop
+@using System.Globalization
 @implements IDisposable
 @inject LanguageService LanguageService
+@inject IJSRuntime JSRuntime
 
 <div class="relative">
     <button type="button" @onclick="ToggleDropdown" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
@@ -41,8 +44,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _currentLanguage = await LanguageService.GetCurrentLanguageAsync();
+        // Get the current culture that Blazor is actually using
+        var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        var supportedLanguages = LanguageService.GetSupportedLanguages();
+        
+        if (supportedLanguages.ContainsKey(currentCulture))
+        {
+            _currentLanguage = currentCulture;
+        }
+        else
+        {
+            // Fallback to getting language from service
+            _currentLanguage = await LanguageService.GetCurrentLanguageAsync();
+        }
+        
         LanguageService.LanguageChanged += OnLanguageChanged;
+        StateHasChanged();
     }
 
     private static string GetLanguageDisplayName(string languageCode)
