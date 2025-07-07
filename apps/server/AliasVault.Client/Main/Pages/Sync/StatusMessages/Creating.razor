@@ -26,6 +26,7 @@
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Sync.StatusMessages.Creating", "AliasVault.Client");
     private string ErrorMessage { get; set; } = string.Empty;
+    private bool IsMigrating { get; set; } = false;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -56,16 +57,17 @@
         // Migrate (create) the database.
         if (await DbService.CreateNewVaultAsync())
         {
-            // Initialize vault settings with user's browser language preference
-            await InitializeVaultSettings();
-
-            // Save the database to the server.
-            if (await DbService.SaveDatabaseAsync())
+            try
             {
+                // Initialize vault settings with user's browser language preference. This also automatically
+                // saves the new empty database to the server.
+                await InitializeVaultSettings();
+
                 // Migration successful, update state which will trigger the status message UI to refresh and redirect user.
                 DbService.GetState().UpdateState(DbServiceState.DatabaseStatus.Ready);
+                return;
             }
-            else
+            catch
             {
                 // Migration failed
                 ErrorMessage = Localizer["SaveFailedError"];
@@ -87,6 +89,7 @@
     {
         try
         {
+            Console.WriteLine("Initializing vault settings with user preferences detected from the browser.");
             // Get the current browser language preference
             var browserLanguage = await LanguageService.GetBrowserLanguageAsync();
 

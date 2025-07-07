@@ -330,6 +330,12 @@ public sealed class SettingsService
     /// <returns>Task.</returns>
     private async Task SetSettingAsync(string key, string value)
     {
+        // Only update if the value has changed.
+        if (_settings.GetValueOrDefault(key) == value)
+        {
+            return;
+        }
+
         var db = await _dbService!.GetDbContextAsync();
         var setting = await db.Settings.FindAsync(key);
         if (setting == null)
