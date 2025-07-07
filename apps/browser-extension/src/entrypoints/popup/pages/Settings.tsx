@@ -390,6 +390,12 @@ const Settings: React.FC = () => {
         <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Appearance</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4">
+            <div className="mb-4">
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('language')}</p>
+                <LanguageSwitcher variant="dropdown" size="sm" />
+              </div>
+            </div>
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Theme</p>
               <div className="flex flex-col space-y-2">
@@ -426,13 +432,6 @@ const Settings: React.FC = () => {
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Dark</span>
                 </label>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('language')}</p>
-                <LanguageSwitcher variant="dropdown" size="sm" />
               </div>
             </div>
           </div>
