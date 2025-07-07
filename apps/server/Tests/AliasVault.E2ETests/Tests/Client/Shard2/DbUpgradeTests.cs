@@ -73,6 +73,9 @@ public class DbUpgradeTests : ClientPlaywrightTest
         await NavigateUsingBlazorRouter("credentials");
         await WaitForUrlAsync(string.Empty, "Test credential 1");
 
+        // Wait for page to have fully loaded
+        await Task.Delay(100);
+
         // Check if the expected service names still appear on the index page and are still accessible.
         var pageContent = await Page.TextContentAsync("body");
         foreach (var serviceName in expectedServiceNamesInVault)
