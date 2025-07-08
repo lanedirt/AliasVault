@@ -1,5 +1,5 @@
 {
-  "title": "Email Aliases",
+  "title": "Email Details",
   "addAlias": "Add Email Alias",
   "editAlias": "Edit Email Alias",
   "deleteAlias": "Delete Email Alias",
@@ -63,6 +63,9 @@
   "custom": "Custom",
   "deleteConfirm": "Are you sure you want to delete this alias?",
   "deleteEmailConfirm": "Are you sure you want to permanently delete this email?",
+  "deleteEmailTitle": "Delete Email",
+  "emailNotFound": "Email not found",
+  "emailContent": "Email content",
   "deleteSuccess": "Alias deleted successfully",
   "saveSuccess": "Alias saved successfully",
   "enableSuccess": "Alias enabled successfully",
@@ -80,7 +83,10 @@
     "copyError": "Failed to copy to clipboard",
     "enableError": "Failed to enable alias",
     "disableError": "Failed to disable alias",
-    "emailLoadError": "Failed to load emails",
-    "emailDeleteError": "Failed to delete email"
+    "emailLoadError": "An error occurred while loading emails. Please try again later.",
+    "emailDeleteError": "Failed to delete email",
+    "emailInUse": "The current chosen email address is already in use. Please change the email address by editing this credential.",
+    "emailSyncError": "An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.",
+    "emailUnexpectedError": "An unexpected error occurred while loading emails. Please try again later."
   }
 }

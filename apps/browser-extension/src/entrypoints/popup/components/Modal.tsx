@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface IModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const Modal: React.FC<IModalProps> = ({
   cancelText = '',
   variant = 'default'
 }) => {
+  const { t } = useTranslation('common');
   if (!isOpen) {
     return null;
   }
@@ -46,7 +48,7 @@ const Modal: React.FC<IModalProps> = ({
             className="absolute right-4 top-4 text-gray-400 hover:text-gray-500 focus:outline-none"
             onClick={onClose}
           >
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t('close')}</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>

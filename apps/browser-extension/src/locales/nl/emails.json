@@ -1,5 +1,5 @@
 {
-  "title": "E-mail Aliassen",
+  "title": "E-mail Details",
   "addAlias": "E-mail Alias Toevoegen",
   "editAlias": "E-mail Alias Bewerken",
   "deleteAlias": "E-mail Alias Verwijderen",
@@ -63,6 +63,9 @@
   "custom": "Aangepast",
   "deleteConfirm": "Weet u zeker dat u deze alias wilt verwijderen?",
   "deleteEmailConfirm": "Weet u zeker dat u deze e-mail definitief wilt verwijderen?",
+  "deleteEmailTitle": "E-mail Verwijderen",
+  "emailNotFound": "E-mail niet gevonden",
+  "emailContent": "E-mailinhoud",
   "deleteSuccess": "Alias succesvol verwijderd",
   "saveSuccess": "Alias succesvol opgeslagen",
   "enableSuccess": "Alias succesvol ingeschakeld",
@@ -80,7 +83,10 @@
     "copyError": "Kopiëren naar klembord mislukt",
     "enableError": "Inschakelen van alias mislukt",
     "disableError": "Uitschakelen van alias mislukt",
-    "emailLoadError": "Laden van e-mails mislukt",
-    "emailDeleteError": "Verwijderen van e-mail mislukt"
+    "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
+    "emailDeleteError": "Verwijderen van e-mail mislukt",
+    "emailInUse": "Het momenteel gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze inloggegevens te bewerken.",
+    "emailSyncError": "Er is een fout opgetreden bij het laden van e-mails. Probeer de inloggegevens te bewerken en op te slaan om de database te synchroniseren, en probeer het opnieuw.",
+    "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw."
   }
 }
