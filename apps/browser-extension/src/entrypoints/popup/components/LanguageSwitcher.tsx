@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { storage } from '#imports';
+
 type LanguageOption = {
   code: string;
   name: string;
@@ -56,7 +58,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
    */
   const changeLanguage = async (lng: string): Promise<void> => {
     await i18n.changeLanguage(lng);
-    localStorage.setItem('aliasvault-language', lng);
+    await storage.setItem('local:language', lng);
+
     setIsOpen(false);
 
     // Force immediate re-render by dispatching the event that react-i18next listens to

@@ -130,19 +130,25 @@ const translations = {
  * Get current language from storage
  */
 export async function getCurrentLanguage(): Promise<string> {
-  // Try to get from localStorage first (same as React app)
   try {
-    const stored = localStorage.getItem('aliasvault-language');
-    if (stored && ['en', 'nl'].includes(stored)) {
-      return stored;
+    // Use extension storage API exclusively (reliable across all contexts)
+    const langFromStorage = await storage.getItem('local:language') as string;
+    if (langFromStorage && ['en', 'nl'].includes(langFromStorage)) {
+      return langFromStorage;
     }
-  } catch {
-    // localStorage might not be available in all contexts
+
+    // If no language is set in storage, detect browser language and save it
+    const browserLang = navigator.language.split('-')[0];
+    const detectedLanguage = ['en', 'nl'].includes(browserLang) ? browserLang : 'en';
+
+    // Save the detected language to storage for future use
+    await storage.setItem('local:language', detectedLanguage);
+
+    return detectedLanguage;
+  } catch (error) {
+    console.error('Failed to get current language:', error);
+    return 'en';
   }
-  
-  // Fall back to storage API
-  const lang = await storage.getItem('local:aliasvault-language') as string;
-  return lang || 'en';
 }
 
 /**
