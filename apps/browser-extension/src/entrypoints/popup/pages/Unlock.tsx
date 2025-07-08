@@ -70,7 +70,7 @@ const Unlock: React.FC = () => {
     return () => {
       setHeaderButtons(null);
     };
-  }, [setHeaderButtons]);
+  }, [setHeaderButtons, t]);
 
   /**
    * Handle submit

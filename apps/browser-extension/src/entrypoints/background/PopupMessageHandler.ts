@@ -45,7 +45,7 @@ export function handleToggleContextMenu(message: any) : Promise<BoolResponse> {
     if (!message.enabled) {
       browser.contextMenus.removeAll();
     } else {
-      setupContextMenus();
+      await setupContextMenus();
     }
     return { success: true };
   })();

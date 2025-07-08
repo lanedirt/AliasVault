@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Button configuration for form input.
@@ -78,6 +79,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
   showPassword: controlledShowPassword,
   onShowPasswordChange
 }, ref) => {
+  const { t } = useTranslation('common');
   const [internalShowPassword, setInternalShowPassword] = React.useState(false);
 
   /**
@@ -112,7 +114,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
        * Toggle password visibility.
        */
       onClick: (): void => setShowPassword(!showPassword),
-      title: showPassword ? 'Hide password' : 'Show password'
+      title: showPassword ? t('hidePassword') : t('showPassword')
     }]
     : buttons;
 

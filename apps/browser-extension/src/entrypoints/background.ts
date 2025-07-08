@@ -37,7 +37,7 @@ export default defineBackground({
     // Setup context menus
     const isContextMenuEnabled = await storage.getItem(GLOBAL_CONTEXT_MENU_ENABLED_KEY) ?? true;
     if (isContextMenuEnabled) {
-      setupContextMenus();
+      await setupContextMenus();
     }
 
     // Listen for custom commands

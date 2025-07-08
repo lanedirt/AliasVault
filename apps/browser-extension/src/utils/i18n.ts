@@ -2,17 +2,16 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 // Import all translations
-import commonEn from '../locales/en/common.json';
 import authEn from '../locales/en/auth.json';
+import commonEn from '../locales/en/common.json';
 import credentialsEn from '../locales/en/credentials.json';
-import settingsEn from '../locales/en/settings.json';
 import emailsEn from '../locales/en/emails.json';
-
-import commonNl from '../locales/nl/common.json';
+import settingsEn from '../locales/en/settings.json';
 import authNl from '../locales/nl/auth.json';
+import commonNl from '../locales/nl/common.json';
 import credentialsNl from '../locales/nl/credentials.json';
-import settingsNl from '../locales/nl/settings.json';
 import emailsNl from '../locales/nl/emails.json';
+import settingsNl from '../locales/nl/settings.json';
 
 const resources = {
   en: {
@@ -32,6 +31,9 @@ const resources = {
 };
 
 // Detect browser language
+/**
+ * Detect the user's preferred language from localStorage or browser settings
+ */
 const detectLanguage = (): string => {
   // Check localStorage first
   const stored = localStorage.getItem('aliasvault-language');

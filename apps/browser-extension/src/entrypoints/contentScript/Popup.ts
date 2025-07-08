@@ -4,6 +4,7 @@ import { filterCredentials } from '@/entrypoints/contentScript/Filter';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 
 import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
+import { t } from '@/utils/contentTranslations';
 import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
@@ -44,9 +45,10 @@ export function openAutofillPopup(input: HTMLInputElement, container: HTMLElemen
     const response = await sendMessage('GET_CREDENTIALS', { }, 'background') as CredentialsResponse;
 
     if (response.success) {
-      createAutofillPopup(input, response.credentials, container);
+      await createAutofillPopup(input, response.credentials, container);
     } else {
-      createVaultLockedPopup(input, container);
+      const vaultLockedText = await t('vaultLocked');
+      createVaultLockedPopup(input, container, vaultLockedText);
     }
   })();
 }
@@ -114,7 +116,7 @@ export function createLoadingPopup(input: HTMLInputElement, message: string, roo
  * @param credentialList - The credential list element.
  * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
-export function updatePopupContent(credentials: Credential[], credentialList: HTMLElement | null, input: HTMLInputElement, rootContainer: HTMLElement) : void {
+export function updatePopupContent(credentials: Credential[], credentialList: HTMLElement | null, input: HTMLInputElement, rootContainer: HTMLElement, noMatchesText?: string) : void {
   if (!credentialList) {
     credentialList = document.getElementById('aliasvault-credential-list') as HTMLElement;
   }
@@ -127,7 +129,7 @@ export function updatePopupContent(credentials: Credential[], credentialList: HT
   credentialList.innerHTML = '';
 
   // Add credentials using the shared function
-  const credentialElements = createCredentialList(credentials, input, rootContainer);
+  const credentialElements = createCredentialList(credentials, input, rootContainer, noMatchesText);
   credentialElements.forEach(element => credentialList.appendChild(element));
 }
 
@@ -154,7 +156,16 @@ export function removeExistingPopup(container: HTMLElement) : void {
 /**
  * Create auto-fill popup
  */
-export function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : void {
+export async function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : Promise<void> {
+  // Get all translations first
+  const newText = await t('new');
+  const searchPlaceholder = await t('searchVault');
+  const hideFor1HourText = await t('hideFor1Hour');
+  const hidePermanentlyText = await t('hidePermanently');
+  const noMatchesText = await t('noMatchesFound');
+  const creatingText = await t('creatingNewAlias');
+  const failedText = await t('failedToCreateIdentity');
+
   // Disable browser's native autocomplete to avoid conflicts with AliasVault's autocomplete.
   input.setAttribute('autocomplete', 'false');
   const popup = createBasePopup(input, rootContainer);
@@ -176,7 +187,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
     document.title
   );
 
-  updatePopupContent(filteredCredentials, credentialList, input, rootContainer);
+  updatePopupContent(filteredCredentials, credentialList, input, rootContainer, noMatchesText);
 
   // Add divider
   const divider = document.createElement('div');
@@ -195,7 +206,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
-    New
+    ${newText}
   `;
 
   /**
@@ -214,7 +225,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       return;
     }
 
-    const loadingPopup = createLoadingPopup(input, 'Creating new alias...', rootContainer);
+    const loadingPopup = createLoadingPopup(input, creatingText, rootContainer);
 
     try {
       // Sync with api to ensure we have the latest vault.
@@ -298,7 +309,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
       console.error('Error creating identity:', error);
       loadingPopup.innerHTML = `
         <div style="padding: 16px; color: #ef4444;">
-          Failed to create identity. Please try again.
+          ${failedText}
         </div>
       `;
       setTimeout(() => {
@@ -314,12 +325,14 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.dataset.avDisable = 'true';
-  searchInput.placeholder = 'Search vault...';
+  searchInput.placeholder = searchPlaceholder;
   searchInput.className = 'av-search-input';
 
   // Handle search input.
   let searchTimeout: NodeJS.Timeout | null = null;
-  searchInput.addEventListener('input', () => handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input));
+  searchInput.addEventListener('input', () => {
+    handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input, noMatchesText);
+  });
 
   // Close button
   const closeButton = document.createElement('button');
@@ -346,13 +359,13 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
         <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Hide for 1 hour (current site)
+        ${hideFor1HourText}
       </button>
       <button class="av-context-menu-item" data-action="permanent">
         <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Hide permanently (current site)
+        ${hidePermanentlyText}
       </button>
     `;
 
@@ -400,7 +413,9 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
   };
 
   // Add click handlers
-  addReliableClickHandler(closeButton, handleCloseClick);
+  addReliableClickHandler(closeButton, (e: Event) => {
+    handleCloseClick(e);
+  });
 
   actionContainer.appendChild(searchInput);
   actionContainer.appendChild(createButton);
@@ -434,7 +449,7 @@ export function createAutofillPopup(input: HTMLInputElement, credentials: Creden
 /**
  * Create vault locked popup.
  */
-export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: HTMLElement): void {
+export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: HTMLElement, vaultLockedText?: string): void {
   /**
    * Handle unlock click.
    */
@@ -457,7 +472,7 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
   // Add message
   const messageElement = document.createElement('div');
   messageElement.className = 'av-vault-locked-message';
-  messageElement.textContent = 'AliasVault is locked.';
+  messageElement.textContent = vaultLockedText || 'AliasVault is locked.';
   container.appendChild(messageElement);
 
   // Add unlock button with SVG icon
@@ -525,7 +540,7 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
 /**
  * Handle popup search input by filtering credentials based on the search term.
  */
-function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement) : void {
+function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement, noMatchesText?: string) : void {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
@@ -574,7 +589,7 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
   }
 
   // Update popup content with filtered results
-  updatePopupContent(filteredCredentials, credentialList, input, rootContainer);
+  updatePopupContent(filteredCredentials, credentialList, input, rootContainer, noMatchesText);
 }
 
 /**
@@ -583,7 +598,7 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
  * @param credentials - The credentials to display.
  * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
-function createCredentialList(credentials: Credential[], input: HTMLInputElement, rootContainer: HTMLElement): HTMLElement[] {
+function createCredentialList(credentials: Credential[], input: HTMLInputElement, rootContainer: HTMLElement, noMatchesText?: string): HTMLElement[] {
   const elements: HTMLElement[] = [];
 
   if (credentials.length > 0) {
@@ -660,7 +675,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
   } else {
     const noMatches = document.createElement('div');
     noMatches.className = 'av-no-matches';
-    noMatches.textContent = 'No matches found';
+    noMatches.textContent = noMatchesText || 'No matches found';
     elements.push(noMatches);
   }
 
@@ -737,16 +752,17 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
   const lastUsername = await storage.getItem(LAST_CUSTOM_USERNAME_KEY) as string ?? '';
 
   return new Promise((resolve) => {
+    (async (): Promise<void> => {
     // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'aliasvault-create-popup';
-    overlay.className = 'av-create-popup-overlay';
+      const overlay = document.createElement('div');
+      overlay.id = 'aliasvault-create-popup';
+      overlay.className = 'av-create-popup-overlay';
 
-    const popup = document.createElement('div');
-    popup.className = 'av-create-popup';
+      const popup = document.createElement('div');
+      popup.className = 'av-create-popup';
 
-    // Define input method base variables
-    const randomIdentityIcon = `
+      // Define input method base variables
+      const randomIdentityIcon = `
       <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
         <circle cx="8" cy="8" r="1"/>
@@ -756,24 +772,36 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
         <circle cx="16" cy="16" r="1"/>
       </svg>
     `;
-    const randomIdentitySubtext = 'Generate a random identity with a random email address accessible in AliasVault.';
-    const randomIdentityTitle = 'Create random alias';
-    const randomIdentityTitleDropdown = 'Random alias';
-    const randomIdentitySubtextDropdown = 'Random identity with random email';
+      const randomIdentitySubtext = await t('randomIdentityDescription');
+      const randomIdentityTitle = await t('createRandomAlias');
+      const randomIdentityTitleDropdown = await t('randomAlias');
+      const randomIdentitySubtextDropdown = 'Random identity with random email';
 
-    const manualUsernamePasswordIcon = `
+      const manualUsernamePasswordIcon = `
       <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="7" r="4"/>
         <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
       </svg>
     `;
-    const manualUsernamePasswordSubtext = 'Specify your own email address and username.';
-    const manualUsernamePasswordTitle = 'Create username/password';
-    const manualUsernamePasswordTitleDropdown = 'Username/password';
-    const manualUsernamePasswordSubtextDropdown = 'Manual username and password';
+      const manualUsernamePasswordSubtext = await t('manualCredentialDescription');
+      const manualUsernamePasswordTitle = await t('createUsernamePassword');
+      const manualUsernamePasswordTitleDropdown = await t('usernamePassword');
+      const manualUsernamePasswordSubtextDropdown = 'Manual username and password';
 
-    // Create the main content
-    popup.innerHTML = `
+      // Get all translated strings first
+      const serviceNameText = await t('serviceName');
+      const enterServiceNameText = await t('enterServiceName');
+      const cancelText = await t('cancel');
+      const createAndSaveAliasText = await t('createAndSaveAlias');
+      const emailText = await t('email');
+      const enterEmailAddressText = await t('enterEmailAddress');
+      const usernameText = await t('username');
+      const enterUsernameText = await t('enterUsername');
+      const generatedPasswordText = await t('generatedPassword');
+      const createAndSaveCredentialText = await t('createAndSaveCredential');
+
+      // Create the main content
+      popup.innerHTML = `
       <div class="av-create-popup-header">
         <div class="av-create-popup-title-container">
           <div class="av-create-popup-title-wrapper">
@@ -813,13 +841,13 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       <div class="av-create-popup-help-text">${randomIdentitySubtext}</div>
 
       <div class="av-create-popup-field-group">
-        <label for="service-name-input">Service name</label>
+        <label for="service-name-input">${serviceNameText}</label>
         <input
           type="text"
           id="service-name-input"
           value="${suggestedNames[0] ?? ''}"
           class="av-create-popup-input"
-          placeholder="Enter service name"
+          placeholder="${enterServiceNameText}"
         >
         ${suggestedNames.length > 1 ? `
           <div class="av-suggested-names">
@@ -830,34 +858,34 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
       <div class="av-create-popup-mode av-create-popup-random-mode">
         <div class="av-create-popup-actions">
-          <button id="cancel-btn" class="av-create-popup-cancel">Cancel</button>
-          <button id="save-btn" class="av-create-popup-save">Create and save alias</button>
+          <button id="cancel-btn" class="av-create-popup-cancel">${cancelText}</button>
+          <button id="save-btn" class="av-create-popup-save">${createAndSaveAliasText}</button>
         </div>
       </div>
 
       <div class="av-create-popup-mode av-create-popup-custom-mode" style="display: none;">
         <div class="av-create-popup-field-group">
-          <label for="custom-email">Email</label>
+          <label for="custom-email">${emailText}</label>
           <input
             type="email"
             id="custom-email"
             class="av-create-popup-input"
-            placeholder="Enter email address"
+            placeholder="${enterEmailAddressText}"
             data-default-value="${lastEmail}"
           >
         </div>
         <div class="av-create-popup-field-group">
-          <label for="custom-username">Username</label>
+          <label for="custom-username">${usernameText}</label>
           <input
             type="text"
             id="custom-username"
             class="av-create-popup-input"
-            placeholder="Enter username"
+            placeholder="${enterUsernameText}"
             data-default-value="${lastUsername}"
           >
         </div>
         <div class="av-create-popup-field-group">
-          <label>Generated Password</label>
+          <label>${generatedPasswordText}</label>
           <div class="av-create-popup-password-preview">
             <input
               type="text"
@@ -880,114 +908,114 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
           </div>
         </div>
         <div class="av-create-popup-actions">
-          <button id="custom-cancel-btn" class="av-create-popup-cancel">Cancel</button>
-          <button id="custom-save-btn" class="av-create-popup-save">Create and save credential</button>
+          <button id="custom-cancel-btn" class="av-create-popup-cancel">${cancelText}</button>
+          <button id="custom-save-btn" class="av-create-popup-save">${createAndSaveCredentialText}</button>
         </div>
       </div>
     `;
 
-    overlay.appendChild(popup);
-    rootContainer.appendChild(overlay);
+      overlay.appendChild(popup);
+      rootContainer.appendChild(overlay);
 
-    // Animate in
-    requestAnimationFrame(() => {
-      popup.classList.add('show');
-    });
-
-    // Get all the elements
-    const randomMode = popup.querySelector('.av-create-popup-random-mode') as HTMLElement;
-    const customMode = popup.querySelector('.av-create-popup-custom-mode') as HTMLElement;
-    const dropdownMenu = popup.querySelector('.av-create-popup-mode-dropdown-menu') as HTMLElement;
-    const titleContainer = popup.querySelector('.av-create-popup-title-container') as HTMLElement;
-    const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
-    const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
-    const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
-    const customSaveBtn = popup.querySelector('#custom-save-btn') as HTMLButtonElement;
-    const inputServiceName = popup.querySelector('#service-name-input') as HTMLInputElement;
-    const customEmail = popup.querySelector('#custom-email') as HTMLInputElement;
-    const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
-    const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
-    const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
-    const toggleVisibilityBtn = popup.querySelector('#toggle-password-visibility') as HTMLButtonElement;
-
-    /**
-     * Setup default value for input with placeholder styling.
-     */
-    const setupDefaultValue = (input: HTMLInputElement) : void => {
-      const defaultValue = input.dataset.defaultValue;
-      if (defaultValue) {
-        input.value = defaultValue;
-        input.classList.add('av-create-popup-input-default');
-      }
-    };
-
-    setupDefaultValue(customEmail);
-    setupDefaultValue(customUsername);
-
-    // Handle input changes
-    customEmail.addEventListener('input', () => {
-      const value = customEmail.value.trim();
-      if (value || value === '') {
-        customEmail.classList.remove('av-create-popup-input-default');
-        storage.setItem(LAST_CUSTOM_EMAIL_KEY, value);
-      } else {
-        customEmail.classList.add('av-create-popup-input-default');
-        storage.setItem(LAST_CUSTOM_EMAIL_KEY, '');
-      }
-    });
-
-    customUsername.addEventListener('input', () => {
-      const value = customUsername.value.trim();
-      if (value || value === '') {
-        customUsername.classList.remove('av-create-popup-input-default');
-        storage.setItem(LAST_CUSTOM_USERNAME_KEY, value);
-      } else {
-        customUsername.classList.add('av-create-popup-input-default');
-        storage.setItem(LAST_CUSTOM_USERNAME_KEY, '');
-      }
-    });
-
-    // Get password settings from background
-    let passwordGenerator: PasswordGenerator;
-    sendMessage('GET_PASSWORD_SETTINGS', {}, 'background').then((response) => {
-      const passwordSettingsResponse = response as PasswordSettingsResponse;
-      passwordGenerator = CreatePasswordGenerator(passwordSettingsResponse.settings ?? {
-        Length: 12,
-        UseLowercase: true,
-        UseUppercase: true,
-        UseNumbers: true,
-        UseSpecialChars: true,
-        UseNonAmbiguousChars: true
+      // Animate in
+      requestAnimationFrame(() => {
+        popup.classList.add('show');
       });
-      // Generate initial password after settings are loaded
-      passwordGenerator.generateRandomPassword();
-    });
 
-    /**
-     * Generate and set password.
-     */
-    const generatePassword = () : void => {
-      if (!passwordGenerator) {
-        return;
-      }
+      // Get all the elements
+      const randomMode = popup.querySelector('.av-create-popup-random-mode') as HTMLElement;
+      const customMode = popup.querySelector('.av-create-popup-custom-mode') as HTMLElement;
+      const dropdownMenu = popup.querySelector('.av-create-popup-mode-dropdown-menu') as HTMLElement;
+      const titleContainer = popup.querySelector('.av-create-popup-title-container') as HTMLElement;
+      const cancelBtn = popup.querySelector('#cancel-btn') as HTMLButtonElement;
+      const customCancelBtn = popup.querySelector('#custom-cancel-btn') as HTMLButtonElement;
+      const saveBtn = popup.querySelector('#save-btn') as HTMLButtonElement;
+      const customSaveBtn = popup.querySelector('#custom-save-btn') as HTMLButtonElement;
+      const inputServiceName = popup.querySelector('#service-name-input') as HTMLInputElement;
+      const customEmail = popup.querySelector('#custom-email') as HTMLInputElement;
+      const customUsername = popup.querySelector('#custom-username') as HTMLInputElement;
+      const passwordPreview = popup.querySelector('#password-preview') as HTMLInputElement;
+      const regenerateBtn = popup.querySelector('#regenerate-password') as HTMLButtonElement;
+      const toggleVisibilityBtn = popup.querySelector('#toggle-password-visibility') as HTMLButtonElement;
 
-      passwordPreview.value = passwordGenerator.generateRandomPassword();
-      passwordPreview.type = 'text';
-      passwordPreview.dataset.isGenerated = 'true';
-      updateVisibilityIcon(true);
-    };
+      /**
+       * Setup default value for input with placeholder styling.
+       */
+      const setupDefaultValue = (input: HTMLInputElement) : void => {
+        const defaultValue = input.dataset.defaultValue;
+        if (defaultValue) {
+          input.value = defaultValue;
+          input.classList.add('av-create-popup-input-default');
+        }
+      };
 
-    // Handle regenerate button click
-    regenerateBtn.addEventListener('click', generatePassword);
+      setupDefaultValue(customEmail);
+      setupDefaultValue(customUsername);
 
-    // Add password visibility toggle functionality
-    const passwordInput = popup.querySelector('#password-preview') as HTMLInputElement;
+      // Handle input changes
+      customEmail.addEventListener('input', () => {
+        const value = customEmail.value.trim();
+        if (value || value === '') {
+          customEmail.classList.remove('av-create-popup-input-default');
+          storage.setItem(LAST_CUSTOM_EMAIL_KEY, value);
+        } else {
+          customEmail.classList.add('av-create-popup-input-default');
+          storage.setItem(LAST_CUSTOM_EMAIL_KEY, '');
+        }
+      });
 
-    /**
-     * Toggle password visibility icon
-     */
-    const updateVisibilityIcon = (isVisible: boolean): void => {
-      toggleVisibilityBtn.innerHTML = isVisible ? `
+      customUsername.addEventListener('input', () => {
+        const value = customUsername.value.trim();
+        if (value || value === '') {
+          customUsername.classList.remove('av-create-popup-input-default');
+          storage.setItem(LAST_CUSTOM_USERNAME_KEY, value);
+        } else {
+          customUsername.classList.add('av-create-popup-input-default');
+          storage.setItem(LAST_CUSTOM_USERNAME_KEY, '');
+        }
+      });
+
+      // Get password settings from background
+      let passwordGenerator: PasswordGenerator;
+      sendMessage('GET_PASSWORD_SETTINGS', {}, 'background').then((response) => {
+        const passwordSettingsResponse = response as PasswordSettingsResponse;
+        passwordGenerator = CreatePasswordGenerator(passwordSettingsResponse.settings ?? {
+          Length: 12,
+          UseLowercase: true,
+          UseUppercase: true,
+          UseNumbers: true,
+          UseSpecialChars: true,
+          UseNonAmbiguousChars: true
+        });
+        // Generate initial password after settings are loaded
+        passwordGenerator.generateRandomPassword();
+      });
+
+      /**
+       * Generate and set password.
+       */
+      const generatePassword = () : void => {
+        if (!passwordGenerator) {
+          return;
+        }
+
+        passwordPreview.value = passwordGenerator.generateRandomPassword();
+        passwordPreview.type = 'text';
+        passwordPreview.dataset.isGenerated = 'true';
+        updateVisibilityIcon(true);
+      };
+
+      // Handle regenerate button click
+      regenerateBtn.addEventListener('click', generatePassword);
+
+      // Add password visibility toggle functionality
+      const passwordInput = popup.querySelector('#password-preview') as HTMLInputElement;
+
+      /**
+       * Toggle password visibility icon
+       */
+      const updateVisibilityIcon = (isVisible: boolean): void => {
+        toggleVisibilityBtn.innerHTML = isVisible ? `
         <svg class="av-icon" viewBox="0 0 24 24">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
           <circle cx="12" cy="12" r="3"></circle>
@@ -998,213 +1026,106 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
           <line x1="1" y1="1" x2="23" y2="23"></line>
         </svg>
       `;
-    };
+      };
 
-    /**
-     * Toggle password visibility
-     */
-    const togglePasswordVisibility = (): void => {
-      const isVisible = passwordInput.type === 'text';
-      passwordInput.type = isVisible ? 'password' : 'text';
-      updateVisibilityIcon(!isVisible);
-    };
+      /**
+       * Toggle password visibility
+       */
+      const togglePasswordVisibility = (): void => {
+        const isVisible = passwordInput.type === 'text';
+        passwordInput.type = isVisible ? 'password' : 'text';
+        updateVisibilityIcon(!isVisible);
+      };
 
-    toggleVisibilityBtn.addEventListener('click', togglePasswordVisibility);
+      toggleVisibilityBtn.addEventListener('click', togglePasswordVisibility);
 
-    /**
-     * Handle password input changes
-     */
-    const handlePasswordChange = (e: Event): void => {
-      const target = e.target as HTMLInputElement;
-      const isGenerated = target.dataset.isGenerated === 'true';
-      const isEmpty = target.value.trim().length <= 1;
+      /**
+       * Handle password input changes
+       */
+      const handlePasswordChange = (e: Event): void => {
+        const target = e.target as HTMLInputElement;
+        const isGenerated = target.dataset.isGenerated === 'true';
+        const isEmpty = target.value.trim().length <= 1;
 
-      // If manually cleared (empty or single char) and was previously generated, switch to password type
-      if (isEmpty && isGenerated) {
-        target.type = 'password';
-        target.dataset.isGenerated = 'false';
+        // If manually cleared (empty or single char) and was previously generated, switch to password type
+        if (isEmpty && isGenerated) {
+          target.type = 'password';
+          target.dataset.isGenerated = 'false';
+          updateVisibilityIcon(false);
+        }
+      };
+
+      /**
+       * Handle paste events
+       */
+      const handlePasswordPaste = (): void => {
+        passwordInput.dataset.isGenerated = 'false';
+        passwordInput.type = 'password';
         updateVisibilityIcon(false);
-      }
-    };
+      };
 
-    /**
-     * Handle paste events
-     */
-    const handlePasswordPaste = (): void => {
-      passwordInput.dataset.isGenerated = 'false';
-      passwordInput.type = 'password';
-      updateVisibilityIcon(false);
-    };
+      passwordInput.addEventListener('input', handlePasswordChange);
+      passwordInput.addEventListener('paste', handlePasswordPaste);
 
-    passwordInput.addEventListener('input', handlePasswordChange);
-    passwordInput.addEventListener('paste', handlePasswordPaste);
+      /**
+       * Toggle dropdown visibility.
+       */
+      const toggleDropdown = () : void => {
+        dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+      };
 
-    /**
-     * Toggle dropdown visibility.
-     */
-    const toggleDropdown = () : void => {
-      dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
-    };
+      // Make title container clickable to trigger the dropdown
+      titleContainer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+      });
 
-    // Make title container clickable to trigger the dropdown
-    titleContainer.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleDropdown();
-    });
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!titleContainer.contains(e.target as Node) && !dropdownMenu.contains(e.target as Node)) {
+          dropdownMenu.style.display = 'none';
+        }
+      });
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!titleContainer.contains(e.target as Node) && !dropdownMenu.contains(e.target as Node)) {
-        dropdownMenu.style.display = 'none';
-      }
-    });
-
-    // Handle mode option clicks
-    dropdownMenu.querySelectorAll('.av-create-popup-mode-option').forEach(option => {
-      option.addEventListener('click', () => {
-        const mode = (option as HTMLElement).dataset.mode;
-        const titleWrapper = popup.querySelector('.av-create-popup-title-wrapper') as HTMLElement;
-        if (mode === 'random') {
-          titleWrapper.innerHTML = `
+      // Handle mode option clicks
+      dropdownMenu.querySelectorAll('.av-create-popup-mode-option').forEach(option => {
+        option.addEventListener('click', () => {
+          const mode = (option as HTMLElement).dataset.mode;
+          const titleWrapper = popup.querySelector('.av-create-popup-title-wrapper') as HTMLElement;
+          if (mode === 'random') {
+            titleWrapper.innerHTML = `
             ${randomIdentityIcon}
             <h3 class="av-create-popup-title">${randomIdentityTitle}</h3>
           `;
           popup.querySelector('.av-create-popup-help-text')!.textContent = randomIdentitySubtext;
           randomMode.style.display = 'block';
           customMode.style.display = 'none';
-        } else if (mode === 'custom') {
-          titleWrapper.innerHTML = `
+          } else if (mode === 'custom') {
+            titleWrapper.innerHTML = `
             ${manualUsernamePasswordIcon}
             <h3 class="av-create-popup-title">${manualUsernamePasswordTitle}</h3>
           `;
           popup.querySelector('.av-create-popup-help-text')!.textContent = manualUsernamePasswordSubtext;
           randomMode.style.display = 'none';
           customMode.style.display = 'block';
-        }
-        dropdownMenu.style.display = 'none';
+          }
+          dropdownMenu.style.display = 'none';
+        });
       });
-    });
 
-    /**
-     * Close the popup.
-     */
-    const closePopup = (value: { serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null) : void => {
-      popup.classList.remove('show');
-      setTimeout(() => {
-        overlay.remove();
-        resolve(value);
-      }, 200);
-    };
+      /**
+       * Close the popup.
+       */
+      const closePopup = (value: { serviceName: string | null, isCustomCredential: boolean, customEmail?: string, customUsername?: string, customPassword?: string } | null) : void => {
+        popup.classList.remove('show');
+        setTimeout(() => {
+          overlay.remove();
+          resolve(value);
+        }, 200);
+      };
 
-    // Handle save buttons
-    saveBtn.addEventListener('click', () => {
-      const serviceName = inputServiceName.value.trim();
-      if (serviceName) {
-        closePopup({
-          serviceName,
-          isCustomCredential: false
-        });
-      }
-    });
-
-    /**
-     * Handle custom save button click.
-     */
-    const handleCustomSave = () : void => {
-      const serviceName = inputServiceName.value.trim();
-      if (serviceName) {
-        const email = customEmail.value.trim();
-        const username = customUsername.value.trim();
-        const hasDefaultEmail = customEmail.classList.contains('av-create-popup-input-default');
-        const hasDefaultUsername = customUsername.classList.contains('av-create-popup-input-default');
-
-        // If using default values, use the dataset values
-        const finalEmail = hasDefaultEmail ? customEmail.dataset.defaultValue : email;
-        const finalUsername = hasDefaultUsername ? customUsername.dataset.defaultValue : username;
-
-        if (!finalEmail && !finalUsername) {
-          // Add error styling to fields
-          customEmail.classList.add('av-create-popup-input-error');
-          customUsername.classList.add('av-create-popup-input-error');
-
-          // Add error messages after labels
-          const emailLabel = customEmail.previousElementSibling as HTMLLabelElement;
-          const usernameLabel = customUsername.previousElementSibling as HTMLLabelElement;
-
-          if (!emailLabel.querySelector('.av-create-popup-error-text')) {
-            const emailError = document.createElement('span');
-            emailError.className = 'av-create-popup-error-text';
-            emailError.textContent = 'Enter email and/or username';
-            emailLabel.appendChild(emailError);
-          }
-
-          if (!usernameLabel.querySelector('.av-create-popup-error-text')) {
-            const usernameError = document.createElement('span');
-            usernameError.className = 'av-create-popup-error-text';
-            usernameError.textContent = 'Enter email and/or username';
-            usernameLabel.appendChild(usernameError);
-          }
-
-          /**
-           * Remove error styling.
-           */
-          const removeError = () : void => {
-            customEmail.classList.remove('av-create-popup-input-error');
-            customUsername.classList.remove('av-create-popup-input-error');
-            const emailError = emailLabel.querySelector('.av-create-popup-error-text');
-            const usernameError = usernameLabel.querySelector('.av-create-popup-error-text');
-            if (emailError) {
-              emailError.remove();
-            }
-            if (usernameError) {
-              usernameError.remove();
-            }
-          };
-
-          customEmail.addEventListener('input', removeError, { once: true });
-          customUsername.addEventListener('input', removeError, { once: true });
-
-          return;
-        }
-
-        closePopup({
-          serviceName,
-          isCustomCredential: true,
-          customEmail: finalEmail,
-          customUsername: finalUsername,
-          customPassword: passwordPreview.value
-        });
-      }
-    }
-
-    customSaveBtn.addEventListener('click', handleCustomSave);
-
-    /**
-     * Handle custom form input enter key press to submit the form.
-     */
-    const handleCustomEnter = (e: KeyboardEvent) : void => {
-      if (e.key === 'Enter') {
-        handleCustomSave();
-      }
-    };
-
-    inputServiceName.addEventListener('keyup', handleCustomEnter);
-    customEmail.addEventListener('keyup', handleCustomEnter);
-    customUsername.addEventListener('keyup', handleCustomEnter);
-    passwordPreview.addEventListener('keyup', handleCustomEnter);
-
-    // Handle cancel buttons
-    cancelBtn.addEventListener('click', () => {
-      closePopup(null);
-    });
-
-    customCancelBtn.addEventListener('click', () => {
-      closePopup(null);
-    });
-
-    // Handle Enter key
-    inputServiceName.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') {
+      // Handle save buttons
+      saveBtn.addEventListener('click', () => {
         const serviceName = inputServiceName.value.trim();
         if (serviceName) {
           closePopup({
@@ -1212,48 +1133,156 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
             isCustomCredential: false
           });
         }
-      }
-    });
+      });
 
-    /**
-     * Handle click outside.
-     */
-    const handleClickOutside = (event: MouseEvent): void => {
-      const target = event.target as Node;
-      if (target === overlay) {
-        closePopup(null);
-      }
-    };
+      /**
+       * Handle custom save button click.
+       */
+      const handleCustomSave = () : void => {
+        const serviceName = inputServiceName.value.trim();
+        if (serviceName) {
+          const email = customEmail.value.trim();
+          const username = customUsername.value.trim();
+          const hasDefaultEmail = customEmail.classList.contains('av-create-popup-input-default');
+          const hasDefaultUsername = customUsername.classList.contains('av-create-popup-input-default');
 
-    // Use mousedown instead of click to prevent closing when dragging text
-    overlay.addEventListener('mousedown', handleClickOutside);
+          // If using default values, use the dataset values
+          const finalEmail = hasDefaultEmail ? customEmail.dataset.defaultValue : email;
+          const finalUsername = hasDefaultUsername ? customUsername.dataset.defaultValue : username;
 
-    /**
-     * Handle suggested name click.
-     */
-    const handleSuggestedNameClick = (e: Event) : void => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains('av-suggested-name')) {
-        const name = target.dataset.name;
-        if (name) {
-          // Update input with clicked name
-          inputServiceName.value = name;
-          customUsername.value = name;
+          if (!finalEmail && !finalUsername) {
+          // Add error styling to fields
+            customEmail.classList.add('av-create-popup-input-error');
+            customUsername.classList.add('av-create-popup-input-error');
 
-          // Update the suggested names section
-          const suggestedNamesContainer = target.closest('.av-suggested-names');
-          if (suggestedNamesContainer) {
-            // Update the suggestions HTML using the helper function
-            suggestedNamesContainer.innerHTML = getSuggestedNamesHtml(suggestedNames, name);
+            // Add error messages after labels
+            const emailLabel = customEmail.previousElementSibling as HTMLLabelElement;
+            const usernameLabel = customUsername.previousElementSibling as HTMLLabelElement;
+
+            if (!emailLabel.querySelector('.av-create-popup-error-text')) {
+              const emailError = document.createElement('span');
+              emailError.className = 'av-create-popup-error-text';
+              emailError.textContent = 'Enter email and/or username';
+              emailLabel.appendChild(emailError);
+            }
+
+            if (!usernameLabel.querySelector('.av-create-popup-error-text')) {
+              const usernameError = document.createElement('span');
+              usernameError.className = 'av-create-popup-error-text';
+              usernameError.textContent = 'Enter email and/or username';
+              usernameLabel.appendChild(usernameError);
+            }
+
+            /**
+             * Remove error styling.
+             */
+            const removeError = () : void => {
+              customEmail.classList.remove('av-create-popup-input-error');
+              customUsername.classList.remove('av-create-popup-input-error');
+              const emailError = emailLabel.querySelector('.av-create-popup-error-text');
+              const usernameError = usernameLabel.querySelector('.av-create-popup-error-text');
+              if (emailError) {
+                emailError.remove();
+              }
+              if (usernameError) {
+                usernameError.remove();
+              }
+            };
+
+            customEmail.addEventListener('input', removeError, { once: true });
+            customUsername.addEventListener('input', removeError, { once: true });
+
+            return;
           }
+
+          closePopup({
+            serviceName,
+            isCustomCredential: true,
+            customEmail: finalEmail,
+            customUsername: finalUsername,
+            customPassword: passwordPreview.value
+          });
         }
       }
-    };
 
-    popup.addEventListener('click', handleSuggestedNameClick);
+      customSaveBtn.addEventListener('click', handleCustomSave);
 
-    // Focus the input field
-    inputServiceName.select();
+      /**
+       * Handle custom form input enter key press to submit the form.
+       */
+      const handleCustomEnter = (e: KeyboardEvent) : void => {
+        if (e.key === 'Enter') {
+          handleCustomSave();
+        }
+      };
+
+      inputServiceName.addEventListener('keyup', handleCustomEnter);
+      customEmail.addEventListener('keyup', handleCustomEnter);
+      customUsername.addEventListener('keyup', handleCustomEnter);
+      passwordPreview.addEventListener('keyup', handleCustomEnter);
+
+      // Handle cancel buttons
+      cancelBtn.addEventListener('click', () => {
+        closePopup(null);
+      });
+
+      customCancelBtn.addEventListener('click', () => {
+        closePopup(null);
+      });
+
+      // Handle Enter key
+      inputServiceName.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+          const serviceName = inputServiceName.value.trim();
+          if (serviceName) {
+            closePopup({
+              serviceName,
+              isCustomCredential: false
+            });
+          }
+        }
+      });
+
+      /**
+       * Handle click outside.
+       */
+      const handleClickOutside = (event: MouseEvent): void => {
+        const target = event.target as Node;
+        if (target === overlay) {
+          closePopup(null);
+        }
+      };
+
+      // Use mousedown instead of click to prevent closing when dragging text
+      overlay.addEventListener('mousedown', handleClickOutside);
+
+      /**
+       * Handle suggested name click.
+       */
+      const handleSuggestedNameClick = (e: Event) : void => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('av-suggested-name')) {
+          const name = target.dataset.name;
+          if (name) {
+          // Update input with clicked name
+            inputServiceName.value = name;
+            customUsername.value = name;
+
+            // Update the suggested names section
+            const suggestedNamesContainer = target.closest('.av-suggested-names');
+            if (suggestedNamesContainer) {
+            // Update the suggestions HTML using the helper function
+              suggestedNamesContainer.innerHTML = getSuggestedNamesHtml(suggestedNames, name);
+            }
+          }
+        }
+      };
+
+      popup.addEventListener('click', handleSuggestedNameClick);
+
+      // Focus the input field
+      inputServiceName.select();
+    })();
   });
 }
 
