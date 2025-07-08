@@ -60,5 +60,11 @@
   "nickname": "Bijnaam",
   "email": "E-mail",
   "username": "Gebruikersnaam",
-  "password": "Wachtwoord"
+  "password": "Wachtwoord",
+  "syncingVault": "Kluis synchroniseren",
+  "savingChangesToVault": "Wijzigingen opslaan in kluis",
+  "uploadingVaultToServer": "Kluis uploaden naar server",
+  "checkingVaultUpdates": "Controleren op kluis-updates",
+  "syncingUpdatedVault": "Bijgewerkte kluis synchroniseren",
+  "executingOperation": "Bewerking uitvoeren..."
 }

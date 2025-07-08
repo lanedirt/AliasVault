@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { sendMessage } from 'webext-bridge/popup';
 
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
@@ -46,6 +47,7 @@ type VaultSyncOptions = {
 export const useVaultSync = () : {
   syncVault: (options?: VaultSyncOptions) => Promise<boolean>;
 } => {
+  const { t } = useTranslation('common');
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
@@ -65,7 +67,7 @@ export const useVaultSync = () : {
       }
 
       // Check app status and vault revision
-      onStatus?.('Checking vault updates');
+      onStatus?.(t('checkingVaultUpdates'));
       const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       // Check if server is actually available, 0.0.0 indicates connection error which triggers offline mode.
@@ -90,7 +92,7 @@ export const useVaultSync = () : {
       const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
 
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
-        onStatus?.('Syncing updated vault');
+        onStatus?.(t('syncingUpdatedVault'));
         const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
@@ -169,7 +171,7 @@ export const useVaultSync = () : {
       onError?.(errorMessage);
       return false;
     }
-  }, [authContext, dbContext, webApi]);
+  }, [authContext, dbContext, webApi, t]);
 
   return { syncVault };
 };

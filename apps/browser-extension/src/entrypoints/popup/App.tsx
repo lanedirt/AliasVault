@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
 import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
@@ -41,6 +42,7 @@ type RouteConfig = {
  * App component.
  */
 const App: React.FC = () => {
+  const { t } = useTranslation(['common', 'credentials', 'emails', 'settings']);
   const authContext = useAuth();
   const { isInitialLoading } = useLoading();
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
@@ -55,13 +57,13 @@ const App: React.FC = () => {
     { path: '/unlock', element: <Unlock />, showBackButton: false },
     { path: '/unlock-success', element: <UnlockSuccess />, showBackButton: false },
     { path: '/upgrade', element: <Upgrade />, showBackButton: false },
-    { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: 'Settings' },
+    { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: t('settings:title') },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
-    { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: 'Add credential' },
-    { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: 'Credential details' },
-    { path: '/credentials/:id/edit', element: <CredentialAddEdit />, showBackButton: true, title: 'Edit credential' },
+    { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: t('credentials:addCredential') },
+    { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: t('credentials:credentialDetails') },
+    { path: '/credentials/:id/edit', element: <CredentialAddEdit />, showBackButton: true, title: t('credentials:editCredential') },
     { path: '/emails', element: <EmailsList />, showBackButton: false },
-    { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: 'Email details' },
+    { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: t('emails:title') },
     { path: '/settings', element: <Settings />, showBackButton: false },
     { path: '/logout', element: <Logout />, showBackButton: false },
   ];

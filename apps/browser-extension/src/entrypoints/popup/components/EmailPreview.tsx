@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { useDb } from '@/entrypoints/popup/context/DbContext';
@@ -18,6 +19,7 @@ type EmailPreviewProps = {
  * This component shows a preview of the latest emails in the inbox.
  */
 export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
+  const { t } = useTranslation(['common', 'emails']);
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
@@ -74,7 +76,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           });
 
           if (!response.ok) {
-            setError('An error occurred while loading emails. Please try again later.');
+            setError(t('emails:errors.emailLoadError'));
             return;
           }
 
@@ -125,23 +127,23 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
               const apiErrorResponse = response as ApiErrorResponse;
 
               if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_MATCH_USER') {
-                setError('The current chosen email address is already in use. Please change the email address by editing this credential.');
+                setError(t('emails:errors.emailInUse'));
               } else if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_EXIST') {
-                setError('An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.');
+                setError(t('emails:errors.emailSyncError'));
               } else {
-                setError('An error occurred while loading emails. Please try again later.');
+                setError(t('emails:errors.emailLoadError'));
               }
 
               return;
             }
           } catch {
-            setError('An error occurred while loading emails. Please try again later.');
+            setError(t('emails:errors.emailLoadError'));
             return;
           }
         }
       } catch (err) {
         console.error('Error loading emails:', err);
-        setError('An unexpected error occurred while loading emails. Please try again later.');
+        setError(t('emails:errors.emailUnexpectedError'));
       }
       setLoading(false);
     };
@@ -150,7 +152,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     // Set up auto-refresh interval
     const interval = setInterval(loadEmails, 2000);
     return () : void => clearInterval(interval);
-  }, [email, loading, webApi, dbContext]);
+  }, [email, loading, webApi, dbContext, t]);
 
   // Don't render anything if the domain is not supported
   if (!isSupportedDomain) {
@@ -161,7 +163,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent emails</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common:recentEmails')}</h2>
         </div>
         <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -174,10 +176,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent emails</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common:recentEmails')}</h2>
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
         </div>
-        Loading emails...
+        {t('common:loadingEmails')}
       </div>
     );
   }
@@ -185,10 +187,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent emails</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common:recentEmails')}</h2>
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
         </div>
-        No emails received yet.
+        {t('emails:noEmails')}
       </div>
     );
   }

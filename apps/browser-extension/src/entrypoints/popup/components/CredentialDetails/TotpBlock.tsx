@@ -1,5 +1,6 @@
 import  * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 
@@ -13,6 +14,7 @@ type TotpBlockProps = {
  * This component shows TOTP codes for a credential.
  */
 const TotpBlock: React.FC<TotpBlockProps> = ({ credentialId }) => {
+  const { t } = useTranslation('common');
   const [totpCodes, setTotpCodes] = useState<TotpCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentCodes, setCurrentCodes] = useState<Record<string, string>>({});
@@ -138,8 +140,8 @@ const TotpBlock: React.FC<TotpBlockProps> = ({ credentialId }) => {
   if (loading) {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Two-factor authentication</h2>
-        Loading TOTP codes...
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('twoFactorAuthentication')}</h2>
+        {t('loadingTotpCodes')}
       </div>
     );
   }
@@ -151,7 +153,7 @@ const TotpBlock: React.FC<TotpBlockProps> = ({ credentialId }) => {
   return (
     <div className="mb-4">
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Two-factor authentication</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('twoFactorAuthentication')}</h2>
         <div className="grid grid-cols-1 gap-2">
           {totpCodes.map(totpCode => (
             <button
@@ -171,7 +173,7 @@ const TotpBlock: React.FC<TotpBlockProps> = ({ credentialId }) => {
                     </span>
                     <div className="text-xs">
                       {copiedId === totpCode.Id ? (
-                        <span className="text-green-600 dark:text-green-400">Copied!</span>
+                        <span className="text-green-600 dark:text-green-400">{t('copied')}</span>
                       ) : (
                         <span className="text-gray-500 dark:text-gray-400">{getRemainingSeconds()}s</span>
                       )}

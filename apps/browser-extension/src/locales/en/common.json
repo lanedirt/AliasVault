@@ -60,5 +60,11 @@
   "nickname": "Nickname",
   "email": "Email",
   "username": "Username",
-  "password": "Password"
+  "password": "Password",
+  "syncingVault": "Syncing vault",
+  "savingChangesToVault": "Saving changes to vault",
+  "uploadingVaultToServer": "Uploading vault to server",
+  "checkingVaultUpdates": "Checking for vault updates",
+  "syncingUpdatedVault": "Syncing updated vault",
+  "executingOperation": "Executing operation..."
 }

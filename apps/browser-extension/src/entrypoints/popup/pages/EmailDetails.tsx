@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
@@ -22,6 +23,7 @@ import { HeaderIconType } from '../components/Icons/HeaderIcons';
  * Email details page.
  */
 const EmailDetails: React.FC = (): React.ReactElement => {
+  const { t } = useTranslation(['common', 'emails']);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dbContext = useDb();
@@ -149,13 +151,13 @@ const EmailDetails: React.FC = (): React.ReactElement => {
           {!PopoutUtility.isPopup() && (
             <HeaderButton
               onClick={openInNewPopup}
-              title="Open in new window"
+              title={t('common:openInNewWindow')}
               iconType={HeaderIconType.EXPAND}
             />
           )}
           <HeaderButton
             onClick={() => setShowDeleteModal(true)}
-            title="Delete email"
+            title={t('emails:deleteEmail')}
             iconType={HeaderIconType.DELETE}
             variant="danger"
           />
@@ -166,7 +168,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
       setHeaderButtonsConfigured(true);
     }
     return () => {};
-  }, [setHeaderButtons, headerButtonsConfigured, openInNewPopup]);
+  }, [setHeaderButtons, headerButtonsConfigured, openInNewPopup, t]);
 
   // Clear header buttons on unmount
   useEffect((): (() => void) => {
@@ -182,11 +184,11 @@ const EmailDetails: React.FC = (): React.ReactElement => {
   }
 
   if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+    return <div className="text-red-500">{t('common:error')} {error}</div>;
   }
 
   if (!email) {
-    return <div className="text-gray-500">Email not found</div>;
+    return <div className="text-gray-500">{t('emails:emailNotFound')}</div>;
   }
 
   return (
@@ -198,10 +200,10 @@ const EmailDetails: React.FC = (): React.ReactElement => {
           setShowDeleteModal(false);
           void handleDelete();
         }}
-        title="Delete Email"
-        message="Are you sure you want to delete this email? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('emails:deleteEmailTitle')}
+        message={t('emails:deleteEmailConfirm')}
+        confirmText={t('common:delete')}
+        cancelText={t('common:cancel')}
         variant="danger"
       />
 
@@ -212,9 +214,9 @@ const EmailDetails: React.FC = (): React.ReactElement => {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{email.subject}</h1>
           </div>
           <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-            <p>From: {email.fromDisplay} ({email.fromLocal}@{email.fromDomain})</p>
-            <p>To: {email.toLocal}@{email.toDomain}</p>
-            <p>Date: {new Date(email.dateSystem).toLocaleString()}</p>
+            <p>{t('emails:from')} {email.fromDisplay} ({email.fromLocal}@{email.fromDomain})</p>
+            <p>{t('emails:to')} {email.toLocal}@{email.toDomain}</p>
+            <p>{t('emails:date')} {new Date(email.dateSystem).toLocaleString()}</p>
           </div>
         </div>
 
@@ -224,7 +226,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
             <iframe
               srcDoc={ConversionUtility.convertAnchorTagsToOpenInNewTab(email.messageHtml)}
               className="w-full min-h-[500px] border-0"
-              title="Email content"
+              title={t('emails:emailContent')}
             />
           ) : (
             <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
@@ -237,7 +239,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
         {email.attachments && email.attachments.length > 0 && (
           <div className="p-6 border-t border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-              Attachments
+              {t('emails:attachments')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {email.attachments.map((attachment) => (

@@ -3,6 +3,7 @@ import { Buffer } from 'buffer';
 import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { sendMessage } from 'webext-bridge/popup';
 import * as Yup from 'yup';
@@ -68,6 +69,7 @@ const credentialSchema = Yup.object().shape({
  * Add or edit credential page.
  */
 const CredentialAddEdit: React.FC = () => {
+  const { t } = useTranslation(['common', 'credentials']);
   const { id } = useParams();
   const navigate = useNavigate();
   const dbContext = useDb();
@@ -458,14 +460,14 @@ const CredentialAddEdit: React.FC = () => {
         {isEditMode && (
           <HeaderButton
             onClick={() => setShowDeleteModal(true)}
-            title="Delete credential"
+            title={t('credentials:deleteCredential')}
             iconType={HeaderIconType.DELETE}
             variant="danger"
           />
         )}
         <HeaderButton
           onClick={handleSubmit(onSubmit)}
-          title="Save credential"
+          title={t('credentials:saveCredential')}
           iconType={HeaderIconType.SAVE}
         />
       </div>
@@ -473,7 +475,7 @@ const CredentialAddEdit: React.FC = () => {
 
     setHeaderButtons(headerButtonsJSX);
     return () => {};
-  }, [setHeaderButtons, handleSubmit, onSubmit, isEditMode]);
+  }, [setHeaderButtons, handleSubmit, onSubmit, isEditMode, t]);
 
   // Clear header buttons on unmount
   useEffect((): (() => void) => {
@@ -481,7 +483,7 @@ const CredentialAddEdit: React.FC = () => {
   }, [setHeaderButtons]);
 
   if (isEditMode && !watch('ServiceName')) {
-    return <div>Loading...</div>;
+    return <div>{t('common:loading')}</div>;
   }
 
   return (
@@ -503,10 +505,10 @@ const CredentialAddEdit: React.FC = () => {
           setShowDeleteModal(false);
           void handleDelete();
         }}
-        title="Delete Credential"
-        message="Are you sure you want to delete this credential? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('credentials:deleteCredentialTitle')}
+        message={t('credentials:deleteCredentialConfirm')}
+        confirmText={t('common:delete')}
+        cancelText={t('common:cancel')}
         variant="danger"
       />
 
@@ -527,7 +529,7 @@ const CredentialAddEdit: React.FC = () => {
               <circle cx="8" cy="16" r="1"/>
               <circle cx="16" cy="16" r="1"/>
             </svg>
-            Random Alias
+            {t('credentials:randomAlias')}
           </button>
           <button
             type="button"
@@ -540,18 +542,18 @@ const CredentialAddEdit: React.FC = () => {
               <circle cx="12" cy="7" r="4"/>
               <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
             </svg>
-            Manual
+            {t('credentials:manual')}
           </button>
         </div>
       )}
 
       <div className="space-y-4">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Service</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials:service')}</h2>
           <div className="space-y-4">
             <FormInput
               id="serviceName"
-              label="Service Name"
+              label={t('credentials:serviceName')}
               ref={serviceNameRef}
               value={watch('ServiceName') ?? ''}
               onChange={(value) => setValue('ServiceName', value)}
@@ -560,7 +562,7 @@ const CredentialAddEdit: React.FC = () => {
             />
             <FormInput
               id="serviceUrl"
-              label="Service URL"
+              label={t('credentials:serviceUrl')}
               value={watch('ServiceUrl') ?? ''}
               onChange={(value) => setValue('ServiceUrl', value)}
               error={errors.ServiceUrl?.message}
@@ -571,11 +573,11 @@ const CredentialAddEdit: React.FC = () => {
         {(mode === 'manual' || isEditMode) && (
           <>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Login Credentials</h2>
+              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials:loginCredentials')}</h2>
               <div className="space-y-4">
                 <FormInput
                   id="username"
-                  label="Username"
+                  label={t('common:username')}
                   value={watch('Username') ?? ''}
                   onChange={(value) => setValue('Username', value)}
                   error={errors.Username?.message}
@@ -583,13 +585,13 @@ const CredentialAddEdit: React.FC = () => {
                     {
                       icon: 'refresh',
                       onClick: generateRandomUsername,
-                      title: 'Generate random username'
+                      title: t('credentials:generateRandomUsername')
                     }
                   ]}
                 />
                 <FormInput
                   id="password"
-                  label="Password"
+                  label={t('common:password')}
                   type="password"
                   value={watch('Password') ?? ''}
                   onChange={(value) => setValue('Password', value)}
@@ -600,7 +602,7 @@ const CredentialAddEdit: React.FC = () => {
                     {
                       icon: 'refresh',
                       onClick: generateRandomPassword,
-                      title: 'Generate random password'
+                      title: t('credentials:generateRandomPassword')
                     }
                   ]}
                 />
@@ -609,11 +611,11 @@ const CredentialAddEdit: React.FC = () => {
                   onClick={handleGenerateRandomAlias}
                   className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                 >
-                  Generate Random Alias
+                  {t('credentials:generateRandomAlias')}
                 </button>
                 <FormInput
                   id="email"
-                  label="Email"
+                  label={t('common:email')}
                   value={watch('Alias.Email') ?? ''}
                   onChange={(value) => setValue('Alias.Email', value)}
                   error={errors.Alias?.Email?.message}
@@ -622,40 +624,40 @@ const CredentialAddEdit: React.FC = () => {
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Alias</h2>
+              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials:alias')}</h2>
               <div className="space-y-4">
                 <FormInput
                   id="firstName"
-                  label="First Name"
+                  label={t('credentials:firstName')}
                   value={watch('Alias.FirstName') ?? ''}
                   onChange={(value) => setValue('Alias.FirstName', value)}
                   error={errors.Alias?.FirstName?.message}
                 />
                 <FormInput
                   id="lastName"
-                  label="Last Name"
+                  label={t('credentials:lastName')}
                   value={watch('Alias.LastName') ?? ''}
                   onChange={(value) => setValue('Alias.LastName', value)}
                   error={errors.Alias?.LastName?.message}
                 />
                 <FormInput
                   id="nickName"
-                  label="Nick Name"
+                  label={t('credentials:nickName')}
                   value={watch('Alias.NickName') ?? ''}
                   onChange={(value) => setValue('Alias.NickName', value)}
                   error={errors.Alias?.NickName?.message}
                 />
                 <FormInput
                   id="gender"
-                  label="Gender"
+                  label={t('credentials:gender')}
                   value={watch('Alias.Gender') ?? ''}
                   onChange={(value) => setValue('Alias.Gender', value)}
                   error={errors.Alias?.Gender?.message}
                 />
                 <FormInput
                   id="birthDate"
-                  label="Birth Date"
-                  placeholder="YYYY-MM-DD"
+                  label={t('credentials:birthDate')}
+                  placeholder={t('credentials:birthDatePlaceholder')}
                   value={watch('Alias.BirthDate') ?? ''}
                   onChange={(value) => setValue('Alias.BirthDate', value)}
                   error={errors.Alias?.BirthDate?.message}
@@ -664,11 +666,11 @@ const CredentialAddEdit: React.FC = () => {
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Metadata</h2>
+              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials:metadata')}</h2>
               <div className="space-y-4">
                 <FormInput
                   id="notes"
-                  label="Notes"
+                  label={t('credentials:notes')}
                   value={watch('Notes') ?? ''}
                   onChange={(value) => setValue('Notes', value)}
                   multiline

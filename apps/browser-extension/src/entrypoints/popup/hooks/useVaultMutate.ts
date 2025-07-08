@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { sendMessage } from 'webext-bridge/popup';
 
 import { useDb } from '@/entrypoints/popup/context/DbContext';
@@ -22,8 +23,9 @@ export function useVaultMutate() : {
   isLoading: boolean;
   syncStatus: string;
   } {
+  const { t } = useTranslation('common');
   const [isLoading, setIsLoading] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('Syncing vault');
+  const [syncStatus, setSyncStatus] = useState(t('syncingVault'));
   const dbContext = useDb();
   const { syncVault } = useVaultSync();
 
@@ -34,12 +36,12 @@ export function useVaultMutate() : {
     operation: () => Promise<void>,
     options: VaultMutationOptions
   ) : Promise<void> => {
-    setSyncStatus('Saving changes to vault');
+    setSyncStatus(t('savingChangesToVault'));
 
     // Execute the provided operation (e.g. create/update/delete credential)
     await operation();
 
-    setSyncStatus('Uploading vault to server');
+    setSyncStatus(t('uploadingVaultToServer'));
 
     try {
       // Upload the updated vault to the server.
@@ -90,7 +92,7 @@ export function useVaultMutate() : {
       }
       throw error;
     }
-  }, [dbContext]);
+  }, [dbContext, t]);
 
   /**
    * Hook to execute a vault mutation which uploads a new encrypted vault to the server
@@ -101,11 +103,11 @@ export function useVaultMutate() : {
   ) => {
     try {
       setIsLoading(true);
-      setSyncStatus('Checking for vault updates');
+      setSyncStatus(t('checkingVaultUpdates'));
 
       // Skip sync check if requested (e.g., during upgrade operations)
       if (options.skipSyncCheck) {
-        setSyncStatus('Executing operation...');
+        setSyncStatus(t('executingOperation'));
         await executeMutateOperation(operation, options);
         return;
       }
@@ -154,7 +156,7 @@ export function useVaultMutate() : {
       setIsLoading(false);
       setSyncStatus('');
     }
-  }, [syncVault, executeMutateOperation]);
+  }, [syncVault, executeMutateOperation, t]);
 
   return {
     executeVaultMutation,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -22,6 +23,7 @@ import type { Credential } from '@/utils/dist/shared/models/vault';
  * Credential details page.
  */
 const CredentialDetails: React.FC = (): React.ReactElement => {
+  const { t } = useTranslation(['common', 'credentials']);
   const { id } = useParams();
   const navigate = useNavigate();
   const dbContext = useDb();
@@ -74,20 +76,20 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
         {!PopoutUtility.isPopup() && (
           <HeaderButton
             onClick={openInNewPopup}
-            title="Open in new window"
+            title={t('common:openInNewWindow')}
             iconType={HeaderIconType.EXPAND}
           />
         )}
         <HeaderButton
           onClick={handleEdit}
-          title="Edit credential"
+          title={t('credentials:editCredential')}
           iconType={HeaderIconType.EDIT}
         />
       </div>
     );
     setHeaderButtons(headerButtonsJSX);
     return () => {};
-  }, [setHeaderButtons, handleEdit, openInNewPopup]);
+  }, [setHeaderButtons, handleEdit, openInNewPopup, t]);
 
   // Clear header buttons on unmount
   useEffect((): (() => void) => {
@@ -95,7 +97,7 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
   }, [setHeaderButtons]);
 
   if (!credential) {
-    return <div>Loading...</div>;
+    return <div>{t('common:loading')}</div>;
   }
 
   return (
