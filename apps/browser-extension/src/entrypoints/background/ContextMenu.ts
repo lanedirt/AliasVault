@@ -1,6 +1,7 @@
 import { type Browser } from '@wxt-dev/browser';
 import { sendMessage } from 'webext-bridge/background';
 
+import { t } from '@/utils/contentTranslations';
 import { PasswordGenerator } from '@/utils/dist/shared/password-generator';
 
 import { browser } from "#imports";
@@ -8,7 +9,7 @@ import { browser } from "#imports";
 /**
  * Setup the context menus.
  */
-export function setupContextMenus() : void {
+export async function setupContextMenus() : Promise<void> {
   // Create root menu
   browser.contextMenus.create({
     id: "aliasvault-root",
@@ -20,7 +21,7 @@ export function setupContextMenus() : void {
   browser.contextMenus.create({
     id: "aliasvault-activate-form",
     parentId: "aliasvault-root",
-    title: "Autofill with AliasVault",
+    title: await t('autofillWithAliasVault'),
     contexts: ["editable"],
   });
 
@@ -36,7 +37,7 @@ export function setupContextMenus() : void {
   browser.contextMenus.create({
     id: "aliasvault-generate-password",
     parentId: "aliasvault-root",
-    title: "Generate random password (copy to clipboard)",
+    title: await t('generateRandomPassword'),
     contexts: ["all"]
   });
 
@@ -80,9 +81,9 @@ export function handleContextMenuClick(info: Browser.contextMenus.OnClickData, t
 /**
  * Copy provided password to clipboard.
  */
-function copyPasswordToClipboard(generatedPassword: string) : void {
-  navigator.clipboard.writeText(generatedPassword).then(() => {
-    showToast('Password copied to clipboard');
+async function copyPasswordToClipboard(generatedPassword: string) : Promise<void> {
+  navigator.clipboard.writeText(generatedPassword).then(async () => {
+    showToast(await t('passwordCopiedToClipboard'));
   });
 
   /**

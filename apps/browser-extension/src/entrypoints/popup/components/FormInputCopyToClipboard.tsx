@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ClipboardCopyService } from '@/entrypoints/popup/utils/ClipboardCopyService';
 
@@ -60,6 +61,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
   value,
   type = 'text'
 }) => {
+  const { t } = useTranslation('common');
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -112,7 +114,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
             <button
               type="button"
               className="p-1 text-green-500 dark:text-green-400 transition-colors duration-200"
-              title="Copied!"
+              title={t('copied')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name="check" />
@@ -123,7 +125,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               type="button"
               onClick={copyToClipboard}
               className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
-              title="Copy to clipboard"
+              title={t('copyToClipboard')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name="copy" />
@@ -135,7 +137,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
-              title={showPassword ? 'Hide password' : 'Show password'}
+              title={showPassword ? t('hidePassword') : t('showPassword')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name={showPassword ? 'visibility-off' : 'visibility'} />

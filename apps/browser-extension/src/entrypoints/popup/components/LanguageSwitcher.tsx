@@ -17,10 +17,15 @@ type LanguageSwitcherProps = {
   size?: 'sm' | 'md';
 };
 
+/**
+ * Language switcher component that allows users to switch between supported languages
+ * @param props - Component props including variant and size
+ * @returns JSX element for the language switcher
+ */
 const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   variant = 'dropdown',
   size = 'md'
-}) => {
+}): React.JSX.Element => {
   const { i18n } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -28,8 +33,12 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+  useEffect((): (() => void) => {
+    /**
+     * Handle clicks outside the dropdown to close it
+     * @param event - Mouse event
+     */
+    const handleClickOutside = (event: MouseEvent): void => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -41,7 +50,11 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     };
   }, []);
 
-  const changeLanguage = async (lng: string) => {
+  /**
+   * Change the application language
+   * @param lng - Language code to switch to
+   */
+  const changeLanguage = async (lng: string): Promise<void> => {
     await i18n.changeLanguage(lng);
     localStorage.setItem('aliasvault-language', lng);
     setIsOpen(false);

@@ -158,14 +158,14 @@ const CredentialsList: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-gray-900 dark:text-white text-xl">Credentials</h2>
+        <h2 className="text-gray-900 dark:text-white text-xl">{t('title')}</h2>
         <ReloadButton onClick={syncVaultAndRefresh} />
       </div>
 
       {credentials.length > 0 ? (
         <input
           type="text"
-          placeholder="Search credentials..."
+          placeholder={t('searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           autoFocus
@@ -178,13 +178,13 @@ const CredentialsList: React.FC = () => {
       {credentials.length === 0 ? (
         <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-10">
           <p className="text-sm">
-            Welcome to AliasVault!
+            {t('welcomeTitle')}
           </p>
           <p className="text-sm">
-            To use the AliasVault browser extension: navigate to a website and use the AliasVault autofill popup to create a new credential.
+            {t('welcomeDescription')}
           </p>
           <p className="text-sm">
-            If you want to create manual identities, open the full AliasVault app via the popout icon in the top right corner.
+            {t('manualCreationHint')}
           </p>
         </div>
       ) : (
