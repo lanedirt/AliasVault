@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+
 // Import all translations
 import authEn from '../locales/en/auth.json';
 import commonEn from '../locales/en/common.json';
@@ -12,6 +13,8 @@ import commonNl from '../locales/nl/common.json';
 import credentialsNl from '../locales/nl/credentials.json';
 import emailsNl from '../locales/nl/emails.json';
 import settingsNl from '../locales/nl/settings.json';
+
+import { storage } from '#imports';
 
 const resources = {
   en: {
@@ -34,9 +37,9 @@ const resources = {
 /**
  * Detect the user's preferred language from localStorage or browser settings
  */
-const detectLanguage = (): string => {
+const detectLanguage = async (): Promise<string> => {
   // Check localStorage first
-  const stored = localStorage.getItem('aliasvault-language');
+  const stored = await storage.getItem('local:language') as string;
   if (stored && ['en', 'nl'].includes(stored)) {
     return stored;
   }
@@ -50,11 +53,11 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: detectLanguage(),
+    lng: await detectLanguage(),
     fallbackLng: 'en',
-    
+
     debug: false, // Set to true for development debugging
-    
+
     interpolation: {
       escapeValue: false // React already escapes
     },
