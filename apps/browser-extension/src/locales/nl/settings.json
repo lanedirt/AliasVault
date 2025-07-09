@@ -24,7 +24,7 @@
   "clearClipboardDescription": "Gekopieerde wachtwoorden automatisch uit klembord wissen",
   "clearClipboardSeconds": "{{count}} seconde",
   "clearClipboardSeconds_other": "{{count}} seconden",
-  "autofillEnabled": "Automatisch Invullen Inschakelen",
+  "autofillEnabled": "Autofill",
   "autofillDescription": "Automatisch inlogformulieren detecteren en invullen",
   "passwordGenerator": "Wachtwoordgenerator",
   "passwordLength": "Wachtwoordlengte",

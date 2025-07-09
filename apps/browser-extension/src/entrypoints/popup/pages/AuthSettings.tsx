@@ -168,6 +168,14 @@ const AuthSettings: React.FC = () => {
 
   return (
     <div className="p-4">
+      {/* Language Settings Section */}
+      <div className="mb-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('language')}</p>
+          <LanguageSwitcher variant="dropdown" size="sm" />
+        </div>
+      </div>
+
       <div className="mb-6">
         <label htmlFor="api-connection" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           {t('serverUrl')}
@@ -236,14 +244,6 @@ const AuthSettings: React.FC = () => {
           >
             {isGloballyEnabled ? t('common:enabled', 'Enabled') : t('common:disabled', 'Disabled')}
           </button>
-        </div>
-      </div>
-
-      {/* Language Settings Section */}
-      <div className="mb-6">
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('language')}</p>
-          <LanguageSwitcher variant="dropdown" size="sm" />
         </div>
       </div>
 
