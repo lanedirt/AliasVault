@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Linking, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 
@@ -63,6 +64,7 @@ const splitTextAndUrls = (text: string): { type: 'text' | 'url', content: string
  * Notes section component.
  */
 export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : React.ReactNode => {
+  const { t } = useTranslation();
   const colors = useColors();
 
   if (!credential.Notes) {
@@ -101,7 +103,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({ credential }) : Reac
 
   return (
     <ThemedView style={styles.section}>
-      <ThemedText type="subtitle">Notes</ThemedText>
+      <ThemedText type="subtitle">{t('credentials.notes')}</ThemedText>
       <View style={styles.notesContainer}>
         {parts.map((part, index) => {
           if (part.type === 'url') {

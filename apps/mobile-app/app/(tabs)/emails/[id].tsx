@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-rout
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { useTranslation } from 'react-i18next';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import type { Email } from '@/utils/dist/shared/models/webapi';
@@ -29,6 +30,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
   const dbContext = useDb();
   const webApi = useWebApi();
   const colors = useColors();
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<Email | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +72,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
         setHtmlView(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('emails.errors.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -85,15 +87,15 @@ export default function EmailDetailsScreen() : React.ReactNode {
    */
   const handleDelete = useCallback(async () : Promise<void> => {
     Alert.alert(
-      'Delete Email',
-      'Are you sure you want to delete this email? This action is permanent and cannot be undone.',
+      t('emails.deleteEmail'),
+      t('emails.deleteEmailConfirm'),
       [
         {
-          text: 'Cancel',
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           /**
            * Handle the delete button press.
@@ -109,7 +111,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
               // Go back to the emails list screen.
               router.back();
             } catch (err) {
-              setError(err instanceof Error ? err.message : 'Failed to delete email');
+              setError(err instanceof Error ? err.message : t('emails.errors.deleteFailed'));
             }
           },
         },
@@ -127,7 +129,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
       );
 
       if (!dbContext?.sqliteClient || !email) {
-        setError('Database context or email not available');
+        setError(t('emails.errors.dbNotAvailable'));
         return;
       }
 
@@ -139,7 +141,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
       );
 
       if (!decryptedBytes) {
-        setError('Failed to decrypt attachment');
+        setError(t('emails.errors.decryptFailed'));
         return;
       }
 
@@ -158,7 +160,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
       await FileSystem.deleteAsync(tempFile);
     } catch (err) {
       console.error('handleDownloadAttachment error', err);
-      setError(err instanceof Error ? err.message : 'Failed to download attachment');
+      setError(err instanceof Error ? err.message : t('emails.errors.downloadFailed'));
     }
   };
 
@@ -341,7 +343,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
   if (isLoading) {
     return (
       <ThemedView style={styles.centerContainer}>
-        <Stack.Screen options={{ title: 'Email Details' }} />
+        <Stack.Screen options={{ title: t('emails.title') }} />
         <ActivityIndicator size="large" />
       </ThemedView>
     );
@@ -350,7 +352,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
   if (error) {
     return (
       <ThemedView style={styles.centerContainer}>
-        <ThemedText style={styles.errorText}>Error: {error}</ThemedText>
+        <ThemedText style={styles.errorText}>{t('common.error')}: {error}</ThemedText>
       </ThemedView>
     );
   }
@@ -358,7 +360,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
   if (!email) {
     return (
       <ThemedView style={styles.centerContainer}>
-        <ThemedText style={styles.emptyText}>Email not found</ThemedText>
+        <ThemedText style={styles.emptyText}>{t('emails.emailNotFound')}</ThemedText>
       </ThemedView>
     );
   }
@@ -383,7 +385,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
         <View style={styles.metadataContainer}>
           <View style={styles.metadataRow}>
             <View style={styles.metadataLabel}>
-              <ThemedText style={styles.metadataHeading}>Subject:</ThemedText>
+              <ThemedText style={styles.metadataHeading}>{t('emails.subject')}</ThemedText>
             </View>
             <View style={styles.metadataValue}>
               <ThemedText style={styles.metadataText}>{email.subject}</ThemedText>
@@ -406,7 +408,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
 
           <View style={styles.metadataRow}>
             <View style={styles.metadataLabel}>
-              <ThemedText style={styles.metadataHeading}>Date:</ThemedText>
+              <ThemedText style={styles.metadataHeading}>{t('emails.date')}</ThemedText>
             </View>
             <View style={styles.metadataValue}>
               <ThemedText style={styles.metadataText}>
@@ -418,7 +420,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
 
           <View style={styles.metadataRow}>
             <View style={styles.metadataLabel}>
-              <ThemedText style={styles.metadataHeading}>From:</ThemedText>
+              <ThemedText style={styles.metadataHeading}>{t('emails.from')}</ThemedText>
             </View>
             <View style={styles.metadataValue}>
               <ThemedText style={styles.metadataText}>
@@ -430,7 +432,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
 
           <View style={styles.metadataRow}>
             <View style={styles.metadataLabel}>
-              <ThemedText style={styles.metadataHeading}>To:</ThemedText>
+              <ThemedText style={styles.metadataHeading}>{t('emails.to')}</ThemedText>
             </View>
             <View style={styles.metadataValue}>
               <ThemedText style={styles.metadataText}>
@@ -463,7 +465,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
     emailView = (
       <TextInput
         style={[styles.plainText, isDarkMode ? styles.textDark : styles.textLight]}
-        value={email.messagePlain || 'This email does not contain any plain-text.'}
+        value={email.messagePlain || t('emails.noPlainText')}
         editable={false}
         multiline
       />
@@ -472,12 +474,12 @@ export default function EmailDetailsScreen() : React.ReactNode {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen options={{ title: 'Email Details' }} />
+      <Stack.Screen options={{ title: t('emails.title') }} />
       {metadataView}
       {emailView}
       {email.attachments && email.attachments.length > 0 && (
         <View style={styles.attachments}>
-          <ThemedText style={styles.attachmentsTitle}>Attachments</ThemedText>
+          <ThemedText style={styles.attachmentsTitle}>{t('emails.attachments')}</ThemedText>
           {email.attachments.map((attachment) => (
             <TouchableOpacity
               key={attachment.id}
@@ -486,7 +488,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
             >
               <Ionicons name="attach" size={20} color="#666" />
               <ThemedText style={styles.attachmentName}>
-                {attachment.filename} ({Math.ceil(attachment.filesize / 1024)} KB)
+                {attachment.filename} ({Math.ceil(attachment.filesize / 1024)} {t('emails.sizeKB')})
               </ThemedText>
             </TouchableOpacity>
           ))}

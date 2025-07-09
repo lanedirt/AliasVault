@@ -19,7 +19,7 @@ const initI18n = async (): Promise<void> => {
   const deviceLanguage = locales[0]?.languageCode ?? 'en';
   const selectedLanguage = resources[deviceLanguage as keyof typeof resources] ? deviceLanguage : 'en';
 
-  i18n
+  await i18n
     .use(initReactI18next)
     .init({
       compatibilityJSON: 'v3',

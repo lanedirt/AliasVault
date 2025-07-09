@@ -2,6 +2,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, AppState } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -16,6 +17,7 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
   const router = useRouter();
   const colors = useColors();
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   /**
    * Handle the stay in app button press.
@@ -83,7 +85,7 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
           onPress={handleStayInApp}
           style={styles.headerRightButton}
         >
-          <ThemedText style={{ color: colors.primary }}>Dismiss</ThemedText>
+          <ThemedText style={{ color: colors.primary }}>{t('common.cancel')}</ThemedText>
         </TouchableOpacity>
       ),
     });
@@ -100,13 +102,13 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
           />
         </View>
 
-        <ThemedText style={styles.title}>Credential Created!</ThemedText>
+        <ThemedText style={styles.title}>{t('credentials.credentialCreated')}</ThemedText>
 
         <ThemedText style={styles.message}>
-          Your new credential has been added to your vault and is now available for password autofill.
+          {t('credentials.credentialCreatedMessage')}
         </ThemedText>
         <ThemedText style={[styles.message, styles.boldMessage]}>
-            Switch back to your browser to continue.
+            {t('credentials.switchBackToBrowser')}
         </ThemedText>
       </ThemedView>
     </ThemedSafeAreaView>

@@ -52,6 +52,7 @@
     "confirmLogout": "Weet u zeker dat u wilt uitloggen? U moet opnieuw inloggen met uw hoofdwachtwoord om toegang te krijgen tot uw kluis."
   },
   "credentials": {
+    "title": "Referenties",
     "addCredential": "Referentie Toevoegen",
     "editCredential": "Referentie Bewerken",
     "deleteCredential": "Referentie Verwijderen",
@@ -68,6 +69,7 @@
     "firstName": "Voornaam",
     "lastName": "Achternaam",
     "nickName": "Bijnaam",
+    "fullName": "Volledige Naam",
     "gender": "Geslacht",
     "birthDate": "Geboortedatum",
     "birthDatePlaceholder": "JJJJ-MM-DD",
@@ -75,6 +77,29 @@
     "randomAlias": "Willekeurige Alias",
     "manual": "Handmatig",
     "generateRandomAlias": "Genereer Willekeurige Alias",
+    "searchPlaceholder": "Zoek referenties...",
+    "noMatchingCredentials": "Geen overeenkomende referenties gevonden",
+    "noCredentialsFound": "Geen referenties gevonden. Maak er een aan om te beginnen. Tip: u kunt ook inloggen op de AliasVault webapp om referenties te importeren uit andere wachtwoordbeheerders.",
+    "recentEmails": "Recente e-mails",
+    "loadingEmails": "E-mails laden...",
+    "noEmailsYet": "Nog geen e-mails ontvangen.",
+    "offlineEmailsMessage": "U bent offline. Maak verbinding met het internet om uw e-mails te laden.",
+    "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
+    "emailClaimError": "Het gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze referentie te bewerken.",
+    "emailSyncError": "Er is een fout opgetreden bij het laden van de e-mails. Probeer de referentie te bewerken en op te slaan om de database te synchroniseren, en probeer het opnieuw.",
+    "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
+    "password": "Wachtwoord",
+    "deletingCredential": "Referentie verwijderen...",
+    "errorLoadingCredentials": "Fout bij het laden van referenties",
+    "vaultSyncFailed": "Kluis synchronisatie mislukt",
+    "vaultSyncedSuccessfully": "Kluis succesvol gesynchroniseerd",
+    "vaultUpToDate": "Kluis is up-to-date",
+    "offlineMessage": "U bent offline. Maak verbinding met het internet om uw kluis te synchroniseren.",
+    "credentialCreated": "Referentie Aangemaakt!",
+    "credentialCreatedMessage": "Uw nieuwe referentie is toegevoegd aan uw kluis en is klaar voor gebruik.",
+    "switchBackToBrowser": "Schakel terug naar uw browser om door te gaan.",
+    "twoFactorAuth": "Twee-factor authenticatie",
+    "totpCode": "TOTP Code",
     "actions": {
       "copyUsername": "Kopieer Gebruikersnaam",
       "copyEmail": "Kopieer E-mail",
@@ -85,7 +110,8 @@
       "emailCopied": "E-mail gekopieerd naar klembord",
       "passwordCopied": "Wachtwoord gekopieerd naar klembord",
       "credentialUpdated": "Referentie succesvol bijgewerkt",
-      "credentialCreated": "Referentie succesvol aangemaakt"
+      "credentialCreated": "Referentie succesvol aangemaakt",
+      "credentialDeleted": "Referentie succesvol verwijderd"
     },
     "errors": {
       "loadFailed": "Laden van referentie mislukt",
@@ -133,5 +159,25 @@
   },
   "offline": {
     "banner": "U bent offline. Sommige functies zijn mogelijk niet beschikbaar."
+  },
+  "emails": {
+    "title": "E-mail Details",
+    "subject": "Onderwerp:",
+    "date": "Datum:",
+    "from": "Van:",
+    "to": "Aan:",
+    "attachments": "Bijlagen",
+    "deleteEmail": "E-mail Verwijderen",
+    "deleteEmailConfirm": "Weet u zeker dat u deze e-mail wilt verwijderen? Deze actie is permanent en kan niet ongedaan worden gemaakt.",
+    "emailNotFound": "E-mail niet gevonden",
+    "noPlainText": "Deze e-mail bevat geen platte tekst.",
+    "sizeKB": "KB",
+    "errors": {
+      "generic": "Er is een fout opgetreden",
+      "deleteFailed": "E-mail verwijderen mislukt",
+      "dbNotAvailable": "Database context of e-mail niet beschikbaar",
+      "decryptFailed": "Bijlage ontsleutelen mislukt",
+      "downloadFailed": "Bijlage downloaden mislukt"
+    }
   }
 }

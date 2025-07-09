@@ -2,6 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { AppInfo } from '@/utils/AppInfo';
 import type { ApiErrorResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
@@ -35,6 +36,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   const dbContext = useDb();
   const authContext = useAuth();
   const colors = useColors();
+  const { t } = useTranslation();
 
   /**
    * Check if the email is a public domain.
@@ -121,7 +123,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
           });
 
           if (!response.ok) {
-            setError('An error occurred while loading emails. Please try again later.');
+            setError(t('credentials.emailLoadError'));
             return;
           }
 
@@ -179,16 +181,16 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
               const apiErrorResponse = response as ApiErrorResponse;
 
               if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_MATCH_USER') {
-                setError('The current chosen email address is already in use. Please change the email address by editing this credential.');
+                setError(t('credentials.emailClaimError'));
               } else if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_EXIST') {
-                setError('An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.');
+                setError(t('credentials.emailSyncError'));
               } else {
-                setError('An error occurred while loading emails. Please try again later.');
+                setError(t('credentials.emailLoadError'));
               }
               return;
             }
           } catch {
-            setError('An error occurred while loading emails. Please try again later.');
+            setError(t('credentials.emailLoadError'));
             return;
           } finally {
             setLoading(false);
@@ -196,7 +198,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
         }
       } catch (err) {
         console.error('Error loading emails:', err);
-        setError('An unexpected error occurred while loading emails. Please try again later.');
+        setError(t('credentials.emailUnexpectedError'));
       }
     };
 
@@ -275,7 +277,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     return (
       <ThemedView style={styles.section}>
         <View style={styles.titleContainer}>
-          <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+          <ThemedText type="title" style={styles.title}>{t('credentials.recentEmails')}</ThemedText>
         </View>
         <View style={styles.errorContainer}>
           <ThemedText style={styles.errorText}>{error}</ThemedText>
@@ -288,10 +290,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     return (
       <ThemedView style={styles.section}>
         <View style={styles.titleContainer}>
-          <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+          <ThemedText type="title" style={styles.title}>{t('credentials.recentEmails')}</ThemedText>
           <PulseDot />
         </View>
-        <ThemedText style={styles.placeholderText}>Loading emails...</ThemedText>
+        <ThemedText style={styles.placeholderText}>{t('credentials.loadingEmails')}</ThemedText>
       </ThemedView>
     );
   }
@@ -300,9 +302,9 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     return (
       <ThemedView style={styles.section}>
         <View style={styles.titleContainer}>
-          <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+          <ThemedText type="title" style={styles.title}>{t('credentials.recentEmails')}</ThemedText>
         </View>
-        <ThemedText style={styles.placeholderText}>You are offline. Please connect to the internet to load your emails.</ThemedText>
+        <ThemedText style={styles.placeholderText}>{t('credentials.offlineEmailsMessage')}</ThemedText>
       </ThemedView>
     );
   }
@@ -311,10 +313,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
     return (
       <ThemedView style={styles.section}>
         <View style={styles.titleContainer}>
-          <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+          <ThemedText type="title" style={styles.title}>{t('credentials.recentEmails')}</ThemedText>
           <PulseDot />
         </View>
-        <ThemedText style={styles.placeholderText}>No emails received yet.</ThemedText>
+        <ThemedText style={styles.placeholderText}>{t('credentials.noEmailsYet')}</ThemedText>
       </ThemedView>
     );
   }

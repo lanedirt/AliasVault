@@ -7,6 +7,7 @@ import { Resolver, useForm } from 'react-hook-form';
 import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
@@ -47,6 +48,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  const { t } = useTranslation();
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
     resolver: yupResolver(credentialSchema) as Resolver<Credential>,
@@ -92,8 +94,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       console.error('Error loading credential:', err);
       Toast.show({
         type: 'error',
-        text1: 'Failed to load credential',
-        text2: 'Please try again'
+        text1: t('credentials.errors.loadFailed'),
+        text2: t('auth.errors.enterPassword')
       });
     }
   }, [id, dbContext.sqliteClient, setValue]);
@@ -108,7 +110,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       setTimeout(() => {
         Toast.show({
           type: 'error',
-          text1: 'You are offline and in read-only mode. Please connect to the internet to add or edit a credential.',
+          text1: t('credentials.offlineMessage'),
           position: 'bottom'
         });
       }, 100);
@@ -306,7 +308,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       setTimeout(() => {
         Toast.show({
           type: 'success',
-          text1: isEditMode ? 'Credential updated successfully' : 'Credential created successfully',
+          text1: isEditMode ? t('credentials.toasts.credentialUpdated') : t('credentials.toasts.credentialCreated'),
           position: 'bottom'
         });
       }, 200);
@@ -334,8 +336,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       console.error('Error generating random username:', error);
       Toast.show({
         type: 'error',
-        text1: 'Failed to generate username',
-        text2: 'Please try again'
+        text1: t('credentials.errors.generateUsernameFailed'),
+        text2: t('auth.errors.enterPassword')
       });
     }
   };
@@ -353,8 +355,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       console.error('Error generating random password:', error);
       Toast.show({
         type: 'error',
-        text1: 'Failed to generate password',
-        text2: 'Please try again'
+        text1: t('credentials.errors.generatePasswordFailed'),
+        text2: t('auth.errors.enterPassword')
       });
     }
   };
@@ -370,15 +372,15 @@ export default function AddEditCredentialScreen() : React.ReactNode {
     Keyboard.dismiss();
 
     Alert.alert(
-      "Delete Credential",
-      "Are you sure you want to delete this credential? This action cannot be undone.",
+      t('credentials.deleteCredential'),
+      t('credentials.deleteConfirm'),
       [
         {
-          text: "Cancel",
+          text: t('common.cancel'),
           style: "cancel"
         },
         {
-          text: "Delete",
+          text: t('common.delete'),
           style: "destructive",
           /**
            * Delete the credential.
@@ -394,7 +396,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
             setTimeout(() => {
               Toast.show({
                 type: 'success',
-                text1: 'Credential deleted successfully',
+                text1: t('credentials.toasts.credentialDeleted'),
                 position: 'bottom'
               });
             }, 200);
@@ -518,7 +520,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
             onPress={() => router.back()}
             style={styles.headerLeftButton}
           >
-            <ThemedText style={styles.headerLeftButtonText}>Cancel</ThemedText>
+            <ThemedText style={styles.headerLeftButtonText}>{t('common.cancel')}</ThemedText>
           </TouchableOpacity>
         ),
         /**
@@ -557,7 +559,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
   return (
     <>
-      <Stack.Screen options={{ title: isEditMode ? 'Edit Credential' : 'Add Credential' }} />
+      <Stack.Screen options={{ title: isEditMode ? t('credentials.editCredential') : t('credentials.addCredential') }} />
       {(isSyncing) && (
         <LoadingOverlay status={syncStatus} />
       )}
@@ -584,7 +586,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                     color={mode === 'random' ? colors.primarySurfaceText : colors.text}
                   />
                   <ThemedText style={[styles.modeButtonText, mode === 'random' && styles.modeButtonTextActive]}>
-                    Random Alias
+                    {t('credentials.randomAlias')}
                   </ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -597,36 +599,36 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                     color={mode === 'manual' ? colors.primarySurfaceText : colors.text}
                   />
                   <ThemedText style={[styles.modeButtonText, mode === 'manual' && styles.modeButtonTextActive]}>
-                    Manual
+                    {t('credentials.manual')}
                   </ThemedText>
                 </TouchableOpacity>
               </View>
             )}
 
             <View style={styles.section}>
-              <ThemedText style={styles.sectionTitle}>Service</ThemedText>
+              <ThemedText style={styles.sectionTitle}>{t('credentials.service')}</ThemedText>
               <ValidatedFormField
                 ref={serviceNameRef}
                 control={control}
                 name="ServiceName"
-                label="Service Name"
+                label={t('credentials.serviceName')}
                 required
               />
               <ValidatedFormField
                 control={control}
                 name="ServiceUrl"
-                label="Service URL"
+                label={t('credentials.serviceUrl')}
               />
             </View>
             {(mode === 'manual' || isEditMode) && (
               <>
                 <View style={styles.section}>
-                  <ThemedText style={styles.sectionTitle}>Login credentials</ThemedText>
+                  <ThemedText style={styles.sectionTitle}>{t('credentials.loginCredentials')}</ThemedText>
 
                   <ValidatedFormField
                     control={control}
                     name="Username"
-                    label="Username"
+                    label={t('credentials.username')}
                     buttons={[
                       {
                         icon: "refresh",
@@ -637,7 +639,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                   <ValidatedFormField
                     control={control}
                     name="Password"
-                    label="Password"
+                    label={t('credentials.password')}
                     secureTextEntry={!isPasswordVisible}
                     buttons={[
                       {
@@ -655,52 +657,52 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                   />
                   <TouchableOpacity style={styles.generateButton} onPress={handleGenerateRandomAlias}>
                     <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
-                    <ThemedText style={styles.generateButtonText}>Generate Random Alias</ThemedText>
+                    <ThemedText style={styles.generateButtonText}>{t('credentials.generateRandomAlias')}</ThemedText>
                   </TouchableOpacity>
                   <ValidatedFormField
                     control={control}
                     name="Alias.Email"
-                    label="Email"
+                    label={t('credentials.email')}
                   />
                 </View>
 
                 <View style={styles.section}>
-                  <ThemedText style={styles.sectionTitle}>Alias</ThemedText>
+                  <ThemedText style={styles.sectionTitle}>{t('credentials.alias')}</ThemedText>
                   <ValidatedFormField
                     control={control}
                     name="Alias.FirstName"
-                    label="First Name"
+                    label={t('credentials.firstName')}
                   />
                   <ValidatedFormField
                     control={control}
                     name="Alias.LastName"
-                    label="Last Name"
+                    label={t('credentials.lastName')}
                   />
                   <ValidatedFormField
                     control={control}
                     name="Alias.NickName"
-                    label="Nick Name"
+                    label={t('credentials.nickName')}
                   />
                   <ValidatedFormField
                     control={control}
                     name="Alias.Gender"
-                    label="Gender"
+                    label={t('credentials.gender')}
                   />
                   <ValidatedFormField
                     control={control}
                     name="Alias.BirthDate"
-                    label="Birth Date"
-                    placeholder="YYYY-MM-DD"
+                    label={t('credentials.birthDate')}
+                    placeholder={t('credentials.birthDatePlaceholder')}
                   />
                 </View>
 
                 <View style={styles.section}>
-                  <ThemedText style={styles.sectionTitle}>Metadata</ThemedText>
+                  <ThemedText style={styles.sectionTitle}>{t('credentials.metadata')}</ThemedText>
 
                   <ValidatedFormField
                     control={control}
                     name="Notes"
-                    label="Notes"
+                    label={t('credentials.notes')}
                     multiline={true}
                     numberOfLines={4}
                     textAlignVertical="top"
@@ -713,7 +715,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                     style={styles.deleteButton}
                     onPress={handleDelete}
                   >
-                    <ThemedText style={styles.deleteButtonText}>Delete Credential</ThemedText>
+                    <ThemedText style={styles.deleteButtonText}>{t('credentials.deleteCredential')}</ThemedText>
                   </TouchableOpacity>
                 )}
               </>

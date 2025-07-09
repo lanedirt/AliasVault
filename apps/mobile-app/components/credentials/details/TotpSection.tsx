@@ -3,6 +3,7 @@ import * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 import type { Credential, TotpCode } from '@/utils/dist/shared/models/vault';
 
@@ -24,6 +25,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
   const [currentCodes, setCurrentCodes] = useState<Record<string, string>>({});
   const colors = useColors();
   const dbContext = useDb();
+  const { t } = useTranslation();
 
   /**
    * Get the remaining seconds.
@@ -75,7 +77,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
         // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
         Toast.show({
           type: 'success',
-          text1: 'Copied to clipboard',
+          text1: t('common.copied'),
           position: 'bottom',
           visibilityTime: 2000,
         });
@@ -186,7 +188,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="subtitle">
-        Two-factor authentication
+        {t('credentials.twoFactorAuth')}
       </ThemedText>
       {totpCodes.map(totpCode => (
         <TouchableOpacity
@@ -197,7 +199,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
           <View style={styles.codeContainer}>
             <View>
               <ThemedText style={styles.label}>
-                TOTP Code
+                {t('credentials.totpCode')}
               </ThemedText>
               <ThemedText style={styles.code}>
                 {currentCodes[totpCode.Id]}

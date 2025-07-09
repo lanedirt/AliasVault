@@ -1,4 +1,5 @@
 import type { Credential } from '@/utils/dist/shared/models/vault';
+import { useTranslation } from 'react-i18next';
 
 import FormInputCopyToClipboard from '@/components/form/FormInputCopyToClipboard';
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -12,6 +13,7 @@ type LoginCredentialsProps = {
  * Login credentials component.
  */
 export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }) : React.ReactNode => {
+  const { t } = useTranslation();
   const email = credential.Alias?.Email?.trim();
   const username = credential.Username?.trim();
   const password = credential.Password?.trim();
@@ -25,22 +27,22 @@ export const LoginCredentials: React.FC<LoginCredentialsProps> = ({ credential }
 
   return (
     <ThemedView style={styles.section}>
-      <ThemedText type="subtitle">Login credentials</ThemedText>
+      <ThemedText type="subtitle">{t('credentials.loginCredentials')}</ThemedText>
       {email && (
         <FormInputCopyToClipboard
-          label="Email"
+          label={t('credentials.email')}
           value={email}
         />
       )}
       {username && (
         <FormInputCopyToClipboard
-          label="Username"
+          label={t('credentials.username')}
           value={username}
         />
       )}
       {password && (
         <FormInputCopyToClipboard
-          label="Password"
+          label={t('credentials.password')}
           value={password}
           type="password"
         />
