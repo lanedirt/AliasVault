@@ -48,24 +48,34 @@ const detectLanguage = async (): Promise<string> => {
   return ['en', 'nl'].includes(browserLang) ? browserLang : 'en';
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: await detectLanguage(),
-    fallbackLng: 'en',
+/**
+ * Initialize i18n with async language detection
+ */
+const initI18n = async (): Promise<void> => {
+  const language = await detectLanguage();
+  
+  await i18n
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: language,
+      fallbackLng: 'en',
 
-    debug: false, // Set to true for development debugging
+      debug: false, // Set to true for development debugging
 
-    interpolation: {
-      escapeValue: false // React already escapes
-    },
+      interpolation: {
+        escapeValue: false // React already escapes
+      },
 
-    react: {
-      useSuspense: false, // Important for browser extensions
-      bindI18n: 'languageChanged loaded', // Bind to language change and loaded events
-      bindI18nStore: '' // Don't bind to resource store changes
-    }
-  });
+      react: {
+        useSuspense: false, // Important for browser extensions
+        bindI18n: 'languageChanged loaded', // Bind to language change and loaded events
+        bindI18nStore: '' // Don't bind to resource store changes
+      }
+    });
+};
+
+// Initialize immediately
+initI18n();
 
 export default i18n;
