@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -14,6 +15,7 @@ import { useAuth } from '@/context/AuthContext';
  */
 export default function AutoLockScreen() : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const { getAutoLockTimeout, setAutoLockTimeout } = useAuth();
   const [autoLockTimeout, setAutoLockTimeoutState] = useState<number>(0);
 
@@ -29,15 +31,15 @@ export default function AutoLockScreen() : React.ReactNode {
   }, [getAutoLockTimeout]);
 
   const timeoutOptions = [
-    { label: 'Never', value: 0 },
-    { label: '5 seconds', value: 5 },
-    { label: '30 seconds', value: 30 },
-    { label: '1 minute', value: 60 },
-    { label: '15 minutes', value: 900 },
-    { label: '30 minutes', value: 1800 },
-    { label: '1 hour', value: 3600 },
-    { label: '4 hours', value: 14400 },
-    { label: '8 hours', value: 28800 },
+    { label: t('settings.autoLockOptions.never'), value: 0 },
+    { label: t('settings.autoLockOptions.5seconds'), value: 5 },
+    { label: t('settings.autoLockOptions.30seconds'), value: 30 },
+    { label: t('settings.autoLockOptions.1minute'), value: 60 },
+    { label: t('settings.autoLockOptions.15minutes'), value: 900 },
+    { label: t('settings.autoLockOptions.30minutes'), value: 1800 },
+    { label: t('settings.autoLockOptions.1hour'), value: 3600 },
+    { label: t('settings.autoLockOptions.4hours'), value: 14400 },
+    { label: t('settings.autoLockOptions.8hours'), value: 28800 },
   ];
 
   const styles = StyleSheet.create({
@@ -76,7 +78,7 @@ export default function AutoLockScreen() : React.ReactNode {
     <ThemedContainer>
       <ThemedScrollView>
         <ThemedText style={styles.headerText}>
-          Choose how long the app can stay in the background before requiring re-authentication. You&apos;ll need to use Face ID or enter your password to unlock the vault again.
+          {t('settings.autoLockSettings.description')}
         </ThemedText>
         <View style={styles.optionContainer}>
           {timeoutOptions.map((option, index) => {

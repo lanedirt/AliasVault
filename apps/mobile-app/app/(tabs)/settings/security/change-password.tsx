@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
@@ -22,6 +23,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
   const colors = useColors();
   const authContext = useAuth();
   const { executeVaultPasswordChange, syncStatus } = useVaultMutate();
+  const { t } = useTranslation();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -63,35 +65,35 @@ export default function ChangePasswordScreen(): React.ReactNode {
    */
   const handleSubmit = async (): Promise<void> => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('common.error'), t('settings.securitySettings.changePassword.fillAllFields'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      Alert.alert(t('common.error'), t('settings.securitySettings.changePassword.passwordsDoNotMatch'));
       return;
     }
 
     if (!authContext.username) {
-      Alert.alert('Error', 'User not authenticated');
+      Alert.alert(t('common.error'), t('settings.securitySettings.changePassword.userNotAuthenticated'));
       return;
     }
 
     try {
       setIsLoading(true);
-      setLoadingStatus('Initiating password change...');
+      setLoadingStatus(t('settings.securitySettings.changePassword.initiatingChange'));
 
       const currentPasswordHashBase64 = await authContext.verifyPassword(currentPassword);
       if (!currentPasswordHashBase64) {
-        Alert.alert('Error', 'Current password is not correct');
+        Alert.alert(t('common.error'), t('settings.securitySettings.changePassword.currentPasswordIncorrect'));
         return;
       }
 
       await executeVaultPasswordChange(currentPasswordHashBase64, newPassword);
 
       // Show confirm dialog and go back to the settings screen
-      Alert.alert('Success', 'Password changed successfully', [
-        { text: 'OK',
+      Alert.alert(t('common.success'), t('settings.securitySettings.changePassword.passwordChangedSuccessfully'), [
+        { text: t('common.ok'),
           /**
            * Reset the password change state and go back to the settings screen
            */
@@ -104,7 +106,7 @@ export default function ChangePasswordScreen(): React.ReactNode {
       ]);
     } catch (error) {
       console.error('Password change error:', error);
-      Alert.alert('Error', 'Failed to change password. Please try again.');
+      Alert.alert(t('common.error'), t('settings.securitySettings.changePassword.failedToChange'));
     } finally {
       setIsLoading(false);
       setLoadingStatus(null);
@@ -123,42 +125,42 @@ export default function ChangePasswordScreen(): React.ReactNode {
         <ThemedContainer>
           <ThemedScrollView>
             <ThemedText style={styles.headerText}>
-              Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.
+              {t('settings.securitySettings.changePassword.headerText')}
             </ThemedText>
             <UsernameDisplay />
             <View style={styles.form}>
               <View style={styles.inputContainer}>
-                <ThemedText style={styles.label}>Current Password</ThemedText>
+                <ThemedText style={styles.label}>{t('settings.securitySettings.changePassword.currentPassword')}</ThemedText>
                 <ThemedTextInput
                   secureTextEntry
                   value={currentPassword}
                   onChangeText={setCurrentPassword}
-                  placeholder="Enter current password"
+                  placeholder={t('settings.securitySettings.changePassword.enterCurrentPassword')}
                 />
               </View>
 
               <View style={styles.inputContainer}>
-                <ThemedText style={styles.label}>New Password</ThemedText>
+                <ThemedText style={styles.label}>{t('settings.securitySettings.changePassword.newPassword')}</ThemedText>
                 <ThemedTextInput
                   secureTextEntry
                   value={newPassword}
                   onChangeText={setNewPassword}
-                  placeholder="Enter new password"
+                  placeholder={t('settings.securitySettings.changePassword.enterNewPassword')}
                 />
               </View>
 
               <View style={styles.inputContainer}>
-                <ThemedText style={styles.label}>Confirm New Password</ThemedText>
+                <ThemedText style={styles.label}>{t('settings.securitySettings.changePassword.confirmNewPassword')}</ThemedText>
                 <ThemedTextInput
                   secureTextEntry
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  placeholder="Confirm new password"
+                  placeholder={t('settings.securitySettings.changePassword.confirmNewPassword')}
                 />
               </View>
 
               <ThemedButton
-                title="Change Password"
+                title={t('settings.securitySettings.changePassword.changePassword')}
                 onPress={handleSubmit}
                 loading={isLoading}
                 style={styles.button}

@@ -7,6 +7,7 @@
     "yes": "Ja",
     "no": "Nee",
     "ok": "OK",
+    "continue": "Doorgaan",
     "loading": "Laden...",
     "error": "Fout",
     "success": "Succes",
@@ -129,6 +130,7 @@
     "security": "Beveiliging",
     "appVersion": "App versie {{version}} ({{url}})",
     "autoLockOptions": {
+      "never": "Nooit",
       "5seconds": "5 seconden",
       "30seconds": "30 seconden",
       "1minute": "1 minuut",
@@ -141,7 +143,115 @@
     "language": "Taal",
     "systemLanguage": "Systeemtaal",
     "languageSystemMessage": "Om de app-taal te wijzigen, openen we iOS Instellingen waar u de gewenste taal voor AliasVault kunt configureren.",
-    "openSettings": "Open Instellingen"
+    "openSettings": "Open Instellingen",
+    "vaultUnlockSettings": {
+      "title": "Kluis Ontgrendel Methode",
+      "description": "Kies hoe u uw kluis wilt ontgrendelen.",
+      "biometricEnabled": "{{biometric}} is nu succesvol ingeschakeld",
+      "biometricNotAvailable": "{{biometric}} Niet Beschikbaar",
+      "biometricDisabledMessage": "{{biometric}} is uitgeschakeld voor AliasVault. Om het te gebruiken, schakel het eerst in via uw apparaat-instellingen.",
+      "biometricHelp": "Uw kluis ontsleutelingssleutel wordt veilig opgeslagen op uw lokale apparaat in de {{keystore}} en kan veilig worden benaderd met {{biometric}}.",
+      "biometricUnavailableHelp": "{{biometric}} is niet beschikbaar. Tik om instellingen te openen en/of ga naar uw apparaat-instellingen om het in te schakelen en te configureren.",
+      "passwordHelp": "Voer uw volledige hoofdwachtwoord opnieuw in om uw kluis te ontgrendelen. Dit is altijd ingeschakeld als terugvaloptie.",
+      "keystoreIOS": "iOS Sleutelhanger",
+      "keystoreAndroid": "Android Sleutelopslag"
+    },
+    "autoLockSettings": {
+      "title": "Automatisch Vergrendelen Timeout",
+      "description": "Kies hoe lang de app op de achtergrond kan blijven voordat herauthenticatie vereist is. U moet Face ID gebruiken of uw wachtwoord invoeren om de kluis opnieuw te ontgrendelen."
+    },
+    "identityGeneratorSettings": {
+      "title": "Identiteit Generator",
+      "description": "Configureer de standaardtaal en geslachtsvoorkeur voor het genereren van nieuwe identiteiten.",
+      "languageSection": "Taal",
+      "languageDescription": "Stel de taal in die wordt gebruikt bij het genereren van nieuwe identiteiten.",
+      "genderSection": "Geslacht",
+      "genderDescription": "Stel de geslachtsvoorkeur in voor het genereren van nieuwe identiteiten.",
+      "languageOptions": {
+        "english": "Engels",
+        "dutch": "Nederlands"
+      },
+      "genderOptions": {
+        "random": "Willekeurig",
+        "male": "Mannelijk",
+        "female": "Vrouwelijk"
+      },
+      "errors": {
+        "loadFailed": "Laden van identiteit generator instellingen mislukt.",
+        "languageUpdateFailed": "Bijwerken van taalinstelling mislukt.",
+        "genderUpdateFailed": "Bijwerken van geslachtsinstelling mislukt."
+      }
+    },
+    "securitySettings": {
+      "title": "Beveiliging",
+      "description": "Beheer uw account en kluis beveiligingsinstellingen.",
+      "changeMasterPassword": "Hoofdwachtwoord Wijzigen",
+      "activeSessionsTitle": "Actieve Sessies",
+      "recentAuthLogs": "Recente Auth Logs",
+      "deleteAccountTitle": "Account Verwijderen",
+      "changePassword": {
+        "headerText": "Het wijzigen van uw hoofdwachtwoord wijzigt ook de kluisversleutelingssleutels. Het wordt aanbevolen om uw hoofdwachtwoord periodiek te wijzigen om uw kluizen veilig te houden.",
+        "currentPassword": "Huidige Wachtwoord",
+        "newPassword": "Nieuwe Wachtwoord",
+        "confirmNewPassword": "Bevestig Nieuwe Wachtwoord",
+        "enterCurrentPassword": "Voer huidige wachtwoord in",
+        "enterNewPassword": "Voer nieuwe wachtwoord in",
+        "changePassword": "Wachtwoord Wijzigen",
+        "fillAllFields": "Vul alle velden in",
+        "passwordsDoNotMatch": "Nieuwe wachtwoorden komen niet overeen",
+        "userNotAuthenticated": "Gebruiker niet geauthenticeerd",
+        "initiatingChange": "Wachtwoord wijziging starten...",
+        "currentPasswordIncorrect": "Huidige wachtwoord is niet correct",
+        "passwordChangedSuccessfully": "Wachtwoord succesvol gewijzigd",
+        "failedToChange": "Wachtwoord wijzigen mislukt. Probeer het opnieuw."
+      },
+      "activeSessions": {
+        "headerText": "Hieronder vindt u een lijst met apparaten waar uw account momenteel is ingelogd of een actieve sessie heeft. U kunt zich hier afmelden van elk van deze sessies.",
+        "noSessions": "Geen actieve sessies",
+        "revoke": "Intrekken",
+        "revokeSession": "Sessie Intrekken",
+        "revokeConfirmation": "Weet u zeker dat u deze sessie wilt intrekken? Dit zal u afmelden van het gekozen apparaat.",
+        "sessionRevoked": "Sessie succesvol ingetrokken",
+        "failedToRevoke": "Sessie intrekken mislukt",
+        "failedToLoad": "Laden van actieve sessies mislukt",
+        "lastActive": "Laatst actief",
+        "expires": "Verloopt"
+      },
+      "authLogs": {
+        "headerText": "Hieronder vindt u een overzicht van recente aanmeldpogingen bij uw account.",
+        "noLogs": "Geen aanmeldlogboeken gevonden",
+        "success": "Succesvol",
+        "failed": "Mislukt",
+        "time": "Tijd",
+        "device": "Apparaat",
+        "ipAddress": "IP-adres",
+        "client": "Client",
+        "failedToLoad": "Laden van aanmeldlogboeken mislukt"
+      },
+      "deleteAccount": {
+        "headerText": "Het verwijderen van uw account zal onmiddellijk en permanent al uw gegevens verwijderen.",
+        "warningText": "Waarschuwing: Deze actie kan niet ongedaan worden gemaakt. Al uw gegevens zullen permanent verwijderd worden.",
+        "finalWarning": "Laatste waarschuwing: Voer uw wachtwoord in om uw account permanent te verwijderen.",
+        "warningVaults": "Alle versleutelde kluizen inclusief al uw inloggegevens zullen permanent verwijderd worden",
+        "warningAliases": "Uw e-mailaliassen zullen weeën worden en kunnen niet door andere gebruikers worden geclaimd",
+        "warningRecovery": "Uw account kan niet worden hersteld na verwijdering",
+        "irreversibleWarning": "Accountverwijdering is onomkeerbaar en kan niet ongedaan worden gemaakt. Door op de knop hieronder te drukken wordt uw account onmiddellijk en permanent verwijderd.",
+        "enterUsername": "Voer uw gebruikersnaam in om door te gaan",
+        "password": "Wachtwoord",
+        "enterPassword": "Voer wachtwoord in",
+        "deleteAccount": "Account Verwijderen",
+        "confirmationMessage": "Weet u absoluut zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+        "usernameDoesNotMatch": "Gebruikersnaam komt niet overeen",
+        "verifyingPassword": "Wachtwoord verifiëren...",
+        "currentPasswordIncorrect": "Huidige wachtwoord is niet correct",
+        "initiatingDeletion": "Accountverwijdering starten",
+        "verifyingWithServer": "Verifiëren met server",
+        "deletingAccount": "Account verwijderen",
+        "accountDeleted": "Account succesvol verwijderd",
+        "failedToDelete": "Account verwijderen mislukt. Probeer het opnieuw.",
+        "usernameNotFound": "Gebruikersnaam niet gevonden. Log opnieuw in."
+      }
+    }
   },
   "navigation": {
     "credentials": "Referenties",

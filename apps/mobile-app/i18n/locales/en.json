@@ -7,6 +7,7 @@
     "yes": "Yes",
     "no": "No",
     "ok": "OK",
+    "continue": "Continue",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -129,6 +130,7 @@
     "security": "Security",
     "appVersion": "App version {{version}} ({{url}})",
     "autoLockOptions": {
+      "never": "Never",
       "5seconds": "5 seconds",
       "30seconds": "30 seconds",
       "1minute": "1 minute",
@@ -141,7 +143,115 @@
     "language": "Language",
     "systemLanguage": "System Language",
     "languageSystemMessage": "To change the app language, we'll open iOS Settings where you can configure the preferred language for AliasVault.",
-    "openSettings": "Open Settings"
+    "openSettings": "Open Settings",
+    "vaultUnlockSettings": {
+      "title": "Vault Unlock Method",
+      "description": "Choose how you want to unlock your vault.",
+      "biometricEnabled": "{{biometric}} is now successfully enabled",
+      "biometricNotAvailable": "{{biometric}} Not Available",
+      "biometricDisabledMessage": "{{biometric}} is disabled for AliasVault. In order to use it, please enable it in your device settings first.",
+      "biometricHelp": "Your vault decryption key will be securely stored on your local device in the {{keystore}} and can be accessed securely with {{biometric}}.",
+      "biometricUnavailableHelp": "{{biometric}} is not available. Tap to open settings and/or go to your device settings to enable and configure it.",
+      "passwordHelp": "Re-enter your full master password to unlock your vault. This is always enabled as fallback option.",
+      "keystoreIOS": "iOS Keychain",
+      "keystoreAndroid": "Android Keystore"
+    },
+    "autoLockSettings": {
+      "title": "Auto-lock Timeout",
+      "description": "Choose how long the app can stay in the background before requiring re-authentication. You'll need to use Face ID or enter your password to unlock the vault again."
+    },
+    "identityGeneratorSettings": {
+      "title": "Identity Generator",
+      "description": "Configure the default language and gender preference for generating new identities.",
+      "languageSection": "Language",
+      "languageDescription": "Set the language that will be used when generating new identities.",
+      "genderSection": "Gender",
+      "genderDescription": "Set the gender preference for generating new identities.",
+      "languageOptions": {
+        "english": "English",
+        "dutch": "Dutch"
+      },
+      "genderOptions": {
+        "random": "Random",
+        "male": "Male",
+        "female": "Female"
+      },
+      "errors": {
+        "loadFailed": "Failed to load identity generator settings.",
+        "languageUpdateFailed": "Failed to update language setting.",
+        "genderUpdateFailed": "Failed to update gender setting."
+      }
+    },
+    "securitySettings": {
+      "title": "Security",
+      "description": "Manage your account and vault security settings.",
+      "changeMasterPassword": "Change Master Password",
+      "activeSessionsTitle": "Active Sessions",
+      "recentAuthLogs": "Recent Auth Logs",
+      "deleteAccountTitle": "Delete Account",
+      "changePassword": {
+        "headerText": "Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password",
+        "enterCurrentPassword": "Enter current password",
+        "enterNewPassword": "Enter new password",
+        "changePassword": "Change Password",
+        "fillAllFields": "Please fill in all fields",
+        "passwordsDoNotMatch": "New passwords do not match",
+        "userNotAuthenticated": "User not authenticated",
+        "initiatingChange": "Initiating password change...",
+        "currentPasswordIncorrect": "Current password is not correct",
+        "passwordChangedSuccessfully": "Password changed successfully",
+        "failedToChange": "Failed to change password. Please try again."
+      },
+      "activeSessions": {
+        "headerText": "Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.",
+        "noSessions": "No active sessions",
+        "revoke": "Revoke",
+        "revokeSession": "Revoke Session",
+        "revokeConfirmation": "Are you sure you want to revoke this session? This will log you out of the chosen device.",
+        "sessionRevoked": "Session successfully revoked",
+        "failedToRevoke": "Failed to revoke session",
+        "failedToLoad": "Failed to load active sessions",
+        "lastActive": "Last active",
+        "expires": "Expires"
+      },
+      "authLogs": {
+        "headerText": "Below you can find an overview of recent login attempts to your account.",
+        "noLogs": "No auth logs found",
+        "success": "Success",
+        "failed": "Failed",
+        "time": "Time",
+        "device": "Device",
+        "ipAddress": "IP Address",
+        "client": "Client",
+        "failedToLoad": "Failed to load auth logs"
+      },
+      "deleteAccount": {
+        "headerText": "Deleting your account will immediately and permanently delete all of your data.",
+        "warningText": "Warning: This action cannot be undone. All your data will be permanently deleted.",
+        "finalWarning": "Final warning: Enter your password to permanently delete your account.",
+        "warningVaults": "All encrypted vaults which includes all of your credentials will be permanently deleted",
+        "warningAliases": "Your email aliases will be orphaned and cannot be claimed by other users",
+        "warningRecovery": "Your account cannot be recovered after deletion",
+        "irreversibleWarning": "Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immediately and permanently.",
+        "enterUsername": "Enter your username to continue",
+        "password": "Password",
+        "enterPassword": "Enter password",
+        "deleteAccount": "Delete Account",
+        "confirmationMessage": "Are you absolutely sure you want to delete your account? This action cannot be undone.",
+        "usernameDoesNotMatch": "Username does not match",
+        "verifyingPassword": "Verifying password...",
+        "currentPasswordIncorrect": "Current password is not correct",
+        "initiatingDeletion": "Initiating account deletion",
+        "verifyingWithServer": "Verifying with server",
+        "deletingAccount": "Deleting account",
+        "accountDeleted": "Account deleted successfully",
+        "failedToDelete": "Failed to delete account. Please try again.",
+        "usernameNotFound": "Username not found. Please login again."
+      }
+    }
   },
   "navigation": {
     "credentials": "Credentials",

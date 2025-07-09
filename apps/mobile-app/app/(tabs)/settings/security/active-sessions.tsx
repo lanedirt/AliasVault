@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 import type { RefreshToken } from '@/utils/dist/shared/models/webapi';
 
@@ -19,6 +20,7 @@ import { useWebApi } from '@/context/WebApiContext';
 export default function ActiveSessionsScreen() : React.ReactNode {
   const colors = useColors();
   const webApi = useWebApi();
+  const { t } = useTranslation();
 
   const [refreshTokens, setRefreshTokens] = useState<RefreshToken[]>([]);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
@@ -88,7 +90,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
       const response = await webApi.getActiveSessions();
       setRefreshTokens(response);
     } catch {
-      Alert.alert('Error', 'Failed to load active sessions');
+      Alert.alert(t('common.error'), t('settings.securitySettings.activeSessions.failedToLoad'));
     } finally {
       setIsLoading(false);
     }
@@ -99,12 +101,12 @@ export default function ActiveSessionsScreen() : React.ReactNode {
    */
   const handleRevokeSession = async (sessionId: string) : Promise<void> => {
     Alert.alert(
-      'Revoke Session',
-      'Are you sure you want to revoke this session? This will log you out of the chosen device.',
+      t('settings.securitySettings.activeSessions.revokeSession'),
+      t('settings.securitySettings.activeSessions.revokeConfirmation'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Revoke',
+          text: t('settings.securitySettings.activeSessions.revoke'),
           style: 'destructive',
           /**
            * Revoke the session and refresh the sessions.
@@ -116,14 +118,14 @@ export default function ActiveSessionsScreen() : React.ReactNode {
 
               // Show success toast
               Toast.show({
-                text1: 'Session successfully revoked',
+                text1: t('settings.securitySettings.activeSessions.sessionRevoked'),
                 type: 'success',
                 position: 'bottom',
               });
             } catch {
               // Show error toast
               Toast.show({
-                text1: 'Failed to revoke session',
+                text1: t('settings.securitySettings.activeSessions.failedToRevoke'),
                 type: 'error',
                 position: 'bottom',
               });
@@ -175,14 +177,14 @@ export default function ActiveSessionsScreen() : React.ReactNode {
         }
       >
         <ThemedText style={styles.headerText}>
-          Below is a list of devices where your account is currently logged in or has an active session. You can log out from any of these sessions here.
+          {t('settings.securitySettings.activeSessions.headerText')}
         </ThemedText>
         <View style={styles.section}>
           {isLoading ? (
             <SkeletonLoader count={1} height={100} parts={3} />
           ) : refreshTokens.length === 0 ? (
             <View style={styles.emptyState}>
-              <ThemedText style={styles.emptyStateText}>No active sessions</ThemedText>
+              <ThemedText style={styles.emptyStateText}>{t('settings.securitySettings.activeSessions.noSessions')}</ThemedText>
             </View>
           ) : (
             refreshTokens.map((item) => (
@@ -190,12 +192,12 @@ export default function ActiveSessionsScreen() : React.ReactNode {
                 <View style={styles.sessionHeader}>
                   <ThemedText style={styles.deviceName} numberOfLines={2}>{item.deviceIdentifier}</ThemedText>
                   <TouchableOpacity onPress={() => handleRevokeSession(item.id)}>
-                    <ThemedText style={styles.revokeButton}>Revoke</ThemedText>
+                    <ThemedText style={styles.revokeButton}>{t('settings.securitySettings.activeSessions.revoke')}</ThemedText>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.sessionDetails}>
-                  <ThemedText style={styles.detailText}>Last active: {formatDate(item.createdAt)}</ThemedText>
-                  <ThemedText style={styles.detailText}>Expires: {formatDate(item.expireDate)}</ThemedText>
+                  <ThemedText style={styles.detailText}>{t('settings.securitySettings.activeSessions.lastActive')}: {formatDate(item.createdAt)}</ThemedText>
+                  <ThemedText style={styles.detailText}>{t('settings.securitySettings.activeSessions.expires')}: {formatDate(item.expireDate)}</ThemedText>
                 </View>
               </View>
             ))

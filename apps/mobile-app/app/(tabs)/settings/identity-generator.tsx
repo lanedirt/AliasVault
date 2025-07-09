@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
 import { StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
@@ -11,27 +12,30 @@ import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useDb } from '@/context/DbContext';
 
-const LANGUAGE_OPTIONS = [
-  { label: 'English', value: 'en' },
-  { label: 'Dutch', value: 'nl' }
-];
-
-const GENDER_OPTIONS = [
-  { label: 'Random', value: 'random' },
-  { label: 'Male', value: 'male' },
-  { label: 'Female', value: 'female' }
-];
+// Language and gender options will be defined inside the component to use translations
 
 /**
  * Identity Generator Settings screen.
  */
 export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const dbContext = useDb();
   const { executeVaultMutation } = useVaultMutate();
 
   const [language, setLanguage] = useState<string>('en');
   const [gender, setGender] = useState<string>('random');
+
+  const LANGUAGE_OPTIONS = [
+    { label: t('settings.identityGeneratorSettings.languageOptions.english'), value: 'en' },
+    { label: t('settings.identityGeneratorSettings.languageOptions.dutch'), value: 'nl' }
+  ];
+
+  const GENDER_OPTIONS = [
+    { label: t('settings.identityGeneratorSettings.genderOptions.random'), value: 'random' },
+    { label: t('settings.identityGeneratorSettings.genderOptions.male'), value: 'male' },
+    { label: t('settings.identityGeneratorSettings.genderOptions.female'), value: 'female' }
+  ];
 
   useFocusEffect(
     useCallback(() => {
@@ -49,7 +53,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
           setGender(currentGender);
         } catch (error) {
           console.error('Error loading identity generator settings:', error);
-          Alert.alert('Error', 'Failed to load identity generator settings.');
+          Alert.alert(t('common.error'), t('settings.identityGeneratorSettings.errors.loadFailed'));
         }
       };
 
@@ -69,7 +73,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       setLanguage(newLanguage);
     } catch (error) {
       console.error('Error updating language setting:', error);
-      Alert.alert('Error', 'Failed to update language setting.');
+      Alert.alert(t('common.error'), t('settings.identityGeneratorSettings.errors.languageUpdateFailed'));
     }
   }, [executeVaultMutation, dbContext.sqliteClient]);
 
@@ -84,7 +88,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       setGender(newGender);
     } catch (error) {
       console.error('Error updating gender setting:', error);
-      Alert.alert('Error', 'Failed to update gender setting.');
+      Alert.alert(t('common.error'), t('settings.identityGeneratorSettings.errors.genderUpdateFailed'));
     }
   }, [executeVaultMutation, dbContext.sqliteClient]);
 
@@ -137,12 +141,12 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
     <ThemedContainer>
       <ThemedScrollView>
         <ThemedText style={styles.headerText}>
-          Configure the default language and gender preference for generating new identities.
+          {t('settings.identityGeneratorSettings.description')}
         </ThemedText>
 
-        <ThemedText style={styles.sectionTitle}>Language</ThemedText>
+        <ThemedText style={styles.sectionTitle}>{t('settings.identityGeneratorSettings.languageSection')}</ThemedText>
         <ThemedText style={styles.descriptionText}>
-          Set the language that will be used when generating new identities.
+          {t('settings.identityGeneratorSettings.languageDescription')}
         </ThemedText>
         <View style={styles.optionContainer}>
           {LANGUAGE_OPTIONS.map((option, index) => {
@@ -162,9 +166,9 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
           })}
         </View>
 
-        <ThemedText style={styles.sectionTitle}>Gender</ThemedText>
+        <ThemedText style={styles.sectionTitle}>{t('settings.identityGeneratorSettings.genderSection')}</ThemedText>
         <ThemedText style={styles.descriptionText}>
-          Set the gender preference for generating new identities.
+          {t('settings.identityGeneratorSettings.genderDescription')}
         </ThemedText>
         <View style={styles.optionContainer}>
           {GENDER_OPTIONS.map((option, index) => {
