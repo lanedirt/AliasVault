@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 
@@ -9,6 +10,7 @@ import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 const LoginServerInfo: React.FC = () => {
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
 
   useEffect(() => {
     /**
@@ -26,7 +28,7 @@ const LoginServerInfo: React.FC = () => {
 
   return (
     <div className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-      (Connecting to{' '}
+      ({t('connectingTo')}{' '}
       <button
         onClick={handleClick}
         type="button"
