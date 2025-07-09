@@ -30,7 +30,7 @@ public struct CredentialProviderView: View {
 
                     if viewModel.isLoading {
                         Spacer()
-                        ProgressView("Loading credentials...")
+                        ProgressView(NSLocalizedString("loading_credentials", comment: ""))
                             .progressViewStyle(.circular)
                             .scaleEffect(1.5)
                         Spacer()
@@ -42,11 +42,11 @@ public struct CredentialProviderView: View {
                                         .font(.system(size: 50))
                                         .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
 
-                                    Text("No credentials found")
+                                    Text(NSLocalizedString("no_credentials_found", comment: ""))
                                         .font(.headline)
                                         .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
 
-                                    Text("No existing credentials match your search")
+                                    Text(NSLocalizedString("no_credentials_match", comment: ""))
                                         .font(.subheadline)
                                         .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
                                         .multilineTextAlignment(.center)
@@ -65,7 +65,7 @@ public struct CredentialProviderView: View {
                                             }, label: {
                                                 HStack {
                                                     Image(systemName: "plus.circle.fill")
-                                                    Text("Create New Credential")
+                                                    Text(NSLocalizedString("create_new_credential", comment: ""))
                                                 }
                                                 .padding()
                                                 .frame(maxWidth: .infinity)
@@ -98,11 +98,11 @@ public struct CredentialProviderView: View {
                     }
                 }
             }
-            .navigationTitle(viewModel.isChoosingTextToInsert ? "Select Text to Insert" : "Select Credential")
+            .navigationTitle(viewModel.isChoosingTextToInsert ? NSLocalizedString("select_text_to_insert", comment: "") : NSLocalizedString("select_credential", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("cancel", comment: "")) {
                         viewModel.cancel()
                     }
                     .foregroundColor(ColorConstants.Light.primary)
@@ -128,25 +128,25 @@ public struct CredentialProviderView: View {
             .actionSheet(isPresented: $viewModel.showSelectionOptions) {
                 // Define all text strings
                 guard let credential = viewModel.selectedCredential else {
-                    return ActionSheet(title: Text("Choose Username"), message: Text("No credential selected."), buttons: [.cancel()])
+                    return ActionSheet(title: Text(NSLocalizedString("choose_username", comment: "")), message: Text(NSLocalizedString("no_credential_selected", comment: "")), buttons: [.cancel()])
                 }
 
                 var buttons: [ActionSheet.Button] = []
 
                 if viewModel.isChoosingTextToInsert {
                     if let username = credential.username, !username.isEmpty {
-                        buttons.append(.default(Text("Username: \(username)")) {
+                        buttons.append(.default(Text(NSLocalizedString("username_prefix", comment: "") + username)) {
                             viewModel.selectUsername()
                         })
                     }
 
                     if let email = credential.alias?.email, !email.isEmpty {
-                        buttons.append(.default(Text("Email: \(email)")) {
+                        buttons.append(.default(Text(NSLocalizedString("email_prefix", comment: "") + email)) {
                             viewModel.selectEmail()
                         })
                     }
 
-                    buttons.append(.default(Text("Password")) {
+                    buttons.append(.default(Text(NSLocalizedString("password", comment: ""))) {
                         viewModel.selectPassword()
                     })
                 } else {
@@ -166,13 +166,13 @@ public struct CredentialProviderView: View {
                 buttons.append(.cancel())
 
                 return ActionSheet(
-                    title: viewModel.isChoosingTextToInsert ? Text("Select Text To Insert") : Text("Choose Username"),
-                    message: viewModel.isChoosingTextToInsert ? Text("Select the text to insert into the focused input field") : Text("This website may require either your username or your email address to log in"),
+                    title: viewModel.isChoosingTextToInsert ? Text(NSLocalizedString("select_text_to_insert", comment: "")) : Text(NSLocalizedString("choose_username", comment: "")),
+                    message: viewModel.isChoosingTextToInsert ? Text(NSLocalizedString("select_text_to_insert_message", comment: "")) : Text(NSLocalizedString("choose_username_message", comment: "")),
                     buttons: buttons
                 )
             }
-            .alert("Error", isPresented: $viewModel.showError) {
-                Button("OK") {
+            .alert(NSLocalizedString("error", comment: ""), isPresented: $viewModel.showError) {
+                Button(NSLocalizedString("ok", comment: "")) {
                     viewModel.dismissError()
                 }
             } message: {
@@ -241,7 +241,7 @@ public class CredentialProviderViewModel: ObservableObject {
             isLoading = false
         } catch {
             isLoading = false
-            errorMessage = "Failed to load credentials. Please open the AliasVault app to check for updates."
+            errorMessage = NSLocalizedString("credentials_load_error", comment: "")
             showError = true
         }
     }

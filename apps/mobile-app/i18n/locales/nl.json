@@ -1,0 +1,137 @@
+{
+  "common": {
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "save": "Opslaan",
+    "edit": "Bewerken",
+    "yes": "Ja",
+    "no": "Nee",
+    "ok": "OK",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "required": "Vereist",
+    "optional": "Optioneel",
+    "never": "Nooit",
+    "untitled": "Naamloos",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "version": "Versie"
+  },
+  "auth": {
+    "login": "Inloggen",
+    "logout": "Uitloggen",
+    "username": "Gebruikersnaam of e-mail",
+    "password": "Wachtwoord",
+    "authCode": "Authenticatiecode",
+    "unlock": "Ontgrendelen",
+    "unlocking": "Ontgrendelen...",
+    "unlockingVault": "Kluis ontgrendelen",
+    "loggingIn": "Inloggen",
+    "validatingCredentials": "Gegevens valideren",
+    "syncingVault": "Kluis synchroniseren",
+    "verifyingAuthCode": "Authenticatiecode verifiëren",
+    "verify": "Verifiëren",
+    "unlockVault": "Kluis Ontgrendelen",
+    "enterPassword": "Voer uw wachtwoord in om uw kluis te ontgrendelen",
+    "enterPasswordPlaceholder": "Wachtwoord",
+    "enterAuthCode": "Voer 6-cijferige code in",
+    "usernamePlaceholder": "naam / naam@bedrijf.com",
+    "passwordPlaceholder": "Voer uw wachtwoord in",
+    "enableBiometric": "{{biometric}} inschakelen?",
+    "biometricPrompt": "Wilt u {{biometric}} gebruiken om uw kluis te ontgrendelen?",
+    "tryBiometricAgain": "Probeer {{biometric}} Opnieuw",
+    "authCodeNote": "Opmerking: als u geen toegang heeft tot uw authenticator-apparaat, kunt u uw 2FA resetten met een herstelcode door in te loggen via de website.",
+    "noAccountYet": "Nog geen account?",
+    "errors": {
+      "credentialsRequired": "Gebruikersnaam en wachtwoord zijn vereist",
+      "invalidAuthCode": "Voer een geldige 6-cijferige authenticatiecode in",
+      "incorrectPassword": "Onjuist wachtwoord. Probeer het opnieuw.",
+      "enterPassword": "Voer uw wachtwoord in"
+    },
+    "confirmLogout": "Weet u zeker dat u wilt uitloggen? U moet opnieuw inloggen met uw hoofdwachtwoord om toegang te krijgen tot uw kluis."
+  },
+  "credentials": {
+    "addCredential": "Referentie Toevoegen",
+    "editCredential": "Referentie Bewerken",
+    "deleteCredential": "Referentie Verwijderen",
+    "deleteConfirm": "Weet u zeker dat u deze referentie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "credentialOptions": "Referentie Opties",
+    "service": "Service",
+    "serviceName": "Service Naam",
+    "serviceUrl": "Service URL",
+    "loginCredentials": "Inloggegevens",
+    "username": "Gebruikersnaam",
+    "email": "E-mail",
+    "alias": "Alias",
+    "metadata": "Metadata",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "nickName": "Bijnaam",
+    "gender": "Geslacht",
+    "birthDate": "Geboortedatum",
+    "birthDatePlaceholder": "JJJJ-MM-DD",
+    "notes": "Notities",
+    "randomAlias": "Willekeurige Alias",
+    "manual": "Handmatig",
+    "generateRandomAlias": "Genereer Willekeurige Alias",
+    "actions": {
+      "copyUsername": "Kopieer Gebruikersnaam",
+      "copyEmail": "Kopieer E-mail",
+      "copyPassword": "Kopieer Wachtwoord"
+    },
+    "toasts": {
+      "usernameCopied": "Gebruikersnaam gekopieerd naar klembord",
+      "emailCopied": "E-mail gekopieerd naar klembord",
+      "passwordCopied": "Wachtwoord gekopieerd naar klembord",
+      "credentialUpdated": "Referentie succesvol bijgewerkt",
+      "credentialCreated": "Referentie succesvol aangemaakt"
+    },
+    "errors": {
+      "loadFailed": "Laden van referentie mislukt",
+      "generateUsernameFailed": "Genereren van gebruikersnaam mislukt",
+      "generatePasswordFailed": "Genereren van wachtwoord mislukt"
+    }
+  },
+  "settings": {
+    "title": "Instellingen",
+    "iosAutofill": "iOS Automatisch Invullen",
+    "androidAutofill": "Android Automatisch Invullen",
+    "vaultUnlock": "Kluis Ontgrendel Methode",
+    "autoLock": "Automatisch Vergrendelen Timeout",
+    "identityGenerator": "Identiteit Generator",
+    "security": "Beveiliging",
+    "appVersion": "App versie {{version}} ({{url}})",
+    "autoLockOptions": {
+      "5seconds": "5 seconden",
+      "30seconds": "30 seconden",
+      "1minute": "1 minuut",
+      "15minutes": "15 minuten",
+      "30minutes": "30 minuten",
+      "1hour": "1 uur",
+      "4hours": "4 uur",
+      "8hours": "8 uur"
+    },
+    "language": "Taal",
+    "systemLanguage": "Systeemtaal",
+    "languageSystemMessage": "Om de app-taal te wijzigen, openen we iOS Instellingen waar u de gewenste taal voor AliasVault kunt configureren.",
+    "openSettings": "Open Instellingen"
+  },
+  "navigation": {
+    "credentials": "Referenties",
+    "emails": "E-mails",
+    "settings": "Instellingen",
+    "notFound": "Deze pagina bestaat niet.",
+    "oops": "Oeps!",
+    "goBack": "Ga terug naar de hoofdpagina"
+  },
+  "validation": {
+    "serviceNameRequired": "Service naam is vereist",
+    "invalidUrl": "Ongeldig URL formaat",
+    "invalidDate": "Datum moet in JJJJ-MM-DD formaat zijn",
+    "invalidEmail": "Ongeldig e-mail formaat"
+  },
+  "offline": {
+    "banner": "U bent offline. Sommige functies zijn mogelijk niet beschikbaar."
+  }
+}

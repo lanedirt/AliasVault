@@ -18,6 +18,7 @@ import { AliasVaultToast } from '@/components/Toast';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { DbProvider, useDb } from '@/context/DbContext';
 import { useWebApi, WebApiProvider } from '@/context/WebApiContext';
+import { initI18n } from '@/i18n';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
 SplashScreen.preventAutoHideAsync();
@@ -46,6 +47,9 @@ function RootLayoutNav() : React.ReactNode {
 
     // Install the react-native-quick-crypto library which is used by the EncryptionUtility
     install();
+
+    // Initialize i18n
+    initI18n();
 
     hasBooted.current = true;
 
