@@ -7,6 +7,7 @@ import { StyleSheet, View, TextInput, TouchableOpacity, Alert, KeyboardAvoidingV
 import EncryptionUtility from '@/utils/EncryptionUtility';
 
 import { useColors } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/hooks/useTranslation';
 
 import Logo from '@/assets/images/logo.svg';
 import LoadingIndicator from '@/components/LoadingIndicator';
@@ -28,6 +29,7 @@ export default function UnlockScreen() : React.ReactNode {
   const [isLoading, setIsLoading] = useState(false);
   const [isBiometricsAvailable, setIsBiometricsAvailable] = useState(false);
   const colors = useColors();
+  const { t } = useTranslation();
   const webApi = useWebApi();
   const { getBiometricDisplayName } = useAuth();
   const [biometricDisplayName, setBiometricDisplayName] = useState('');
@@ -68,7 +70,7 @@ export default function UnlockScreen() : React.ReactNode {
    */
   const handleUnlock = async () : Promise<void> => {
     if (!password) {
-      Alert.alert('Error', 'Please enter your password');
+      Alert.alert(t('common.error'), t('auth.errors.enterPassword'));
       return;
     }
 
@@ -110,7 +112,7 @@ export default function UnlockScreen() : React.ReactNode {
         // Navigate to credentials
         router.replace('/(tabs)/credentials');
       } else {
-        Alert.alert('Error', 'Incorrect password. Please try again.');
+        Alert.alert(t('common.error'), t('auth.errors.incorrectPassword'));
       }
     } catch {
       Alert.alert('Error', 'Incorrect password. Please try again.');
@@ -267,7 +269,7 @@ export default function UnlockScreen() : React.ReactNode {
     <ThemedView style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <LoadingIndicator status="Unlocking vault" />
+          <LoadingIndicator status={t('auth.unlockingVault')} />
         </View>
       ) : (
         <KeyboardAvoidingView
@@ -287,7 +289,7 @@ export default function UnlockScreen() : React.ReactNode {
                 <View style={styles.headerSection}>
                   <View style={styles.logoContainer}>
                     <Logo width={80} height={80} />
-                    <Text style={styles.appName}>Unlock Vault</Text>
+                    <Text style={styles.appName}>{t('auth.unlockVault')}</Text>
                   </View>
                 </View>
                 <View style={styles.content}>
@@ -295,7 +297,7 @@ export default function UnlockScreen() : React.ReactNode {
                     <Avatar />
                     <ThemedText style={styles.username}>{username}</ThemedText>
                   </View>
-                  <ThemedText style={styles.subtitle}>Enter your password to unlock your vault</ThemedText>
+                  <ThemedText style={styles.subtitle}>{t('auth.enterPassword')}</ThemedText>
 
                   <View style={styles.inputContainer}>
                     <MaterialIcons
@@ -306,7 +308,7 @@ export default function UnlockScreen() : React.ReactNode {
                     />
                     <TextInput
                       style={styles.input}
-                      placeholder="Password"
+                      placeholder={t('auth.enterPasswordPlaceholder')}
                       placeholderTextColor={colors.textMuted}
                       secureTextEntry
                       value={password}
@@ -322,7 +324,7 @@ export default function UnlockScreen() : React.ReactNode {
                     disabled={isLoading}
                   >
                     <ThemedText style={styles.buttonText}>
-                      {isLoading ? 'Unlocking...' : 'Unlock'}
+                      {isLoading ? t('auth.unlocking') : t('auth.unlock')}
                     </ThemedText>
                   </TouchableOpacity>
 
@@ -331,7 +333,7 @@ export default function UnlockScreen() : React.ReactNode {
                       style={styles.faceIdButton}
                       onPress={handleBiometricsRetry}
                     >
-                      <ThemedText style={styles.faceIdButtonText}>Try {biometricDisplayName} Again</ThemedText>
+                      <ThemedText style={styles.faceIdButtonText}>{t('auth.tryBiometricAgain', { biometric: biometricDisplayName })}</ThemedText>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -340,7 +342,7 @@ export default function UnlockScreen() : React.ReactNode {
                   style={styles.logoutButton}
                   onPress={handleLogout}
                 >
-                  <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+                  <ThemedText style={styles.logoutButtonText}>{t('auth.logout')}</ThemedText>
                 </TouchableOpacity>
               </View>
             </ScrollView>

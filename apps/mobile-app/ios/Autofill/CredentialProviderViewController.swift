@@ -52,15 +52,15 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
             } catch {
                 print("Failed to setup view: \(error)")
                 let alert = UIAlertController(
-                    title: "Loading Error",
-                    message: "Loading credentials went wrong. Please open the AliasVault app to check for updates.",
+                    title: NSLocalizedString("loading_error", comment: ""),
+                    message: NSLocalizedString("loading_error_message", comment: ""),
                     preferredStyle: .alert
                 )
-                alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { [weak self] _ in
                     self?.extensionContext.cancelRequest(withError: NSError(
                         domain: ASExtensionErrorDomain,
                         code: ASExtensionError.failed.rawValue,
-                        userInfo: [NSLocalizedDescriptionKey: "Failed to load credentials"]
+                        userInfo: [NSLocalizedDescriptionKey: NSLocalizedString("failed_to_load_credentials", comment: "")]
                     ))
                 })
                 present(alert, animated: true)
@@ -179,11 +179,11 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
     private func sanityChecks(vaultStore: VaultStore) -> Bool {
         if !vaultStore.hasEncryptedDatabase {
             let alert = UIAlertController(
-                title: "Login Required",
-                message: "To use Autofill, please login to your AliasVault account in the AliasVault app.",
+                title: NSLocalizedString("login_required", comment: ""),
+                message: NSLocalizedString("login_required_message", comment: ""),
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { [weak self] _ in
                 self?.extensionContext.cancelRequest(withError: NSError(
                     domain: ASExtensionErrorDomain,
                     code: ASExtensionError.userCanceled.rawValue
@@ -195,7 +195,7 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
 
         // Check if Face ID/Touch ID is enabled
         let context = LAContext()
-        var authMethod = "Face ID / Touch ID"
+        var authMethod = NSLocalizedString("face_id_touch_id", comment: "")
         var biometricsAvailable = false
         var biometricsError: NSError?
 
@@ -204,9 +204,9 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
             biometricsAvailable = true
             switch context.biometryType {
             case .faceID:
-                authMethod = "Face ID"
+                authMethod = NSLocalizedString("face_id", comment: "")
             case .touchID:
-                authMethod = "Touch ID"
+                authMethod = NSLocalizedString("touch_id", comment: "")
             default:
                 break
             }
@@ -215,11 +215,11 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         // First check if biometrics are available on the device
         if !biometricsAvailable {
             let alert = UIAlertController(
-                title: "\(authMethod) Required",
-                message: "To use AliasVault Autofill, please enable \(authMethod) in your device settings and/or go to the AliasVault app settings to configure it.",
+                title: String(format: NSLocalizedString("biometric_required", comment: ""), authMethod),
+                message: String(format: NSLocalizedString("biometric_required_message", comment: ""), authMethod),
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { [weak self] _ in
                 self?.extensionContext.cancelRequest(withError: NSError(
                     domain: ASExtensionErrorDomain,
                     code: ASExtensionError.userCanceled.rawValue
@@ -232,11 +232,11 @@ public class CredentialProviderViewController: ASCredentialProviderViewControlle
         // Then check if Face ID/Touch ID is enabled in the app settings
         if !vaultStore.getAuthMethods().contains(.faceID) {
             let alert = UIAlertController(
-                title: "\(authMethod) Required",
-                message: "To use Autofill, please enable \(authMethod) as your vault unlock method in the AliasVault app settings.",
+                title: String(format: NSLocalizedString("biometric_required", comment: ""), authMethod),
+                message: String(format: NSLocalizedString("biometric_app_required_message", comment: ""), authMethod),
                 preferredStyle: .alert
             )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: ""), style: .default) { [weak self] _ in
                 self?.extensionContext.cancelRequest(withError: NSError(
                     domain: ASExtensionErrorDomain,
                     code: ASExtensionError.userCanceled.rawValue

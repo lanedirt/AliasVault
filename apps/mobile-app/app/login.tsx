@@ -16,6 +16,7 @@ import { SrpUtility } from '@/utils/SrpUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 
 import { useColors } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useVaultSync } from '@/hooks/useVaultSync';
 
 import Logo from '@/assets/images/logo.svg';
@@ -31,6 +32,7 @@ import { useWebApi } from '@/context/WebApiContext';
  */
 export default function LoginScreen() : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const [fadeAnim] = useState(new Animated.Value(0));
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
 
@@ -90,11 +92,11 @@ export default function LoginScreen() : React.ReactNode {
     if (isBiometricsEnabledOnDevice) {
       // Show biometric prompt if biometrics are available (faceid or fingerprint enrolled) on device.
       Alert.alert(
-        `Enable ${biometricDisplayName}?`,
-        `Would you like to use ${biometricDisplayName} to unlock your vault?`,
+        t('auth.enableBiometric', { biometric: biometricDisplayName }),
+        t('auth.biometricPrompt', { biometric: biometricDisplayName }),
         [
           {
-            text: 'No',
+            text: t('common.no'),
             style: 'destructive',
             /**
              * Handle disabling biometric authentication
@@ -111,7 +113,7 @@ export default function LoginScreen() : React.ReactNode {
             }
           },
           {
-            text: 'Yes',
+            text: t('common.yes'),
             isPreferred: true,
             /**
              * Handle enabling biometric authentication
@@ -185,7 +187,7 @@ export default function LoginScreen() : React.ReactNode {
         checkSuccess = false;
 
         // Show modal with error message
-        Alert.alert('Error', message);
+        Alert.alert(t('common.error'), message);
         webApi.logout(message);
         setIsLoading(false);
       },
@@ -231,12 +233,12 @@ export default function LoginScreen() : React.ReactNode {
 
     // Sanity check: if username or password is empty, return
     if (!credentials.username || !credentials.password) {
-      setError('Username and password are required');
+      setError(t('auth.errors.credentialsRequired'));
       setIsLoading(false);
       return;
     }
 
-    setLoginStatus('Logging in');
+    setLoginStatus(t('auth.loggingIn'));
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
@@ -254,7 +256,7 @@ export default function LoginScreen() : React.ReactNode {
       const passwordHashString = Buffer.from(passwordHash).toString('hex').toUpperCase();
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
 
-      setLoginStatus('Validating credentials');
+      setLoginStatus(t('auth.validatingCredentials'));
       await new Promise(resolve => requestAnimationFrame(resolve));
       const validationResponse = await srpUtil.validateLogin(
         ConversionUtility.normalizeUsername(credentials.username),
@@ -277,7 +279,7 @@ export default function LoginScreen() : React.ReactNode {
         throw new Error('Login failed -- no token returned');
       }
 
-      setLoginStatus('Syncing vault');
+      setLoginStatus(t('auth.syncingVault'));
       await new Promise(resolve => requestAnimationFrame(resolve));
       const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
@@ -317,7 +319,7 @@ export default function LoginScreen() : React.ReactNode {
    */
   const handleTwoFactorSubmit = async () : Promise<void> => {
     setIsLoading(true);
-    setLoginStatus('Verifying authentication code');
+    setLoginStatus(t('auth.verifyingAuthCode'));
     setError(null);
     await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -328,7 +330,7 @@ export default function LoginScreen() : React.ReactNode {
 
       const code = twoFactorCode.trim();
       if (!/^\d{6}$/.test(code)) {
-        throw new ApiAuthError('Please enter a valid 6-digit authentication code.');
+        throw new ApiAuthError(t('auth.errors.invalidAuthCode'));
       }
 
       const validationResponse = await srpUtil.validateLogin2Fa(
@@ -343,7 +345,7 @@ export default function LoginScreen() : React.ReactNode {
         throw new Error('Login failed -- no token returned');
       }
 
-      setLoginStatus('Syncing vault');
+      setLoginStatus(t('auth.syncingVault'));
       await new Promise(resolve => requestAnimationFrame(resolve));
       const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
         'Authorization': `Bearer ${validationResponse.token.token}`
@@ -394,23 +396,6 @@ export default function LoginScreen() : React.ReactNode {
       color: colors.primarySurfaceText,
       fontSize: 16,
       fontWeight: '600',
-    },
-    checkbox: {
-      alignItems: 'center',
-      borderColor: colors.accentBorder,
-      borderRadius: 4,
-      borderWidth: 2,
-      height: 20,
-      justifyContent: 'center',
-      width: 20,
-    },
-    checkboxChecked: {
-      backgroundColor: colors.primary,
-    },
-    checkboxInner: {
-      borderRadius: 2,
-      height: 12,
-      width: 12,
     },
     clickableLink: {
       color: colors.primary,
@@ -543,11 +528,11 @@ export default function LoginScreen() : React.ReactNode {
         </SafeAreaView>
         <ThemedView style={styles.content}>
           {isLoading ? (
-            <LoadingIndicator status={loginStatus ?? 'Loading...'} />
+            <LoadingIndicator status={loginStatus ?? t('common.loading')} />
           ) : (
             <>
               <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>Log in</Text>
+                <Text style={styles.headerTitle}>{t('auth.login')}</Text>
                 <Text style={styles.headerSubtitle}>
                   Connecting to{' '}
                   <Text
@@ -567,7 +552,7 @@ export default function LoginScreen() : React.ReactNode {
 
               {twoFactorRequired ? (
                 <View style={styles.formContainer}>
-                  <Text style={styles.label}>Authentication Code</Text>
+                  <Text style={styles.label}>{t('auth.authCode')}</Text>
                   <View style={styles.inputContainer}>
                     <MaterialIcons
                       name="security"
@@ -581,7 +566,7 @@ export default function LoginScreen() : React.ReactNode {
                       onChangeText={setTwoFactorCode}
                       autoCorrect={false}
                       autoCapitalize="none"
-                      placeholder="Enter 6-digit code"
+                      placeholder={t('auth.enterAuthCode')}
                       keyboardType="numeric"
                       maxLength={6}
                       placeholderTextColor={colors.textMuted}
@@ -596,7 +581,7 @@ export default function LoginScreen() : React.ReactNode {
                       {isLoading ? (
                         <ActivityIndicator color={colors.text} />
                       ) : (
-                        <Text style={styles.buttonText}>Verify</Text>
+                        <Text style={styles.buttonText}>{t('auth.verify')}</Text>
                       )}
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -611,16 +596,16 @@ export default function LoginScreen() : React.ReactNode {
                         setError(null);
                       }}
                     >
-                      <Text style={styles.buttonText}>Cancel</Text>
+                      <Text style={styles.buttonText}>{t('common.cancel')}</Text>
                     </TouchableOpacity>
                   </View>
                   <Text style={styles.textMuted}>
-                    Note: if you don&apos;t have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.
+                    {t('auth.authCodeNote')}
                   </Text>
                 </View>
               ) : (
                 <View style={styles.formContainer}>
-                  <Text style={styles.label}>Username or email</Text>
+                  <Text style={styles.label}>{t('auth.username')}</Text>
                   <View style={styles.inputContainer}>
                     <MaterialIcons
                       name="person"
@@ -632,13 +617,13 @@ export default function LoginScreen() : React.ReactNode {
                       style={styles.input}
                       value={credentials.username}
                       onChangeText={(text) => setCredentials({ ...credentials, username: text })}
-                      placeholder="name / name@company.com"
+                      placeholder={t('auth.usernamePlaceholder')}
                       autoCapitalize="none"
                       autoCorrect={false}
                       placeholderTextColor={colors.textMuted}
                     />
                   </View>
-                  <Text style={styles.label}>Password</Text>
+                  <Text style={styles.label}>{t('auth.password')}</Text>
                   <View style={styles.inputContainer}>
                     <MaterialIcons
                       name="lock"
@@ -650,7 +635,7 @@ export default function LoginScreen() : React.ReactNode {
                       style={styles.input}
                       value={credentials.password}
                       onChangeText={(text) => setCredentials({ ...credentials, password: text })}
-                      placeholder="Enter your password"
+                      placeholder={t('auth.passwordPlaceholder')}
                       secureTextEntry
                       placeholderTextColor={colors.textMuted}
                       autoCorrect={false}
@@ -665,7 +650,7 @@ export default function LoginScreen() : React.ReactNode {
                     {isLoading ? (
                       <ActivityIndicator color={colors.text} />
                     ) : (
-                      <Text style={styles.buttonText}>Login</Text>
+                      <Text style={styles.buttonText}>{t('auth.login')}</Text>
                     )}
                   </TouchableOpacity>
                   <View style={styles.createNewVaultContainer}>

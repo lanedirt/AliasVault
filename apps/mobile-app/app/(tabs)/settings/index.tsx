@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useRef, useState, useCallback } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Animated, Platform, Alert, Linking } from 'react-native';
 
 import { useApiUrl } from '@/utils/ApiUrlUtility';
 import { AppInfo } from '@/utils/AppInfo';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
+import { useTranslation } from '@/hooks/useTranslation';
 
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -24,6 +25,7 @@ import { useWebApi } from '@/context/WebApiContext';
 export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
+  const { t } = useTranslation();
   const { getAuthMethodDisplay, shouldShowAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
@@ -40,24 +42,24 @@ export default function SettingsScreen() : React.ReactNode {
        */
       const loadAutoLockDisplay = async () : Promise<void> => {
         const autoLockTimeout = await getAutoLockTimeout();
-        let display = 'Never';
+        let display = t('common.never');
 
         if (autoLockTimeout === 5) {
-          display = '5 seconds';
+          display = t('settings.autoLockOptions.5seconds');
         } else if (autoLockTimeout === 30) {
-          display = '30 seconds';
+          display = t('settings.autoLockOptions.30seconds');
         } else if (autoLockTimeout === 60) {
-          display = '1 minute';
+          display = t('settings.autoLockOptions.1minute');
         } else if (autoLockTimeout === 900) {
-          display = '15 minutes';
+          display = t('settings.autoLockOptions.15minutes');
         } else if (autoLockTimeout === 1800) {
-          display = '30 minutes';
+          display = t('settings.autoLockOptions.30minutes');
         } else if (autoLockTimeout === 3600) {
-          display = '1 hour';
+          display = t('settings.autoLockOptions.1hour');
         } else if (autoLockTimeout === 14400) {
-          display = '4 hours';
+          display = t('settings.autoLockOptions.4hours');
         } else if (autoLockTimeout === 28800) {
-          display = '8 hours';
+          display = t('settings.autoLockOptions.8hours');
         }
 
         setAutoLockDisplay(display);
@@ -80,7 +82,7 @@ export default function SettingsScreen() : React.ReactNode {
       };
 
       loadData();
-    }, [getAutoLockTimeout, getAuthMethodDisplay, setIsFirstLoad, loadApiUrl])
+    }, [getAutoLockTimeout, getAuthMethodDisplay, setIsFirstLoad, loadApiUrl, t])
   );
 
   /**
@@ -89,11 +91,11 @@ export default function SettingsScreen() : React.ReactNode {
   const handleLogout = async () : Promise<void> => {
     // Show native confirmation dialog
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout? You need to login again with your master password to access your vault.',
+      t('auth.logout'),
+      t('auth.confirmLogout'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive',
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('auth.logout'), style: 'destructive',
           /**
            * Handle the logout.
            */
@@ -139,6 +141,32 @@ export default function SettingsScreen() : React.ReactNode {
    */
   const handleIdentityGeneratorPress = () : void => {
     router.push('/(tabs)/settings/identity-generator');
+  };
+
+  /**
+   * Handle the language settings press.
+   */
+  const handleLanguagePress = (): void => {
+    Alert.alert(
+      t('settings.language'),
+      t('settings.languageSystemMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { 
+          text: t('settings.openSettings'), 
+          style: 'default',
+          /**
+           * Open iOS settings
+           */
+          onPress: (): void => {
+            // Open iOS Settings app
+            if (Platform.OS === 'ios') {
+              Linking.openURL('app-settings:');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const styles = StyleSheet.create({
@@ -224,7 +252,7 @@ export default function SettingsScreen() : React.ReactNode {
   return (
     <ThemedContainer>
       <CollapsibleHeader
-        title="Settings"
+        title={t('settings.title')}
         scrollY={scrollY}
         showNavigationHeader={false}
       />
@@ -239,7 +267,7 @@ export default function SettingsScreen() : React.ReactNode {
         scrollIndicatorInsets={{ bottom: 40 }}
         style={styles.scrollView}
       >
-        <TitleContainer title="Settings" />
+        <TitleContainer title={t('settings.title')} />
         <UsernameDisplay />
         <View style={styles.section}>
           {Platform.OS === 'ios' && (
@@ -252,7 +280,7 @@ export default function SettingsScreen() : React.ReactNode {
                   <Ionicons name="key-outline" size={20} color={colors.text} />
                 </View>
                 <View style={styles.settingItemContent}>
-                  <ThemedText style={styles.settingItemText}>iOS Autofill</ThemedText>
+                  <ThemedText style={styles.settingItemText}>{t('settings.iosAutofill')}</ThemedText>
                   {shouldShowAutofillReminder && (
                     <View style={styles.settingItemBadge}>
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
@@ -274,7 +302,7 @@ export default function SettingsScreen() : React.ReactNode {
                   <Ionicons name="key-outline" size={20} color={colors.text} />
                 </View>
                 <View style={styles.settingItemContent}>
-                  <ThemedText style={styles.settingItemText}>Android Autofill</ThemedText>
+                  <ThemedText style={styles.settingItemText}>{t('settings.androidAutofill')}</ThemedText>
                   {shouldShowAutofillReminder && (
                     <View style={styles.settingItemBadge}>
                       <ThemedText style={styles.settingItemBadgeText}>1</ThemedText>
@@ -294,7 +322,7 @@ export default function SettingsScreen() : React.ReactNode {
               <Ionicons name="lock-closed" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Vault Unlock Method</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.vaultUnlock')}</ThemedText>
               {isFirstLoad ? (
                 <InlineSkeletonLoader width={100} style={styles.skeletonLoader} />
               ) : (
@@ -312,12 +340,28 @@ export default function SettingsScreen() : React.ReactNode {
               <Ionicons name="timer-outline" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Auto-lock Timeout</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.autoLock')}</ThemedText>
               {isFirstLoad ? (
                 <InlineSkeletonLoader width={80} style={styles.skeletonLoader} />
               ) : (
                 <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
               )}
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.separator} />
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleLanguagePress}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="language" size={20} color={colors.text} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={styles.settingItemText}>{t('settings.language')}</ThemedText>
+              <ThemedText style={styles.settingItemValue}>
+                {t('settings.systemLanguage')}
+              </ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
@@ -332,7 +376,7 @@ export default function SettingsScreen() : React.ReactNode {
               <Ionicons name="person-outline" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Identity Generator</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.identityGenerator')}</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
@@ -345,7 +389,7 @@ export default function SettingsScreen() : React.ReactNode {
               <Ionicons name="shield-checkmark" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Security</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.security')}</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
@@ -360,13 +404,13 @@ export default function SettingsScreen() : React.ReactNode {
               <Ionicons name="log-out" size={20} color={colors.primary} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={[styles.settingItemText, { color: colors.primary }]}>Logout</ThemedText>
+              <ThemedText style={[styles.settingItemText, { color: colors.primary }]}>{t('auth.logout')}</ThemedText>
             </View>
           </TouchableOpacity>
         </View>
 
         <View style={styles.versionContainer}>
-          <ThemedText style={styles.versionText}>App version {AppInfo.VERSION} ({getDisplayUrl()})</ThemedText>
+          <ThemedText style={styles.versionText}>{t('settings.appVersion', { version: AppInfo.VERSION, url: getDisplayUrl() })}</ThemedText>
         </View>
       </Animated.ScrollView>
     </ThemedContainer>
