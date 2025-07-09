@@ -52,42 +52,42 @@ public struct CredentialCard: View {
             if let username = credential.username, !username.isEmpty {
                 Button(action: {
                     UIPasteboard.general.string = username
-                    copyToastMessage = "Username copied"
+                    copyToastMessage = NSLocalizedString("username_copied", comment: "Username copied message")
                     showCopyToast = true
                     // Delay for 1 second before calling onCopy which dismisses the view
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         onCopy()
                     }
                 }, label: {
-                    Label("Copy Username", systemImage: "person")
+                    Label(NSLocalizedString("copy_username", comment: "Copy username context menu"), systemImage: "person")
                 })
             }
 
             if let password = credential.password?.value, !password.isEmpty {
                 Button(action: {
                     UIPasteboard.general.string = password
-                    copyToastMessage = "Password copied"
+                    copyToastMessage = NSLocalizedString("password_copied", comment: "Password copied message")
                     showCopyToast = true
                     // Delay for 1 second before calling onCopy which dismisses the view
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         onCopy()
                     }
                 }, label: {
-                    Label("Copy Password", systemImage: "key")
+                    Label(NSLocalizedString("copy_password", comment: "Copy password context menu"), systemImage: "key")
                 })
             }
 
             if let email = credential.alias?.email, !email.isEmpty {
                 Button(action: {
                     UIPasteboard.general.string = email
-                    copyToastMessage = "Email copied"
+                    copyToastMessage = NSLocalizedString("email_copied", comment: "Email copied message")
                     showCopyToast = true
                     // Delay for 1 second before calling onCopy which dismisses the view
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         onCopy()
                     }
                 }, label: {
-                    Label("Copy Email", systemImage: "envelope")
+                    Label(NSLocalizedString("copy_email", comment: "Copy email context menu"), systemImage: "envelope")
                 })
             }
 
@@ -102,7 +102,7 @@ public struct CredentialCard: View {
                     UIApplication.shared.open(url)
                 }
             }, label: {
-                Label("View Details", systemImage: "eye")
+                Label(NSLocalizedString("view_details", comment: "View details context menu"), systemImage: "eye")
             })
 
             Button(action: {
@@ -110,7 +110,7 @@ public struct CredentialCard: View {
                     UIApplication.shared.open(url)
                 }
             }, label: {
-                Label("Edit", systemImage: "pencil")
+                Label(NSLocalizedString("edit", comment: "Edit context menu"), systemImage: "pencil")
             })
         })
         .overlay(

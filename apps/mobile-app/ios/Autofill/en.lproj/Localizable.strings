@@ -27,3 +27,16 @@
 "face_id_touch_id" = "Face ID / Touch ID";
 "face_id" = "Face ID";
 "touch_id" = "Touch ID";
+
+/* Context menu strings */
+"copy_username" = "Copy Username";
+"copy_password" = "Copy Password";
+"copy_email" = "Copy Email";
+"view_details" = "View Details";
+"edit" = "Edit";
+"username_copied" = "Username copied";
+"password_copied" = "Password copied";
+"email_copied" = "Email copied";
+
+/* Search bar */
+"search_credentials" = "Search credentials...";
