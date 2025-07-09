@@ -1,7 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-
 // Import all translations
 import authEn from '../locales/en/auth.json';
 import commonEn from '../locales/en/common.json';

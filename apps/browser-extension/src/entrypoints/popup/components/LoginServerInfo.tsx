@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 
