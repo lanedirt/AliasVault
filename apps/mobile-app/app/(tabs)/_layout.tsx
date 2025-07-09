@@ -1,6 +1,7 @@
 import { Tabs, router } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import emitter from '@/utils/EventEmitter';
 
@@ -20,6 +21,7 @@ export default function TabLayout() : React.ReactNode {
   const colors = useColors();
   const authContext = useAuth();
   const dbContext = useDb();
+  const { t } = useTranslation();
 
   // Check if user is authenticated and database is available
   const isFullyInitialized = authContext.isInitialized && dbContext.dbInitialized;
@@ -95,7 +97,7 @@ export default function TabLayout() : React.ReactNode {
       <Tabs.Screen
         name="credentials"
         options={{
-          title: 'Credentials',
+          title: t('navigation.credentials'),
           /**
            * Icon for the credentials tab.
            */
@@ -105,7 +107,7 @@ export default function TabLayout() : React.ReactNode {
       <Tabs.Screen
         name="emails"
         options={{
-          title: 'Emails',
+          title: t('navigation.emails'),
           /**
            * Icon for the emails tab.
            */
@@ -115,7 +117,7 @@ export default function TabLayout() : React.ReactNode {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t('navigation.settings'),
           /**
            * Icon for the settings tab.
            */

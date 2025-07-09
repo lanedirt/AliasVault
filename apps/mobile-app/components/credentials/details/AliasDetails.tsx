@@ -1,5 +1,6 @@
 import { IdentityHelperUtils } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
+import { useTranslation } from 'react-i18next';
 
 import FormInputCopyToClipboard from '@/components/form/FormInputCopyToClipboard';
 import { ThemedText } from '@/components/themed/ThemedText';
@@ -13,6 +14,7 @@ type AliasDetailsProps = {
  * Alias details component.
  */
 export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) : React.ReactNode => {
+  const { t } = useTranslation();
   const hasName = Boolean(credential.Alias?.FirstName?.trim() ?? credential.Alias?.LastName?.trim());
   const fullName = [credential.Alias?.FirstName, credential.Alias?.LastName].filter(Boolean).join(' ');
 
@@ -22,34 +24,34 @@ export const AliasDetails: React.FC<AliasDetailsProps> = ({ credential }) : Reac
 
   return (
     <ThemedView style={styles.section}>
-      <ThemedText type="subtitle">Alias</ThemedText>
+      <ThemedText type="subtitle">{t('credentials.alias')}</ThemedText>
       {hasName && (
         <FormInputCopyToClipboard
-          label="Full Name"
+          label={t('credentials.fullName')}
           value={fullName}
         />
       )}
       {credential.Alias?.FirstName && (
         <FormInputCopyToClipboard
-          label="First Name"
+          label={t('credentials.firstName')}
           value={credential.Alias.FirstName}
         />
       )}
       {credential.Alias?.LastName && (
         <FormInputCopyToClipboard
-          label="Last Name"
+          label={t('credentials.lastName')}
           value={credential.Alias.LastName}
         />
       )}
       {credential.Alias?.NickName && (
         <FormInputCopyToClipboard
-          label="Nickname"
+          label={t('credentials.nickName')}
           value={credential.Alias.NickName}
         />
       )}
       {IdentityHelperUtils.isValidBirthDate(credential.Alias?.BirthDate) && (
         <FormInputCopyToClipboard
-          label="Birth Date"
+          label={t('credentials.birthDate')}
           value={IdentityHelperUtils.normalizeBirthDateForDisplay(credential.Alias.BirthDate)}
         />
       )}

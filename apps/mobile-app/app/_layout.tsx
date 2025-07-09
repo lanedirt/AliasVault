@@ -41,17 +41,18 @@ function RootLayoutNav() : React.ReactNode {
   const hasBooted = useRef(false);
 
   useEffect(() => {
-    if (hasBooted.current) {
-      return;
-    }
+    const initializeApp = async () => {
+      if (hasBooted.current) {
+        return;
+      }
 
-    // Install the react-native-quick-crypto library which is used by the EncryptionUtility
-    install();
+      // Install the react-native-quick-crypto library which is used by the EncryptionUtility
+      install();
 
-    // Initialize i18n
-    initI18n();
+      // Initialize i18n and wait for it to be ready
+      await initI18n();
 
-    hasBooted.current = true;
+      hasBooted.current = true;
 
     /**
      * Handle vault unlocking process.
@@ -183,7 +184,10 @@ function RootLayoutNav() : React.ReactNode {
       });
     };
 
-    initialize();
+      initialize();
+    };
+
+    initializeApp();
   }, [dbContext, syncVault, initializeAuth, webApi]);
 
   useEffect(() => {

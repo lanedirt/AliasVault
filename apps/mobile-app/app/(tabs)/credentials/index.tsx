@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import emitter from '@/utils/EventEmitter';
@@ -37,6 +38,7 @@ export default function CredentialsScreen() : React.ReactNode {
   const { syncVault } = useVaultSync();
   const webApi = useWebApi();
   const colors = useColors();
+  const { t } = useTranslation();
   const flatListRef = useRef<FlatList>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
@@ -69,7 +71,7 @@ export default function CredentialsScreen() : React.ReactNode {
       // Error loading credentials, show error toast
       Toast.show({
         type: 'error',
-        text1: 'Error loading credentials',
+        text1: t('credentials.errorLoadingCredentials'),
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
       setIsLoadingCredentials(false);
@@ -140,7 +142,7 @@ export default function CredentialsScreen() : React.ReactNode {
           setTimeout(() => {
             Toast.show({
               type: 'success',
-              text1: hasNewVault ? 'Vault synced successfully' : 'Vault is up-to-date',
+              text1: hasNewVault ? t('credentials.vaultSyncedSuccessfully') : t('credentials.vaultUpToDate'),
               position: 'top',
               visibilityTime: 1200,
             });
@@ -156,7 +158,7 @@ export default function CredentialsScreen() : React.ReactNode {
           setTimeout(() => {
             Toast.show({
               type: 'error',
-              text1: 'You are offline. Please connect to the internet to sync your vault.',
+              text1: t('credentials.offlineMessage'),
               position: 'bottom',
             });
           }, 200);
@@ -188,7 +190,7 @@ export default function CredentialsScreen() : React.ReactNode {
       setIsLoadingCredentials(false);
       Toast.show({
         type: 'error',
-        text1: 'Vault sync failed',
+        text1: t('credentials.vaultSyncFailed'),
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
@@ -297,7 +299,7 @@ export default function CredentialsScreen() : React.ReactNode {
        * Define custom header which is shown on Android. iOS displays the custom CollapsibleHeader component instead.
        * @returns
        */
-      headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Credentials" /> : <Text>Credentials</Text>,
+      headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title={t('credentials.title')} /> : <Text>{t('credentials.title')}</Text>,
     });
   }, [navigation]);
 
@@ -332,7 +334,7 @@ export default function CredentialsScreen() : React.ReactNode {
         <LoadingOverlay status={syncStatus} />
       )}
       <CollapsibleHeader
-        title="Credentials"
+        title={t('credentials.title')}
         scrollY={scrollY}
         showNavigationHeader={true}
         alwaysVisible={true}
@@ -366,7 +368,7 @@ export default function CredentialsScreen() : React.ReactNode {
           removeClippedSubviews={false}
           ListHeaderComponent={
             <ThemedView>
-              <TitleContainer title="Credentials" />
+              <TitleContainer title={t('credentials.title')} />
               {serviceUrl && (
                 <ServiceUrlNotice
                   serviceUrl={serviceUrl}
@@ -382,7 +384,7 @@ export default function CredentialsScreen() : React.ReactNode {
                 />
                 <TextInput
                   style={styles.searchInput}
-                  placeholder="Search credentials..."
+                  placeholder={t('credentials.searchPlaceholder')}
                   placeholderTextColor={colors.textMuted}
                   value={searchQuery}
                   autoCorrect={false}
@@ -419,13 +421,13 @@ export default function CredentialsScreen() : React.ReactNode {
           ListEmptyComponent={
             !isLoadingCredentials ? (
               <Text style={styles.emptyText}>
-                {searchQuery ? 'No matching credentials found' : 'No credentials found. Create one to get started. Tip: you can also login to the AliasVault web app to import credentials from other password managers.'}
+                {searchQuery ? t('credentials.noMatchingCredentials') : t('credentials.noCredentialsFound')}
               </Text>
             ) : null
           }
         />
       </ThemedView>
-      {isLoading && <LoadingOverlay status={syncStatus || 'Deleting credential...'} />}
+      {isLoading && <LoadingOverlay status={syncStatus || t('credentials.deletingCredential')} />}
     </ThemedContainer>
   );
 }
