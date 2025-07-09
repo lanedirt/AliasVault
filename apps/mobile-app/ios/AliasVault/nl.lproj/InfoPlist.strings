@@ -1,0 +1,4 @@
+/* Dutch localization for Info.plist */
+"CFBundleDisplayName" = "AliasVault";
+"CFBundleName" = "AliasVault";
+"NSFaceIDUsageDescription" = "AliasVault gebruikt Face ID om uw versleutelingssleutel veilig op te slaan, waardoor u toegang krijgt tot uw versleutelde gegevens met gezichtsherkenning.";

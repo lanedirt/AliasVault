@@ -10,7 +10,12 @@
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
     <key>CFBundleDevelopmentRegion</key>
-    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+      <string>en</string>
+      <string>nl</string>
+    </array>
     <key>CFBundleDisplayName</key>
     <string>AliasVault</string>
     <key>CFBundleExecutable</key>
