@@ -1,0 +1,4 @@
+/* English localization for Info.plist */
+"CFBundleDisplayName" = "AliasVault";
+"CFBundleName" = "AliasVault";
+"NSFaceIDUsageDescription" = "AliasVault uses Face ID to securely store your encryption key, allowing you to access your encrypted data with facial authentication.";
