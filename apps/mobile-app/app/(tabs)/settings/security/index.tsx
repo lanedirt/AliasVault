@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -14,6 +15,7 @@ import { SettingsHeader } from '@/components/ui/SettingsHeader';
  */
 export default function SecuritySettingsScreen() : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
 
   const styles = StyleSheet.create({
     section: {
@@ -57,7 +59,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
   return (
     <ThemedContainer>
       <ThemedScrollView>
-        <SettingsHeader title="Security" description="Manage your account and vault security settings." icon="shield-checkmark" />
+        <SettingsHeader title={t('settings.securitySettings.title')} description={t('settings.securitySettings.description')} icon="shield-checkmark" />
         <View style={styles.section}>
           <TouchableOpacity
             style={styles.settingItem}
@@ -67,7 +69,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
               <Ionicons name="key" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Change Master Password</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.securitySettings.changeMasterPassword')}</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
@@ -81,7 +83,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
               <Ionicons name="desktop" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Active Sessions</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.securitySettings.activeSessionsTitle')}</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
@@ -95,7 +97,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
               <Ionicons name="list" size={20} color={colors.text} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={styles.settingItemText}>Recent Auth Logs</ThemedText>
+              <ThemedText style={styles.settingItemText}>{t('settings.securitySettings.recentAuthLogs')}</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>
@@ -109,7 +111,7 @@ export default function SecuritySettingsScreen() : React.ReactNode {
               <Ionicons name="trash" size={20} color={colors.primary} />
             </View>
             <View style={styles.settingItemContent}>
-              <ThemedText style={[styles.settingItemText, { color: colors.primary }]}>Delete Account</ThemedText>
+              <ThemedText style={[styles.settingItemText, { color: colors.primary }]}>{t('settings.securitySettings.deleteAccountTitle')}</ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>

@@ -359,9 +359,6 @@ export default function SettingsScreen() : React.ReactNode {
             </View>
             <View style={styles.settingItemContent}>
               <ThemedText style={styles.settingItemText}>{t('settings.language')}</ThemedText>
-              <ThemedText style={styles.settingItemValue}>
-                {t('settings.systemLanguage')}
-              </ThemedText>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>
           </TouchableOpacity>

@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 import type { AuthLogModel } from '@/utils/dist/shared/models/webapi';
 import { AuthEventType } from '@/utils/dist/shared/models/webapi';
@@ -21,6 +22,7 @@ import { useWebApi } from '@/context/WebApiContext';
 export default function AuthLogsScreen() : React.ReactNode {
   const colors = useColors();
   const webApi = useWebApi();
+  const { t } = useTranslation();
 
   const [logs, setLogs] = useState<AuthLogModel[]>([]);
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 200);
@@ -94,7 +96,7 @@ export default function AuthLogsScreen() : React.ReactNode {
     } catch {
       Toast.show({
         type: 'error',
-        text1: 'Failed to load auth logs',
+        text1: t('settings.securitySettings.authLogs.failedToLoad'),
         position: 'bottom',
       });
     } finally {
@@ -145,7 +147,7 @@ export default function AuthLogsScreen() : React.ReactNode {
     if (logs.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <ThemedText style={styles.emptyStateText}>No auth logs found</ThemedText>
+          <ThemedText style={styles.emptyStateText}>{t('settings.securitySettings.authLogs.noLogs')}</ThemedText>
         </View>
       );
     }
@@ -161,14 +163,14 @@ export default function AuthLogsScreen() : React.ReactNode {
               styles.status,
               item.isSuccess ? styles.statusSuccess : styles.statusFailure
             ]}>
-              {item.isSuccess ? 'Success' : 'Failed'}
+              {item.isSuccess ? t('settings.securitySettings.authLogs.success') : t('settings.securitySettings.authLogs.failed')}
             </ThemedText>
           </View>
           <View>
-            <ThemedText style={styles.detailText}>Time: {formatDate(item.timestamp)}</ThemedText>
-            <ThemedText style={styles.detailText}>Device: {item.userAgent}</ThemedText>
-            <ThemedText style={styles.detailText}>IP Address: {item.ipAddress}</ThemedText>
-            <ThemedText style={styles.detailText}>Client: {item.client}</ThemedText>
+            <ThemedText style={styles.detailText}>{t('settings.securitySettings.authLogs.time')}: {formatDate(item.timestamp)}</ThemedText>
+            <ThemedText style={styles.detailText}>{t('settings.securitySettings.authLogs.device')}: {item.userAgent}</ThemedText>
+            <ThemedText style={styles.detailText}>{t('settings.securitySettings.authLogs.ipAddress')}: {item.ipAddress}</ThemedText>
+            <ThemedText style={styles.detailText}>{t('settings.securitySettings.authLogs.client')}: {item.client}</ThemedText>
           </View>
         </View>
       );
@@ -188,7 +190,7 @@ export default function AuthLogsScreen() : React.ReactNode {
         }
       >
         <ThemedText style={styles.headerText}>
-          Below you can find an overview of recent login attempts to your account.
+          {t('settings.securitySettings.authLogs.headerText')}
         </ThemedText>
         <View style={styles.section}>
           {renderContent()}

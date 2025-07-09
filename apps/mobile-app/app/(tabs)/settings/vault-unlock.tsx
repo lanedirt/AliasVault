@@ -2,6 +2,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -15,6 +16,7 @@ import { AuthMethod, useAuth } from '@/context/AuthContext';
  */
 export default function VaultUnlockSettingsScreen() : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const [initialized, setInitialized] = useState(false);
   const { setAuthMethods, getEnabledAuthMethods, getBiometricDisplayName } = useAuth();
   const [hasBiometrics, setHasBiometrics] = useState(false);
@@ -86,11 +88,11 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   const handleBiometricsToggle = useCallback(async (value: boolean) : Promise<void> => {
     if (value && !hasBiometrics) {
       Alert.alert(
-        `${biometricDisplayName} Not Available`,
-        `${biometricDisplayName} is disabled for AliasVault. In order to use it, please enable it in your device settings first.`,
+        t('settings.vaultUnlockSettings.biometricNotAvailable', { biometric: biometricDisplayName }),
+        t('settings.vaultUnlockSettings.biometricDisabledMessage', { biometric: biometricDisplayName }),
         [
           {
-            text: 'Open Settings',
+            text: t('settings.openSettings'),
             /**
              * Handle the open settings press.
              */
@@ -105,7 +107,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
             },
           },
           {
-            text: 'Cancel',
+            text: t('common.cancel'),
             style: 'cancel',
             /**
              * Handle the cancel press.
@@ -127,7 +129,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
     if (value) {
       Toast.show({
         type: 'success',
-        text1: `${biometricDisplayName} is now successfully enabled`,
+        text1: t('settings.vaultUnlockSettings.biometricEnabled', { biometric: biometricDisplayName }),
         position: 'bottom',
         visibilityTime: 1200,
       });
@@ -178,7 +180,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
     <ThemedContainer>
       <ThemedScrollView>
         <ThemedText style={styles.headerText}>
-          Choose how you want to unlock your vault.
+          {t('settings.vaultUnlockSettings.description')}
         </ThemedText>
 
         <View style={styles.optionContainer}>
@@ -198,25 +200,28 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
               </View>
             </View>
             <ThemedText style={styles.helpText}>
-              Your vault decryption key will be securely stored on your local device in the {Platform.OS === 'ios' ? 'iOS Keychain' : 'Android Keystore'} and can be accessed securely with {biometricDisplayName}.
+              {t('settings.vaultUnlockSettings.biometricHelp', { 
+                keystore: Platform.OS === 'ios' ? t('settings.vaultUnlockSettings.keystoreIOS') : t('settings.vaultUnlockSettings.keystoreAndroid'),
+                biometric: biometricDisplayName
+              })}
             </ThemedText>
             {!hasBiometrics && (
               <ThemedText style={[styles.helpText, { color: colors.errorBorder }]}>
-                {biometricDisplayName} is not available. Tap to open settings and/or go to your device settings to enable and configure it.
+                {t('settings.vaultUnlockSettings.biometricUnavailableHelp', { biometric: biometricDisplayName })}
               </ThemedText>
             )}
           </TouchableOpacity>
 
           <View style={[styles.option, styles.optionLast]}>
             <View style={styles.optionHeader}>
-              <ThemedText style={styles.optionText}>Password</ThemedText>
+              <ThemedText style={styles.optionText}>{t('credentials.password')}</ThemedText>
               <Switch
                 value={true}
                 disabled={true}
               />
             </View>
             <ThemedText style={styles.helpText}>
-              Re-enter your full master password to unlock your vault. This is always enabled as fallback option.
+              {t('settings.vaultUnlockSettings.passwordHelp')}
             </ThemedText>
           </View>
         </View>

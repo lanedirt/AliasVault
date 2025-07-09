@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import srp from 'secure-remote-password/client';
+import { useTranslation } from 'react-i18next';
 
 import type { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse, DeleteAccountRequest } from '@/utils/dist/shared/models/webapi';
 
@@ -24,6 +25,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
   const colors = useColors();
   const webApi = useWebApi();
   const { username, verifyPassword, logout } = useAuth();
+  const { t } = useTranslation();
 
   const [confirmUsername, setConfirmUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -95,7 +97,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
    */
   const handleUsernameSubmit = (): void => {
     if (confirmUsername !== username) {
-      Alert.alert('Error', 'Username does not match');
+      Alert.alert(t('common.error'), t('settings.securitySettings.deleteAccount.usernameDoesNotMatch'));
       return;
     }
     setStep('password');
@@ -106,17 +108,17 @@ export default function DeleteAccountScreen(): React.ReactNode {
    */
   const handleDeleteAccount = async (): Promise<void> => {
     if (!password) {
-      Alert.alert('Error', 'Please enter your password');
+      Alert.alert(t('common.error'), t('settings.securitySettings.deleteAccount.enterPassword'));
       return;
     }
 
     Alert.alert(
-      'Delete Account',
-      'Are you absolutely sure you want to delete your account? This action cannot be undone.',
+      t('settings.securitySettings.deleteAccount.deleteAccount'),
+      t('settings.securitySettings.deleteAccount.confirmationMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete Account',
+          text: t('settings.securitySettings.deleteAccount.deleteAccount'),
           style: 'destructive',
           /**
            * Handles the delete account press.
@@ -133,19 +135,19 @@ export default function DeleteAccountScreen(): React.ReactNode {
   const handleDeleteAccountPress = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      setLoadingStatus('Verifying password...');
+      setLoadingStatus(t('settings.securitySettings.deleteAccount.verifyingPassword'));
       const currentPasswordHashBase64 = await verifyPassword(password);
       if (!currentPasswordHashBase64) {
-        Alert.alert('Error', 'Current password is not correct');
+        Alert.alert(t('common.error'), t('settings.securitySettings.deleteAccount.currentPasswordIncorrect'));
         return;
       }
 
-      setLoadingStatus('Initiating account deletion');
+      setLoadingStatus(t('settings.securitySettings.deleteAccount.initiatingDeletion'));
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (!username) {
-        throw new Error('Username not found. Please login again.');
+        throw new Error(t('settings.securitySettings.deleteAccount.usernameNotFound'));
       }
 
       const deleteAccountInitiateRequest: DeleteAccountInitiateRequest = {
@@ -157,7 +159,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
       const currentSalt = data.salt;
       const currentServerEphemeral = data.serverEphemeral;
 
-      setLoadingStatus('Verifying with server');
+      setLoadingStatus(t('settings.securitySettings.deleteAccount.verifyingWithServer'));
       // Convert base64 string to hex string
       const currentPasswordHashString = Buffer.from(currentPasswordHashBase64, 'base64').toString('hex').toUpperCase();
 
@@ -167,7 +169,7 @@ export default function DeleteAccountScreen(): React.ReactNode {
       // Get username from the auth context, always lowercase and trimmed which is required for the argon2id key derivation
       const sanitizedUsername = username?.toLowerCase().trim();
       if (!sanitizedUsername) {
-        throw new Error('Username not found. Please login again.');
+        throw new Error(t('settings.securitySettings.deleteAccount.usernameNotFound'));
       }
 
       const privateKey = srp.derivePrivateKey(currentSalt, sanitizedUsername, currentPasswordHashString);
@@ -185,18 +187,18 @@ export default function DeleteAccountScreen(): React.ReactNode {
         clientSessionProof: newClientSession.proof,
       };
 
-      setLoadingStatus('Deleting account');
+      setLoadingStatus(t('settings.securitySettings.deleteAccount.deletingAccount'));
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Send final delete request with SRP proof.
       await webApi.post('Auth/delete-account/confirm', deleteAccountRequest);
 
       // Logout silently and navigate to login screen.
-      await logout('Account deleted successfully');
+      await logout(t('settings.securitySettings.deleteAccount.accountDeleted'));
       router.replace('/login');
     } catch (error) {
       console.error('Error deleting account:', error);
-      Alert.alert('Error', 'Failed to delete account. Please try again.');
+      Alert.alert(t('common.error'), t('settings.securitySettings.deleteAccount.failedToDelete'));
     } finally {
       setIsLoading(false);
       setLoadingStatus(null);
@@ -229,29 +231,29 @@ export default function DeleteAccountScreen(): React.ReactNode {
         <ThemedContainer>
           <ThemedScrollView>
             <ThemedText style={styles.headerText}>
-              Deleting your account will immediately and permanently delete all of your data.
+              {t('settings.securitySettings.deleteAccount.headerText')}
             </ThemedText>
             <UsernameDisplay />
             <View style={styles.form}>
               {step === 'username' ? (
                 <>
                   <ThemedText style={styles.warningText}>
-                    Warning: This action cannot be undone. All your data will be permanently deleted.
+                    {t('settings.securitySettings.deleteAccount.warningText')}
                   </ThemedText>
-                  <WarningItem text="All encrypted vaults which includes all of your credentials will be permanently deleted" />
-                  <WarningItem text="Your email aliases will be orphaned and cannot be claimed by other users" />
-                  <WarningItem text="Your account cannot be recovered after deletion" />
+                  <WarningItem text={t('settings.securitySettings.deleteAccount.warningVaults')} />
+                  <WarningItem text={t('settings.securitySettings.deleteAccount.warningAliases')} />
+                  <WarningItem text={t('settings.securitySettings.deleteAccount.warningRecovery')} />
                   <View style={styles.inputContainer}>
-                    <ThemedText style={styles.label}>Enter your username to continue</ThemedText>
+                    <ThemedText style={styles.label}>{t('settings.securitySettings.deleteAccount.enterUsername')}</ThemedText>
                     <ThemedTextInput
                       value={confirmUsername}
                       onChangeText={setConfirmUsername}
-                      placeholder="Enter username"
+                      placeholder={t('settings.securitySettings.deleteAccount.enterUsername')}
                       autoCapitalize="none"
                     />
                   </View>
                   <ThemedButton
-                    title="Continue"
+                    title={t('common.continue')}
                     onPress={handleUsernameSubmit}
                     style={styles.button}
                   />
@@ -259,20 +261,20 @@ export default function DeleteAccountScreen(): React.ReactNode {
               ) : (
                 <>
                   <ThemedText style={styles.warningText}>
-                    Final warning: Enter your password to permanently delete your account.
+                    {t('settings.securitySettings.deleteAccount.finalWarning')}
                   </ThemedText>
-                  <WarningItem text="Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently." />
+                  <WarningItem text={t('settings.securitySettings.deleteAccount.irreversibleWarning')} />
                   <View style={styles.inputContainer}>
-                    <ThemedText style={styles.label}>Password</ThemedText>
+                    <ThemedText style={styles.label}>{t('settings.securitySettings.deleteAccount.password')}</ThemedText>
                     <ThemedTextInput
                       secureTextEntry
                       value={password}
                       onChangeText={setPassword}
-                      placeholder="Enter password"
+                      placeholder={t('settings.securitySettings.deleteAccount.enterPassword')}
                     />
                   </View>
                   <ThemedButton
-                    title="Delete Account"
+                    title={t('settings.securitySettings.deleteAccount.deleteAccount')}
                     onPress={handleDeleteAccount}
                     loading={isLoading}
                     style={styles.button}
