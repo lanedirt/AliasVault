@@ -2,20 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSExtension</key>
-    <dict>
-        <key>NSExtensionPrincipalClass</key>
-        <string>$(PRODUCT_MODULE_NAME).CredentialProviderViewController</string>
-        <key>NSExtensionPointIdentifier</key>
-        <string>com.apple.authentication-services-credential-provider-ui</string>
-        <key>NSExtensionAttributes</key>
-        <dict>
-            <key>ASCredentialProviderExtensionCapabilities</key>
-            <dict>
-                <key>ProvidesTextToInsert</key>
-                <true/>
-            </dict>
-        </dict>
-    </dict>
+	<key>CFBundleLocalizations</key>
+    <array>
+      <string>en</string>
+      <string>nl</string>
+    </array>
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>ASCredentialProviderExtensionCapabilities</key>
+			<dict>
+				<key>ProvidesTextToInsert</key>
+				<true/>
+			</dict>
+		</dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.authentication-services-credential-provider-ui</string>
+		<key>NSExtensionPrincipalClass</key>
+		<string>$(PRODUCT_MODULE_NAME).CredentialProviderViewController</string>
+	</dict>
 </dict>
 </plist>
