@@ -27,3 +27,16 @@
 "face_id_touch_id" = "Face ID / Touch ID";
 "face_id" = "Face ID";
 "touch_id" = "Touch ID";
+
+/* Context menu strings */
+"copy_username" = "Kopieer Gebruikersnaam";
+"copy_password" = "Kopieer Wachtwoord";
+"copy_email" = "Kopieer E-mail";
+"view_details" = "Bekijk Details";
+"edit" = "Bewerken";
+"username_copied" = "Gebruikersnaam gekopieerd";
+"password_copied" = "Wachtwoord gekopieerd";
+"email_copied" = "E-mail gekopieerd";
+
+/* Search bar */
+"search_credentials" = "Zoek referenties...";

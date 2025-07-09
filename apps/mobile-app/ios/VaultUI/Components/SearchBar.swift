@@ -1,7 +1,7 @@
 import SwiftUI
 import Macaw
 
-/// Service logo view
+/// Search bar view
 public struct SearchBarView: View {
     @Binding var text: String
     @Environment(\.colorScheme) private var colorScheme
@@ -13,7 +13,7 @@ public struct SearchBarView: View {
                     .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
                     .padding(.leading, 8)
 
-                TextField("Search credentials...", text: $text)
+                TextField(NSLocalizedString("search_credentials", comment: "Search credentials placeholder"), text: $text)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
                     .foregroundColor(colorScheme == .dark ? ColorConstants.Dark.text : ColorConstants.Light.text)
