@@ -1,0 +1,5 @@
+<resources>
+  <string name="app_name">AliasVault</string>
+  <string name="autofill_service_description">AliasVault AutoFill</string>
+  <string name="aliasvault_icon">AliasVault pictogram</string>
+</resources>
