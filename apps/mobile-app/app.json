@@ -8,7 +8,11 @@
     "scheme": "net.aliasvault.app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "net.aliasvault.app",
@@ -51,7 +55,8 @@
             "enforceNavigationBarContrast": false
           }
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
