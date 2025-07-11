@@ -21,45 +21,99 @@
   </xsd:schema>
   <!-- Page title and description -->
   <data name="PageTitle">
-    <value>Extensions &amp; Apps</value>
-    <comment>Page title for extensions and apps</comment>
+    <value>General settings</value>
+    <comment>Page title for general settings</comment>
   </data>
   <data name="PageDescription">
-    <value>Install browser extensions and mobile apps to access your vault from all your devices and automatically fill credentials on websites.</value>
-    <comment>Page description for extensions and apps</comment>
+    <value>Configure general AliasVault settings.</value>
+    <comment>Page description for general settings</comment>
   </data>
   <data name="BreadcrumbTitle">
-    <value>Extensions &amp; Apps</value>
-    <comment>Breadcrumb title for extensions and apps</comment>
+    <value>General settings</value>
+    <comment>Breadcrumb title for general settings</comment>
   </data>
-  <!-- Browser Extensions Section -->
-  <data name="BrowserExtensionsTitle">
-    <value>Browser Extensions</value>
-    <comment>Title for browser extensions section</comment>
+  <!-- Email Settings Section -->
+  <data name="EmailSettingsTitle">
+    <value>Email Settings</value>
+    <comment>Title for email settings section</comment>
   </data>
-  <data name="BrowserExtensionsDescription">
-    <value>The AliasVault browser extension allows you to autofill existing credentials on any website. It also allows you to generate new aliases during registration, access received emails on all of your aliases, and view your aliases and identities.</value>
-    <comment>Description for browser extensions</comment>
+  <data name="DefaultEmailDomainLabel">
+    <value>Default email domain</value>
+    <comment>Label for default email domain setting</comment>
   </data>
-  <data name="InstallButton">
-    <value>Install</value>
-    <comment>Install button text</comment>
+  <data name="DefaultEmailDomainDescription">
+    <value>Set the default email domain that will be used when creating new credentials.</value>
+    <comment>Description for default email domain setting</comment>
   </data>
-  <data name="ComingSoonText">
-    <value>Coming soon</value>
-    <comment>Coming soon text for unavailable extensions</comment>
+  <data name="PrivateDomainsLabel">
+    <value>Private Domains</value>
+    <comment>Label for private domains group</comment>
   </data>
-  <!-- Mobile Apps Section -->
-  <data name="MobileAppsTitle">
-    <value>Mobile Apps</value>
-    <comment>Title for mobile apps section</comment>
+  <data name="PublicDomainsLabel">
+    <value>Public Domains</value>
+    <comment>Label for public domains group</comment>
   </data>
-  <data name="MobileAppsDescription">
-    <value>The AliasVault mobile app allows you to access your aliases and identities on the go, view and manage received emails, and generate new aliases anytime. Your data is fully protected with on-device biometric authentication.</value>
-    <comment>Description for mobile apps</comment>
+  <data name="AutoEmailRefreshLabel">
+    <value>Auto refresh emails content when new ones arrive</value>
+    <comment>Label for auto email refresh setting</comment>
   </data>
-  <data name="DownloadButton">
-    <value>Download</value>
-    <comment>Download button text</comment>
+  <!-- Alias Settings Section -->
+  <data name="AliasSettingsTitle">
+    <value>Alias Settings</value>
+    <comment>Title for alias settings section</comment>
+  </data>
+  <data name="AliasGenerationLanguageLabel">
+    <value>Alias generation language</value>
+    <comment>Label for alias generation language setting</comment>
+  </data>
+  <data name="AliasGenerationLanguageDescription">
+    <value>Set the default language that will be used when generating new identities.</value>
+    <comment>Description for alias generation language setting</comment>
+  </data>
+  <data name="EnglishOption">
+    <value>English</value>
+    <comment>English language option</comment>
+  </data>
+  <data name="DutchOption">
+    <value>Dutch</value>
+    <comment>Dutch language option</comment>
+  </data>
+  <data name="AliasGenerationGenderLabel">
+    <value>Alias generation gender</value>
+    <comment>Label for alias generation gender setting</comment>
+  </data>
+  <data name="AliasGenerationGenderDescription">
+    <value>Set the default gender preference for generating new identities.</value>
+    <comment>Description for alias generation gender setting</comment>
+  </data>
+  <data name="RandomOption">
+    <value>Random</value>
+    <comment>Random gender option</comment>
+  </data>
+  <data name="MaleOption">
+    <value>Male</value>
+    <comment>Male gender option</comment>
+  </data>
+  <data name="FemaleOption">
+    <value>Female</value>
+    <comment>Female gender option</comment>
+  </data>
+  <!-- Password Settings Section -->
+  <data name="PasswordSettingsTitle">
+    <value>Password Settings</value>
+    <comment>Title for password settings section</comment>
+  </data>
+  <!-- App Language Settings Section -->
+  <data name="AppLanguageTitle">
+    <value>Application Language</value>
+    <comment>Title for app language settings section</comment>
+  </data>
+  <data name="AppLanguageLabel">
+    <value>Language</value>
+    <comment>Label for app language setting</comment>
+  </data>
+  <data name="AppLanguageDescription">
+    <value>Set the language for the application interface.</value>
+    <comment>Description for app language setting</comment>
   </data>
 </root>
