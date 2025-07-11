@@ -35,20 +35,5 @@ const initI18n = async (): Promise<void> => {
     });
 };
 
-/**
- * Open iOS app settings for language change
- * This function is used to indicate that language should be changed in iOS Settings
- * The actual implementation depends on the platform
- */
-export const openAppSettings = (): void => {
-  // Implementation handled in settings screen
-};
-
-/**
- * Get the current language
- * @returns The current language code
- */
-export const getCurrentLanguage = (): string => i18n.language;
-
 export { initI18n };
 export default i18n;
