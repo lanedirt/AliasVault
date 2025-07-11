@@ -2,4 +2,10 @@
   <string name="app_name">AliasVault</string>
   <string name="autofill_service_description">AliasVault AutoFill</string>
   <string name="aliasvault_icon">AliasVault pictogram</string>
+
+  <!-- AutofillService strings -->
+  <string name="autofill_failed_to_retrieve">Ophalen mislukt, open app</string>
+  <string name="autofill_no_match_found">Geen match gevonden, nieuwe maken?</string>
+  <string name="autofill_open_app">Open app</string>
+  <string name="autofill_vault_locked">Kluis vergrendeld</string>
 </resources>
