@@ -58,18 +58,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- Page titles -->
+  <!-- Page title -->
   <data name="PageTitle" xml:space="preserve">
-    <value>Log in to AliasVault</value>
-    <comment>Main login page title</comment>
-  </data>
-  <data name="TwoFactorAuthenticationTitle" xml:space="preserve">
-    <value>Two-factor authentication</value>
-    <comment>Title for 2FA step</comment>
-  </data>
-  <data name="RecoveryCodeVerificationTitle" xml:space="preserve">
-    <value>Recovery code verification</value>
-    <comment>Title for recovery code step</comment>
+    <value>Create a new AliasVault account</value>
+    <comment>Main registration page title</comment>
   </data>
   <!-- Form labels -->
   <data name="UsernameOrEmailLabel" xml:space="preserve">
@@ -80,90 +72,41 @@
     <value>Your password</value>
     <comment>Label for password input field</comment>
   </data>
-  <data name="AuthenticatorCodeLabel" xml:space="preserve">
-    <value>Authenticator code</value>
-    <comment>Label for 2FA code input field</comment>
+  <data name="ConfirmPasswordLabel" xml:space="preserve">
+    <value>Confirm password</value>
+    <comment>Label for password confirmation input field</comment>
   </data>
-  <data name="RecoveryCodeLabel" xml:space="preserve">
-    <value>Recovery Code</value>
-    <comment>Label for recovery code input field</comment>
+  <!-- Terms and conditions -->
+  <data name="AcceptTermsLabel" xml:space="preserve">
+    <value>I accept the</value>
+    <comment>Text before terms and conditions link</comment>
   </data>
-  <data name="RememberMeLabel" xml:space="preserve">
-    <value>Remember me</value>
-    <comment>Label for remember me checkbox</comment>
-  </data>
-  <data name="RememberMachineLabel" xml:space="preserve">
-    <value>Remember this machine</value>
-    <comment>Label for remember machine checkbox</comment>
+  <data name="TermsAndConditionsLink" xml:space="preserve">
+    <value>Terms and Conditions</value>
+    <comment>Link text for terms and conditions</comment>
   </data>
   <!-- Buttons -->
-  <data name="LoginButton" xml:space="preserve">
-    <value>Log in</value>
-    <comment>Login button text</comment>
-  </data>
-  <data name="LoginToAccountButton" xml:space="preserve">
-    <value>Login to your account</value>
-    <comment>Extended login button text</comment>
+  <data name="CreateAccountButton" xml:space="preserve">
+    <value>Create account</value>
+    <comment>Create account button text</comment>
   </data>
   <!-- Links -->
-  <data name="LostPasswordLink" xml:space="preserve">
-    <value>Lost Password?</value>
-    <comment>Link text for password recovery</comment>
+  <data name="AlreadyRegisteredText" xml:space="preserve">
+    <value>Already registered?</value>
+    <comment>Text before login link</comment>
   </data>
-  <data name="CreateNewVaultLink" xml:space="preserve">
-    <value>Create new vault</value>
-    <comment>Link text for creating a new vault</comment>
-  </data>
-  <data name="LoginWithRecoveryCodeLink" xml:space="preserve">
-    <value>log in with a recovery code</value>
-    <comment>Link text for logging in with recovery code</comment>
-  </data>
-  <data name="LoginWithAuthenticatorLink" xml:space="preserve">
-    <value>log in with authenticator code</value>
-    <comment>Link text for logging in with authenticator</comment>
-  </data>
-  <!-- Descriptions and help text -->
-  <data name="TwoFactorAuthenticationDescription" xml:space="preserve">
-    <value>Your login is protected with an authenticator app. Enter your authenticator code below.</value>
-    <comment>Description for 2FA step</comment>
-  </data>
-  <data name="RecoveryCodeDescription" xml:space="preserve">
-    <value>You have requested to log in with a recovery code. A recovery code is a one-time code that can be used to log in to your account. Note that if you don't manually disable 2FA after login, you will be asked for an authenticator code again at the next login.</value>
-    <comment>Description for recovery code step</comment>
-  </data>
-  <data name="NoAccountYetText" xml:space="preserve">
-    <value>No account yet?</value>
-    <comment>Text before registration link</comment>
-  </data>
-  <data name="DontHaveAuthenticatorText" xml:space="preserve">
-    <value>Don't have access to your authenticator device? You can</value>
-    <comment>Text before recovery code link</comment>
-  </data>
-  <data name="RegainedAccessText" xml:space="preserve">
-    <value>Regained access to your authenticator device? You can</value>
-    <comment>Text before authenticator login link</comment>
+  <data name="LoginHereLink" xml:space="preserve">
+    <value>Login here</value>
+    <comment>Link text for login page</comment>
   </data>
   <!-- Loading and status messages -->
-  <data name="LoggingInMessage" xml:space="preserve">
-    <value>Logging in...</value>
-    <comment>Loading message during login process</comment>
+  <data name="CreatingAccountMessage" xml:space="preserve">
+    <value>Creating account...</value>
+    <comment>Loading message during account creation</comment>
   </data>
-  <data name="VerifyingTwoFactorCodeMessage" xml:space="preserve">
-    <value>Verifying 2FA code...</value>
-    <comment>Loading message during 2FA verification</comment>
-  </data>
-  <data name="VerifyingRecoveryCodeMessage" xml:space="preserve">
-    <value>Verifying recovery code...</value>
-    <comment>Loading message during recovery code verification</comment>
-  </data>
-  <!-- Error messages -->
-  <data name="LoginErrorMessage" xml:space="preserve">
-    <value>An error occurred while processing the login request. Try again (later).</value>
-    <comment>Generic login error message</comment>
-  </data>
-  <data name="LoginRequestErrorMessage" xml:space="preserve">
-    <value>An error occurred while processing the login request.</value>
-    <comment>Login request processing error message</comment>
+  <data name="RegistrationErrorMessage" xml:space="preserve">
+    <value>An error occurred during registration.</value>
+    <comment>Generic registration error message</comment>
   </data>
   <!-- Placeholders -->
   <data name="UsernamePlaceholder" xml:space="preserve">
