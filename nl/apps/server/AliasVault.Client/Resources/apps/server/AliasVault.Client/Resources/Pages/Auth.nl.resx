@@ -58,12 +58,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="LoggingOutTitle" xml:space="preserve">
-    <value>Uitloggen</value>
-    <comment>Title shown during logout process</comment>
+  <data name="MainTitle" xml:space="preserve">
+    <value>Wachtwoord &amp; (E-mail) Alias Manager</value>
+    <comment>Main title of the application</comment>
   </data>
-  <data name="LoggingOutDescription" xml:space="preserve">
-    <value>Je gegevens worden veilig geleegd en je wordt uitgelogd. Even geduld.</value>
-    <comment>Description shown during logout process</comment>
+  <data name="TaglineText" xml:space="preserve">
+    <value>Jouw Privacy. Beschermd.</value>
+    <comment>Tagline emphasizing privacy protection</comment>
+  </data>
+  <data name="CreateNewVaultButton" xml:space="preserve">
+    <value>Nieuwe kluis aanmaken</value>
+    <comment>Button text for creating a new vault</comment>
+  </data>
+  <data name="LoginExistingAccountButton" xml:space="preserve">
+    <value>Inloggen met bestaand account</value>
+    <comment>Button text for logging in with existing account</comment>
   </data>
 </root>
