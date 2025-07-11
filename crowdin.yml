@@ -37,36 +37,34 @@ languages:
 base_path: ./
 preserve_hierarchy: 1
 files:
-  - source: apps/server/AliasVault.Client/wwwroot/locales/en.json
-    translation: apps/server/AliasVault.Client/wwwroot/locales/%two_letters_code%.json
+  - source: /apps/server/AliasVault.Client/wwwroot/locales/en.json
+    translation: /apps/server/AliasVault.Client/wwwroot/locales/%two_letters_code%.json
     type: json
-  - source: apps/server/AliasVault.Client/Resources/SharedResources.en.resx
-    translation: apps/server/AliasVault.Client/Resources/SharedResources.%two_letters_code%.resx
+  - source: /apps/server/AliasVault.Client/Resources/**/*.en.resx
+    translation: /%original_path%/%file_name%.%two_letters_code%.resx
     type: resx
-  - source: apps/server/AliasVault.Client/Resources/**/*.en.resx
-    translation: apps/server/AliasVault.Client/Resources/%original_path%.%two_letters_code%.resx
-    type: resx
-  - source: apps/browser-extension/src/locales/en/**/*.json
-    translation: apps/browser-extension/src/locales/%two_letters_code%/%file_name%.%file_extension%
+    "translation_replace": {
+      "_en": ""
+    }
+  - source: /apps/browser-extension/src/locales/en/**/*.json
+    translation: /apps/browser-extension/src/locales/%two_letters_code%/%file_name%.%file_extension%
     type: json
-  - source: apps/mobile-app/i18n/locales/en.json
-    translation: apps/mobile-app/i18n/locales/%two_letters_code%.json
+  - source: /apps/mobile-app/i18n/locales/en.json
+    translation: /apps/mobile-app/i18n/locales/%two_letters_code%.json
     type: json
-  - source: apps/mobile-app/ios/AliasVault/en.lproj/Localizable.strings
-    translation: apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/Localizable.strings
+  - source: /apps/mobile-app/ios/AliasVault/en.lproj/Localizable.strings
+    translation: /apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/Localizable.strings
     type: strings
-  - source: apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings
-    translation: apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings
+  - source: /apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings
+    translation: /apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings
     type: strings
-  - source: apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings
-    translation: apps/mobile-app/ios/Autofill/%two_letters_code%.lproj/Localizable.strings
+  - source: /apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings
+    translation: /apps/mobile-app/ios/Autofill/%two_letters_code%.lproj/Localizable.strings
     type: strings
-  - source: apps/mobile-app/ios/VaultUI/en.lproj/Localizable.strings
-    translation: apps/mobile-app/ios/VaultUI/%two_letters_code%.lproj/Localizable.strings
+  - source: /apps/mobile-app/ios/VaultUI/en.lproj/Localizable.strings
+    translation: /apps/mobile-app/ios/VaultUI/%two_letters_code%.lproj/Localizable.strings
     type: strings
-  - source: apps/mobile-app/android/app/src/main/res/values/strings.xml
-    translation: apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml
+  - source: /apps/mobile-app/android/app/src/main/res/values/strings.xml
+    translation: /apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml
     type: android
-    ignore:
-      - apps/mobile-app/android/app/src/main/res/values-*/**
 commit_message: 'Update translations from Crowdin [ci skip]'
