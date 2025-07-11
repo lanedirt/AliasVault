@@ -58,20 +58,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="WelcomeTitle" xml:space="preserve">
-    <value>Welkom bij AliasVault</value>
-    <comment>Welcome title for new vault creation</comment>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Kluis ontsleutelingsfout.</value>
+    <comment>Title for vault decryption error</comment>
   </data>
-  <data name="CreatingDescription" xml:space="preserve">
-    <value>Je nieuwe versleutelde kluis wordt geïnitialiseerd. Dit proces kan even duren. Even geduld.</value>
-    <comment>Description for vault creation process</comment>
-  </data>
-  <data name="SaveFailedError" xml:space="preserve">
-    <value>Kluis succesvol aangemaakt maar opslaan naar server mislukt. Ververs de pagina en probeer opnieuw of neem contact op met support.</value>
-    <comment>Error message when vault creation succeeds but save fails</comment>
-  </data>
-  <data name="CreationFailedError" xml:space="preserve">
-    <value>Kluis aanmaken mislukt. Probeer opnieuw of neem contact op met support.</value>
-    <comment>Error message when vault creation fails</comment>
+  <data name="ErrorDescription" xml:space="preserve">
+    <value>Er is een fout opgetreden bij het lokaal ontsleutelen van je kluis. Je gegevens zijn op dit moment niet toegankelijk. Probeer het (later) opnieuw of neem contact op met support.</value>
+    <comment>Description for vault decryption error</comment>
   </data>
 </root>
