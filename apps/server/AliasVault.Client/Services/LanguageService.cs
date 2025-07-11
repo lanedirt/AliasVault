@@ -23,6 +23,22 @@ public class LanguageService(
     DbService dbService)
 {
     private const string AppLanguageKey = "AppLanguage";
+
+    /// <summary>
+    /// Language configuration containing all supported languages.
+    /// To add a new language, simply add a new entry to this list.
+    /// </summary>
+    private static readonly List<LanguageConfig> SupportedLanguages = new()
+    {
+        new LanguageConfig("en", "English", "🇺🇸"),
+        new LanguageConfig("nl", "Nederlands", "🇳🇱"),
+
+        // Add new languages here:
+        // new LanguageConfig("de", "Deutsch", "🇩🇪"),
+        // new LanguageConfig("fr", "Français", "🇫🇷"),
+        // new LanguageConfig("es", "Español", "🇪🇸"),
+    };
+
     private readonly ILocalStorageService _localStorage = localStorage;
     private readonly IJSRuntime _jsRuntime = jsRuntime;
     private readonly AuthenticationStateProvider _authenticationStateProvider = authenticationStateProvider;
@@ -39,11 +55,7 @@ public class LanguageService(
     /// <returns>Dictionary of language codes and display names.</returns>
     public static Dictionary<string, string> GetSupportedLanguages()
     {
-        return new Dictionary<string, string>
-        {
-            ["en"] = "English",
-            ["nl"] = "Nederlands",
-        };
+        return SupportedLanguages.ToDictionary(lang => lang.Code, lang => lang.DisplayName);
     }
 
     /// <summary>
@@ -52,11 +64,7 @@ public class LanguageService(
     /// <returns>Dictionary of language codes and display names with flag emojis.</returns>
     public static Dictionary<string, string> GetSupportedLanguagesWithFlags()
     {
-        return new Dictionary<string, string>
-        {
-            ["en"] = "🇺🇸 English",
-            ["nl"] = "🇳🇱 Nederlands",
-        };
+        return SupportedLanguages.ToDictionary(lang => lang.Code, lang => $"{lang.FlagEmoji} {lang.DisplayName}");
     }
 
     /// <summary>
@@ -66,12 +74,38 @@ public class LanguageService(
     /// <returns>Flag emoji string.</returns>
     public static string GetLanguageFlag(string languageCode)
     {
-        return languageCode switch
-        {
-            "en" => "🇺🇸",
-            "nl" => "🇳🇱",
-            _ => "🌐",
-        };
+        var language = SupportedLanguages.FirstOrDefault(lang => lang.Code == languageCode);
+        return language?.FlagEmoji ?? "🌐";
+    }
+
+    /// <summary>
+    /// Gets the display name for a specific language code.
+    /// </summary>
+    /// <param name="languageCode">The language code.</param>
+    /// <returns>Display name string.</returns>
+    public static string GetLanguageDisplayName(string languageCode)
+    {
+        var language = SupportedLanguages.FirstOrDefault(lang => lang.Code == languageCode);
+        return language?.DisplayName ?? languageCode;
+    }
+
+    /// <summary>
+    /// Checks if a language code is supported.
+    /// </summary>
+    /// <param name="languageCode">The language code to check.</param>
+    /// <returns>True if the language is supported, false otherwise.</returns>
+    public static bool IsLanguageSupported(string languageCode)
+    {
+        return SupportedLanguages.Any(lang => lang.Code == languageCode);
+    }
+
+    /// <summary>
+    /// Gets the default language code.
+    /// </summary>
+    /// <returns>Default language code.</returns>
+    public static string GetDefaultLanguage()
+    {
+        return SupportedLanguages.FirstOrDefault()?.Code ?? "en";
     }
 
     /// <summary>
@@ -251,4 +285,9 @@ public class LanguageService(
             // Ignore if blazorCulture is not available yet
         }
     }
+
+    /// <summary>
+    /// Configuration for a supported language.
+    /// </summary>
+    private record LanguageConfig(string Code, string DisplayName, string FlagEmoji);
 }
