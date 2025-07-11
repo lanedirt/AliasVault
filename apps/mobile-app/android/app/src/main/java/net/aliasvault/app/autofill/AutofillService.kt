@@ -87,7 +87,7 @@ class AutofillService : AutofillService() {
             try {
                 val responseBuilder = FillResponse.Builder()
                 val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
-                presentation.setTextViewText(R.id.text, "Failed to retrieve, open app")
+                presentation.setTextViewText(R.id.text, getString(R.string.autofill_failed_to_retrieve))
 
                 val dataSetBuilder = Dataset.Builder(presentation)
 
@@ -347,7 +347,7 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         presentation.setTextViewText(
             R.id.text,
-            "No match found, create new?",
+            getString(R.string.autofill_no_match_found),
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
@@ -391,7 +391,7 @@ class AutofillService : AutofillService() {
         val openAppPresentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         openAppPresentation.setTextViewText(
             R.id.text,
-            "Open app",
+            getString(R.string.autofill_open_app),
         )
 
         val dataSetBuilder = Dataset.Builder(openAppPresentation)
@@ -436,7 +436,7 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         presentation.setTextViewText(
             R.id.text,
-            "Vault locked",
+            getString(R.string.autofill_vault_locked),
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
@@ -474,7 +474,7 @@ class AutofillService : AutofillService() {
         val presentation = RemoteViews(packageName, R.layout.autofill_dataset_item_logo)
         presentation.setTextViewText(
             R.id.text,
-            "Failed to retrieve, open app",
+            getString(R.string.autofill_failed_to_retrieve),
         )
 
         val dataSetBuilder = Dataset.Builder(presentation)
