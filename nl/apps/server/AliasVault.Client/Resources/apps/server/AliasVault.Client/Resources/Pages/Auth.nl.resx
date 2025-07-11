@@ -58,28 +58,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="LostPasswordTitle" xml:space="preserve">
-    <value>Wachtwoord verloren</value>
-    <comment>Title for the forgot password page</comment>
+  <data name="LoggingOutTitle" xml:space="preserve">
+    <value>Uitloggen</value>
+    <comment>Title shown during logout process</comment>
   </data>
-  <data name="NoRecoveryExplanation" xml:space="preserve">
-    <value>Helaas, als je je wachtwoord bent kwijtgeraakt, is er geen manier om het te herstellen. AliasVault gebruikt end-to-end versleuteling voor al je gegevens, zodat niemand behalve jij toegang heeft tot je gegevens.</value>
-    <comment>Explanation that password recovery is not possible due to encryption</comment>
-  </data>
-  <data name="NewAccountRequired" xml:space="preserve">
-    <value>Als je je wachtwoord niet meer weet, moet je een nieuw account aanmaken. Let op: dit betekent dat al je gegevens verloren gaan.</value>
-    <comment>Warning about needing to create a new account and data loss</comment>
-  </data>
-  <data name="RecentlyChangedPasswordTitle" xml:space="preserve">
-    <value>Onlangs wachtwoord gewijzigd</value>
-    <comment>Section title for recently changed password help</comment>
-  </data>
-  <data name="ContactSupportWithEmail" xml:space="preserve">
-    <value>Als je onlangs je wachtwoord hebt gewijzigd en problemen hebt met inloggen, neem dan contact op met support via {0} voor hulp.</value>
-    <comment>Instructions to contact support when support email is available. {0} is placeholder for email address</comment>
-  </data>
-  <data name="ContactAdministrator" xml:space="preserve">
-    <value>Als je onlangs je wachtwoord hebt gewijzigd en problemen hebt met inloggen met je nieuwe wachtwoord, kan de serverbeheerder mogelijk een eerdere backup van je kluis herstellen om je te helpen. Neem in dat geval contact op met de serverbeheerder.</value>
-    <comment>Instructions to contact server administrator when no support email is available</comment>
+  <data name="LoggingOutDescription" xml:space="preserve">
+    <value>Je gegevens worden veilig geleegd en je wordt uitgelogd. Even geduld.</value>
+    <comment>Description shown during logout process</comment>
   </data>
 </root>
