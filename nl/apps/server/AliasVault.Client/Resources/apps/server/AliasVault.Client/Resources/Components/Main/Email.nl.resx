@@ -58,64 +58,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="FromLabel" xml:space="preserve">
-    <value>Van:</value>
-    <comment>Email sender field label</comment>
-  </data>
-  <data name="ToLabel" xml:space="preserve">
-    <value>Aan:</value>
-    <comment>Email recipient field label</comment>
-  </data>
-  <data name="DateLabel" xml:space="preserve">
-    <value>Datum:</value>
-    <comment>Email date field label</comment>
-  </data>
-  <data name="CredentialLabel" xml:space="preserve">
-    <value>Inloggegevens:</value>
-    <comment>Email credential field label</comment>
-  </data>
-  <data name="NoneValue" xml:space="preserve">
-    <value>Geen</value>
-    <comment>No credential assigned value</comment>
-  </data>
-  <data name="AttachmentsLabel" xml:space="preserve">
-    <value>Bijlagen:</value>
-    <comment>Email attachments section header</comment>
-  </data>
-  <data name="SelectEmailMessage" xml:space="preserve">
-    <value>Selecteer een e-mail om de inhoud te bekijken</value>
-    <comment>Empty state message when no email is selected</comment>
-  </data>
-  <data name="DeleteEmailTitle" xml:space="preserve">
-    <value>E-mail verwijderen</value>
-    <comment>Delete email confirmation dialog title</comment>
-  </data>
-  <data name="DeleteEmailConfirmation" xml:space="preserve">
-    <value>Weet u zeker dat u deze e-mail wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</value>
-    <comment>Delete email confirmation message</comment>
-  </data>
-  <data name="EmailDeletedSuccess" xml:space="preserve">
-    <value>E-mail succesvol verwijderd</value>
-    <comment>Success message when email is deleted</comment>
-  </data>
-  <data name="EmailDeleteFailed" xml:space="preserve">
-    <value>Verwijderen van e-mail mislukt</value>
-    <comment>Error message when email deletion fails</comment>
-  </data>
-  <data name="GenericError" xml:space="preserve">
-    <value>Er is een fout opgetreden</value>
-    <comment>Generic error message</comment>
-  </data>
-  <data name="NoEmailBody" xml:space="preserve">
-    <value>[Deze e-mail heeft geen inhoud.]</value>
-    <comment>Message shown when email has no content</comment>
-  </data>
-  <data name="AttachmentDownloadFailed" xml:space="preserve">
-    <value>Downloaden van bijlage mislukt</value>
-    <comment>Error message when attachment download fails</comment>
-  </data>
-  <data name="AttachmentDownloadError" xml:space="preserve">
-    <value>Fout bij downloaden bijlage</value>
-    <comment>Error message for attachment download error</comment>
+  <data name="NewEmailTooltip" xml:space="preserve">
+    <value>Nieuwe e-mail</value>
+    <comment>Tooltip text for new email indicator</comment>
   </data>
 </root>
