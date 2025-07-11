@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 

@@ -122,8 +122,8 @@
   },
   "settings": {
     "title": "Instellingen",
-    "iosAutofill": "iOS Automatisch Invullen",
-    "androidAutofill": "Android Automatisch Invullen",
+    "iosAutofill": "iOS autofill",
+    "androidAutofill": "Android autofill",
     "vaultUnlock": "Kluis Ontgrendel Methode",
     "autoLock": "Automatisch Vergrendelen Timeout",
     "identityGenerator": "Identiteit Generator",
@@ -142,8 +142,9 @@
     },
     "language": "Taal",
     "systemLanguage": "Systeemtaal",
-    "languageSystemMessage": "Om de app-taal te wijzigen, openen we iOS Instellingen waar u de gewenste taal voor AliasVault kunt configureren.",
+    "languageSystemMessage": "Wijzig de app-taal via het app instellingen scherm op je apparaat.",
     "openSettings": "Open Instellingen",
+    "unableToOpenSettings": "Het openen van de instellingen is niet gelukt. Ga naar de app-instellingen en wijzig de taal.",
     "vaultUnlockSettings": {
       "title": "Kluis Ontgrendel Methode",
       "description": "Kies hoe u uw kluis wilt ontgrendelen.",

@@ -1,9 +1,9 @@
 import * as Clipboard from 'expo-clipboard';
 import * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import type { Credential, TotpCode } from '@/utils/dist/shared/models/vault';
 

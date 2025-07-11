@@ -147,21 +147,45 @@ export default function SettingsScreen() : React.ReactNode {
    * Handle the language settings press.
    */
   const handleLanguagePress = (): void => {
+    const isIOS = Platform.OS === 'ios';
+
     Alert.alert(
       t('settings.language'),
       t('settings.languageSystemMessage'),
       [
         { text: t('common.cancel'), style: 'cancel' },
-        { 
-          text: t('settings.openSettings'), 
+        {
+          text: t('settings.openSettings'),
           style: 'default',
           /**
-           * Open iOS settings
+           * Open platform-specific settings
            */
-          onPress: (): void => {
-            // Open iOS Settings app
-            if (Platform.OS === 'ios') {
-              Linking.openURL('app-settings:');
+          onPress: async (): Promise<void> => {
+            if (isIOS) {
+              // Open iOS Settings app
+              await Linking.openURL('app-settings:');
+            } else {
+              // Fallback to general locale settings
+              try {
+                await Linking.openSettings();
+                return;
+              } catch (error) {
+                console.warn('Failed to open general locale settings:', error);
+              }
+
+              // Fallback to general settings
+              try {
+                await Linking.openSettings();
+                return;
+              } catch (error) {
+                console.warn('Failed to open general settings:', error);
+              }
+
+              // Final fallback - show manual instructions
+              Alert.alert(
+                t('common.error') ?? 'Error',
+                'Unable to open device settings. Please manually navigate to the app settings and change the language.'
+              );
             }
           }
         }

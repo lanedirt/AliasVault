@@ -1,8 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, TouchableOpacity, Alert, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import type { RefreshToken } from '@/utils/dist/shared/models/webapi';
 
@@ -94,7 +94,7 @@ export default function ActiveSessionsScreen() : React.ReactNode {
     } finally {
       setIsLoading(false);
     }
-  }, [webApi, setIsLoading, setRefreshTokens]);
+  }, [webApi, setIsLoading, setRefreshTokens, t]);
 
   /**
    * Handle the revoke session action.

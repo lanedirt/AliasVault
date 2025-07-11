@@ -3,7 +3,7 @@
 "loading_error_message" = "Het laden van referenties ging mis. Open de AliasVault app om te controleren op updates.";
 "ok" = "OK";
 "login_required" = "Inloggen Vereist";
-"login_required_message" = "Om Automatisch Invullen te gebruiken, log eerst in op uw AliasVault account in de AliasVault app.";
+"login_required_message" = "Om autofill te gebruiken, log eerst in op uw AliasVault account in de AliasVault app.";
 "biometric_required" = "%@ Vereist";
 "biometric_required_message" = "Om AliasVault Automatisch Invullen te gebruiken, schakel %@ in bij uw apparaat instellingen en/of ga naar de AliasVault app instellingen om het te configureren.";
 "biometric_app_required_message" = "Om Automatisch Invullen te gebruiken, schakel %@ in als uw kluis ontgrendel methode in de AliasVault app instellingen.";

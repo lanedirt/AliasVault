@@ -1,8 +1,8 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, View, TouchableOpacity, AppState } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -89,7 +89,7 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, colors.primary, styles.headerRightButton, handleStayInApp]);
+  }, [navigation, colors.primary, styles.headerRightButton, handleStayInApp, t]);
 
   return (
     <ThemedSafeAreaView style={styles.container}>
@@ -108,7 +108,7 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
           {t('credentials.credentialCreatedMessage')}
         </ThemedText>
         <ThemedText style={[styles.message, styles.boldMessage]}>
-            {t('credentials.switchBackToBrowser')}
+          {t('credentials.switchBackToBrowser')}
         </ThemedText>
       </ThemedView>
     </ThemedSafeAreaView>

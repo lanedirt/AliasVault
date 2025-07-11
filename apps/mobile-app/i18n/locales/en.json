@@ -142,8 +142,9 @@
     },
     "language": "Language",
     "systemLanguage": "System Language",
-    "languageSystemMessage": "To change the app language, we'll open iOS Settings where you can configure the preferred language for AliasVault.",
+    "languageSystemMessage": "To change the app language, configure the preferred language for AliasVault in your device settings.",
     "openSettings": "Open Settings",
+    "unableToOpenSettings": "Unable to open device settings. Please manually navigate to the app settings and change the language.",
     "vaultUnlockSettings": {
       "title": "Vault Unlock Method",
       "description": "Choose how you want to unlock your vault.",

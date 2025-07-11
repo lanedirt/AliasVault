@@ -3,10 +3,10 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, FlatList, TouchableOpacity, TextInput, RefreshControl, Platform, Animated, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import emitter from '@/utils/EventEmitter';
@@ -76,7 +76,7 @@ export default function CredentialsScreen() : React.ReactNode {
       });
       setIsLoadingCredentials(false);
     }
-  }, [dbContext.sqliteClient, setIsLoadingCredentials]);
+  }, [dbContext.sqliteClient, setIsLoadingCredentials, t]);
 
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -194,7 +194,7 @@ export default function CredentialsScreen() : React.ReactNode {
         text2: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [syncVault, loadCredentials, setIsLoadingCredentials, setRefreshing, webApi, authContext, router]);
+  }, [syncVault, loadCredentials, setIsLoadingCredentials, setRefreshing, webApi, authContext, router, t]);
 
   useEffect(() => {
     if (!isAuthenticated || !isDatabaseAvailable) {
@@ -301,7 +301,7 @@ export default function CredentialsScreen() : React.ReactNode {
        */
       headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title={t('credentials.title')} /> : <Text>{t('credentials.title')}</Text>,
     });
-  }, [navigation]);
+  }, [navigation, t]);
 
   /**
    * Delete a credential.

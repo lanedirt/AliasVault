@@ -1,8 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, RefreshControl, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import type { AuthLogModel } from '@/utils/dist/shared/models/webapi';
 import { AuthEventType } from '@/utils/dist/shared/models/webapi';
@@ -102,7 +102,7 @@ export default function AuthLogsScreen() : React.ReactNode {
     } finally {
       setIsLoading(false);
     }
-  }, [webApi, setIsLoading, setLogs]);
+  }, [webApi, setIsLoading, setLogs, t]);
 
   /**
    * Refresh the logs on pull to refresh.

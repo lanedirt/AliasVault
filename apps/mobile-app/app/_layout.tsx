@@ -41,7 +41,10 @@ function RootLayoutNav() : React.ReactNode {
   const hasBooted = useRef(false);
 
   useEffect(() => {
-    const initializeApp = async () => {
+    /**
+     * Initialize the app.
+     */
+    const initializeApp = async () : Promise<void> => {
       if (hasBooted.current) {
         return;
       }
@@ -54,135 +57,135 @@ function RootLayoutNav() : React.ReactNode {
 
       hasBooted.current = true;
 
-    /**
-     * Handle vault unlocking process.
-     */
-    async function handleVaultUnlock() : Promise<void> {
-      const { enabledAuthMethods } = await initializeAuth();
+      /**
+       * Handle vault unlocking process.
+       */
+      async function handleVaultUnlock() : Promise<void> {
+        const { enabledAuthMethods } = await initializeAuth();
 
-      try {
-        const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
-        if (hasEncryptedDatabase) {
-          const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
-          if (!isFaceIDEnabled) {
-            setRedirectTarget('/unlock');
-            setBootComplete(true);
-            return;
-          }
-
-          setStatus('Unlocking vault');
-          const isUnlocked = await dbContext.unlockVault();
-          if (isUnlocked) {
-            await new Promise(resolve => setTimeout(resolve, 750));
-            setStatus('Decrypting vault');
-            await new Promise(resolve => setTimeout(resolve, 750));
-
-            // Check if the vault is up to date, if not, redirect to the upgrade page.
-            if (await dbContext.hasPendingMigrations()) {
-              setRedirectTarget('/upgrade');
+        try {
+          const hasEncryptedDatabase = await NativeVaultManager.hasEncryptedDatabase();
+          if (hasEncryptedDatabase) {
+            const isFaceIDEnabled = enabledAuthMethods.includes('faceid');
+            if (!isFaceIDEnabled) {
+              setRedirectTarget('/unlock');
               setBootComplete(true);
               return;
             }
 
+            setStatus('Unlocking vault');
+            const isUnlocked = await dbContext.unlockVault();
+            if (isUnlocked) {
+              await new Promise(resolve => setTimeout(resolve, 750));
+              setStatus('Decrypting vault');
+              await new Promise(resolve => setTimeout(resolve, 750));
+
+              // Check if the vault is up to date, if not, redirect to the upgrade page.
+              if (await dbContext.hasPendingMigrations()) {
+                setRedirectTarget('/upgrade');
+                setBootComplete(true);
+                return;
+              }
+
+              setBootComplete(true);
+              return;
+            }
+
+            setRedirectTarget('/unlock');
+            setBootComplete(true);
+            return;
+          } else {
+            setRedirectTarget('/unlock');
             setBootComplete(true);
             return;
           }
-
-          setRedirectTarget('/unlock');
-          setBootComplete(true);
-          return;
-        } else {
+        } catch {
           setRedirectTarget('/unlock');
           setBootComplete(true);
           return;
         }
-      } catch {
-        setRedirectTarget('/unlock');
-        setBootComplete(true);
-        return;
-      }
-    }
-
-    /**
-     * Initialize the app.
-     */
-    const initialize = async () : Promise<void> => {
-      const { isLoggedIn } = await initializeAuth();
-
-      if (!isLoggedIn) {
-        setRedirectTarget('/login');
-        setBootComplete(true);
-        return;
       }
 
-      // First perform vault sync
-      await syncVault({
-        initialSync: true,
-        /**
-         * Handle the status update.
-         */
-        onStatus: (message) => {
-          setStatus(message);
-        },
-        /**
-         * Handle successful vault sync and continue with vault unlock flow.
-         */
-        onSuccess: async () => {
-          // Continue with the rest of the flow after successful sync
-          handleVaultUnlock();
-        },
-        /**
-         * Handle offline state and prompt user for action.
-         */
-        onOffline: async () => {
-          Alert.alert(
-            'Sync Issue',
-            'The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
-            [
-              {
-                text: 'Open Local Vault',
-                /**
-                 * Handle opening vault in read-only mode.
-                 */
-                onPress: async () : Promise<void> => {
-                  setStatus('Opening vault in read-only mode');
-                  await handleVaultUnlock();
-                }
-              },
-              {
-                text: 'Retry Sync',
-                /**
-                 * Handle retrying the connection.
-                 */
-                onPress: () : void => {
-                  setStatus('Retrying connection...');
-                  initialize();
-                }
-              }
-            ]
-          );
-        },
-        /**
-         * Handle error during vault sync.
-         */
-        onError: async (error: string) => {
-          // Show modal with error message
-          Alert.alert('Error', error);
+      /**
+       * Initialize the app.
+       */
+      const initialize = async () : Promise<void> => {
+        const { isLoggedIn } = await initializeAuth();
 
-          // The logout user and navigate to the login screen.
-          await webApi.logout(error);
+        if (!isLoggedIn) {
           setRedirectTarget('/login');
           setBootComplete(true);
-        },
-        /**
-         * On upgrade required.
-         */
-        onUpgradeRequired: () : void => {
-          setRedirectTarget('/upgrade');
-          setBootComplete(true);
-        },
-      });
-    };
+          return;
+        }
+
+        // First perform vault sync
+        await syncVault({
+          initialSync: true,
+          /**
+           * Handle the status update.
+           */
+          onStatus: (message) => {
+            setStatus(message);
+          },
+          /**
+           * Handle successful vault sync and continue with vault unlock flow.
+           */
+          onSuccess: async () => {
+          // Continue with the rest of the flow after successful sync
+            handleVaultUnlock();
+          },
+          /**
+           * Handle offline state and prompt user for action.
+           */
+          onOffline: async () => {
+            Alert.alert(
+              'Sync Issue',
+              'The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
+              [
+                {
+                  text: 'Open Local Vault',
+                  /**
+                   * Handle opening vault in read-only mode.
+                   */
+                  onPress: async () : Promise<void> => {
+                    setStatus('Opening vault in read-only mode');
+                    await handleVaultUnlock();
+                  }
+                },
+                {
+                  text: 'Retry Sync',
+                  /**
+                   * Handle retrying the connection.
+                   */
+                  onPress: () : void => {
+                    setStatus('Retrying connection...');
+                    initialize();
+                  }
+                }
+              ]
+            );
+          },
+          /**
+           * Handle error during vault sync.
+           */
+          onError: async (error: string) => {
+          // Show modal with error message
+            Alert.alert('Error', error);
+
+            // The logout user and navigate to the login screen.
+            await webApi.logout(error);
+            setRedirectTarget('/login');
+            setBootComplete(true);
+          },
+          /**
+           * On upgrade required.
+           */
+          onUpgradeRequired: () : void => {
+            setRedirectTarget('/upgrade');
+            setBootComplete(true);
+          },
+        });
+      };
 
       initialize();
     };

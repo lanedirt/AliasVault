@@ -1,8 +1,8 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
 
 import { AppInfo } from '@/utils/AppInfo';
 import type { ApiErrorResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
@@ -210,7 +210,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
         clearInterval(interval);
       }
     };
-  }, [email, loading, webApi, dbContext, isPublicDomain, isPrivateDomain, authContext.isOffline, isComponentVisible]);
+  }, [email, loading, webApi, dbContext, isPublicDomain, isPrivateDomain, authContext.isOffline, isComponentVisible, t]);
 
   const styles = StyleSheet.create({
     date: {

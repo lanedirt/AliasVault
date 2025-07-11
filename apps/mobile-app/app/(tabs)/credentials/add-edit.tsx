@@ -4,10 +4,10 @@ import * as Haptics from 'expo-haptics';
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Resolver, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
@@ -98,7 +98,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         text2: t('auth.errors.enterPassword')
       });
     }
-  }, [id, dbContext.sqliteClient, setValue]);
+  }, [id, dbContext.sqliteClient, setValue, t]);
 
   /**
    * On mount, load an existing credential if we're in edit mode, or extract the service name from the service URL
@@ -133,7 +133,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         serviceNameRef.current?.focus();
       }, 100);
     }
-  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue, authContext.isOffline, router]);
+  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue, authContext.isOffline, router, t]);
 
   /**
    * Initialize the identity and password generators with settings from user's vault.
@@ -315,7 +315,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
       setIsSyncing(false);
     }
-  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsSyncing, isSaveDisabled]);
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsSyncing, isSaveDisabled, t]);
 
   /**
    * Generate a random username.
@@ -555,7 +555,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         ),
       });
     }
-  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton, styles.headerRightButtonDisabled, isSaveDisabled]);
+  }, [navigation, mode, handleSubmit, onSubmit, colors.primary, isEditMode, router, styles.headerLeftButton, styles.headerLeftButtonText, styles.headerRightButton, styles.headerRightButtonDisabled, isSaveDisabled, t]);
 
   return (
     <>

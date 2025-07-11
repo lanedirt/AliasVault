@@ -2,9 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams, useRouter, useNavigation, Stack } from 'expo-router';
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert, Share, useColorScheme, TextInput, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useTranslation } from 'react-i18next';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import type { Email } from '@/utils/dist/shared/models/webapi';
@@ -76,7 +76,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
     } finally {
       setIsLoading(false);
     }
-  }, [dbContext.sqliteClient, id, webApi]);
+  }, [dbContext.sqliteClient, id, webApi, t]);
 
   useEffect(() => {
     loadEmail();
@@ -117,7 +117,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
         },
       ]
     );
-  }, [id, router, webApi]);
+  }, [id, router, webApi, t]);
 
   /**
    * Handle the download attachment button press.

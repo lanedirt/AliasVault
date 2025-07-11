@@ -113,7 +113,7 @@ const nlTranslations: IContentTranslations = {
   manualCredentialDescription: 'Specificeer je eigen e-mailadres en gebruikersnaam.',
   failedToCreateIdentity: 'Identiteit aanmaken mislukt. Probeer opnieuw.',
   enterEmailAndOrUsername: 'Voer e-mail en/of gebruikersnaam in',
-  autofillWithAliasVault: 'Automatisch invullen met AliasVault',
+  autofillWithAliasVault: 'Autofill met AliasVault',
   generateRandomPassword: 'Willekeurig wachtwoord genereren (kopiëren naar klembord)',
   passwordCopiedToClipboard: 'Wachtwoord gekopieerd naar klembord'
 };
