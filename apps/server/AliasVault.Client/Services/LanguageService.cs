@@ -289,5 +289,5 @@ public class LanguageService(
     /// <summary>
     /// Configuration for a supported language.
     /// </summary>
-    private record LanguageConfig(string Code, string DisplayName, string FlagEmoji);
+    private sealed record LanguageConfig(string Code, string DisplayName, string FlagEmoji);
 }
