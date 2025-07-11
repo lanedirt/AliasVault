@@ -70,21 +70,21 @@
     <value>Date:</value>
     <comment>Email date field label</comment>
   </data>
-  <data name="ActionsLabel" xml:space="preserve">
-    <value>Actions:</value>
-    <comment>Email actions section label</comment>
+  <data name="CredentialLabel" xml:space="preserve">
+    <value>Credential:</value>
+    <comment>Email credential field label</comment>
   </data>
-  <data name="DeleteButton" xml:space="preserve">
-    <value>Delete</value>
-    <comment>Delete email button text</comment>
+  <data name="NoneValue" xml:space="preserve">
+    <value>None</value>
+    <comment>No credential assigned value</comment>
   </data>
   <data name="AttachmentsLabel" xml:space="preserve">
     <value>Attachments:</value>
     <comment>Email attachments section header</comment>
   </data>
-  <data name="CloseButton" xml:space="preserve">
-    <value>Close</value>
-    <comment>Close modal button text</comment>
+  <data name="SelectEmailMessage" xml:space="preserve">
+    <value>Select an email to view its contents</value>
+    <comment>Empty state message when no email is selected</comment>
   </data>
   <data name="DeleteEmailTitle" xml:space="preserve">
     <value>Delete Email</value>
