@@ -58,20 +58,68 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MainTitle" xml:space="preserve">
-    <value>Password &amp; (Email) Alias Manager</value>
-    <comment>Main title of the application</comment>
+  <data name="LoggingInWithWebAuthn" xml:space="preserve">
+    <value>Logging in with WebAuthn...</value>
+    <comment>Message shown while WebAuthn authentication is in progress</comment>
   </data>
-  <data name="TaglineText" xml:space="preserve">
-    <value>Your Privacy. Protected.</value>
-    <comment>Tagline emphasizing privacy protection</comment>
+  <data name="QuickUnlockDescription" xml:space="preserve">
+    <value>Quickly unlock your vault using your fingerprint, face ID, or security key. Or login with your password as a fallback.</value>
+    <comment>Description explaining WebAuthn unlock options</comment>
   </data>
-  <data name="CreateNewVaultButton" xml:space="preserve">
-    <value>Create new vault</value>
-    <comment>Button text for creating a new vault</comment>
+  <data name="UnlockWithWebAuthn" xml:space="preserve">
+    <value>Unlock with WebAuthn</value>
+    <comment>Button text for WebAuthn unlock</comment>
   </data>
-  <data name="LoginExistingAccountButton" xml:space="preserve">
-    <value>Log in with existing account</value>
-    <comment>Button text for logging in with existing account</comment>
+  <data name="UnlockWithPassword" xml:space="preserve">
+    <value>Unlock with password</value>
+    <comment>Button text for password unlock</comment>
+  </data>
+  <data name="EnterMasterPasswordDescription" xml:space="preserve">
+    <value>Enter your master password to unlock your vault.</value>
+    <comment>Description for password unlock form</comment>
+  </data>
+  <data name="YourPasswordLabel" xml:space="preserve">
+    <value>Your password</value>
+    <comment>Label for password input field</comment>
+  </data>
+  <data name="UnlockButton" xml:space="preserve">
+    <value>Unlock</value>
+    <comment>Button text for unlock submission</comment>
+  </data>
+  <data name="SwitchAccountsText" xml:space="preserve">
+    <value>Switch accounts?</value>
+    <comment>Text before logout link</comment>
+  </data>
+  <data name="LogOutLink" xml:space="preserve">
+    <value>Log out</value>
+    <comment>Link text for logout</comment>
+  </data>
+  <data name="UnlockingVaultMessage" xml:space="preserve">
+    <value>Unlocking vault...</value>
+    <comment>Loading message while unlocking vault</comment>
+  </data>
+  <data name="UnlockRequestError" xml:space="preserve">
+    <value>An error occurred while processing the unlock request.</value>
+    <comment>Error message for unlock request processing</comment>
+  </data>
+  <data name="IncorrectPasswordError" xml:space="preserve">
+    <value>The password is incorrect. Please try entering your password again, or log out and log in again.</value>
+    <comment>Error message for incorrect password</comment>
+  </data>
+  <data name="SessionTimedOutError" xml:space="preserve">
+    <value>Your session has timed out. Please log in again.</value>
+    <comment>Error message for session timeout</comment>
+  </data>
+  <data name="ConnectionFailedError" xml:space="preserve">
+    <value>Connection with the AliasVault servers failed. Please try again (later).</value>
+    <comment>Error message for server connection failure</comment>
+  </data>
+  <data name="WebAuthnNotSupportedError" xml:space="preserve">
+    <value>Your current browser does not support the WebAuthn PRF extension. Please login with your password instead.</value>
+    <comment>Error message when WebAuthn is not supported</comment>
+  </data>
+  <data name="GenericUnlockError" xml:space="preserve">
+    <value>An error occurred while processing the login request. Try again (later).</value>
+    <comment>Generic error message for unlock failures</comment>
   </data>
 </root>
