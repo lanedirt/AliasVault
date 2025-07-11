@@ -58,32 +58,177 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoLogoText" xml:space="preserve">
-    <value>Geen logo</value>
-    <comment>Text shown when service logo is not available</comment>
+  <!-- 1Password -->
+  <data name="OnePasswordDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden vanuit je 1Password account</value>
+    <comment>Description for 1Password import service</comment>
   </data>
-  <data name="ImportFromServiceTitle" xml:space="preserve">
-    <value>Importeren van {0}</value>
-    <comment>Modal title for importing from a service. {0} is placeholder for service name</comment>
+  <data name="OnePasswordInstructionsPart1" xml:space="preserve">
+    <value>Om je 1Password kluis te importeren, moet je deze exporteren als CSV-bestand. Je kunt dit doen door in te loggen op je 1Password account in de 1Password 8 desktop app (Windows / MacOS / Linux), naar het 'File' menu te gaan en 'Export' (naar CSV) te selecteren.</value>
+    <comment>1Password export instructions part 1</comment>
   </data>
-  <data name="UploadExportFileText" xml:space="preserve">
-    <value>Upload uw {0} export bestand:</value>
-    <comment>Text for file upload instruction. {0} is placeholder for service name</comment>
+  <data name="OnePasswordInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>1Password export instructions part 2</comment>
   </data>
-  <data name="CancelButton" xml:space="preserve">
-    <value>Annuleren</value>
-    <comment>Cancel button text</comment>
+  <!-- Bitwarden -->
+  <data name="BitwardenDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit uw Bitwarden kluis</value>
+    <comment>Description for Bitwarden import service</comment>
   </data>
-  <data name="BackButton" xml:space="preserve">
-    <value>Terug</value>
-    <comment>Back button text</comment>
+  <data name="BitwardenInstructionsPart1" xml:space="preserve">
+    <value>Om uw Bitwarden kluis te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door in te loggen op uw Bitwarden account, naar het 'Tools' menu te gaan en 'Export vault' (naar CSV) te selecteren.</value>
+    <comment>Bitwarden export instructions part 1</comment>
   </data>
-  <data name="NextButton" xml:space="preserve">
-    <value>Volgende</value>
-    <comment>Next button text</comment>
+  <data name="BitwardenInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>Bitwarden export instructions part 2</comment>
   </data>
-  <data name="ImportButton" xml:space="preserve">
-    <value>Importeren</value>
-    <comment>Import button text</comment>
+  <!-- LastPass -->
+  <data name="LastPassDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit uw LastPass kluis</value>
+    <comment>Description for LastPass import service</comment>
+  </data>
+  <data name="LastPassInstructionsPart1" xml:space="preserve">
+    <value>Om je LastPass kluis te importeren, moet je deze exporteren als CSV-bestand. Je kunt dit doen door in te loggen op je LastPass account, naar 'Advanced Options' in de linkerzijbalk te gaan en 'Export' > 'LastPass CSV File' te selecteren.</value>
+    <comment>LastPass export instructions part 1</comment>
+  </data>
+  <data name="LastPassInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>LastPass export instructions part 2</comment>
+  </data>
+  <!-- Chrome -->
+  <data name="ChromeDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit uw Chrome Wachtwoordbeheer</value>
+    <comment>Description for Chrome import service</comment>
+  </data>
+  <data name="ChromeInstructionsPart1" xml:space="preserve">
+    <value>Om je Chrome Wachtwoordbeheer te importeren, moet je deze exporteren als CSV-bestand. Je kunt dit doen door in te loggen in uw Chrome browser, naar het 'Settings' menu te gaan > 'Password and AutoFill' > 'Google Password Manager'. Klik vervolgens op 'Export passwords'.</value>
+    <comment>Chrome export instructions part 1</comment>
+  </data>
+  <data name="ChromeInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>Chrome export instructions part 2</comment>
+  </data>
+  <!-- KeePass -->
+  <data name="KeePassDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit KeePass</value>
+    <comment>Description for KeePass import service</comment>
+  </data>
+  <data name="KeePassInstructionsPart1" xml:space="preserve">
+    <value>Om uw KeePass kluis te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door naar het 'File' menu te gaan en 'Export' (naar CSV) te selecteren.</value>
+    <comment>KeePass export instructions part 1</comment>
+  </data>
+  <data name="KeePassInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>KeePass export instructions part 2</comment>
+  </data>
+  <!-- Generic CSV -->
+  <data name="GenericCsvDescription" xml:space="preserve">
+    <value>Importeer inloggegevens met een sjabloon CSV-indeling</value>
+    <comment>Description for Generic CSV import service</comment>
+  </data>
+  <data name="GenericCsvInstructionsPart1" xml:space="preserve">
+    <value>Wordt de wachtwoordbeheerder die u gebruikt niet ondersteund? U kunt uw inloggegevens altijd in AliasVault importeren met een generiek CSV-sjabloonformaat.</value>
+    <comment>Generic CSV instructions part 1</comment>
+  </data>
+  <data name="GenericCsvStep1" xml:space="preserve">
+    <value>Download het AliasVault Import CSV sjabloon</value>
+    <comment>Generic CSV step 1</comment>
+  </data>
+  <data name="GenericCsvStep2" xml:space="preserve">
+    <value>Open het in een spreadsheetprogramma (Microsoft Excel, Google Sheets, etc.)</value>
+    <comment>Generic CSV step 2</comment>
+  </data>
+  <data name="GenericCsvStep3" xml:space="preserve">
+    <value>Vul uw inloggegevens in (vervang de voorbeeldgegevens)</value>
+    <comment>Generic CSV step 3</comment>
+  </data>
+  <data name="GenericCsvStep4" xml:space="preserve">
+    <value>Sla op als CSV-indeling en upload het hieronder</value>
+    <comment>Generic CSV step 4</comment>
+  </data>
+  <data name="GenericCsvTemplateDownloadError" xml:space="preserve">
+    <value>Kon CSV-sjabloon niet downloaden. Probeer het opnieuw.</value>
+    <comment>Error message for template download failure</comment>
+  </data>
+  <!-- Firefox -->
+  <data name="FirefoxDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit uw Firefox Wachtwoordbeheer</value>
+    <comment>Description for Firefox import service</comment>
+  </data>
+  <data name="FirefoxInstructionsPart1" xml:space="preserve">
+    <value>Om uw Firefox wachtwoorden te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door uw Firefox browser te openen, naar menu > 'Wachtwoorden' te gaan. Klik vervolgens op het menu-icoon in de rechterbovenhoek en selecteer 'Wachtwoorden exporteren'.</value>
+    <comment>Firefox export instructions part 1</comment>
+  </data>
+  <data name="FirefoxInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>Firefox export instructions part 2</comment>
+  </data>
+  <!-- Dashlane -->
+  <data name="DashlaneDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit uw Dashlane account</value>
+    <comment>Description for Dashlane import service</comment>
+  </data>
+  <data name="DashlaneInstructionsPart1" xml:space="preserve">
+    <value>Om uw Dashlane wachtwoorden te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door in te loggen op uw Dashlane account, naar het 'Account' > 'Settings' menu te gaan en 'Export to CSV' te selecteren.</value>
+    <comment>Dashlane export instructions part 1</comment>
+  </data>
+  <data name="DashlaneInstructionsPart2" xml:space="preserve">
+    <value>Let op: het .zip bestand dat u download bevat een "credentials.csv" bestand. U moet het archief eerst uitpakken en vervolgens het "credentials.csv" CSV-bestand hieronder uploaden.</value>
+    <comment>Dashlane export instructions part 2</comment>
+  </data>
+  <!-- KeePassXC -->
+  <data name="KeePassXCDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit KeePassXC</value>
+    <comment>Description for KeePassXC import service</comment>
+  </data>
+  <data name="KeePassXCInstructionsPart1" xml:space="preserve">
+    <value>Om uw KeePassXC kluis te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door naar het 'File' menu te gaan en 'Export' (naar CSV) te selecteren.</value>
+    <comment>KeePassXC export instructions part 1</comment>
+  </data>
+  <data name="KeePassXCInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>KeePassXC export instructions part 2</comment>
+  </data>
+  <!-- Proton Pass -->
+  <data name="ProtonPassDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit Proton Pass</value>
+    <comment>Description for Proton Pass import service</comment>
+  </data>
+  <data name="ProtonPassInstructionsPart1" xml:space="preserve">
+    <value>Om uw Proton Pass wachtwoorden te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door in te loggen op Proton Pass (web), op het 'Settings' menu te klikken > 'Export' > 'File format: CSV'. Klik vervolgens op 'Export'.</value>
+    <comment>Proton Pass export instructions part 1</comment>
+  </data>
+  <data name="ProtonPassInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>Proton Pass export instructions part 2</comment>
+  </data>
+  <!-- Strongbox -->
+  <data name="StrongboxDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden uit Strongbox</value>
+    <comment>Description for Strongbox import service</comment>
+  </data>
+  <data name="StrongboxInstructionsPart1" xml:space="preserve">
+    <value>Om uw Strongbox kluis te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door naar het 'File' menu te gaan en 'Export Database' (naar CSV) te selecteren.</value>
+    <comment>Strongbox export instructions part 1</comment>
+  </data>
+  <data name="StrongboxInstructionsPart2" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>Strongbox export instructions part 2</comment>
+  </data>
+  <!-- AliasVault -->
+  <data name="AliasVaultDescription" xml:space="preserve">
+    <value>Importeer wachtwoorden van een andere AliasVault server of handmatige back-up</value>
+    <comment>Description for AliasVault import service</comment>
+  </data>
+  <data name="AliasVaultInstructionsPart1" xml:space="preserve">
+    <value>Als u een CSV-bestand back-up heeft van uw AliasVault database (van een andere AliasVault server), kunt u het hier importeren.</value>
+    <comment>AliasVault import instructions</comment>
+  </data>
+  <!-- Common text that can be reused -->
+  <data name="UploadFileInstructionCommon" xml:space="preserve">
+    <value>Nadat u het bestand heeft geëxporteerd, kunt u het hieronder uploaden.</value>
+    <comment>Common instruction for file upload</comment>
   </data>
 </root>
