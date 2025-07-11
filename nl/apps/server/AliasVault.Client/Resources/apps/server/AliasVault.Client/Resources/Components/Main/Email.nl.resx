@@ -58,8 +58,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NewEmailTooltip" xml:space="preserve">
-    <value>Nieuwe e-mail</value>
-    <comment>Tooltip text for new email indicator</comment>
+  <data name="EmailSectionTitle" xml:space="preserve">
+    <value>E-mail</value>
+    <comment>Section title for email panel</comment>
+  </data>
+  <data name="AutoRefreshEnabledTooltip" xml:space="preserve">
+    <value>Automatisch vernieuwen ingeschakeld</value>
+    <comment>Tooltip for auto-refresh indicator</comment>
+  </data>
+  <data name="SubjectColumn" xml:space="preserve">
+    <value>Onderwerp</value>
+    <comment>Table column header for email subject</comment>
+  </data>
+  <data name="DateColumn" xml:space="preserve">
+    <value>Datum</value>
+    <comment>Table column header for email date</comment>
+  </data>
+  <data name="NoEmailsReceivedMessage" xml:space="preserve">
+    <value>(Nog) geen e-mails ontvangen.</value>
+    <comment>Message when no emails are available</comment>
+  </data>
+  <data name="EmailAddressInUseError" xml:space="preserve">
+    <value>Het huidige gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze inloggegevens te bewerken.</value>
+    <comment>Error message when email address is already in use</comment>
+  </data>
+  <data name="EmailLoadError" xml:space="preserve">
+    <value>Er is een fout opgetreden bij het laden van de e-mails. Probeer de inloggegevens te bewerken en op te slaan om de database te synchroniseren, en probeer het dan opnieuw.</value>
+    <comment>Error message when email loading fails</comment>
   </data>
 </root>
