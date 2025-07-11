@@ -1,141 +1,72 @@
-# Crowdin configuration for AliasVault
-# This file configures the translation workflow for the entire AliasVault monorepo
-# Works with GitHub App integration
-
-# Base path for files
-base_path: "./"
-
-# Preserve hierarchy for nested JSON objects
-preserve_hierarchy: true
-
-# Files configuration
-files:
-  # ============================================================================
-  # Web App (Blazor WASM) - Server Client
-  # ============================================================================
-
-  # Blazor WASM Client JSON localization files
-  - source: "apps/server/AliasVault.Client/wwwroot/locales/en.json"
-    translation: "apps/server/AliasVault.Client/wwwroot/locales/%two_letters_code%.json"
-    type: "json"
-    preserve_translations: true
-
-  # .NET Resource files (RESX) for Blazor components
-  - source: "apps/server/AliasVault.Client/Resources/SharedResources.en.resx"
-    translation: "apps/server/AliasVault.Client/Resources/SharedResources.%two_letters_code%.resx"
-    type: "resx"
-    preserve_translations: true
-
-  # Blazor component resource files
-  - source: "apps/server/AliasVault.Client/Resources/**/*.en.resx"
-    translation: "apps/server/AliasVault.Client/Resources/%original_path%.%two_letters_code%.resx"
-    type: "resx"
-    preserve_translations: true
-
-  # ============================================================================
-  # Browser Extension
-  # ============================================================================
-
-  # Browser Extension JSON translation files (nested structure)
-  - source: "apps/browser-extension/src/locales/en/**/*.json"
-    translation: "apps/browser-extension/src/locales/%two_letters_code%/%original_path%"
-    type: "json"
-    preserve_translations: true
-
-  # ============================================================================
-  # Mobile App (React Native + Native iOS/Android)
-  # ============================================================================
-
-  # React Native JSON translation files
-  - source: "apps/mobile-app/i18n/locales/en.json"
-    translation: "apps/mobile-app/i18n/locales/%two_letters_code%.json"
-    type: "json"
-    preserve_translations: true
-
-  # iOS native localization files
-  - source: "apps/mobile-app/ios/AliasVault/en.lproj/Localizable.strings"
-    translation: "apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/Localizable.strings"
-    type: "strings"
-    preserve_translations: true
-
-  - source: "apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings"
-    translation: "apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings"
-    type: "strings"
-    preserve_translations: true
-
-  # iOS Autofill extension localization files
-  - source: "apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings"
-    translation: "apps/mobile-app/ios/Autofill/%two_letters_code%.lproj/Localizable.strings"
-    type: "strings"
-    preserve_translations: true
-
-  # iOS VaultUI framework localization files
-  - source: "apps/mobile-app/ios/VaultUI/en.lproj/Localizable.strings"
-    translation: "apps/mobile-app/ios/VaultUI/%two_letters_code%.lproj/Localizable.strings"
-    type: "strings"
-    preserve_translations: true
-
-  # Android native localization files
-  - source: "apps/mobile-app/android/app/src/main/res/values/strings.xml"
-    translation: "apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml"
-    type: "android"
-    preserve_translations: true
-    ignore:
-      - "apps/mobile-app/android/app/src/main/res/values-*/**"
-
-# Translation memory settings
 translation_memory:
-  tm_id: "auto"
-
-# Quality assurance settings
+  tm_id: auto
 quality_assurance:
   - inconsistent_translations
   - empty_translations
   - duplicate_translations
-
-# Workflow settings
-workflow_id: "auto"
-
-# Export settings
+workflow_id: auto
 export_settings:
-  - pattern: "**/*.json"
-    format: "json"
+  - pattern: '**/*.json'
+    format: json
     escape_quotes: 0
-
-  - pattern: "**/*.resx"
-    format: "resx"
-
-  - pattern: "**/*.strings"
-    format: "strings"
-
-  - pattern: "**/*.xml"
-    format: "android"
-
-# Notification settings
+  - pattern: '**/*.resx'
+    format: resx
+  - pattern: '**/*.strings'
+    format: strings
+  - pattern: '**/*.xml'
+    format: android
 notifications:
-  - event: "translation_request"
-    user_role: "translator"
-
-  - event: "translation_completed"
-    user_role: "manager"
-
-# Commit message for automated commits
-commit_message: "Update translations from Crowdin [ci skip]"
-
-# Pull request settings
+  - event: translation_request
+    user_role: translator
+  - event: translation_completed
+    user_role: manager
 pull_request:
-  title: "Update translations from Crowdin"
-  body: "This PR contains updated translations from Crowdin. Please review and merge if everything looks correct."
-
-# Languages to translate to
+  title: Update translations from Crowdin
+  body: This PR contains updated translations from Crowdin. Please review and merge if everything looks correct.
 languages:
-  - "nl"     # Dutch
-  - "de"     # German
-  - "fr"     # French
-  - "es"     # Spanish
-  - "it"     # Italian
-  - "pt"     # Portuguese
-  - "uk"     # Ukrainian
-  - "zh"     # Chinese
-  - "ja"     # Japanese
-  - "ko"     # Korean
+  - nl
+  - de
+  - fr
+  - es
+  - it
+  - pt
+  - uk
+  - zh
+  - ja
+  - ko
+base_path: ./
+preserve_hierarchy: 1
+files:
+  - source: apps/server/AliasVault.Client/wwwroot/locales/en.json
+    translation: apps/server/AliasVault.Client/wwwroot/locales/%two_letters_code%.json
+    type: json
+  - source: apps/server/AliasVault.Client/Resources/SharedResources.en.resx
+    translation: apps/server/AliasVault.Client/Resources/SharedResources.%two_letters_code%.resx
+    type: resx
+  - source: apps/server/AliasVault.Client/Resources/**/*.en.resx
+    translation: apps/server/AliasVault.Client/Resources/%original_path%.%two_letters_code%.resx
+    type: resx
+  - source: apps/browser-extension/src/locales/en/**/*.json
+    translation: apps/browser-extension/src/locales/%two_letters_code%/%file_name%.%file_extension%
+    type: json
+  - source: apps/mobile-app/i18n/locales/en.json
+    translation: apps/mobile-app/i18n/locales/%two_letters_code%.json
+    type: json
+  - source: apps/mobile-app/ios/AliasVault/en.lproj/Localizable.strings
+    translation: apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/Localizable.strings
+    type: strings
+  - source: apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings
+    translation: apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings
+    type: strings
+  - source: apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings
+    translation: apps/mobile-app/ios/Autofill/%two_letters_code%.lproj/Localizable.strings
+    type: strings
+  - source: apps/mobile-app/ios/VaultUI/en.lproj/Localizable.strings
+    translation: apps/mobile-app/ios/VaultUI/%two_letters_code%.lproj/Localizable.strings
+    type: strings
+  - source: apps/mobile-app/android/app/src/main/res/values/strings.xml
+    translation: apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml
+    type: android
+    ignore:
+      - apps/mobile-app/android/app/src/main/res/values-*/**
+commit_message: 'Update translations from Crowdin [ci skip]'
