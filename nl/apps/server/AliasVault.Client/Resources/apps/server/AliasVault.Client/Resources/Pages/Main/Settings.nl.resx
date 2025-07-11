@@ -21,45 +21,99 @@
   </xsd:schema>
   <!-- Page title and description -->
   <data name="PageTitle">
-    <value>Extensies &amp; Apps</value>
-    <comment>Page title for extensions and apps</comment>
+    <value>Algemene instellingen</value>
+    <comment>Page title for general settings</comment>
   </data>
   <data name="PageDescription">
-    <value>Installeer browserextensies en mobiele apps om toegang te krijgen tot je kluis vanaf al je apparaten en automatisch inloggegevens in te vullen op websites.</value>
-    <comment>Page description for extensions and apps</comment>
+    <value>Configureer algemene AliasVault instellingen.</value>
+    <comment>Page description for general settings</comment>
   </data>
   <data name="BreadcrumbTitle">
-    <value>Extensies &amp; Apps</value>
-    <comment>Breadcrumb title for extensions and apps</comment>
+    <value>Algemene instellingen</value>
+    <comment>Breadcrumb title for general settings</comment>
   </data>
-  <!-- Browser Extensions Section -->
-  <data name="BrowserExtensionsTitle">
-    <value>Browserextensies</value>
-    <comment>Title for browser extensions section</comment>
+  <!-- Email Settings Section -->
+  <data name="EmailSettingsTitle">
+    <value>E-mail Instellingen</value>
+    <comment>Title for email settings section</comment>
   </data>
-  <data name="BrowserExtensionsDescription">
-    <value>De AliasVault browserextensie stelt je in staat om bestaande inloggegevens automatisch in te vullen op elke website. Het stelt je ook in staat om nieuwe aliassen te genereren tijdens registratie, ontvangen e-mails op al je aliassen te bekijken, en je aliassen en identiteiten te bekijken.</value>
-    <comment>Description for browser extensions</comment>
+  <data name="DefaultEmailDomainLabel">
+    <value>Standaard e-maildomein</value>
+    <comment>Label for default email domain setting</comment>
   </data>
-  <data name="InstallButton">
-    <value>Installeren</value>
-    <comment>Install button text</comment>
+  <data name="DefaultEmailDomainDescription">
+    <value>Stel het standaard e-maildomein in dat wordt gebruikt bij het aanmaken van nieuwe inloggegevens.</value>
+    <comment>Description for default email domain setting</comment>
   </data>
-  <data name="ComingSoonText">
-    <value>Binnenkort beschikbaar</value>
-    <comment>Coming soon text for unavailable extensions</comment>
+  <data name="PrivateDomainsLabel">
+    <value>Privé Domeinen</value>
+    <comment>Label for private domains group</comment>
   </data>
-  <!-- Mobile Apps Section -->
-  <data name="MobileAppsTitle">
-    <value>Mobiele Apps</value>
-    <comment>Title for mobile apps section</comment>
+  <data name="PublicDomainsLabel">
+    <value>Publieke Domeinen</value>
+    <comment>Label for public domains group</comment>
   </data>
-  <data name="MobileAppsDescription">
-    <value>De AliasVault mobiele app stelt je in staat om onderweg toegang te krijgen tot je aliassen en identiteiten, ontvangen e-mails te bekijken en beheren, en altijd nieuwe aliassen te genereren. Je gegevens zijn volledig beschermd met biometrische authenticatie op het apparaat.</value>
-    <comment>Description for mobile apps</comment>
+  <data name="AutoEmailRefreshLabel">
+    <value>Automatisch e-mailinhoud verversen wanneer nieuwe berichten aankomen</value>
+    <comment>Label for auto email refresh setting</comment>
   </data>
-  <data name="DownloadButton">
-    <value>Downloaden</value>
-    <comment>Download button text</comment>
+  <!-- Alias Settings Section -->
+  <data name="AliasSettingsTitle">
+    <value>Alias Instellingen</value>
+    <comment>Title for alias settings section</comment>
+  </data>
+  <data name="AliasGenerationLanguageLabel">
+    <value>Taal voor alias generatie</value>
+    <comment>Label for alias generation language setting</comment>
+  </data>
+  <data name="AliasGenerationLanguageDescription">
+    <value>Stel de standaardtaal in die wordt gebruikt bij het genereren van nieuwe identiteiten.</value>
+    <comment>Description for alias generation language setting</comment>
+  </data>
+  <data name="EnglishOption">
+    <value>Engels</value>
+    <comment>English language option</comment>
+  </data>
+  <data name="DutchOption">
+    <value>Nederlands</value>
+    <comment>Dutch language option</comment>
+  </data>
+  <data name="AliasGenerationGenderLabel">
+    <value>Geslacht voor alias generatie</value>
+    <comment>Label for alias generation gender setting</comment>
+  </data>
+  <data name="AliasGenerationGenderDescription">
+    <value>Stel de standaard geslachtsvoorkeur in voor het genereren van nieuwe identiteiten.</value>
+    <comment>Description for alias generation gender setting</comment>
+  </data>
+  <data name="RandomOption">
+    <value>Willekeurig</value>
+    <comment>Random gender option</comment>
+  </data>
+  <data name="MaleOption">
+    <value>Man</value>
+    <comment>Male gender option</comment>
+  </data>
+  <data name="FemaleOption">
+    <value>Vrouw</value>
+    <comment>Female gender option</comment>
+  </data>
+  <!-- Password Settings Section -->
+  <data name="PasswordSettingsTitle">
+    <value>Wachtwoord Instellingen</value>
+    <comment>Title for password settings section</comment>
+  </data>
+  <!-- App Language Settings Section -->
+  <data name="AppLanguageTitle">
+    <value>Taal van de Applicatie</value>
+    <comment>Title for app language settings section</comment>
+  </data>
+  <data name="AppLanguageLabel">
+    <value>Taal</value>
+    <comment>Label for app language setting</comment>
+  </data>
+  <data name="AppLanguageDescription">
+    <value>Stel de taal in voor de applicatie interface.</value>
+    <comment>Description for app language setting</comment>
   </data>
 </root>
