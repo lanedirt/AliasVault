@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';

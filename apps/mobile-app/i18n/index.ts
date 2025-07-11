@@ -19,10 +19,10 @@ const initI18n = async (): Promise<void> => {
   const deviceLanguage = locales[0]?.languageCode ?? 'en';
   const selectedLanguage = resources[deviceLanguage as keyof typeof resources] ? deviceLanguage : 'en';
 
+  // eslint-disable-next-line import/no-named-as-default-member
   await i18n
     .use(initReactI18next)
     .init({
-      compatibilityJSON: 'v3',
       resources,
       lng: selectedLanguage,
       fallbackLng: 'en',

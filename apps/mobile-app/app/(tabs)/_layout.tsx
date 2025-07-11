@@ -1,7 +1,7 @@
 import { Tabs, router } from 'expo-router';
 import React, { useEffect } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import emitter from '@/utils/EventEmitter';
 

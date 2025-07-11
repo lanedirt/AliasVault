@@ -1,8 +1,8 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Alert, Platform, Linking, Switch, TouchableOpacity } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -134,7 +134,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
         visibilityTime: 1200,
       });
     }
-  }, [hasBiometrics, setAuthMethods, biometricDisplayName]);
+  }, [hasBiometrics, setAuthMethods, biometricDisplayName, t]);
 
   const styles = StyleSheet.create({
     disabledText: {
@@ -200,7 +200,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
               </View>
             </View>
             <ThemedText style={styles.helpText}>
-              {t('settings.vaultUnlockSettings.biometricHelp', { 
+              {t('settings.vaultUnlockSettings.biometricHelp', {
                 keystore: Platform.OS === 'ios' ? t('settings.vaultUnlockSettings.keystoreIOS') : t('settings.vaultUnlockSettings.keystoreAndroid'),
                 biometric: biometricDisplayName
               })}

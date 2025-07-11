@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import srp from 'secure-remote-password/client';
-import { useTranslation } from 'react-i18next';
 
 import type { DeleteAccountInitiateRequest, DeleteAccountInitiateResponse, DeleteAccountRequest } from '@/utils/dist/shared/models/webapi';
 

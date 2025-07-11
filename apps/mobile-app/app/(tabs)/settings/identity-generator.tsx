@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
-import { StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, View, Alert, TouchableOpacity } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
@@ -58,7 +58,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       };
 
       loadSettings();
-    }, [dbContext.sqliteClient])
+    }, [dbContext.sqliteClient, t])
   );
 
   /**
@@ -75,7 +75,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       console.error('Error updating language setting:', error);
       Alert.alert(t('common.error'), t('settings.identityGeneratorSettings.errors.languageUpdateFailed'));
     }
-  }, [executeVaultMutation, dbContext.sqliteClient]);
+  }, [executeVaultMutation, dbContext.sqliteClient, t]);
 
   /**
    * Handle gender change.
@@ -90,7 +90,7 @@ export default function IdentityGeneratorSettingsScreen(): React.ReactNode {
       console.error('Error updating gender setting:', error);
       Alert.alert(t('common.error'), t('settings.identityGeneratorSettings.errors.genderUpdateFailed'));
     }
-  }, [executeVaultMutation, dbContext.sqliteClient]);
+  }, [executeVaultMutation, dbContext.sqliteClient, t]);
 
   const styles = StyleSheet.create({
     descriptionText: {
