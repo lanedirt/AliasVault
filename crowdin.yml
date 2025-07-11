@@ -43,9 +43,8 @@ files:
   - source: /apps/server/AliasVault.Client/Resources/**/*.en.resx
     translation: /%original_path%/%file_name%.%two_letters_code%.resx
     type: resx
-    "translation_replace": {
-      "_en": ""
-    }
+    translation_replace:
+      _en: ''
   - source: /apps/browser-extension/src/locales/en/**/*.json
     translation: /apps/browser-extension/src/locales/%two_letters_code%/%file_name%.%file_extension%
     type: json
