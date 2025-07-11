@@ -18,16 +18,19 @@ files:
   - source: "apps/server/AliasVault.Client/wwwroot/locales/en.json"
     translation: "apps/server/AliasVault.Client/wwwroot/locales/%two_letters_code%.json"
     type: "json"
+    preserve_translations: true
 
   # .NET Resource files (RESX) for Blazor components
   - source: "apps/server/AliasVault.Client/Resources/SharedResources.en.resx"
     translation: "apps/server/AliasVault.Client/Resources/SharedResources.%two_letters_code%.resx"
     type: "resx"
+    preserve_translations: true
 
   # Blazor component resource files
   - source: "apps/server/AliasVault.Client/Resources/**/*.en.resx"
     translation: "apps/server/AliasVault.Client/Resources/%original_path%.%two_letters_code%.resx"
     type: "resx"
+    preserve_translations: true
 
   # ============================================================================
   # Browser Extension
@@ -37,6 +40,7 @@ files:
   - source: "apps/browser-extension/src/locales/en/**/*.json"
     translation: "apps/browser-extension/src/locales/%two_letters_code%/%original_path%"
     type: "json"
+    preserve_translations: true
 
   # ============================================================================
   # Mobile App (React Native + Native iOS/Android)
@@ -46,30 +50,36 @@ files:
   - source: "apps/mobile-app/i18n/locales/en.json"
     translation: "apps/mobile-app/i18n/locales/%two_letters_code%.json"
     type: "json"
+    preserve_translations: true
 
   # iOS native localization files
   - source: "apps/mobile-app/ios/AliasVault/en.lproj/Localizable.strings"
     translation: "apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/Localizable.strings"
     type: "strings"
+    preserve_translations: true
 
   - source: "apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings"
     translation: "apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings"
     type: "strings"
+    preserve_translations: true
 
   # iOS Autofill extension localization files
   - source: "apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings"
     translation: "apps/mobile-app/ios/Autofill/%two_letters_code%.lproj/Localizable.strings"
     type: "strings"
+    preserve_translations: true
 
   # iOS VaultUI framework localization files
   - source: "apps/mobile-app/ios/VaultUI/en.lproj/Localizable.strings"
     translation: "apps/mobile-app/ios/VaultUI/%two_letters_code%.lproj/Localizable.strings"
     type: "strings"
+    preserve_translations: true
 
   # Android native localization files
   - source: "apps/mobile-app/android/app/src/main/res/values/strings.xml"
     translation: "apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml"
     type: "android"
+    preserve_translations: true
     ignore:
       - "apps/mobile-app/android/app/src/main/res/values-*/**"
 
