@@ -1,35 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-
   <!-- Main navigation links -->
   <data name="CredentialsNav">
-    <value>Inloggegevens</value>
+    <value>Credentials</value>
     <comment>Main navigation link for credentials section</comment>
   </data>
   <data name="EmailsNav">
     <value>E-mails</value>
     <comment>Main navigation link for emails section</comment>
   </data>
-
   <!-- Settings menu items -->
   <data name="GeneralSettingsNav">
     <value>Algemene instellingen</value>
@@ -47,7 +45,6 @@
     <value>Extensies &amp; Apps</value>
     <comment>Navigation link for extensions and apps settings</comment>
   </data>
-
   <!-- Menu actions -->
   <data name="ToggleDarkMode">
     <value>Donkere modus schakelen</value>
@@ -57,13 +54,11 @@
     <value>Uitloggen</value>
     <comment>Button text for logging out</comment>
   </data>
-
   <!-- Accessibility labels -->
   <data name="OpenMenuLabel">
     <value>Menu openen</value>
     <comment>Screen reader label for mobile menu button</comment>
   </data>
-
   <!-- Status labels -->
   <data name="NewLabel">
     <value>NIEUW</value>
