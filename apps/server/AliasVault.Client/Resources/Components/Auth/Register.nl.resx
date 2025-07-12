@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -58,13 +58,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  
   <!-- Page title -->
   <data name="PageTitle" xml:space="preserve">
     <value>Maak een nieuw AliasVault account aan</value>
     <comment>Main registration page title</comment>
   </data>
-  
   <!-- Form labels -->
   <data name="UsernameOrEmailLabel" xml:space="preserve">
     <value>Uw gebruikersnaam of e-mail</value>
@@ -78,7 +76,6 @@
     <value>Bevestig wachtwoord</value>
     <comment>Label for password confirmation input field</comment>
   </data>
-  
   <!-- Terms and conditions -->
   <data name="AcceptTermsLabel" xml:space="preserve">
     <value>Ik accepteer de</value>
@@ -88,13 +85,11 @@
     <value>Algemene Voorwaarden</value>
     <comment>Link text for terms and conditions</comment>
   </data>
-  
   <!-- Buttons -->
   <data name="CreateAccountButton" xml:space="preserve">
     <value>Account aanmaken</value>
     <comment>Create account button text</comment>
   </data>
-  
   <!-- Links -->
   <data name="AlreadyRegisteredText" xml:space="preserve">
     <value>Al geregistreerd?</value>
@@ -104,7 +99,6 @@
     <value>Hier inloggen</value>
     <comment>Link text for login page</comment>
   </data>
-  
   <!-- Loading and status messages -->
   <data name="CreatingAccountMessage" xml:space="preserve">
     <value>Account aanmaken...</value>
@@ -114,7 +108,6 @@
     <value>Er is een fout opgetreden tijdens de registratie.</value>
     <comment>Generic registration error message</comment>
   </data>
-  
   <!-- Placeholders -->
   <data name="UsernamePlaceholder" xml:space="preserve">
     <value>naam / naam@bedrijf.com</value>
