@@ -1,6 +1,6 @@
 {
   "title": "Instellingen",
-  "serverUrl": "Server-URL",
+  "serverUrl": "Server URL",
   "language": "Taal",
   "autofillEnabled": "Autofill",
   "version": "Versie",
@@ -10,7 +10,7 @@
   "logout": "Uitloggen",
   "globalSettings": "Globale Instellingen",
   "autofillPopup": "Autofill popup",
-  "activeOnAllSites": "Actief op alle sites (tenzij hieronder uitgeschakeld)",
+  "activeOnAllSites": "Actief voor alle sites (tenzij hieronder uitgeschakeld)",
   "disabledOnAllSites": "Uitgeschakeld op alle sites",
   "enabled": "Ingeschakeld",
   "disabled": "Uitgeschakeld",
@@ -26,8 +26,8 @@
   "useDefault": "Standaard gebruiken",
   "light": "Licht",
   "dark": "Donker",
-  "keyboardShortcuts": "Toetsenbordsnelkoppelingen",
-  "configureKeyboardShortcuts": "Toetsenbordsnelkoppelingen configureren",
+  "keyboardShortcuts": "Snelkoppelingen",
+  "configureKeyboardShortcuts": "Snelkoppelingen configureren",
   "configure": "Configureren",
   "versionPrefix": "Versie "
 }

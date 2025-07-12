@@ -1,5 +1,5 @@
 {
-  "title": "E-mail Details",
+  "title": "E-mail details",
   "deleteEmailTitle": "E-mail Verwijderen",
   "deleteEmailConfirm": "Weet u zeker dat u deze e-mail definitief wilt verwijderen?",
   "from": "Van",
@@ -11,8 +11,8 @@
   "noEmails": "Geen e-mails gevonden",
   "errors": {
     "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
-    "emailInUse": "Het momenteel gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze inloggegevens te bewerken.",
-    "emailSyncError": "Er is een fout opgetreden bij het laden van e-mails. Probeer de inloggegevens te bewerken en op te slaan om de database te synchroniseren, en probeer het opnieuw.",
+    "emailInUse": "Het huidige gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze credential te bewerken.",
+    "emailSyncError": "Er is een fout opgetreden bij het laden van e-mails. Probeer de credential te bewerken en op te slaan om de database te synchroniseren, en probeer het opnieuw.",
     "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw."
   }
 }

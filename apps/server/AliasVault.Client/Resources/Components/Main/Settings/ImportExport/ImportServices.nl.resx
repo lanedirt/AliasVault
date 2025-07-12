@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -60,11 +60,11 @@
   </resheader>
   <!-- 1Password -->
   <data name="OnePasswordDescription" xml:space="preserve">
-    <value>Importeer wachtwoorden uit uw 1Password kluis</value>
+    <value>Importeer wachtwoorden vanuit je 1Password account</value>
     <comment>Description for 1Password import service</comment>
   </data>
   <data name="OnePasswordInstructionsPart1" xml:space="preserve">
-    <value>Om uw 1Password kluis te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door in te loggen op uw 1Password account in de 1Password 8 desktop app (Windows / MacOS / Linux), naar het 'File' menu te gaan en 'Export' (naar CSV) te selecteren.</value>
+    <value>Om je 1Password kluis te importeren, moet je deze exporteren als CSV-bestand. Je kunt dit doen door in te loggen op je 1Password account in de 1Password 8 desktop app (Windows / MacOS / Linux), naar het 'File' menu te gaan en 'Export' (naar CSV) te selecteren.</value>
     <comment>1Password export instructions part 1</comment>
   </data>
   <data name="OnePasswordInstructionsPart2" xml:space="preserve">
@@ -90,7 +90,7 @@
     <comment>Description for LastPass import service</comment>
   </data>
   <data name="LastPassInstructionsPart1" xml:space="preserve">
-    <value>Om uw LastPass kluis te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door in te loggen op uw LastPass account, naar 'Advanced Options' in de linkerzijbalk te gaan en 'Export' > 'LastPass CSV File' te selecteren.</value>
+    <value>Om je LastPass kluis te importeren, moet je deze exporteren als CSV-bestand. Je kunt dit doen door in te loggen op je LastPass account, naar 'Advanced Options' in de linkerzijbalk te gaan en 'Export' > 'LastPass CSV File' te selecteren.</value>
     <comment>LastPass export instructions part 1</comment>
   </data>
   <data name="LastPassInstructionsPart2" xml:space="preserve">
@@ -103,7 +103,7 @@
     <comment>Description for Chrome import service</comment>
   </data>
   <data name="ChromeInstructionsPart1" xml:space="preserve">
-    <value>Om uw Chrome Wachtwoordbeheer te importeren, moet u deze exporteren als CSV-bestand. U kunt dit doen door in te loggen in uw Chrome browser, naar het 'Settings' menu te gaan > 'Password and AutoFill' > 'Google Password Manager'. Klik vervolgens op 'Export passwords'.</value>
+    <value>Om je Chrome Wachtwoordbeheer te importeren, moet je deze exporteren als CSV-bestand. Je kunt dit doen door in te loggen in uw Chrome browser, naar het 'Settings' menu te gaan > 'Password and AutoFill' > 'Google Password Manager'. Klik vervolgens op 'Export passwords'.</value>
     <comment>Chrome export instructions part 1</comment>
   </data>
   <data name="ChromeInstructionsPart2" xml:space="preserve">
@@ -125,11 +125,11 @@
   </data>
   <!-- Generic CSV -->
   <data name="GenericCsvDescription" xml:space="preserve">
-    <value>Importeer inloggegevens met een sjabloon CSV-indeling</value>
+    <value>Importeer credentials met een sjabloon CSV bestand</value>
     <comment>Description for Generic CSV import service</comment>
   </data>
   <data name="GenericCsvInstructionsPart1" xml:space="preserve">
-    <value>Wordt de wachtwoordbeheerder die u gebruikt niet ondersteund? U kunt uw inloggegevens altijd in AliasVault importeren met een generiek CSV-sjabloonformaat.</value>
+    <value>Wordt de wachtwoordmanager die je gebruikt niet ondersteund? Je kunt je inloggegevens altijd in AliasVault importeren met een generiek CSV-sjabloonformaat.</value>
     <comment>Generic CSV instructions part 1</comment>
   </data>
   <data name="GenericCsvStep1" xml:space="preserve">
@@ -141,7 +141,7 @@
     <comment>Generic CSV step 2</comment>
   </data>
   <data name="GenericCsvStep3" xml:space="preserve">
-    <value>Vul uw inloggegevens in (vervang de voorbeeldgegevens)</value>
+    <value>Vul je credentials in (vervang de voorbeeldgegevens)</value>
     <comment>Generic CSV step 3</comment>
   </data>
   <data name="GenericCsvStep4" xml:space="preserve">

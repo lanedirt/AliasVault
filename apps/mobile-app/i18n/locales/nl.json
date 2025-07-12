@@ -42,7 +42,7 @@
     "enableBiometric": "{{biometric}} inschakelen?",
     "biometricPrompt": "Wilt u {{biometric}} gebruiken om uw kluis te ontgrendelen?",
     "tryBiometricAgain": "Probeer {{biometric}} Opnieuw",
-    "authCodeNote": "Opmerking: als u geen toegang heeft tot uw authenticator-apparaat, kunt u uw 2FA resetten met een herstelcode door in te loggen via de website.",
+    "authCodeNote": "Opmerking: als je geen toegang hebt tot je authenticator, kunt je je 2FA resetten door met een herstelcode in te loggen via de website.",
     "noAccountYet": "Nog geen account?",
     "errors": {
       "credentialsRequired": "Gebruikersnaam en wachtwoord zijn vereist",
@@ -53,15 +53,15 @@
     "confirmLogout": "Weet u zeker dat u wilt uitloggen? U moet opnieuw inloggen met uw hoofdwachtwoord om toegang te krijgen tot uw kluis."
   },
   "credentials": {
-    "title": "Referenties",
-    "addCredential": "Referentie Toevoegen",
-    "editCredential": "Referentie Bewerken",
-    "deleteCredential": "Referentie Verwijderen",
-    "deleteConfirm": "Weet u zeker dat u deze referentie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-    "credentialOptions": "Referentie Opties",
-    "service": "Service",
+    "title": "Credentials",
+    "addCredential": "Credential toevoegen",
+    "editCredential": "Credential bewerken",
+    "deleteCredential": "Credential verwijderen",
+    "deleteConfirm": "Weet je zeker dat je deze credential wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "credentialOptions": "Credential opties",
+    "service": "Dienst",
     "serviceName": "Service Naam",
-    "serviceUrl": "Service URL",
+    "serviceUrl": "Dienst URL",
     "loginCredentials": "Inloggegevens",
     "username": "Gebruikersnaam",
     "email": "E-mail",
@@ -73,33 +73,33 @@
     "fullName": "Volledige Naam",
     "gender": "Geslacht",
     "birthDate": "Geboortedatum",
-    "birthDatePlaceholder": "JJJJ-MM-DD",
+    "birthDatePlaceholder": "YYYY-MM-DD",
     "notes": "Notities",
     "randomAlias": "Willekeurige Alias",
     "manual": "Handmatig",
     "generateRandomAlias": "Genereer Willekeurige Alias",
-    "searchPlaceholder": "Zoek referenties...",
-    "noMatchingCredentials": "Geen overeenkomende referenties gevonden",
-    "noCredentialsFound": "Geen referenties gevonden. Maak er een aan om te beginnen. Tip: u kunt ook inloggen op de AliasVault webapp om referenties te importeren uit andere wachtwoordbeheerders.",
+    "searchPlaceholder": "Zoek credentials...",
+    "noMatchingCredentials": "Geen credentials gevonden",
+    "noCredentialsFound": "Geen credentials gevonden. Maak er een aan om te beginnen. Tip: je kunt ook inloggen op de AliasVault webapp om credentials te importeren uit andere wachtwoord-managers.",
     "recentEmails": "Recente e-mails",
     "loadingEmails": "E-mails laden...",
     "noEmailsYet": "Nog geen e-mails ontvangen.",
     "offlineEmailsMessage": "U bent offline. Maak verbinding met het internet om uw e-mails te laden.",
     "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
-    "emailClaimError": "Het gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze referentie te bewerken.",
-    "emailSyncError": "Er is een fout opgetreden bij het laden van de e-mails. Probeer de referentie te bewerken en op te slaan om de database te synchroniseren, en probeer het opnieuw.",
+    "emailClaimError": "Het gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze credential te bewerken.",
+    "emailSyncError": "Er is een fout opgetreden bij het laden van de e-mails. Probeer de credential te bewerken en opnieuw op te slaan om de vault te synchroniseren, en probeer het opnieuw.",
     "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
     "password": "Wachtwoord",
-    "deletingCredential": "Referentie verwijderen...",
-    "errorLoadingCredentials": "Fout bij het laden van referenties",
+    "deletingCredential": "Credential verwijderen...",
+    "errorLoadingCredentials": "Fout bij het laden van credentials",
     "vaultSyncFailed": "Kluis synchronisatie mislukt",
     "vaultSyncedSuccessfully": "Kluis succesvol gesynchroniseerd",
     "vaultUpToDate": "Kluis is up-to-date",
     "offlineMessage": "U bent offline. Maak verbinding met het internet om uw kluis te synchroniseren.",
-    "credentialCreated": "Referentie Aangemaakt!",
-    "credentialCreatedMessage": "Uw nieuwe referentie is toegevoegd aan uw kluis en is klaar voor gebruik.",
+    "credentialCreated": "Credential aangemaakt!",
+    "credentialCreatedMessage": "Je nieuwe credential is toegevoegd aan je vault en is klaar voor gebruik.",
     "switchBackToBrowser": "Schakel terug naar uw browser om door te gaan.",
-    "twoFactorAuth": "Twee-factor authenticatie",
+    "twoFactorAuth": "Twee-factor-authenticatie",
     "totpCode": "TOTP Code",
     "actions": {
       "copyUsername": "Kopieer Gebruikersnaam",
@@ -110,12 +110,12 @@
       "usernameCopied": "Gebruikersnaam gekopieerd naar klembord",
       "emailCopied": "E-mail gekopieerd naar klembord",
       "passwordCopied": "Wachtwoord gekopieerd naar klembord",
-      "credentialUpdated": "Referentie succesvol bijgewerkt",
-      "credentialCreated": "Referentie succesvol aangemaakt",
-      "credentialDeleted": "Referentie succesvol verwijderd"
+      "credentialUpdated": "Credential succesvol bijgewerkt",
+      "credentialCreated": "Credential succesvol aangemaakt",
+      "credentialDeleted": "Credential succesvol verwijderd"
     },
     "errors": {
-      "loadFailed": "Laden van referentie mislukt",
+      "loadFailed": "Laden van credential mislukt",
       "generateUsernameFailed": "Genereren van gebruikersnaam mislukt",
       "generatePasswordFailed": "Genereren van wachtwoord mislukt"
     }
@@ -125,7 +125,7 @@
     "iosAutofill": "iOS autofill",
     "androidAutofill": "Android autofill",
     "vaultUnlock": "Kluis Ontgrendel Methode",
-    "autoLock": "Automatisch Vergrendelen Timeout",
+    "autoLock": "Automatisch vergrendelen",
     "identityGenerator": "Identiteit Generator",
     "security": "Beveiliging",
     "appVersion": "App versie {{version}} ({{url}})",
@@ -152,14 +152,14 @@
       "biometricNotAvailable": "{{biometric}} Niet Beschikbaar",
       "biometricDisabledMessage": "{{biometric}} is uitgeschakeld voor AliasVault. Om het te gebruiken, schakel het eerst in via uw apparaat-instellingen.",
       "biometricHelp": "Uw kluis ontsleutelingssleutel wordt veilig opgeslagen op uw lokale apparaat in de {{keystore}} en kan veilig worden benaderd met {{biometric}}.",
-      "biometricUnavailableHelp": "{{biometric}} is niet beschikbaar. Tik om instellingen te openen en/of ga naar uw apparaat-instellingen om het in te schakelen en te configureren.",
+      "biometricUnavailableHelp": "{{biometric}} is niet beschikbaar. Tik om instellingen te openen en/of ga naar je apparaat-instellingen om het in te schakelen en te configureren.",
       "passwordHelp": "Voer uw volledige hoofdwachtwoord opnieuw in om uw kluis te ontgrendelen. Dit is altijd ingeschakeld als terugvaloptie.",
       "keystoreIOS": "iOS Sleutelhanger",
       "keystoreAndroid": "Android Sleutelopslag"
     },
     "autoLockSettings": {
-      "title": "Automatisch Vergrendelen Timeout",
-      "description": "Kies hoe lang de app op de achtergrond kan blijven voordat herauthenticatie vereist is. U moet Face ID gebruiken of uw wachtwoord invoeren om de kluis opnieuw te ontgrendelen."
+      "title": "Automatisch vergrendelen",
+      "description": "Kies hoe lang de app op de achtergrond kan blijven voordat je opnieuw moet aanmelden. Je moet vervolgens Face ID gebruiken of je wachtwoord invoeren om de vault opnieuw te ontgrendelen."
     },
     "identityGeneratorSettings": {
       "title": "Identiteit Generator",
@@ -180,7 +180,7 @@
       "errors": {
         "loadFailed": "Laden van identiteit generator instellingen mislukt.",
         "languageUpdateFailed": "Bijwerken van taalinstelling mislukt.",
-        "genderUpdateFailed": "Bijwerken van geslachtsinstelling mislukt."
+        "genderUpdateFailed": "Bijwerken van geslacht voorkeur mislukt."
       }
     },
     "securitySettings": {
@@ -191,7 +191,7 @@
       "recentAuthLogs": "Recente Auth Logs",
       "deleteAccountTitle": "Account Verwijderen",
       "changePassword": {
-        "headerText": "Het wijzigen van uw hoofdwachtwoord wijzigt ook de kluisversleutelingssleutels. Het wordt aanbevolen om uw hoofdwachtwoord periodiek te wijzigen om uw kluizen veilig te houden.",
+        "headerText": "Het wijzigen van je hoofdwachtwoord wijzigt ook de encryptie sleutels. Het wordt aanbevolen om je hoofdwachtwoord periodiek te wijzigen om je vault veilig te houden.",
         "currentPassword": "Huidige Wachtwoord",
         "newPassword": "Nieuwe Wachtwoord",
         "confirmNewPassword": "Bevestig Nieuwe Wachtwoord",
@@ -220,23 +220,23 @@
       },
       "authLogs": {
         "headerText": "Hieronder vindt u een overzicht van recente aanmeldpogingen bij uw account.",
-        "noLogs": "Geen aanmeldlogboeken gevonden",
+        "noLogs": "Geen auth logs gevonden",
         "success": "Succesvol",
         "failed": "Mislukt",
         "time": "Tijd",
         "device": "Apparaat",
         "ipAddress": "IP-adres",
         "client": "Client",
-        "failedToLoad": "Laden van aanmeldlogboeken mislukt"
+        "failedToLoad": "Laden van auth logs mislukt"
       },
       "deleteAccount": {
         "headerText": "Het verwijderen van uw account zal onmiddellijk en permanent al uw gegevens verwijderen.",
         "warningText": "Waarschuwing: Deze actie kan niet ongedaan worden gemaakt. Al uw gegevens zullen permanent verwijderd worden.",
         "finalWarning": "Laatste waarschuwing: Voer uw wachtwoord in om uw account permanent te verwijderen.",
-        "warningVaults": "Alle versleutelde kluizen inclusief al uw inloggegevens zullen permanent verwijderd worden",
-        "warningAliases": "Uw e-mailaliassen zullen weeën worden en kunnen niet door andere gebruikers worden geclaimd",
+        "warningVaults": "Alle versleutelde vaults inclusief al je credentials zullen permanent verwijderd worden",
+        "warningAliases": "Je e-mailaliassen zullen worden geanonimiseerd en kunnen niet door andere gebruikers worden geclaimd",
         "warningRecovery": "Uw account kan niet worden hersteld na verwijdering",
-        "irreversibleWarning": "Accountverwijdering is onomkeerbaar en kan niet ongedaan worden gemaakt. Door op de knop hieronder te drukken wordt uw account onmiddellijk en permanent verwijderd.",
+        "irreversibleWarning": "Het verwijderen van je account is onomkeerbaar en kan niet ongedaan worden gemaakt. Door op de knop hieronder te drukken wordt je account onmiddellijk en permanent verwijderd.",
         "enterUsername": "Voer uw gebruikersnaam in om door te gaan",
         "password": "Wachtwoord",
         "enterPassword": "Voer wachtwoord in",
@@ -255,7 +255,7 @@
     }
   },
   "navigation": {
-    "credentials": "Referenties",
+    "credentials": "Credentials",
     "emails": "E-mails",
     "settings": "Instellingen",
     "notFound": "Deze pagina bestaat niet.",
@@ -264,8 +264,8 @@
   },
   "validation": {
     "serviceNameRequired": "Service naam is vereist",
-    "invalidUrl": "Ongeldig URL formaat",
-    "invalidDate": "Datum moet in JJJJ-MM-DD formaat zijn",
+    "invalidUrl": "Ongeldig URL-formaat",
+    "invalidDate": "Datum moet in YYYY-MM-DD formaat zijn",
     "invalidEmail": "Ongeldig e-mail formaat"
   },
   "offline": {

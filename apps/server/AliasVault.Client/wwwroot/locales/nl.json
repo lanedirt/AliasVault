@@ -1,24 +1,24 @@
 {
   "loading": {
     "title": "AliasVault wordt geladen",
-    "message": "Veilige omgeving wordt geïnitialiseerd. AliasVault geeft prioriteit aan uw privacy door volledig in uw browser te draaien. De eerste keer laden kan even duren.",
-    "refreshText": "Als het laden vastloopt, kunt u op de onderstaande knop klikken om de pagina te vernieuwen.",
+    "message": "De beveiligde omgeving wordt opgestart. AliasVault draait volledig in je browser, waardoor het laden de eerste keer iets langer kan duren.",
+    "refreshText": "Als het laden vastloopt, kunt je op de onderstaande knop klikken om de pagina te vernieuwen.",
     "refreshButtonText": "Vernieuwen"
   },
   "errors": {
-    "unhandledError": "Er is een onverwachte fout opgetreden. Probeer de pagina opnieuw te laden. Als het probleem aanhoudt, neem contact op met ondersteuning.",
+    "unhandledError": "Er is een onverwachte fout opgetreden. Probeer de pagina opnieuw te laden. Als het probleem aanhoudt, neem dan contact op met support.",
     "webAssemblyError": "AliasVault vereist WebAssembly, dat door deze browser niet wordt ondersteund. Probeer een modernere browser die WebAssembly ondersteunt.",
     "reloadPageText": "Pagina herladen"
   },
   "quotes": {
     "security": [
-      "Uw identiteit is uw meest waardevolle bezit. Bescherm het als zodanig.",
-      "In de digitale wereld is een sterk wachtwoord uw eerste verdedigingslinie.",
+      "Je identiteit is je meest waardevolle bezit. Wees voorzichtig en bescherm het.",
+      "In de digitale wereld is een sterk wachtwoord je eerste verdedigingslinie.",
       "Beveiliging is geen product, maar een proces.",
       "De zwakste schakel in de beveiligingsketen is het menselijke element.",
-      "Beveiliging is altijd overdreven totdat het niet genoeg is.",
+      "Beveiliging wordt vaak gezien als overdreven, totdat het niet genoeg is.",
       "Vertrouw, maar verifieer - vooral online.",
-      "Uw gegevens zijn alleen zo veilig als uw zwakste wachtwoord.",
+      "Je gegevens zijn alleen zo veilig als je zwakste wachtwoord.",
       "Het veiligste wachtwoord is degene die u zich niet kunt herinneren."
     ]
   }

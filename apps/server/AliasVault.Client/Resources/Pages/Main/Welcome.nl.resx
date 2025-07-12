@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-
   <!-- Step titles -->
   <data name="WelcomeStepTitle">
     <value>Welkom bij AliasVault</value>
@@ -41,13 +40,11 @@
     <value>Tutorial</value>
     <comment>Default tutorial step title</comment>
   </data>
-
   <!-- Welcome step content -->
   <data name="WelcomeMessage">
     <value>Uw kluis is succesvol aangemaakt! Bescherm uw online privacy door unieke aliassen te maken voor elke service waarvoor u zich aanmeldt. Laten we leren hoe AliasVault werkt en vervolgens uw eerste veilige alias maken.</value>
     <comment>Welcome message on the first tutorial step</comment>
   </data>
-
   <!-- How it works step content -->
   <data name="HowItWorksIntro">
     <value>Wanneer u zich moet aanmelden voor een nieuwe service:</value>
@@ -69,7 +66,6 @@
     <value>Uw echte e-mailadres en andere persoonlijke informatie blijven privé</value>
     <comment>Fourth step in how it works explanation</comment>
   </data>
-
   <!-- Tips step content -->
   <data name="MasterPasswordTipTitle">
     <value>Houd uw hoofdwachtwoord veilig</value>
@@ -95,7 +91,6 @@
     <value>Installeer de AliasVault browser-extensie en mobiele app om aliassen te maken en formulieren automatisch in te vullen direct vanuit uw browser en smartphone.</value>
     <comment>Content for browser extensions and mobile apps tip</comment>
   </data>
-
   <!-- Create first identity step content -->
   <data name="ReadyToStartTitle">
     <value>Klaar om te beginnen?</value>
@@ -109,7 +104,6 @@
     <value>Maak uw eerste identiteit</value>
     <comment>Button text for creating first identity</comment>
   </data>
-
   <!-- Navigation buttons -->
   <data name="ContinueButton">
     <value>Doorgaan</value>
@@ -119,13 +113,11 @@
     <value>Aan de slag</value>
     <comment>Get started button text</comment>
   </data>
-
   <!-- Loading and status messages -->
   <data name="FinishingTutorialMessage">
     <value>Tutorial afronden...</value>
     <comment>Loading message when finishing tutorial</comment>
   </data>
-
   <!-- Extension and app labels -->
   <data name="ComingSoonLabel">
     <value>Binnenkort beschikbaar</value>
@@ -133,7 +125,7 @@
   </data>
   <data name="DownloadForPrefix">
     <value>Download voor</value>
-    <comment>Prefix for download links (e.g., "Download voor iOS")</comment>
+    <comment>Prefix for download links (e.g., "Download for iOS")</comment>
   </data>
   <data name="SoonSuffix">
     <value>(Binnenkort)</value>
