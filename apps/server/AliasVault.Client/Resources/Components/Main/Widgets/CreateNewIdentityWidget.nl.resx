@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -71,7 +71,7 @@
     <comment>Title of the create new alias popup</comment>
   </data>
   <data name="ServiceNameLabel" xml:space="preserve">
-    <value>Servicenaam</value>
+    <value>Naam van dienst</value>
     <comment>Label for service name field</comment>
   </data>
   <data name="ServiceNamePlaceholder" xml:space="preserve">
@@ -79,7 +79,7 @@
     <comment>Placeholder text for service name field</comment>
   </data>
   <data name="ServiceUrlLabel" xml:space="preserve">
-    <value>Service URL</value>
+    <value>Dienst URL</value>
     <comment>Label for service URL field</comment>
   </data>
   <data name="CreateButton" xml:space="preserve">
@@ -95,11 +95,11 @@
     <comment>Loading message while creating alias</comment>
   </data>
   <data name="CreateCredentialErrorMessage" xml:space="preserve">
-    <value>Fout bij het aanmaken van een nieuwe inloggegevens. Probeer het (later) opnieuw of log uit en weer in.</value>
+    <value>Fout bij het aanmaken van nieuwe credential. Probeer het (later) opnieuw of probeer opnieuw uit- en in te loggen.</value>
     <comment>Error message when credential creation fails</comment>
   </data>
   <data name="CredentialCreatedSuccessMessage" xml:space="preserve">
-    <value>Inloggegevens succesvol aangemaakt.</value>
+    <value>Credential succesvol aangemaakt.</value>
     <comment>Success message when credential is created</comment>
   </data>
 </root>
