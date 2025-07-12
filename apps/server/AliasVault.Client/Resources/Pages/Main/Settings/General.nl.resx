@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-
   <!-- Page title and description -->
   <data name="PageTitle">
     <value>Algemene instellingen</value>
@@ -33,7 +32,6 @@
     <value>Algemene instellingen</value>
     <comment>Breadcrumb title for general settings</comment>
   </data>
-
   <!-- Email Settings Section -->
   <data name="EmailSettingsTitle">
     <value>E-mail Instellingen</value>
@@ -59,7 +57,6 @@
     <value>Automatisch e-mailinhoud verversen wanneer nieuwe berichten aankomen</value>
     <comment>Label for auto email refresh setting</comment>
   </data>
-
   <!-- Alias Settings Section -->
   <data name="AliasSettingsTitle">
     <value>Alias Instellingen</value>
@@ -101,13 +98,11 @@
     <value>Vrouw</value>
     <comment>Female gender option</comment>
   </data>
-
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
     <value>Wachtwoord Instellingen</value>
     <comment>Title for password settings section</comment>
   </data>
-
   <!-- App Language Settings Section -->
   <data name="AppLanguageTitle">
     <value>Taal van de Applicatie</value>
