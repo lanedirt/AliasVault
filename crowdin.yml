@@ -44,7 +44,7 @@ files:
     translation: /%original_path%/%file_name%.%two_letters_code%.resx
     type: resx
     translation_replace:
-      _en: ''
+      .en: ''
   - source: /apps/browser-extension/src/locales/en/**/*.json
     translation: /apps/browser-extension/src/locales/%two_letters_code%/%file_name%.%file_extension%
     type: json
