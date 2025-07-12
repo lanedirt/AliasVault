@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
       </xsd:complexType>
     </xsd:element>
   </xsd:schema>
-
   <!-- Page title and description -->
   <data name="PageTitle">
     <value>Extensies &amp; Apps</value>
@@ -33,7 +32,6 @@
     <value>Extensies &amp; Apps</value>
     <comment>Breadcrumb title for extensions and apps</comment>
   </data>
-
   <!-- Browser Extensions Section -->
   <data name="BrowserExtensionsTitle">
     <value>Browserextensies</value>
@@ -51,7 +49,6 @@
     <value>Binnenkort beschikbaar</value>
     <comment>Coming soon text for unavailable extensions</comment>
   </data>
-
   <!-- Mobile Apps Section -->
   <data name="MobileAppsTitle">
     <value>Mobiele Apps</value>
