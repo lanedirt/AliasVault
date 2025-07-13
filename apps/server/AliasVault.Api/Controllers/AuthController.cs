@@ -49,31 +49,6 @@ using SecureRemotePassword;
 public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, SignInManager<AliasVaultUser> signInManager, IConfiguration configuration, IMemoryCache cache, ITimeProvider timeProvider, AuthLoggingService authLoggingService, Config config, ServerSettingsService settingsService) : ControllerBase
 {
     /// <summary>
-    /// Error message for invalid username or password.
-    /// </summary>
-    private static readonly string[] InvalidUsernameOrPasswordError = ["Invalid username or password. Please try again."];
-
-    /// <summary>
-    /// Error message for invalid 2-factor authentication code.
-    /// </summary>
-    private static readonly string[] Invalid2FaCode = ["Invalid authenticator code."];
-
-    /// <summary>
-    /// Error message for invalid 2-factor authentication recovery code.
-    /// </summary>
-    private static readonly string[] InvalidRecoveryCode = ["Invalid recovery code."];
-
-    /// <summary>
-    /// Error message for too many failed login attempts.
-    /// </summary>
-    private static readonly string[] AccountLocked = ["You have entered an incorrect password too many times and your account has now been locked out. You can try again in 30 minutes."];
-
-    /// <summary>
-    /// Error message for if user is (manually) blocked by admin.
-    /// </summary>
-    private static readonly string[] AccountBlocked = ["Your account has been disabled. If you believe this is a mistake, please contact support."];
-
-    /// <summary>
     /// Semaphore to prevent concurrent access to the database when generating new tokens for a user.
     /// </summary>
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
@@ -158,14 +133,14 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (await userManager.IsLockedOutAsync(user))
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
-            return BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.ACCOUNT_LOCKED, 400));
         }
 
         // Check if the account is blocked.
         if (user.Blocked)
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.AccountBlocked);
-            return BadRequest(ServerValidationErrorResponse.Create(AccountBlocked, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.ACCOUNT_BLOCKED, 400));
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
@@ -228,7 +203,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (user == null || serverSession == null)
         {
             // Expected variables are not set, return generic error.
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 400));
         }
 
         // Verify 2-factor code.
@@ -239,7 +214,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             await userManager.AccessFailedAsync(user);
 
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidTwoFactorCode);
-            return BadRequest(ServerValidationErrorResponse.Create(Invalid2FaCode, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.INVALID_AUTHENTICATOR_CODE, 400));
         }
 
         // Validation of 2-FA token is successful, user is authenticated.
@@ -271,7 +246,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (user == null || serverSession == null)
         {
             // Expected variables are not set, return generic error.
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 400));
         }
 
         // Sanitize recovery code.
@@ -286,7 +261,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             await userManager.AccessFailedAsync(user);
 
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.TwoFactorAuthentication, AuthFailureReason.InvalidRecoveryCode);
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidRecoveryCode, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.INVALID_RECOVERY_CODE, 400));
         }
 
         // Recovery code is valid, user is authenticated.
@@ -313,26 +288,26 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         // If the token is not provided, return bad request.
         if (string.IsNullOrWhiteSpace(tokenModel.RefreshToken))
         {
-            return BadRequest("Refresh token is required.");
+            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.REFRESH_TOKEN_REQUIRED, 400));
         }
 
         var principal = GetPrincipalFromToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
-            return Unauthorized("User not found (name-1)");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_TOKEN, 401));
         }
 
         var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
-            return Unauthorized("User not found (name-2)");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_DATABASE, 401));
         }
 
         // Check if the account is blocked.
         if (user.Blocked)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.AccountBlocked);
-            return Unauthorized("Account blocked");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.ACCOUNT_BLOCKED, 401));
         }
 
         // Generate new tokens for the user.
@@ -340,7 +315,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (token == null)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TokenRefresh, AuthFailureReason.InvalidRefreshToken);
-            return Unauthorized("Invalid refresh token");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.INVALID_REFRESH_TOKEN, 401));
         }
 
         await context.SaveChangesAsync();
@@ -362,19 +337,19 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         // If the token is not provided, return bad request.
         if (string.IsNullOrWhiteSpace(model.RefreshToken))
         {
-            return BadRequest("Refresh token is required.");
+            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.REFRESH_TOKEN_REQUIRED, 400));
         }
 
         var principal = GetPrincipalFromToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
-            return Unauthorized("User not found (name-1)");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_TOKEN, 401));
         }
 
         var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
-            return Unauthorized("User not found (name-2)");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_DATABASE, 401));
         }
 
         // Check if the refresh token is valid.
@@ -382,7 +357,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (!providedTokenExists)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Logout, AuthFailureReason.InvalidRefreshToken);
-            return Unauthorized("Invalid refresh token");
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.INVALID_REFRESH_TOKEN, 401));
         }
 
         // Remove the provided refresh token and any other existing refresh tokens that are issued to the current device ID.
@@ -393,7 +368,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         await context.SaveChangesAsync();
 
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.Logout);
-        return Ok("Refresh token revoked successfully");
+        return Ok(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.REFRESH_TOKEN_REVOKED_SUCCESSFULLY, 200));
     }
 
     /// <summary>
@@ -407,14 +382,14 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         // Check if public registration is disabled in the configuration.
         if (!config.PublicRegistrationEnabled)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(["New account registration is currently disabled on this server. Please contact the administrator."], 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.PUBLIC_REGISTRATION_DISABLED, 400));
         }
 
         // Validate the username.
         var (isValid, errorMessage) = ValidateUsername(model.Username);
         if (!isValid)
         {
-            return BadRequest(ServerValidationErrorResponse.Create([errorMessage], 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(GetUsernameValidationErrorCode(errorMessage), 400));
         }
 
         var user = new AliasVaultUser
@@ -471,7 +446,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         var user = await userManager.GetUserAsync(User);
         if (user == null)
         {
-            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+            return NotFound(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 404));
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
@@ -497,7 +472,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     {
         if (string.IsNullOrWhiteSpace(model.Username))
         {
-            return BadRequest("Username is required.");
+            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USERNAME_REQUIRED, 400));
         }
 
         var normalizedUsername = NormalizeUsername(model.Username);
@@ -505,7 +480,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
 
         if (existingUser != null)
         {
-            return BadRequest("Username is already in use.");
+            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USERNAME_ALREADY_IN_USE, 400));
         }
 
         // Validate the username
@@ -513,10 +488,10 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
 
         if (!isValid)
         {
-            return BadRequest(errorMessage);
+            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(GetUsernameValidationErrorCode(errorMessage), 400));
         }
 
-        return Ok("Username is available.");
+        return Ok(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USERNAME_AVAILABLE, 200));
     }
 
     /// <summary>
@@ -531,13 +506,13 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         var user = await userManager.GetUserAsync(User);
         if (user == null)
         {
-            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+            return NotFound(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 404));
         }
 
         // Verify the username matches the current user.
         if (user.UserName != model.Username)
         {
-            return BadRequest(ServerValidationErrorResponse.Create("Username does not match the current user.", 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USERNAME_MISMATCH, 400));
         }
 
         // Retrieve latest vault of user which contains the current salt and verifier.
@@ -568,13 +543,13 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         var user = await userManager.GetUserAsync(User);
         if (user == null)
         {
-            return NotFound(ServerValidationErrorResponse.Create("User not found.", 404));
+            return NotFound(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 404));
         }
 
         // Verify the username matches the current user.
         if (user.UserName != model.Username)
         {
-            return BadRequest(ServerValidationErrorResponse.Create("Username does not match the current user.", 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USERNAME_MISMATCH, 400));
         }
 
         // Validate the SRP session (actual password check).
@@ -582,7 +557,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (serverSession is null)
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.AccountDeletion, AuthFailureReason.InvalidPassword);
-            return BadRequest(ServerValidationErrorResponse.Create("The provided password does not match your current password.", 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.PASSWORD_MISMATCH, 400));
         }
 
         // Log the successful account deletion.
@@ -593,7 +568,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         context.AliasVaultUsers.Remove(user);
         await context.SaveChangesAsync();
 
-        return Ok(new { message = "Account successfully deleted." });
+        return Ok(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.ACCOUNT_SUCCESSFULLY_DELETED, 200));
     }
 
     /// <summary>
@@ -619,22 +594,22 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            return (false, "Username cannot be empty or whitespace.");
+            return (false, ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE.ToCode());
         }
 
         if (username.Length < minimumUsernameLength)
         {
-            return (false, $"Username too short: must be at least {minimumUsernameLength} characters long.");
+            return (false, ApiErrorCode.USERNAME_TOO_SHORT.ToCode());
         }
 
         if (username.Length > maximumUsernameLength)
         {
-            return (false, $"Username too long: cannot be longer than {maximumUsernameLength} characters.");
+            return (false, ApiErrorCode.USERNAME_TOO_LONG.ToCode());
         }
 
         if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
         {
-            return (false, "Username 'admin' is not allowed.");
+            return (false, ApiErrorCode.USERNAME_ADMIN_NOT_ALLOWED.ToCode());
         }
 
         // Check if it's a valid email address
@@ -647,17 +622,36 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             }
             catch
             {
-                return (false, $"'{username}' is not a valid email address.");
+                return (false, ApiErrorCode.USERNAME_INVALID_EMAIL.ToCode());
             }
         }
 
         // If it's not an email, check if it only contains letters and digits
         if (!username.All(char.IsLetterOrDigit))
         {
-            return (false, $"Username '{username}' is invalid, can only contain letters or digits.");
+            return (false, ApiErrorCode.USERNAME_INVALID_CHARACTERS.ToCode());
         }
 
         return (true, string.Empty);
+    }
+
+    /// <summary>
+    /// Gets the appropriate error code for a username validation error message.
+    /// </summary>
+    /// <param name="errorMessage">The validation error message.</param>
+    /// <returns>Corresponding ApiErrorCode.</returns>
+    private static ApiErrorCode GetUsernameValidationErrorCode(string errorMessage)
+    {
+        return errorMessage switch
+        {
+            var msg when msg.Contains("empty or whitespace") => ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE,
+            var msg when msg.Contains("too short") => ApiErrorCode.USERNAME_TOO_SHORT,
+            var msg when msg.Contains("too long") => ApiErrorCode.USERNAME_TOO_LONG,
+            var msg when msg.Contains("admin") => ApiErrorCode.USERNAME_ADMIN_NOT_ALLOWED,
+            var msg when msg.Contains("valid email") => ApiErrorCode.USERNAME_INVALID_EMAIL,
+            var msg when msg.Contains("invalid") => ApiErrorCode.USERNAME_INVALID_CHARACTERS,
+            _ => ApiErrorCode.UNKNOWN_ERROR,
+        };
     }
 
     /// <summary>
@@ -750,21 +744,21 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         if (user == null)
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.InvalidUsername);
-            return (null, null, BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400)));
+            return (null, null, BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 400)));
         }
 
         // Check if the account is locked out.
         if (await userManager.IsLockedOutAsync(user))
         {
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.TwoFactorAuthentication, AuthFailureReason.AccountLocked);
-            return (null, null, BadRequest(ServerValidationErrorResponse.Create(AccountLocked, 400)));
+            return (null, null, BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.ACCOUNT_LOCKED, 400)));
         }
 
         // Check if the account is blocked.
         if (user.Blocked)
         {
             await authLoggingService.LogAuthEventFailAsync(model.Username, AuthEventType.Login, AuthFailureReason.AccountBlocked);
-            return (null, null, BadRequest(ServerValidationErrorResponse.Create(AccountBlocked, 400)));
+            return (null, null, BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.ACCOUNT_BLOCKED, 400)));
         }
 
         // Validate the SRP session (actual password check).
@@ -775,7 +769,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             await userManager.AccessFailedAsync(user);
 
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.Login, AuthFailureReason.InvalidPassword);
-            return (null, null, BadRequest(ServerValidationErrorResponse.Create(InvalidUsernameOrPasswordError, 400)));
+            return (null, null, BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USER_NOT_FOUND, 400)));
         }
 
         return (user, serverSession, null);
