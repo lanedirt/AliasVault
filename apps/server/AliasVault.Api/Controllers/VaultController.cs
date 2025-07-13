@@ -40,21 +40,6 @@ using Microsoft.Extensions.Caching.Memory;
 public class VaultController(ILogger<VaultController> logger, IAliasServerDbContextFactory dbContextFactory, UserManager<AliasVaultUser> userManager, ITimeProvider timeProvider, AuthLoggingService authLoggingService, IMemoryCache cache, Config config) : AuthenticatedRequestController(userManager)
 {
     /// <summary>
-    /// Error message for providing an invalid current password (during password change).
-    /// </summary>
-    private static readonly string[] InvalidCurrentPassword = ["The current password provided is invalid. Please try again."];
-
-    /// <summary>
-    /// Error message for providing an invalid username.
-    /// </summary>
-    private static readonly string[] InvalidUsername = ["The currently logged on user is not the owner of the vault being saved. Please save your changes."];
-
-    /// <summary>
-    /// Error message for providing an older vault revision number.
-    /// </summary>
-    private static readonly string[] OlderVaultRevisionNumber = ["The local vault is not up-to-date. Please synchronize your vault by refreshing the page and try again."];
-
-    /// <summary>
     /// Default retention policy for vaults.
     /// </summary>
     private readonly RetentionPolicy _retentionPolicy = new()
@@ -225,7 +210,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // that is being used to update the vault (e.g. if working with multiple tabs).
         if (user.UserName != model.Username)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsername, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USERNAME_MISMATCH, 400));
         }
 
         // Retrieve latest vault of user which contains the current encryption settings.
@@ -234,7 +219,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // Reject vaults with a version that is lower than the last vault version.
         if (VersionHelper.IsVersionOlder(model.Version, latestVault.Version))
         {
-            return BadRequest(ServerValidationErrorResponse.Create(OlderVaultRevisionNumber, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.VAULT_NOT_UP_TO_DATE, 400));
         }
 
         // Calculate the new revision number for the vault.
@@ -313,7 +298,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         // that is being used to update the vault (e.g. if working with multiple tabs).
         if (model.Username != user.UserName)
         {
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidUsername, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.USERNAME_MISMATCH, 400));
         }
 
         // Validate the SRP session (actual password check).
@@ -324,7 +309,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
             await GetUserManager().AccessFailedAsync(user);
 
             await authLoggingService.LogAuthEventFailAsync(user.UserName!, AuthEventType.PasswordChange, AuthFailureReason.InvalidPassword);
-            return BadRequest(ServerValidationErrorResponse.Create(InvalidCurrentPassword, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.PASSWORD_MISMATCH, 400));
         }
 
         // Check if the provided revision number is equal to the latest revision number.
@@ -332,7 +317,7 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
         var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).First();
         if (VersionHelper.IsVersionOlder(model.Version, latestVault.Version))
         {
-            return BadRequest(ServerValidationErrorResponse.Create(OlderVaultRevisionNumber, 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(ApiErrorCode.VAULT_NOT_UP_TO_DATE, 400));
         }
 
         // Calculate the new revision number for the vault.
