@@ -125,15 +125,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
             } catch {
               // Try to parse as error response instead
               const apiErrorResponse = response as ApiErrorResponse;
-
-              if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_MATCH_USER') {
-                setError(t('emails:errors.emailInUse'));
-              } else if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_EXIST') {
-                setError(t('emails:errors.emailSyncError'));
-              } else {
-                setError(t('emails:errors.emailLoadError'));
-              }
-
+              setError(t('emails:apiErrors.' + apiErrorResponse?.code));
               return;
             }
           } catch {
