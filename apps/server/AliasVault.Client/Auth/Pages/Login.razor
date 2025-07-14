@@ -127,6 +127,7 @@ else
     private bool _showLoginWithRecoveryCodeStep;
 
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Login", "AliasVault.Client");
+    private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
 
     private SrpEphemeral _clientEphemeral = new();
     private SrpSession _clientSession = new();
@@ -224,7 +225,7 @@ else
 
         if (!result.IsSuccessStatusCode)
         {
-            return ApiResponseUtility.ParseErrorResponse(responseContent);
+            return ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer);
         }
 
         var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
@@ -255,7 +256,7 @@ else
 
         if (!result.IsSuccessStatusCode)
         {
-            return ApiResponseUtility.ParseErrorResponse(responseContent);
+            return ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer);
         }
 
         var validateLoginResponse = JsonSerializer.Deserialize<ValidateLoginResponse>(responseContent);
@@ -297,7 +298,7 @@ else
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer))
                 {
                     _serverValidationErrors.AddError(error);
                 }
@@ -355,7 +356,7 @@ else
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer))
                 {
                     _serverValidationErrors.AddError(error);
                 }
