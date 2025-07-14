@@ -87,6 +87,7 @@ else
     private FullScreenLoadingIndicator _loadingIndicator = new();
     private ServerValidationErrors _serverValidationErrors = new();
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Auth.Unlock", "AliasVault.Client");
+    private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
 
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -129,7 +130,7 @@ else
 
             if (!result.IsSuccessStatusCode)
             {
-                var errors = ApiResponseUtility.ParseErrorResponse(responseContent);
+                var errors = ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer);
                 foreach (var error in errors)
                 {
                     _serverValidationErrors.AddError(error);
