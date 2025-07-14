@@ -1,4 +1,5 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
+@using AliasVault.Client.Utilities
 @using Microsoft.Extensions.Localization
 @using System.Timers
 
@@ -51,6 +52,8 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Setup.UsernameStep", "AliasVault.Client");
+    private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
+
     /// <summary>
     /// The username that is previously entered by the user. When a user navigates with back/continue
     /// and entered a username already, the existing username might be provided by the parent component.
@@ -181,8 +184,8 @@
                 }
                 else
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    _errorMessage = error;
+                    var errorResponse = await response.Content.ReadAsStringAsync();
+                    _errorMessage = ApiResponseUtility.ParseSingleErrorResponse(errorResponse, ApiErrorLocalizer);
                     _isValid = false;
                     await OnUsernameChange.InvokeAsync(string.Empty);
                 }
