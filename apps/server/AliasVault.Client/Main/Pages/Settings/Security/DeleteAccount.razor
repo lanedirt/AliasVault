@@ -6,14 +6,16 @@
 @using AliasVault.Cryptography.Client
 @using SecureRemotePassword
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inject HttpClient Http
 
-<LayoutPageTitle>Delete Account</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-        <H1>Delete Account</H1>
+        <H1>@Localizer["PageTitle"]</H1>
     </div>
 </div>
 
@@ -21,25 +23,25 @@
     @if (!_showPasswordConfirm)
     {
         <div class="mb-6">
-            <MessageWarning Message="Warning: This action is permanent and cannot be undone. All your data will be permanently deleted." />
+            <MessageWarning Message="@Localizer["PermanentActionWarning"]" />
 
             <div class="mt-4 mb-6 text-gray-600 dark:text-gray-400">
-                <p class="mb-2">Please note:</p>
+                <p class="mb-2">@Localizer["PleaseNote"]</p>
                 <ul class="list-disc list-inside space-y-2">
-                    <li>All encrypted vaults which includes all of your credentials will be permanently deleted</li>
-                    <li>Your email aliases will be orphaned and cannot be claimed by other users</li>
-                    <li>Your account cannot be recovered after deletion</li>
+                    <li>@Localizer["VaultsDeletedNote"]</li>
+                    <li>@Localizer["EmailAliasesOrphanedNote"]</li>
+                    <li>@Localizer["AccountCannotBeRecoveredNote"]</li>
                 </ul>
             </div>
 
             <EditForm Model="@_usernameModel" OnSubmit="@ConfirmUsername">
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm your username</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["ConfirmUsernameLabel"]</label>
                     <InputText id="username" @bind-Value="_usernameModel.Username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
                 </div>
 
                 <div class="flex space-x-3">
-                    <Button Type="submit" Color="danger">Continue with Account Deletion</Button>
+                    <Button Type="submit" Color="danger">@Localizer["ContinueWithAccountDeletion"]</Button>
                     <Button Type="button" Color="secondary" OnClick="Cancel">Cancel</Button>
                 </div>
             </EditForm>
@@ -48,12 +50,12 @@
     else
     {
         <div class="mb-6">
-            <MessageWarning Message="Final warning: Enter your password to permanently delete your account." />
+            <MessageWarning Message="@Localizer["FinalWarning"]" />
 
             <div class="mt-4 mb-6 text-gray-600 dark:text-gray-400">
-                <p class="mb-2">Please note:</p>
+                <p class="mb-2">@Localizer["PleaseNote"]</p>
                 <ul class="list-disc list-inside space-y-2">
-                    <li>Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently.</li>
+                    <li>@Localizer["DeletionIrreversibleNote"]</li>
                 </ul>
             </div>
 
@@ -62,12 +64,12 @@
                 <ValidationSummary />
 
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter your password</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["EnterPasswordLabel"]</label>
                     <InputText id="password" type="password" @bind-Value="_passwordModel.Password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
                 </div>
 
                 <div class="flex space-x-3">
-                    <Button Type="submit" Color="danger">Delete My Account</Button>
+                    <Button Type="submit" Color="danger">@Localizer["DeleteMyAccount"]</Button>
                     <Button Type="button" Color="secondary" OnClick="Cancel">Cancel</Button>
                 </div>
             </EditForm>
@@ -85,6 +87,9 @@
     /// The model for the password confirmation step.
     /// </summary>
     private readonly DeleteAccountPasswordModel _passwordModel = new();
+
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Pages.Settings.Security.DeleteAccount", "AliasVault.Client");
+    private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
 
     /// <summary>
     /// Whether to show the password confirmation step.
@@ -106,8 +111,8 @@
     {
         await base.OnInitializedAsync();
 
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Security settings", Url = "/settings/security" });
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Delete Account" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbSecuritySettings"], Url = "/settings/security" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbDeleteAccount"] });
     }
 
     /// <summary>
@@ -119,7 +124,7 @@
 
         if (string.IsNullOrEmpty(_usernameModel.Username))
         {
-            GlobalNotificationService.AddErrorMessage("Username is required", true);
+            GlobalNotificationService.AddErrorMessage(Localizer["UsernameRequired"], true);
             return;
         }
 
@@ -127,7 +132,7 @@
         var usernameMatches = string.Equals(_usernameModel.Username.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase);
         if (!usernameMatches)
         {
-            GlobalNotificationService.AddErrorMessage("The username you entered does not match your current username. Please try again.", true);
+            GlobalNotificationService.AddErrorMessage(Localizer["UsernameDoesNotMatch"], true);
             return;
         }
 
@@ -140,7 +145,7 @@
     /// </summary>
     private async Task DeleteAccountConfirmed()
     {
-        GlobalLoadingSpinner.Show("Deleting account...");
+        GlobalLoadingSpinner.Show(Localizer["DeletingAccountMessage"]);
         GlobalNotificationService.ClearMessages();
 
         try
@@ -152,7 +157,7 @@
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer))
                 {
                     GlobalNotificationService.AddErrorMessage(error, true);
                 }
@@ -162,7 +167,7 @@
             var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
-                GlobalNotificationService.AddErrorMessage("An error occurred while processing the request.", true);
+                GlobalNotificationService.AddErrorMessage(Localizer["ErrorProcessingRequest"], true);
                 return;
             }
 
@@ -185,7 +190,7 @@
 
             if (!result.IsSuccessStatusCode)
             {
-                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent))
+                foreach (var error in ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer))
                 {
                     GlobalNotificationService.AddErrorMessage(error, true);
                 }
@@ -217,7 +222,7 @@
         /// <summary>
         /// Gets or sets the username.
         /// </summary>
-        [Required(ErrorMessage = "Username is required")]
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.UsernameRequired))]
         public string Username { get; set; } = string.Empty;
     }
 
@@ -229,7 +234,7 @@
         /// <summary>
         /// Gets or sets the password.
         /// </summary>
-        [Required(ErrorMessage = "Password is required")]
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
         public string Password { get; set; } = string.Empty;
     }
 }
