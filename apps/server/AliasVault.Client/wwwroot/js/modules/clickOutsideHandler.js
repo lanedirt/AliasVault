@@ -7,21 +7,30 @@ export function registerClickOutsideHandler(dotNetHelper, contentIds, methodName
     currentDotNetHelper = dotNetHelper;
     const idArray = Array.isArray(contentIds) ? contentIds : contentIds.split(',').map(id => id.trim());
 
-    currentHandler = (event) => {
+    const mouseHandler = (event) => {
         const isOutside = idArray.every(id => {
             const content = document.getElementById(id);
             return !content?.contains(event.target);
         });
 
-        const isEscapeKey = event.type === 'keydown' && event.key === 'Escape';
-
-        if (isOutside || isEscapeKey) {
+        if (isOutside) {
             currentDotNetHelper.invokeMethodAsync(methodName);
         }
     };
 
-    document.addEventListener('mousedown', currentHandler);
-    document.addEventListener('keydown', currentHandler);
+    const keyHandler = (event) => {
+        if (event.key === 'Escape') {
+            currentDotNetHelper.invokeMethodAsync(methodName);
+        }
+    };
+
+    currentHandler = {
+        mouse: mouseHandler,
+        key: keyHandler
+    };
+
+    document.addEventListener('mousedown', mouseHandler);
+    document.addEventListener('keydown', keyHandler);
 }
 
 export function unregisterClickOutsideHandler() {
