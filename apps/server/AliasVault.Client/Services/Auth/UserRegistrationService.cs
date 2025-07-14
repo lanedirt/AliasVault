@@ -13,6 +13,7 @@ using AliasVault.Client.Utilities;
 using AliasVault.Cryptography.Client;
 using AliasVault.Shared.Models.WebApi.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Localization;
 using SecureRemotePassword;
 
 /// <summary>
@@ -22,8 +23,11 @@ using SecureRemotePassword;
 /// <param name="authStateProvider">The provider that manages authentication state.</param>
 /// <param name="authService">The service handling authentication operations.</param>
 /// <param name="config">The application configuration.</param>
-public class UserRegistrationService(HttpClient httpClient, AuthenticationStateProvider authStateProvider, AuthService authService, Config config)
+/// <param name="localizerFactory">The string localizer factory for localization.</param>
+public class UserRegistrationService(HttpClient httpClient, AuthenticationStateProvider authStateProvider, AuthService authService, Config config, IStringLocalizerFactory localizerFactory)
 {
+    private readonly IStringLocalizer _apiErrorLocalizer = localizerFactory.Create("ApiErrors", "AliasVault.Client");
+
     /// <summary>
     /// Registers a new user asynchronously.
     /// </summary>
@@ -55,7 +59,7 @@ public class UserRegistrationService(HttpClient httpClient, AuthenticationStateP
 
             if (!result.IsSuccessStatusCode)
             {
-                var errors = ApiResponseUtility.ParseErrorResponse(responseContent);
+                var errors = ApiResponseUtility.ParseErrorResponse(responseContent, _apiErrorLocalizer);
                 return (false, string.Join(", ", errors));
             }
 

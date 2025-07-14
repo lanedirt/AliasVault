@@ -10,6 +10,7 @@ namespace AliasVault.Client.Main.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
 using AliasClientDb;
+using AliasVault.Client.Resources;
 
 /// <summary>
 /// Credential edit model.
@@ -29,7 +30,7 @@ public sealed class TotpCodeEdit
     /// <summary>
     /// Gets or sets the secret key of the TOTP code.
     /// </summary>
-    [Required(ErrorMessage = "Secret key is required")]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.SecretKeyRequired))]
     public string SecretKey { get; set; } = string.Empty;
 
     /// <summary>

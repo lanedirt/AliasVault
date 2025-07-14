@@ -2,7 +2,7 @@
 @inherits AliasVault.Client.Auth.Pages.Base.LoginBase
 @attribute [AllowAnonymous]
 @layout Auth.Layout.MainLayout
-@using AliasVault.Shared.Models.WebApi.Auth
+@using AliasVault.Client.Auth.Models
 @using AliasVault.Client.Auth.Components
 @using Microsoft.Extensions.Localization
 
@@ -48,7 +48,7 @@
 </EditForm>
 
 @code {
-    private readonly RegisterModel _registerModel = new();
+    private readonly RegisterFormModel _registerModel = new();
     private FullScreenLoadingIndicator _loadingIndicator = new();
     private ServerValidationErrors _serverValidationErrors = new();
 
