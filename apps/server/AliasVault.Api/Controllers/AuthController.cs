@@ -386,10 +386,10 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         }
 
         // Validate the username.
-        var (isValid, errorMessage) = ValidateUsername(model.Username);
+        var (isValid, apiErrorCode) = ValidateUsername(model.Username);
         if (!isValid)
         {
-            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(GetUsernameValidationErrorCode(errorMessage), 400));
+            return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(apiErrorCode, 400));
         }
 
         var user = new AliasVaultUser
@@ -484,11 +484,11 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         }
 
         // Validate the username
-        var (isValid, errorMessage) = ValidateUsername(normalizedUsername);
+        var (isValid, apiErrorCode) = ValidateUsername(normalizedUsername);
 
         if (!isValid)
         {
-            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(GetUsernameValidationErrorCode(errorMessage), 400));
+            return BadRequest(ApiErrorCodeHelper.CreateErrorResponse(apiErrorCode, 400));
         }
 
         return Ok(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USERNAME_AVAILABLE, 200));
@@ -586,7 +586,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     /// </summary>
     /// <param name="username">The username to validate.</param>
     /// <returns>A tuple containing a boolean indicating if the username is valid, and an error message if it's invalid.</returns>
-    private static (bool IsValid, string ErrorMessage) ValidateUsername(string username)
+    private static (bool IsValid, ApiErrorCode ApiErrorCode) ValidateUsername(string username)
     {
         const int minimumUsernameLength = 3;
         const int maximumUsernameLength = 40;
@@ -594,22 +594,22 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            return (false, ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE.ToCode());
+            return (false, ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE);
         }
 
         if (username.Length < minimumUsernameLength)
         {
-            return (false, ApiErrorCode.USERNAME_TOO_SHORT.ToCode());
+            return (false, ApiErrorCode.USERNAME_TOO_SHORT);
         }
 
         if (username.Length > maximumUsernameLength)
         {
-            return (false, ApiErrorCode.USERNAME_TOO_LONG.ToCode());
+            return (false, ApiErrorCode.USERNAME_TOO_LONG);
         }
 
         if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
         {
-            return (false, ApiErrorCode.USERNAME_ADMIN_NOT_ALLOWED.ToCode());
+            return (false, ApiErrorCode.USERNAME_ADMIN_NOT_ALLOWED);
         }
 
         // Check if it's a valid email address
@@ -618,40 +618,21 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             try
             {
                 var addr = new System.Net.Mail.MailAddress(username);
-                return (addr.Address == username, string.Empty);
+                return (addr.Address == username, ApiErrorCode.USERNAME_INVALID_EMAIL);
             }
             catch
             {
-                return (false, ApiErrorCode.USERNAME_INVALID_EMAIL.ToCode());
+                return (false, ApiErrorCode.USERNAME_INVALID_EMAIL);
             }
         }
 
         // If it's not an email, check if it only contains letters and digits
         if (!username.All(char.IsLetterOrDigit))
         {
-            return (false, ApiErrorCode.USERNAME_INVALID_CHARACTERS.ToCode());
+            return (false, ApiErrorCode.USERNAME_INVALID_CHARACTERS);
         }
 
-        return (true, string.Empty);
-    }
-
-    /// <summary>
-    /// Gets the appropriate error code for a username validation error message.
-    /// </summary>
-    /// <param name="errorMessage">The validation error message.</param>
-    /// <returns>Corresponding ApiErrorCode.</returns>
-    private static ApiErrorCode GetUsernameValidationErrorCode(string errorMessage)
-    {
-        return errorMessage switch
-        {
-            var msg when msg.Contains("empty or whitespace") => ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE,
-            var msg when msg.Contains("too short") => ApiErrorCode.USERNAME_TOO_SHORT,
-            var msg when msg.Contains("too long") => ApiErrorCode.USERNAME_TOO_LONG,
-            var msg when msg.Contains("admin") => ApiErrorCode.USERNAME_ADMIN_NOT_ALLOWED,
-            var msg when msg.Contains("valid email") => ApiErrorCode.USERNAME_INVALID_EMAIL,
-            var msg when msg.Contains("invalid") => ApiErrorCode.USERNAME_INVALID_CHARACTERS,
-            _ => ApiErrorCode.UNKNOWN_ERROR,
-        };
+        return (true, ApiErrorCode.USERNAME_AVAILABLE);
     }
 
     /// <summary>
