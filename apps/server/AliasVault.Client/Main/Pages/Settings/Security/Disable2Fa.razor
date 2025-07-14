@@ -1,8 +1,9 @@
 ﻿@page "/settings/security/disable-2fa"
 @inherits MainBase
 @inject HttpClient Http
+@using Microsoft.Extensions.Localization
 
-<LayoutPageTitle>Disable two-factor authentication</LayoutPageTitle>
+<LayoutPageTitle>@_pageTitle</LayoutPageTitle>
 
 @if (IsLoading)
 {
@@ -13,17 +14,17 @@ else
     <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
         <div class="mb-4 col-span-full xl:mb-2">
             <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-            <H1>Disable two-factor authentication</H1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Disabling two-factor authentication means you will be able to login with only your password.</p>
+            <H1>@_pageTitle</H1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">@_pageDescription</p>
         </div>
     </div>
 
     <div class="p-4 mb-4  mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <AlertMessageError Message="Please note: after disabling two-factor authentication any configured authenticator app(s) will stop working. When you want to re-enable two-factor authentication you will have to configure the authenticator app(s) again." />
-        <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">Two factor authentication is currently enabled. Disable it in order to be able to access your vault with your password only.</div>
+        <AlertMessageError Message="@_alertMessage" />
+        <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">@_descriptionText</div>
         <button @onclick="DisableTwoFactor"
                 class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-            Confirm Disable Two-Factor Authentication
+            @_confirmDisableButton
         </button>
     </div>
 }
@@ -31,13 +32,40 @@ else
 @code {
     private bool IsLoading { get; set; } = true;
 
+    private IStringLocalizer? _localizer;
+    private IStringLocalizer Localizer => _localizer ??= LocalizerFactory.Create("Components.Main.Pages.Settings.Security.Disable2Fa", "AliasVault.Client");
+
+    // Cached localized strings for performance
+    private string _pageTitle = string.Empty;
+    private string _pageDescription = string.Empty;
+    private string _breadcrumbSecuritySettings = string.Empty;
+    private string _breadcrumbDisable2Fa = string.Empty;
+    private string _alertMessage = string.Empty;
+    private string _descriptionText = string.Empty;
+    private string _confirmDisableButton = string.Empty;
+    private string _twoFactorNotEnabled = string.Empty;
+    private string _twoFactorDisabledSuccess = string.Empty;
+    private string _failedToDisable2Fa = string.Empty;
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Security settings", Url = "/settings/security" });
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Disable two-factor authentication" });
+        // Cache localized strings for performance
+        _pageTitle = Localizer["PageTitle"];
+        _pageDescription = Localizer["PageDescription"];
+        _breadcrumbSecuritySettings = Localizer["BreadcrumbSecuritySettings"];
+        _breadcrumbDisable2Fa = Localizer["BreadcrumbDisable2Fa"];
+        _alertMessage = Localizer["AlertMessage"];
+        _descriptionText = Localizer["DescriptionText"];
+        _confirmDisableButton = Localizer["ConfirmDisableButton"];
+        _twoFactorNotEnabled = Localizer["TwoFactorNotEnabled"];
+        _twoFactorDisabledSuccess = Localizer["TwoFactorDisabledSuccess"];
+        _failedToDisable2Fa = Localizer["FailedToDisable2Fa"];
+
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbSecuritySettings, Url = "/settings/security" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbDisable2Fa });
     }
 
     /// <inheritdoc />
@@ -51,7 +79,7 @@ else
             var response = await Http.GetFromJsonAsync<TwoFactorEnabledResult>("v1/TwoFactorAuth/status");
             if (response is not null && !response.TwoFactorEnabled)
             {
-                GlobalNotificationService.AddErrorMessage("Two-factor authentication is not enabled.");
+                GlobalNotificationService.AddErrorMessage(_twoFactorNotEnabled);
                 NavigationManager.NavigateTo("/settings/security");
                 return;
             }
@@ -66,13 +94,13 @@ else
         var response = await Http.PostAsync("v1/TwoFactorAuth/disable", null);
         if (response.IsSuccessStatusCode)
         {
-            GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully disabled.");
+            GlobalNotificationService.AddSuccessMessage(_twoFactorDisabledSuccess);
             NavigationManager.NavigateTo("/settings/security");
             return;
         }
 
         // Handle error
-        GlobalNotificationService.AddErrorMessage("Failed to disable two-factor authentication.", true);
+        GlobalNotificationService.AddErrorMessage(_failedToDisable2Fa, true);
         StateHasChanged();
     }
 

@@ -1,5 +1,7 @@
 ﻿@inherits AliasVault.Client.Main.Pages.MainBase
 @using Microsoft.Extensions.Localization
+@using AliasVault.Client.Services
+@inject LanguageService LanguageService
 @implements IDisposable
 
 <header>
@@ -10,17 +12,17 @@
                     <img src="/img/icon-nopadding.png" class="mr-3 h-8 w-10" alt="AliasVault Logo">
                     <span class="self-center hidden sm:flex text-2xl font-semibold content-start align-top whitespace-nowrap dark:text-white">
                         AliasVault
-                        <span class="text-primary-500 text-[10px] ml-1 font-normal hidden sm:inline-block">@Localizer["BetaLabel"]</span>
+                        <span class="text-primary-500 text-[10px] ml-1 font-normal hidden sm:inline-block">@_betaLabel</span>
                     </span>
                 </a>
 
                 <div class="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1">
                     <ul class="flex flex-col mt-4 space-x-6 text-sm font-medium lg:flex-row xl:space-x-8 lg:mt-0">
                         <NavLink href="/credentials" class="block text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["CredentialsNav"]
+                            @_credentialsNav
                         </NavLink>
                         <NavLink href="/emails" class="block text-gray-700 hover:text-primary-700 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["EmailsNav"]
+                            @_emailsNav
                         </NavLink>
                     </ul>
                 </div>
@@ -36,7 +38,7 @@
                 <DbLockButton />
                 <DbStatusIndicator />
                <button @onclick="ToggleMobileMenu" type="button" id="toggleMobileMenuButton" class="items-center p-2 text-gray-500 rounded-lg md:ml-2 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="mobileMenuDropdown">
-                    <span class="sr-only">@Localizer["OpenMenuLabel"]</span>
+                    <span class="sr-only">@_openMenuLabel</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
             </div>
@@ -45,12 +47,12 @@
                 <ul class="lg:hidden py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
                     <li>
                         <NavLink href="/credentials" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.Prefix">
-                            @Localizer["CredentialsNav"]
+                            @_credentialsNav
                         </NavLink>
                     </li>
                     <li>
                         <NavLink href="/emails" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["EmailsNav"]
+                            @_emailsNav
                         </NavLink>
                     </li>
                 </ul>
@@ -60,37 +62,37 @@
                 <ul class="py-1 font-light text-gray-500 dark:text-gray-400" aria-labelledby="mobileMenuDropdownButton">
                     <li>
                         <NavLink href="/settings/general" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["GeneralSettingsNav"]
+                            @_generalSettingsNav
                         </NavLink>
                     </li>
                     <li>
                         <NavLink href="/settings/security" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["SecuritySettingsNav"]
+                            @_securitySettingsNav
                         </NavLink>
                     </li>
                     <li>
                         <NavLink href="/settings/import-export" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["ImportExportNav"]
+                            @_importExportNav
                         </NavLink>
                     </li>
                     <li class="border-t border-b border-gray-100 dark:border-gray-600">
                         <NavLink href="/settings/apps" class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["ExtensionsAppsNav"]
+                            @_extensionsAppsNav
                             <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
-                                @Localizer["NewLabel"]
+                                @_newLabel
                             </span>
                         </NavLink>
                     </li>
                     <li>
                         <button id="theme-toggle" data-tooltip-target="tooltip-toggle" type="button" class="w-full text-start py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">
-                            @Localizer["ToggleDarkMode"]
+                            @_toggleDarkMode
                             <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                             <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 align-middle inline-block" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                         </button>
                     </li>
                     <li>
                         <NavLink href="/user/logout" class="block py-2 px-4 font-bold text-sm text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-primary-200 dark:hover:text-white" ActiveClass="text-primary-700 dark:text-primary-500" Match="NavLinkMatch.All">
-                            @Localizer["LogOut"]
+                            @_logOut
                         </NavLink>
                     </li>
                 </ul>
@@ -101,10 +103,24 @@
 </header>
 
 @code {
-    private IStringLocalizer Localizer => LocalizerFactory.Create("Layout.TopMenu", "AliasVault.Client");
+    private IStringLocalizer? _localizer;
+    private IStringLocalizer Localizer => _localizer ??= LocalizerFactory.Create("Layout.TopMenu", "AliasVault.Client");
     private bool IsUserMenuOpen { get; set; } = false;
     private bool IsMobileMenuOpen { get; set; } = false;
     private string Username { get; set; } = string.Empty;
+
+    // Cached localized strings
+    private string _betaLabel = string.Empty;
+    private string _credentialsNav = string.Empty;
+    private string _emailsNav = string.Empty;
+    private string _openMenuLabel = string.Empty;
+    private string _generalSettingsNav = string.Empty;
+    private string _securitySettingsNav = string.Empty;
+    private string _importExportNav = string.Empty;
+    private string _extensionsAppsNav = string.Empty;
+    private string _newLabel = string.Empty;
+    private string _toggleDarkMode = string.Empty;
+    private string _logOut = string.Empty;
 
     /// <summary>
     /// Close the menu.
@@ -132,6 +148,7 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= LocationChanged;
+        LanguageService.LanguageChanged -= OnLanguageChanged;
     }
 
     /// <inheritdoc />
@@ -140,6 +157,40 @@
         await base.OnInitializedAsync();
         Username = await GetUsernameAsync();
         NavigationManager.LocationChanged += LocationChanged;
+        LanguageService.LanguageChanged += OnLanguageChanged;
+
+        // Cache localized strings to prevent infinite rendering loops
+        RefreshLocalizedStrings();
+    }
+
+    /// <summary>
+    /// Refreshes all cached localized strings.
+    /// </summary>
+    private void RefreshLocalizedStrings()
+    {
+        _betaLabel = Localizer["BetaLabel"];
+        _credentialsNav = Localizer["CredentialsNav"];
+        _emailsNav = Localizer["EmailsNav"];
+        _openMenuLabel = Localizer["OpenMenuLabel"];
+        _generalSettingsNav = Localizer["GeneralSettingsNav"];
+        _securitySettingsNav = Localizer["SecuritySettingsNav"];
+        _importExportNav = Localizer["ImportExportNav"];
+        _extensionsAppsNav = Localizer["ExtensionsAppsNav"];
+        _newLabel = Localizer["NewLabel"];
+        _toggleDarkMode = Localizer["ToggleDarkMode"];
+        _logOut = Localizer["LogOut"];
+    }
+
+    /// <summary>
+    /// Handles language change events.
+    /// </summary>
+    /// <param name="newLanguage">The new language code.</param>
+    private void OnLanguageChanged(string newLanguage)
+    {
+        // Re-create the localizer to pick up the new culture
+        _localizer = null;
+        RefreshLocalizedStrings();
+        StateHasChanged();
     }
 
     /// <inheritdoc />

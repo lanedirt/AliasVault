@@ -6,78 +6,90 @@
 @implements IAsyncDisposable
 @using Microsoft.Extensions.Localization
 
-<ClickOutsideHandler OnClose="OnClose" ContentId="searchWidgetContainer">
-    <div class="relative" id="searchWidgetContainer">
-        <input
-            id="searchWidget"
-            type="text"
-            placeholder="@Localizer["SearchVaultPlaceholder"]"
-            autocomplete="off"
-            class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
-            @bind-value="SearchTerm"
-            @oninput="SearchTermChanged"
-            @onfocus="OnFocus"
-            @onkeydown="HandleKeyDown"/>
+<div class="relative" id="searchWidgetContainer">
+    <input
+        id="searchWidget"
+        type="text"
+        placeholder="@_searchPlaceholder"
+        autocomplete="off"
+        class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
+        @bind-value="SearchTerm"
+        @oninput="SearchTermChanged"
+        @onfocus="OnFocus"
+        @onkeydown="HandleKeyDown"/>
 
-        @if (ShowHelpText)
-        {
-            <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
-                @if (string.IsNullOrEmpty(SearchTerm))
-                {
-                    <p>@Localizer["SearchHelpText"]</p>
-                }
-                else if (SearchTerm.Length == 1)
-                {
-                    <p>@Localizer["SearchTooShortMessage"]</p>
-                }
-                else
-                {
-                    <p>@string.Format(Localizer["SearchingForMessage"], SearchTerm)</p>
-                }
-            </div>
-        }
-
-        @if (ShowResults && SearchTerm.Length >= 2)
-        {
-            @if (SearchResults.Any())
+    @if (ShowHelpText || ShowResults)
+    {
+        <ClickOutsideHandler OnClose="OnClose" ContentId="searchWidgetContainer">
+            @if (ShowHelpText)
             {
-                <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
-                    @for (int i = 0; i < SearchResults.Count; i++)
+                <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
+                    @if (string.IsNullOrEmpty(SearchTerm))
                     {
-                        var result = SearchResults[i];
-                        <div
-                            class="search-result @(i == SelectedIndex ? "bg-gray-100 dark:bg-gray-700" : "") px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                            @onclick="() => SelectResult(result)">
-                            <DisplayFavicon FaviconBytes="@result.Service.Logo" Width="24" />
-                            <div class="ml-2">
-                                <div>@result.Service.Name</div>
-                                @if (!string.IsNullOrEmpty(result.Alias.Email))
-                                {
-                                    <span class="text-gray-500">(@result.Alias.Email)</span>
-                                }
-                                else if (!string.IsNullOrEmpty(result.Username))
-                                {
-                                    <span class="text-gray-500">(@result.Username)</span>
-                                }
-                            </div>
-                        </div>
+                        <p>@_searchHelpText</p>
+                    }
+                    else if (SearchTerm.Length == 1)
+                    {
+                        <p>@_searchTooShortMessage</p>
+                    }
+                    else
+                    {
+                        <p>@string.Format(_searchingForMessage, SearchTerm)</p>
                     }
                 </div>
             }
-            else
+
+            @if (ShowResults && SearchTerm.Length >= 2)
             {
-                <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
-                    <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                        @Localizer["NoResultsFoundMessage"]
+                @if (SearchResults.Any())
+                {
+                    <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                        @for (int i = 0; i < SearchResults.Count; i++)
+                        {
+                            var result = SearchResults[i];
+                            <div
+                                class="search-result @(i == SelectedIndex ? "bg-gray-100 dark:bg-gray-700" : "") px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                                @onclick="() => SelectResult(result)">
+                                <DisplayFavicon FaviconBytes="@result.Service.Logo" Width="24" />
+                                <div class="ml-2">
+                                    <div>@result.Service.Name</div>
+                                    @if (!string.IsNullOrEmpty(result.Alias.Email))
+                                    {
+                                        <span class="text-gray-500">(@result.Alias.Email)</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(result.Username))
+                                    {
+                                        <span class="text-gray-500">(@result.Username)</span>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                        <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                            @_noResultsFoundMessage
+                        </div>
+                    </div>
+                }
             }
-        }
-    </div>
-</ClickOutsideHandler>
+        </ClickOutsideHandler>
+    }
+</div>
 
 @code {
-    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Widgets.SearchWidget", "AliasVault.Client");
+    private IStringLocalizer? _localizer;
+    private IStringLocalizer Localizer => _localizer ??= LocalizerFactory.Create("Components.Main.Widgets.SearchWidget", "AliasVault.Client");
+    
+    // Cached localized strings
+    private string _searchPlaceholder = string.Empty;
+    private string _searchHelpText = string.Empty;
+    private string _searchTooShortMessage = string.Empty;
+    private string _searchingForMessage = string.Empty;
+    private string _noResultsFoundMessage = string.Empty;
+    
     private string SearchTerm { get; set; } = string.Empty;
     private List<Credential> SearchResults { get; set; } = new();
     private bool ShowResults { get; set; }
@@ -99,6 +111,13 @@
 
         if (firstRender)
         {
+            // Initialize localized strings once
+            _searchPlaceholder = Localizer["SearchVaultPlaceholder"];
+            _searchHelpText = Localizer["SearchHelpText"];
+            _searchTooShortMessage = Localizer["SearchTooShortMessage"];
+            _searchingForMessage = Localizer["SearchingForMessage"];
+            _noResultsFoundMessage = Localizer["NoResultsFoundMessage"];
+            
             await KeyboardShortcutService.RegisterShortcutAsync("gs", FocusSearchField);
             await KeyboardShortcutService.RegisterShortcutAsync("gf", FocusSearchField);
             NavigationManager.LocationChanged += ResetSearchField;
