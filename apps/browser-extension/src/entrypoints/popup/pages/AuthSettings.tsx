@@ -21,10 +21,13 @@ const DEFAULT_OPTIONS: ApiOption[] = [
 ];
 
 // Validation schema for URLs
-const urlSchema = Yup.object().shape({
+/**
+ * Creates a URL validation schema with localized error messages.
+ */
+const createUrlSchema = (t: (key: string) => string): Yup.ObjectSchema<{apiUrl: string; clientUrl: string}> => Yup.object().shape({
   apiUrl: Yup.string()
-    .required('API URL is required')
-    .test('is-valid-api-url', 'Please enter a valid API URL', (value: string | undefined) => {
+    .required(t('validation.apiUrlRequired'))
+    .test('is-valid-api-url', t('validation.apiUrlInvalid'), (value: string | undefined) => {
       if (!value) {
         return true; // Allow empty for non-custom option
       }
@@ -36,8 +39,8 @@ const urlSchema = Yup.object().shape({
       }
     }),
   clientUrl: Yup.string()
-    .required('Client URL is required')
-    .test('is-valid-client-url', 'Please enter a valid client URL', (value: string | undefined) => {
+    .required(t('validation.clientUrlRequired'))
+    .test('is-valid-client-url', t('validation.clientUrlInvalid'), (value: string | undefined) => {
       if (!value) {
         return true; // Allow empty for non-custom option
       }
@@ -61,6 +64,8 @@ const AuthSettings: React.FC = () => {
   const [isGloballyEnabled, setIsGloballyEnabled] = useState<boolean>(true);
   const [errors, setErrors] = useState<{ apiUrl?: string; clientUrl?: string }>({});
   const { setIsInitialLoading } = useLoading();
+  
+  const urlSchema = createUrlSchema(t);
 
   useEffect(() => {
     /**

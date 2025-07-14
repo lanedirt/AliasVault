@@ -29,5 +29,11 @@
   "keyboardShortcuts": "Keyboard Shortcuts",
   "configureKeyboardShortcuts": "Configure keyboard shortcuts",
   "configure": "Configure",
-  "versionPrefix": "Version "
+  "versionPrefix": "Version ",
+  "validation": {
+    "apiUrlRequired": "API URL is required",
+    "apiUrlInvalid": "Please enter a valid API URL",
+    "clientUrlRequired": "Client URL is required",
+    "clientUrlInvalid": "Please enter a valid client URL"
+  }
 }
