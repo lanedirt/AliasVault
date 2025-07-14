@@ -11,8 +11,10 @@
   "noEmails": "No emails found",
   "errors": {
     "emailLoadError": "An error occurred while loading emails. Please try again later.",
-    "emailInUse": "The current chosen email address is already in use. Please change the email address by editing this credential.",
-    "emailSyncError": "An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.",
     "emailUnexpectedError": "An unexpected error occurred while loading emails. Please try again later."
+  },
+  "apiErrors": {
+    "CLAIM_DOES_NOT_MATCH_USER": "The current chosen email address is already in use. Please change the email address by editing this credential.",
+    "CLAIM_DOES_NOT_EXIST": "An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again."
   }
 }
