@@ -2,6 +2,8 @@ import type { StatusResponse, VaultResponse } from '@/utils/dist/shared/models/w
 
 import { AppInfo } from "./AppInfo";
 
+import type { TFunction } from 'i18next';
+
 import { storage } from '#imports';
 
 type RequestInit = globalThis.RequestInit;
@@ -268,17 +270,17 @@ export class WebApiService {
   /**
    * Validates the status response and returns an error message if validation fails.
    */
-  public validateStatusResponse(statusResponse: StatusResponse): string | null {
+  public validateStatusResponse(statusResponse: StatusResponse, t: TFunction): string | null {
     if (statusResponse.serverVersion === '0.0.0') {
-      return 'The AliasVault server is not available. Please try again later or contact support if the problem persists.';
+      return t('errors.serverNotAvailable');
     }
 
     if (!statusResponse.clientVersionSupported) {
-      return 'This version of the AliasVault browser extension is not supported by the server anymore. Please update your browser extension to the latest version.';
+      return t('errors.clientVersionNotSupported');
     }
 
     if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-      return 'The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help.';
+      return t('errors.serverVersionNotSupported');
     }
 
     return null;
@@ -287,22 +289,22 @@ export class WebApiService {
   /**
    * Validates the vault response and returns an error message if validation fails
    */
-  public validateVaultResponse(vaultResponseJson: VaultResponse): string | null {
+  public validateVaultResponse(vaultResponseJson: VaultResponse, t: TFunction): string | null {
     /**
      * Status 0 = OK, vault is ready.
      * Status 1 = Merge required, which only the web client supports.
      */
     if (vaultResponseJson.status === 1) {
       // Note: vault merge is no longer allowed by the API as of 0.20.0, updates with the same revision number are rejected. So this check can be removed later.
-      return 'Your vault needs to be updated. Please login on the AliasVault website and follow the steps.';
+      return t('errors.VaultMergeRequired');
     }
 
     if (vaultResponseJson.status === 2) {
-      return 'Your vault is outdated. Please login on the AliasVault website and follow the steps.';
+      return t('errors.VaultOutdated');
     }
 
     if (!vaultResponseJson.vault?.blob) {
-      return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
+      return t('errors.NoVaultFound');
     }
 
     return null;

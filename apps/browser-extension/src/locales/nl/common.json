@@ -36,6 +36,14 @@
   "checkingVaultUpdates": "Controleren op vault updates",
   "syncingUpdatedVault": "Bijgewerkte vault synchroniseren",
   "executingOperation": "Actie uitvoeren...",
+  "errors": {
+    "VaultMergeRequired": "Uw vault moet worden bijgewerkt. Log in op de AliasVault website en volg de stappen.",
+    "VaultOutdated": "Uw vault is verouderd. Log in op de AliasVault website en volg de stappen.",
+    "NoVaultFound": "Uw account heeft nog geen vault. Voltooi eerst de tutorial in de AliasVault webclient voordat u de browserextensie gebruikt.",
+    "serverNotAvailable": "De AliasVault server is niet beschikbaar. Probeer het later opnieuw of neem contact op met de ondersteuning als het probleem aanhoudt.",
+    "clientVersionNotSupported": "Deze versie van de AliasVault browserextensie wordt niet meer ondersteund door de server. Update uw browserextensie naar de nieuwste versie.",
+    "serverVersionNotSupported": "De AliasVault server moet worden bijgewerkt naar een nieuwere versie om deze browserextensie te kunnen gebruiken. Neem contact op met de ondersteuning als u hulp nodig hebt."
+  },
   "apiErrors": {
     "UNKNOWN_ERROR": "Er is een onbekende fout opgetreden. Probeer het opnieuw.",
     "ACCOUNT_LOCKED": "Account tijdelijk vergrendeld vanwege te veel mislukte pogingen. Probeer het later opnieuw.",

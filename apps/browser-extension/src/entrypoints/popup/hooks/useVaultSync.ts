@@ -75,7 +75,7 @@ export const useVaultSync = () : {
         // Offline mode is not implemented for browser extension yet, let it fail below due to the validateStatusResponse check.
       }
 
-      const statusError = webApi.validateStatusResponse(statusResponse);
+      const statusError = webApi.validateStatusResponse(statusResponse, t);
       if (statusError) {
         onError?.(statusError);
         return false;
@@ -95,7 +95,7 @@ export const useVaultSync = () : {
         onStatus?.(t('syncingUpdatedVault'));
         const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
-        const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
+        const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse, t);
         if (vaultError) {
           // Only logout if it's an authentication error, not a network error
           if (vaultError.includes('authentication') || vaultError.includes('unauthorized')) {

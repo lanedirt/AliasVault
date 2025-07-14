@@ -30,6 +30,7 @@ import { storage } from '#imports';
  */
 const Login: React.FC = () => {
   const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const authContext = useAuth();
   const dbContext = useDb();
@@ -148,7 +149,7 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson, tCommon);
       if (vaultError) {
         setError(vaultError);
         hideLoading();
@@ -186,7 +187,7 @@ const Login: React.FC = () => {
     } catch (err) {
       // Show API authentication errors as-is.
       if (err instanceof ApiAuthError) {
-        setError(err.message);
+        setError(tCommon('apiErrors.' + err.message));
       } else {
         setError(t('errors.serverError'));
       }
@@ -205,13 +206,13 @@ const Login: React.FC = () => {
       showLoading();
 
       if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
-        throw new Error('Required login data not found');
+        throw new Error(t('errors.loginDataMissing'));
       }
 
       // Validate that 2FA code is a 6-digit number
       const code = twoFactorCode.trim();
       if (!/^\d{6}$/.test(code)) {
-        throw new ApiAuthError(t('errors.invalidCode'));
+        throw new Error(t('errors.invalidCode'));
       }
 
       const validationResponse = await srpUtil.validateLogin2Fa(
@@ -232,7 +233,7 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson, tCommon);
       if (vaultError) {
         setError(vaultError);
         hideLoading();
@@ -276,7 +277,7 @@ const Login: React.FC = () => {
       // Show API authentication errors as-is.
       console.error('2FA error:', err);
       if (err instanceof ApiAuthError) {
-        setError(err.message);
+        setError(tCommon('apiErrors:' + err.message));
       } else {
         setError(t('errors.serverError'));
       }
