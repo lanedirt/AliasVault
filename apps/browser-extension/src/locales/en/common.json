@@ -36,6 +36,14 @@
   "checkingVaultUpdates": "Checking for vault updates",
   "syncingUpdatedVault": "Syncing updated vault",
   "executingOperation": "Executing operation...",
+  "errors": {
+    "VaultMergeRequired": "Your vault needs to be updated. Please login on the AliasVault website and follow the steps.",
+    "VaultOutdated": "Your vault is outdated. Please login on the AliasVault website and follow the steps.",
+    "NoVaultFound": "Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.",
+    "serverNotAvailable": "The AliasVault server is not available. Please try again later or contact support if the problem persists.",
+    "clientVersionNotSupported": "This version of the AliasVault browser extension is not supported by the server anymore. Please update your browser extension to the latest version.",
+    "serverVersionNotSupported": "The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help."
+  },
   "apiErrors": {
     "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",
     "ACCOUNT_LOCKED": "Account temporarily locked due to too many failed attempts. Please try again later.",
