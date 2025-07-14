@@ -29,5 +29,11 @@
   "keyboardShortcuts": "Snelkoppelingen",
   "configureKeyboardShortcuts": "Snelkoppelingen configureren",
   "configure": "Configureren",
-  "versionPrefix": "Versie "
+  "versionPrefix": "Versie ",
+  "validation": {
+    "apiUrlRequired": "API URL is vereist",
+    "apiUrlInvalid": "Voer een geldige API URL in",
+    "clientUrlRequired": "Client URL is vereist",
+    "clientUrlInvalid": "Voer een geldige client URL in"
+  }
 }
