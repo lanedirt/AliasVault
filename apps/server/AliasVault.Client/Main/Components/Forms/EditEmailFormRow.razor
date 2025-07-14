@@ -20,13 +20,13 @@
     @if (IsCustomDomain)
     {
         <button type="button" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200" @onclick="TogglePopup">
-            @Localizer["UseDomainChooserButton"]
+            @_useDomainChooserButton
         </button>
     }
     else
     {
         <button type="button" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200" @onclick="ToggleCustomDomain">
-            @Localizer["EnterCustomDomainButton"]
+            @_enterCustomDomainButton
         </button>
     }
 </div>
@@ -36,13 +36,13 @@
     <div class="fixed inset-0 bg-gray-600 bg-opacity-50 z-30 overflow-y-auto h-full w-full" @onclick="ClosePopup">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800" @onclick:stopPropagation>
             <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">@Localizer["SelectEmailDomainTitle"]</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">@_selectEmailDomainTitle</h3>
                 <div class="mt-2 px-7 py-3">
                     @if (ShowPrivateDomains)
                     {
                         <div class="mb-4">
-                            <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300">@Localizer["PrivateEmailTitle"]</h4>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">@Localizer["PrivateEmailDescription"]</p>
+                            <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300">@_privateEmailTitle</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">@_privateEmailDescription</p>
                             @foreach (var domain in PrivateDomains)
                             {
                                 <button class="mt-2 px-4 py-2 bg-primary-300 text-gray-700 rounded hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2" @onclick="() => SelectDomain(domain)">
@@ -52,8 +52,8 @@
                         </div>
                     }
                     <div class="@(ShowPrivateDomains ? "border-t border-gray-200 dark:border-gray-600 pt-4" : "")">
-                        <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300">@Localizer["PublicEmailTitle"]</h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">@Localizer["PublicEmailDescription"]</p>
+                        <h4 class="text-md font-semibold text-gray-700 dark:text-gray-300">@_publicEmailTitle</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">@_publicEmailDescription</p>
                         @foreach (var domain in PublicDomains)
                         {
                             <button class="mt-2 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2" @onclick="() => SelectDomain(domain)">
@@ -81,6 +81,15 @@
     public string Label { get; set; } = "Email Address";
 
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Forms.EditEmailFormRow", "AliasVault.Client");
+    
+    // Cached localized strings
+    private string _useDomainChooserButton = "";
+    private string _enterCustomDomainButton = "";
+    private string _selectEmailDomainTitle = "";
+    private string _privateEmailTitle = "";
+    private string _privateEmailDescription = "";
+    private string _publicEmailTitle = "";
+    private string _publicEmailDescription = "";
 
     /// <summary>
     /// The value of the input field. This should be the full email address.
@@ -107,6 +116,15 @@
     /// <inheritdoc />
     protected override void OnInitialized()
     {
+        // Cache localized strings
+        _useDomainChooserButton = Localizer["UseDomainChooserButton"];
+        _enterCustomDomainButton = Localizer["EnterCustomDomainButton"];
+        _selectEmailDomainTitle = Localizer["SelectEmailDomainTitle"];
+        _privateEmailTitle = Localizer["PrivateEmailTitle"];
+        _privateEmailDescription = Localizer["PrivateEmailDescription"];
+        _publicEmailTitle = Localizer["PublicEmailTitle"];
+        _publicEmailDescription = Localizer["PublicEmailDescription"];
+        
         base.OnInitialized();
 
         IsCustomDomain = !PublicDomains.Contains(SelectedDomain) && !PrivateDomains.Contains(SelectedDomain);

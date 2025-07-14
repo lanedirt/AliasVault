@@ -7,7 +7,7 @@
 @using Microsoft.Extensions.Localization
 
 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-    @Localizer["PageTitle"]
+    @_pageTitle
 </h2>
 
 <FullScreenLoadingIndicator @ref="_loadingIndicator" />
@@ -16,18 +16,18 @@
 <EditForm Model="_registerModel" OnValidSubmit="HandleRegister" class="mt-8 space-y-6">
     <DataAnnotationsValidator/>
     <div>
-        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["UsernameOrEmailLabel"]</label>
-        <InputTextField id="email" @bind-Value="_registerModel.Username" type="text" placeholder="@Localizer["UsernamePlaceholder"]" />
+        <label asp-for="Input.Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@_usernameOrEmailLabel</label>
+        <InputTextField id="email" @bind-Value="_registerModel.Username" type="text" placeholder="@_usernamePlaceholder" />
         <ValidationMessage For="() => _registerModel.Username"/>
     </div>
     <div>
-        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["PasswordLabel"]</label>
-        <InputTextField id="password" @bind-Value="_registerModel.Password" type="password" placeholder="@Localizer["PasswordPlaceholder"]" />
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@_passwordLabel</label>
+        <InputTextField id="password" @bind-Value="_registerModel.Password" type="password" placeholder="@_passwordPlaceholder" />
         <ValidationMessage For="() => _registerModel.Password"/>
     </div>
     <div>
-        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["ConfirmPasswordLabel"]</label>
-        <InputTextField id="password2" @bind-Value="_registerModel.PasswordConfirm" type="password" placeholder="@Localizer["PasswordPlaceholder"]" />
+        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@_confirmPasswordLabel</label>
+        <InputTextField id="password2" @bind-Value="_registerModel.PasswordConfirm" type="password" placeholder="@_passwordPlaceholder" />
         <ValidationMessage For="() => _registerModel.PasswordConfirm"/>
     </div>
 
@@ -36,14 +36,14 @@
             <InputCheckbox id="terms" @bind-Value="_registerModel.AcceptTerms" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600" />
         </div>
         <div class="ml-3 text-sm">
-            <label for="terms" class="font-medium text-gray-900 dark:text-white">@Localizer["AcceptTermsLabel"] <a href="https://github.com/lanedirt/AliasVault/blob/main/LICENSE.md" target="_blank" class="text-primary-700 hover:underline dark:text-primary-500">@Localizer["TermsAndConditionsLink"]</a></label>
+            <label for="terms" class="font-medium text-gray-900 dark:text-white">@_acceptTermsLabel <a href="https://github.com/lanedirt/AliasVault/blob/main/LICENSE.md" target="_blank" class="text-primary-700 hover:underline dark:text-primary-500">@_termsAndConditionsLink</a></label>
             <ValidationMessage For="() => _registerModel.AcceptTerms"/>
         </div>
     </div>
 
-    <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">@Localizer["CreateAccountButton"]</button>
+    <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">@_createAccountButton</button>
     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-        @Localizer["AlreadyRegisteredText"] <a href="/user/login" class="text-primary-700 hover:underline dark:text-primary-500">@Localizer["LoginHereLink"]</a>
+        @_alreadyRegisteredText <a href="/user/login" class="text-primary-700 hover:underline dark:text-primary-500">@_loginHereLink</a>
     </div>
 </EditForm>
 
@@ -54,9 +54,44 @@
 
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Register", "AliasVault.Client");
 
+    // Cached localized strings
+    private string _pageTitle = string.Empty;
+    private string _usernameOrEmailLabel = string.Empty;
+    private string _usernamePlaceholder = string.Empty;
+    private string _passwordLabel = string.Empty;
+    private string _passwordPlaceholder = string.Empty;
+    private string _confirmPasswordLabel = string.Empty;
+    private string _acceptTermsLabel = string.Empty;
+    private string _termsAndConditionsLink = string.Empty;
+    private string _createAccountButton = string.Empty;
+    private string _alreadyRegisteredText = string.Empty;
+    private string _loginHereLink = string.Empty;
+    private string _creatingAccountMessage = string.Empty;
+    private string _registrationErrorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        // Cache localized strings to prevent infinite rendering loops
+        _pageTitle = Localizer["PageTitle"];
+        _usernameOrEmailLabel = Localizer["UsernameOrEmailLabel"];
+        _usernamePlaceholder = Localizer["UsernamePlaceholder"];
+        _passwordLabel = Localizer["PasswordLabel"];
+        _passwordPlaceholder = Localizer["PasswordPlaceholder"];
+        _confirmPasswordLabel = Localizer["ConfirmPasswordLabel"];
+        _acceptTermsLabel = Localizer["AcceptTermsLabel"];
+        _termsAndConditionsLink = Localizer["TermsAndConditionsLink"];
+        _createAccountButton = Localizer["CreateAccountButton"];
+        _alreadyRegisteredText = Localizer["AlreadyRegisteredText"];
+        _loginHereLink = Localizer["LoginHereLink"];
+        _creatingAccountMessage = Localizer["CreatingAccountMessage"];
+        _registrationErrorMessage = Localizer["RegistrationErrorMessage"];
+    }
+
     private async Task HandleRegister()
     {
-        _loadingIndicator.Show(Localizer["CreatingAccountMessage"]);
+        _loadingIndicator.Show(_creatingAccountMessage);
         _serverValidationErrors.Clear();
 
         var (success, errorMessage) = await UserRegistrationService.RegisterUserAsync(_registerModel.Username, _registerModel.Password);
@@ -67,7 +102,7 @@
         }
         else
         {
-            _serverValidationErrors.AddError(errorMessage ?? Localizer["RegistrationErrorMessage"]);
+            _serverValidationErrors.AddError(errorMessage ?? _registrationErrorMessage);
             StateHasChanged();
         }
 
