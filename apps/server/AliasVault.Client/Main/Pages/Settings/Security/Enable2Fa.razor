@@ -1,15 +1,16 @@
 ﻿@page "/settings/security/enable-2fa"
 @using AliasVault.Client.Main.Pages.Settings.Security.Components
+@using Microsoft.Extensions.Localization
 @inherits MainBase
 @inject HttpClient Http
 
-<LayoutPageTitle>Enable two-factor authentication</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-        <H1>Enable two-factor authentication</H1>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Enable two-factor authentication to increase the security of your vaults.</p>
+        <H1>@Localizer["PageTitle"]</H1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">@Localizer["PageDescription"]</p>
     </div>
 </div>
 
@@ -30,7 +31,7 @@ else
             </div>
 
             <p class="text-sm text-gray-600 text-center">
-                Scan this QR code with your authenticator app or enter the following secret manually:
+                @Localizer["QrCodeInstructions"]
             </p>
             <div class="text-lg font-mono text-center bg-gray-100 p-2 rounded" id="authenticator-secret">@Secret</div>
 
@@ -38,11 +39,11 @@ else
                 <div>
                     <InputText id="verificationCode" @bind-Value="VerifyModel.Code"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="Enter verification code"/>
+                               placeholder="@Localizer["VerificationCodePlaceholder"]"/>
                 </div>
                 <button type="submit"
                         class="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    Verify and Enable
+                    @Localizer["VerifyAndEnableButton"]
                 </button>
             </EditForm>
         </div>
@@ -56,13 +57,15 @@ else
     private List<string>? RecoveryCodes { get; set; }
     private readonly VerificationModel VerifyModel = new();
 
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Pages.Settings.Security.Enable2Fa", "AliasVault.Client");
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Security settings", Url = "/settings/security" });
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Enable two-factor authentication" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbSecuritySettings"], Url = "/settings/security" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbEnable2Fa"] });
     }
 
     /// <inheritdoc />
@@ -107,8 +110,7 @@ else
 
             if (result != null)
             {
-                GlobalNotificationService.AddSuccessMessage("Two-factor authentication is now successfully enabled. On your " +
-                                                            "next login you will need to enter your 2FA code.", true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["TwoFactorEnabledSuccess"], true);
 
                 // Show recovery codes.
                 RecoveryCodes = result.RecoveryCodes;
@@ -118,7 +120,7 @@ else
             }
         }
 
-        GlobalNotificationService.AddErrorMessage("Failed to enable two-factor authentication.", true);
+        GlobalNotificationService.AddErrorMessage(Localizer["FailedToEnable2Fa"], true);
         StateHasChanged();
     }
 
