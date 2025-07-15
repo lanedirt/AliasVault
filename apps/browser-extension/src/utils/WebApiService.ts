@@ -268,19 +268,19 @@ export class WebApiService {
   }
 
   /**
-   * Validates the status response and returns an error message if validation fails.
+   * Validates the status response and returns an error message (as translation key) if validation fails.
    */
-  public validateStatusResponse(statusResponse: StatusResponse, t: TFunction): string | null {
+  public validateStatusResponse(statusResponse: StatusResponse): string | null {
     if (statusResponse.serverVersion === '0.0.0') {
-      return t('errors.serverNotAvailable');
+      return 'errors.serverNotAvailable';
     }
 
     if (!statusResponse.clientVersionSupported) {
-      return t('errors.clientVersionNotSupported');
+      return 'errors.clientVersionNotSupported';
     }
 
     if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-      return t('errors.serverVersionNotSupported');
+      return 'errors.serverVersionNotSupported';
     }
 
     return null;
