@@ -28,7 +28,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   variant = 'dropdown',
   size = 'md'
 }): React.JSX.Element => {
-  const { i18n } = useTranslation('common');
+  const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

@@ -10,7 +10,7 @@ import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 const LoginServerInfo: React.FC = () => {
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const navigate = useNavigate();
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation();
 
   useEffect(() => {
     /**
@@ -28,7 +28,7 @@ const LoginServerInfo: React.FC = () => {
 
   return (
     <div className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-      ({t('connectingTo')}{' '}
+      ({t('auth.connectingTo')}{' '}
       <button
         onClick={handleClick}
         type="button"

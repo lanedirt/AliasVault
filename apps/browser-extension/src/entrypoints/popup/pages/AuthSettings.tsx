@@ -57,14 +57,14 @@ const createUrlSchema = (t: (key: string) => string): Yup.ObjectSchema<{apiUrl: 
  * Auth settings page only shown when user is not logged in.
  */
 const AuthSettings: React.FC = () => {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [customUrl, setCustomUrl] = useState<string>('');
   const [customClientUrl, setCustomClientUrl] = useState<string>('');
   const [isGloballyEnabled, setIsGloballyEnabled] = useState<boolean>(true);
   const [errors, setErrors] = useState<{ apiUrl?: string; clientUrl?: string }>({});
   const { setIsInitialLoading } = useLoading();
-  
+
   const urlSchema = createUrlSchema(t);
 
   useEffect(() => {
@@ -176,14 +176,14 @@ const AuthSettings: React.FC = () => {
       {/* Language Settings Section */}
       <div className="mb-6">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('language')}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('common.language')}</p>
           <LanguageSwitcher variant="dropdown" size="sm" />
         </div>
       </div>
 
       <div className="mb-6">
         <label htmlFor="api-connection" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          {t('serverUrl')}
+          {t('common.serverUrl')}
         </label>
         <select
           value={selectedOption}
@@ -238,7 +238,7 @@ const AuthSettings: React.FC = () => {
       {/* Autofill Popup Settings Section */}
       <div className="mb-6">
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('autofillEnabled')}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{t('common.autofillEnabled')}</p>
           <button
             onClick={toggleGlobalPopup}
             className={`px-4 py-2 rounded-md transition-colors ${
@@ -247,13 +247,13 @@ const AuthSettings: React.FC = () => {
                 : 'bg-red-200 text-red-800 hover:bg-red-300 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
             }`}
           >
-            {isGloballyEnabled ? t('common:enabled', 'Enabled') : t('common:disabled', 'Disabled')}
+            {isGloballyEnabled ? t('common.enabled', 'Enabled') : t('common.disabled', 'Disabled')}
           </button>
         </div>
       </div>
 
       <div className="text-center text-gray-400 dark:text-gray-600">
-        {t('version')}: {AppInfo.VERSION}
+        {t('common.version')}: {AppInfo.VERSION}
       </div>
     </div>
   );

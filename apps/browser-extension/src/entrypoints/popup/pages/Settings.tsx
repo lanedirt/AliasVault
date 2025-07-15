@@ -34,7 +34,7 @@ type PopupSettings = {
  * Settings page component.
  */
 const Settings: React.FC = () => {
-  const { t } = useTranslation('settings');
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const authContext = useAuth();
   const { setHeaderButtons } = useHeaderButtons();
@@ -80,14 +80,14 @@ const Settings: React.FC = () => {
           <>
             <HeaderButton
               onClick={() => PopoutUtility.openInNewPopup()}
-              title={t('openInNewWindow')}
+              title={t('settings.openInNewWindow')}
               iconType={HeaderIconType.EXPAND}
             />
           </>
         )}
         <HeaderButton
           onClick={openClientTab}
-          title={t('openWebApp')}
+          title={t('settings.openWebApp')}
           iconType={HeaderIconType.EXTERNAL_LINK}
         />
       </div>
@@ -258,7 +258,7 @@ const Settings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-gray-900 dark:text-white text-xl">{t('title')}</h2>
+        <h2 className="text-gray-900 dark:text-white text-xl">{t('settings.title')}</h2>
       </div>
 
       {/* User Menu Section */}
@@ -279,7 +279,7 @@ const Settings: React.FC = () => {
                     {authContext.username}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {t('loggedIn')}
+                    {t('settings.loggedIn')}
                   </p>
                 </div>
               </div>
@@ -287,7 +287,7 @@ const Settings: React.FC = () => {
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
               >
-                {t('logout')}
+                {t('settings.logout')}
               </button>
             </div>
           </div>
@@ -296,14 +296,14 @@ const Settings: React.FC = () => {
 
       {/* Global Settings Section */}
       <section>
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('globalSettings')}</h3>
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.globalSettings')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('autofillPopup')}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autofillPopup')}</p>
                 <p className={`text-sm mt-1 ${settings.isGloballyEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {settings.isGloballyEnabled ? t('activeOnAllSites') : t('disabledOnAllSites')}
+                  {settings.isGloballyEnabled ? t('settings.activeOnAllSites') : t('settings.disabledOnAllSites')}
                 </p>
               </div>
               <button
@@ -314,15 +314,15 @@ const Settings: React.FC = () => {
                     : 'bg-red-500 hover:bg-red-600 text-white'
                 }`}
               >
-                {settings.isGloballyEnabled ? t('enabled') : t('disabled')}
+                {settings.isGloballyEnabled ? t('settings.enabled') : t('settings.disabled')}
               </button>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('rightClickContextMenu')}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.rightClickContextMenu')}</p>
                 <p className={`text-sm mt-1 ${settings.isContextMenuEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {settings.isContextMenuEnabled ? t('enabled') : t('disabled')}
+                  {settings.isContextMenuEnabled ? t('settings.enabled') : t('settings.disabled')}
                 </p>
               </div>
               <button
@@ -343,18 +343,18 @@ const Settings: React.FC = () => {
       {/* Site-Specific Settings Section */}
       {settings.isGloballyEnabled && (
         <section>
-          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('siteSpecificSettings')}</h3>
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.siteSpecificSettings')}</h3>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t('autofillPopupOn')}{settings.currentUrl}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autofillPopupOn')}{settings.currentUrl}</p>
                   <p className={`text-sm mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {settings.isEnabled ? t('enabledForThisSite') : t('disabledForThisSite')}
+                    {settings.isEnabled ? t('settings.enabledForThisSite') : t('settings.disabledForThisSite')}
                   </p>
                   {!settings.isEnabled && settings.temporaryDisabledUrls[settings.currentUrl] && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {t('temporarilyDisabledUntil')}{new Date(settings.temporaryDisabledUrls[settings.currentUrl]).toLocaleTimeString()}
+                      {t('settings.temporarilyDisabledUntil')}{new Date(settings.temporaryDisabledUrls[settings.currentUrl]).toLocaleTimeString()}
                     </p>
                   )}
                 </div>
@@ -367,7 +367,7 @@ const Settings: React.FC = () => {
                         : 'bg-red-500 hover:bg-red-600 text-white'
                     }`}
                   >
-                    {settings.isEnabled ? t('enabled') : t('disabled')}
+                    {settings.isEnabled ? t('settings.enabled') : t('settings.disabled')}
                   </button>
                 )}
               </div>
@@ -377,7 +377,7 @@ const Settings: React.FC = () => {
                   onClick={resetSettings}
                   className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors text-sm"
                 >
-                  {t('resetAllSiteSettings')}
+                  {t('settings.resetAllSiteSettings')}
                 </button>
               </div>
             </div>
@@ -387,17 +387,17 @@ const Settings: React.FC = () => {
 
       {/* Appearance Settings Section */}
       <section>
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('appearance')}</h3>
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.appearance')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4">
             <div className="mb-4">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('language')}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('settings.language')}</p>
                 <LanguageSwitcher variant="dropdown" size="sm" />
               </div>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('theme')}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.theme')}</p>
               <div className="flex flex-col space-y-2">
                 <label className="flex items-center">
                   <input
@@ -408,7 +408,7 @@ const Settings: React.FC = () => {
                     onChange={() => setThemePreference('system')}
                     className="mr-2"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('useDefault')}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('settings.useDefault')}</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -419,7 +419,7 @@ const Settings: React.FC = () => {
                     onChange={() => setThemePreference('light')}
                     className="mr-2"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('light')}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('settings.light')}</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -430,7 +430,7 @@ const Settings: React.FC = () => {
                     onChange={() => setThemePreference('dark')}
                     className="mr-2"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('dark')}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('settings.dark')}</span>
                 </label>
               </div>
             </div>
@@ -441,18 +441,18 @@ const Settings: React.FC = () => {
       {/* Keyboard Shortcuts Section */}
       {import.meta.env.CHROME && (
         <section>
-          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('keyboardShortcuts')}</h3>
+          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.keyboardShortcuts')}</h3>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t('configureKeyboardShortcuts')}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.configureKeyboardShortcuts')}</p>
                 </div>
                 <button
                   onClick={openKeyboardShortcuts}
                   className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
                 >
-                  {t('configure')}
+                  {t('settings.configure')}
                 </button>
               </div>
             </div>
@@ -461,7 +461,7 @@ const Settings: React.FC = () => {
       )}
 
       <div className="text-center text-gray-400 dark:text-gray-600">
-        {t('versionPrefix')}{AppInfo.VERSION} ({getDisplayUrl()})
+        {t('settings.versionPrefix')}{AppInfo.VERSION} ({getDisplayUrl()})
       </div>
     </div>
   );

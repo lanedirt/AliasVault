@@ -21,7 +21,7 @@ const convertUrlsToLinks = (text: string): string => {
  * Render the notes block.
  */
 const NotesBlock: React.FC<NotesBlockProps> = ({ notes }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   if (!notes) {
     return null;
   }
@@ -30,7 +30,7 @@ const NotesBlock: React.FC<NotesBlockProps> = ({ notes }) => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('notes')}</h2>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('common.notes')}</h2>
       <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
         <p
           className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap"

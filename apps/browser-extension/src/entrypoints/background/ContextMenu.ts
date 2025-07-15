@@ -2,7 +2,7 @@ import { type Browser } from '@wxt-dev/browser';
 import { sendMessage } from 'webext-bridge/background';
 
 import { PasswordGenerator } from '@/utils/dist/shared/password-generator';
-import { tc } from '@/utils/i18n/StandaloneI18n';
+import { t } from '@/utils/i18n/StandaloneI18n';
 
 import { browser } from "#imports";
 
@@ -21,7 +21,7 @@ export async function setupContextMenus() : Promise<void> {
   browser.contextMenus.create({
     id: "aliasvault-activate-form",
     parentId: "aliasvault-root",
-    title: await tc('autofillWithAliasVault'),
+    title: await t('content.autofillWithAliasVault'),
     contexts: ["editable"],
   });
 
@@ -37,7 +37,7 @@ export async function setupContextMenus() : Promise<void> {
   browser.contextMenus.create({
     id: "aliasvault-generate-password",
     parentId: "aliasvault-root",
-    title: await tc('generateRandomPassword'),
+    title: await t('content.generateRandomPassword'),
     contexts: ["all"]
   });
 
@@ -83,7 +83,7 @@ export function handleContextMenuClick(info: Browser.contextMenus.OnClickData, t
  */
 async function copyPasswordToClipboard(generatedPassword: string) : Promise<void> {
   navigator.clipboard.writeText(generatedPassword).then(async () => {
-    showToast(await tc('passwordCopiedToClipboard'));
+    showToast(await t('content.passwordCopiedToClipboard'));
   });
 
   /**

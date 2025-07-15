@@ -29,8 +29,7 @@ import { storage } from '#imports';
  * Login page
  */
 const Login: React.FC = () => {
-  const { t } = useTranslation('auth');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const authContext = useAuth();
   const dbContext = useDb();
@@ -141,7 +140,7 @@ const Login: React.FC = () => {
 
       // Check if token was returned.
       if (!validationResponse.token) {
-        throw new Error(t('errors.noToken'));
+        throw new Error(t('auth.errors.noToken'));
       }
 
       // Try to get latest vault manually providing auth token.
@@ -149,7 +148,7 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson, tCommon);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson, t);
       if (vaultError) {
         setError(vaultError);
         hideLoading();
@@ -174,7 +173,7 @@ const Login: React.FC = () => {
         }
       } catch (err) {
         await authContext.logout();
-        setError(err instanceof Error ? err.message : t('errors.migrationError'));
+        setError(err instanceof Error ? err.message : t('auth.errors.migrationError'));
         hideLoading();
         return;
       }
@@ -187,9 +186,9 @@ const Login: React.FC = () => {
     } catch (err) {
       // Show API authentication errors as-is.
       if (err instanceof ApiAuthError) {
-        setError(tCommon('apiErrors.' + err.message));
+        setError(t('common.apiErrors.' + err.message));
       } else {
-        setError(t('errors.serverError'));
+        setError(t('auth.errors.serverError'));
       }
       hideLoading();
     }
@@ -206,13 +205,13 @@ const Login: React.FC = () => {
       showLoading();
 
       if (!passwordHashString || !passwordHashBase64 || !loginResponse) {
-        throw new Error(t('errors.loginDataMissing'));
+        throw new Error(t('auth.errors.loginDataMissing'));
       }
 
       // Validate that 2FA code is a 6-digit number
       const code = twoFactorCode.trim();
       if (!/^\d{6}$/.test(code)) {
-        throw new Error(t('errors.invalidCode'));
+        throw new Error(t('auth.errors.invalidCode'));
       }
 
       const validationResponse = await srpUtil.validateLogin2Fa(
@@ -225,7 +224,7 @@ const Login: React.FC = () => {
 
       // Check if token was returned.
       if (!validationResponse.token) {
-        throw new Error(t('errors.noToken'));
+        throw new Error(t('auth.errors.noToken'));
       }
 
       // Try to get latest vault manually providing auth token.
@@ -233,7 +232,7 @@ const Login: React.FC = () => {
         'Authorization': `Bearer ${validationResponse.token.token}`
       } });
 
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson, tCommon);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson, t);
       if (vaultError) {
         setError(vaultError);
         hideLoading();
@@ -258,7 +257,7 @@ const Login: React.FC = () => {
         }
       } catch (err) {
         await authContext.logout();
-        setError(err instanceof Error ? err.message : t('errors.migrationError'));
+        setError(err instanceof Error ? err.message : t('auth.errors.migrationError'));
         hideLoading();
         return;
       }
@@ -277,9 +276,9 @@ const Login: React.FC = () => {
       // Show API authentication errors as-is.
       console.error('2FA error:', err);
       if (err instanceof ApiAuthError) {
-        setError(tCommon('apiErrors:' + err.message));
+        setError(t('common.apiErrors.' + err.message));
       } else {
-        setError(t('errors.serverError'));
+        setError(t('auth.errors.serverError'));
       }
       hideLoading();
     }
@@ -307,10 +306,10 @@ const Login: React.FC = () => {
           )}
           <div className="mb-6">
             <p className="text-gray-700 dark:text-gray-200 mb-4">
-              {t('twoFactorTitle')}
+              {t('auth.twoFactorTitle')}
             </p>
             <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="twoFactorCode">
-              {t('authCode')}
+              {t('auth.authCode')}
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
@@ -318,13 +317,13 @@ const Login: React.FC = () => {
               type="text"
               value={twoFactorCode}
               onChange={(e) => setTwoFactorCode(e.target.value)}
-              placeholder={t('authCodePlaceholder')}
+              placeholder={t('auth.authCodePlaceholder')}
               required
             />
           </div>
           <div className="flex flex-col w-full space-y-2">
             <Button type="submit">
-              {t('verify')}
+              {t('auth.verify')}
             </Button>
             <Button
               type="button"
@@ -343,11 +342,11 @@ const Login: React.FC = () => {
               }}
               variant="secondary"
             >
-              {t('cancel')}
+              {t('auth.cancel')}
             </Button>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">
-            {t('twoFactorNote')}
+            {t('auth.twoFactorNote')}
           </p>
         </form>
       </div>
@@ -362,18 +361,18 @@ const Login: React.FC = () => {
             {error}
           </div>
         )}
-        <h2 className="text-xl font-bold dark:text-gray-200">{t('loginTitle')}</h2>
+        <h2 className="text-xl font-bold dark:text-gray-200">{t('auth.loginTitle')}</h2>
         <LoginServerInfo />
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="username">
-            {t('username')}
+            {t('auth.username')}
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 leading-tight focus:outline-none focus:shadow-outline"
             id="username"
             type="text"
             name="username"
-            placeholder={t('usernamePlaceholder')}
+            placeholder={t('auth.usernamePlaceholder')}
             value={credentials.username}
             onChange={handleChange}
             required
@@ -381,14 +380,14 @@ const Login: React.FC = () => {
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="password">
-            {t('password')}
+            {t('auth.password')}
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             id="password"
             type="password"
             name="password"
-            placeholder={t('passwordPlaceholder')}
+            placeholder={t('auth.passwordPlaceholder')}
             value={credentials.password}
             onChange={handleChange}
             required
@@ -402,24 +401,24 @@ const Login: React.FC = () => {
               onChange={(e) => setRememberMe(e.target.checked)}
               className="mr-2"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-200">{t('rememberMe')}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-200">{t('auth.rememberMe')}</span>
           </label>
         </div>
         <div className="flex w-full">
           <Button type="submit">
-            {t('loginButton')}
+            {t('auth.loginButton')}
           </Button>
         </div>
       </form>
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-        {t('noAccount')}{' '}
+        {t('auth.noAccount')}{' '}
         <a
           href={clientUrl ?? ''}
           target="_blank"
           rel="noopener noreferrer"
           className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500"
         >
-          {t('createVault')}
+          {t('auth.createVault')}
         </a>
       </div>
     </div>

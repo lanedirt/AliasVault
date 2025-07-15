@@ -25,8 +25,7 @@ import { storage } from '#imports';
  * Unlock page
  */
 const Unlock: React.FC = () => {
-  const { t } = useTranslation('auth');
-  const { t: tc } = useTranslation('common');
+  const { t } = useTranslation();
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
@@ -47,21 +46,21 @@ const Unlock: React.FC = () => {
       const statusResponse = await webApi.getStatus();
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
-        await webApi.logout(tc(statusError));
+        await webApi.logout(t('common.apiErrors.' + statusError));
         navigate('/logout');
       }
       setIsInitialLoading(false);
     };
 
     checkStatus();
-  }, [webApi, authContext, setIsInitialLoading, navigate, tc]);
+  }, [webApi, authContext, setIsInitialLoading, navigate, t]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
     const headerButtonsJSX = !PopoutUtility.isPopup() ? (
       <HeaderButton
         onClick={() => PopoutUtility.openInNewPopup()}
-        title={t('common:openInNewWindow', 'Open in new window')}
+        title={t('common.openInNewWindow')}
         iconType={HeaderIconType.EXPAND}
       />
     ) : null;
@@ -96,9 +95,9 @@ const Unlock: React.FC = () => {
       // Make API call to get latest vault
       const vaultResponseJson = await webApi.get<VaultResponse>('Vault');
 
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson);
+      const vaultError = webApi.validateVaultResponse(vaultResponseJson, t);
       if (vaultError) {
-        setError(vaultError);
+        setError(t('common.apiErrors.' + vaultError));
         hideLoading();
         return;
       }
@@ -115,7 +114,7 @@ const Unlock: React.FC = () => {
       // Redirect to reinitialize page
       navigate('/reinitialize', { replace: true });
     } catch (err) {
-      setError(t('errors.wrongPassword'));
+      setError(t('auth.errors.wrongPassword'));
       console.error('Unlock error:', err);
     } finally {
       hideLoading();
@@ -146,14 +145,14 @@ const Unlock: React.FC = () => {
               {authContext.username}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t('loggedIn')}
+              {t('auth.loggedIn')}
             </p>
           </div>
         </div>
 
         {/* Instruction Title */}
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          {t('unlockTitle')}
+          {t('auth.unlockTitle')}
         </h2>
 
         {error && (
@@ -164,7 +163,7 @@ const Unlock: React.FC = () => {
 
         <div className="mb-2">
           <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="password">
-            {t('masterPassword')}
+            {t('auth.masterPassword')}
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-200 dark:bg-gray-800 dark:border-gray-600 mb-3 leading-tight focus:outline-none focus:shadow-outline"
@@ -172,17 +171,17 @@ const Unlock: React.FC = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={t('passwordPlaceholder')}
+            placeholder={t('auth.passwordPlaceholder')}
             required
           />
         </div>
 
         <Button type="submit">
-          {t('unlockVault')}
+          {t('auth.unlockVault')}
         </Button>
 
         <div className="text-sm font-medium text-gray-500 dark:text-gray-200 mt-6">
-          {t('switchAccounts')} <button onClick={handleLogout} className="text-primary-700 hover:underline dark:text-primary-500">{t('logout')}</button>
+          {t('auth.switchAccounts')} <button onClick={handleLogout} className="text-primary-700 hover:underline dark:text-primary-500">{t('auth.logout')}</button>
         </div>
       </form>
     </div>

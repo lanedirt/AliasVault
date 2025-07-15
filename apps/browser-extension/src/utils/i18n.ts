@@ -1,34 +1,18 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Import all translations
-import authEn from '../locales/en/auth.json';
-import commonEn from '../locales/en/common.json';
-import credentialsEn from '../locales/en/credentials.json';
-import emailsEn from '../locales/en/emails.json';
-import settingsEn from '../locales/en/settings.json';
-import authNl from '../locales/nl/auth.json';
-import commonNl from '../locales/nl/common.json';
-import credentialsNl from '../locales/nl/credentials.json';
-import emailsNl from '../locales/nl/emails.json';
-import settingsNl from '../locales/nl/settings.json';
+// Import consolidated translations
+import enTranslations from '../locales/en.json';
+import nlTranslations from '../locales/nl.json';
 
 import { storage } from '#imports';
 
 const resources = {
   en: {
-    common: commonEn,
-    auth: authEn,
-    credentials: credentialsEn,
-    settings: settingsEn,
-    emails: emailsEn
+    translation: enTranslations
   },
   nl: {
-    common: commonNl,
-    auth: authNl,
-    credentials: credentialsNl,
-    settings: settingsNl,
-    emails: emailsNl
+    translation: nlTranslations
   }
 };
 

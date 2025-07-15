@@ -8,7 +8,7 @@ import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator'
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
-import { tc } from '@/utils/i18n/StandaloneI18n';
+import { t } from '@/utils/i18n/StandaloneI18n';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { IdentitySettingsResponse } from '@/utils/types/messaging/IdentitySettingsResponse';
@@ -157,13 +157,13 @@ export function removeExistingPopup(container: HTMLElement) : void {
  */
 export async function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : Promise<void> {
   // Get all translations first
-  const newText = await tc('new');
-  const searchPlaceholder = await tc('searchVault');
-  const hideFor1HourText = await tc('hideFor1Hour');
-  const hidePermanentlyText = await tc('hidePermanently');
-  const noMatchesText = await tc('noMatchesFound');
-  const creatingText = await tc('creatingNewAlias');
-  const failedText = await tc('failedToCreateIdentity');
+  const newText = await t('content.new');
+  const searchPlaceholder = await t('content.searchVault');
+  const hideFor1HourText = await t('content.hideFor1Hour');
+  const hidePermanentlyText = await t('content.hidePermanently');
+  const noMatchesText = await t('content.noMatchesFound');
+  const creatingText = await t('content.creatingNewAlias');
+  const failedText = await t('content.failedToCreateIdentity');
 
   // Disable browser's native autocomplete to avoid conflicts with AliasVault's autocomplete.
   input.setAttribute('autocomplete', 'false');
@@ -471,7 +471,7 @@ export async function createVaultLockedPopup(input: HTMLInputElement, rootContai
   // Add message
   const messageElement = document.createElement('div');
   messageElement.className = 'av-vault-locked-message';
-  messageElement.textContent = await tc('vaultLocked');
+  messageElement.textContent = await t('content.vaultLocked');
   container.appendChild(messageElement);
 
   // Add unlock button with SVG icon
@@ -771,10 +771,10 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
         <circle cx="16" cy="16" r="1"/>
       </svg>
     `;
-      const randomIdentitySubtext = await tc('randomIdentityDescription');
-      const randomIdentityTitle = await tc('createRandomAlias');
-      const randomIdentityTitleDropdown = await tc('randomAlias');
-      const randomIdentitySubtextDropdown = await tc('randomIdentityDescriptionDropdown');
+      const randomIdentitySubtext = await t('content.randomIdentityDescription');
+      const randomIdentityTitle = await t('content.createRandomAlias');
+      const randomIdentityTitleDropdown = await t('content.randomAlias');
+      const randomIdentitySubtextDropdown = await t('content.randomIdentityDescriptionDropdown');
 
       const manualUsernamePasswordIcon = `
       <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -782,24 +782,24 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
         <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
       </svg>
     `;
-      const manualUsernamePasswordSubtext = await tc('manualCredentialDescription');
-      const manualUsernamePasswordTitle = await tc('createUsernamePassword');
-      const manualUsernamePasswordTitleDropdown = await tc('usernamePassword');
-      const manualUsernamePasswordSubtextDropdown = await tc('manualCredentialDescriptionDropdown');
+      const manualUsernamePasswordSubtext = await t('content.manualCredentialDescription');
+      const manualUsernamePasswordTitle = await t('content.createUsernamePassword');
+      const manualUsernamePasswordTitleDropdown = await t('content.usernamePassword');
+      const manualUsernamePasswordSubtextDropdown = await t('content.manualCredentialDescriptionDropdown');
 
       // Get all translated strings first
-      const serviceNameText = await tc('serviceName');
-      const enterServiceNameText = await tc('enterServiceName');
-      const cancelText = await tc('cancel');
-      const createAndSaveAliasText = await tc('createAndSaveAlias');
-      const emailText = await tc('email');
-      const enterEmailAddressText = await tc('enterEmailAddress');
-      const usernameText = await tc('username');
-      const enterUsernameText = await tc('enterUsername');
-      const generatedPasswordText = await tc('generatedPassword');
-      const generateNewPasswordText = await tc('generateNewPassword');
-      const togglePasswordVisibilityText = await tc('togglePasswordVisibility');
-      const createAndSaveCredentialText = await tc('createAndSaveCredential');
+      const serviceNameText = await t('content.serviceName');
+      const enterServiceNameText = await t('content.enterServiceName');
+      const cancelText = await t('content.cancel');
+      const createAndSaveAliasText = await t('content.createAndSaveAlias');
+      const emailText = await t('content.email');
+      const enterEmailAddressText = await t('content.enterEmailAddress');
+      const usernameText = await t('content.username');
+      const enterUsernameText = await t('content.enterUsername');
+      const generatedPasswordText = await t('content.generatedPassword');
+      const generateNewPasswordText = await t('content.generateNewPassword');
+      const togglePasswordVisibilityText = await t('content.togglePasswordVisibility');
+      const createAndSaveCredentialText = await t('content.createAndSaveCredential');
 
       // Create the main content
       popup.innerHTML = `
@@ -1163,14 +1163,14 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
             if (!emailLabel.querySelector('.av-create-popup-error-text')) {
               const emailError = document.createElement('span');
               emailError.className = 'av-create-popup-error-text';
-              emailError.textContent = await tc('enterEmailAndOrUsername');
+              emailError.textContent = await t('content.enterEmailAndOrUsername');
               emailLabel.appendChild(emailError);
             }
 
             if (!usernameLabel.querySelector('.av-create-popup-error-text')) {
               const usernameError = document.createElement('span');
               usernameError.className = 'av-create-popup-error-text';
-              usernameError.textContent = await tc('enterEmailAndOrUsername');
+              usernameError.textContent = await t('content.enterEmailAndOrUsername');
               usernameLabel.appendChild(usernameError);
             }
 
@@ -1525,7 +1525,7 @@ export async function createUpgradeRequiredPopup(input: HTMLInputElement, rootCo
 
   // Add upgrade button with SVG icon
   const button = document.createElement('button');
-  button.title = await tc('openAliasVaultToUpgrade');
+  button.title = await t('content.openAliasVaultToUpgrade');
   button.className = 'av-upgrade-required-button';
   button.innerHTML = `
     <svg class="av-icon-upgrade" viewBox="0 0 24 24">
@@ -1540,7 +1540,7 @@ export async function createUpgradeRequiredPopup(input: HTMLInputElement, rootCo
   // Add close button as a separate element positioned to the right
   const closeButton = document.createElement('button');
   closeButton.className = 'av-button av-button-close av-upgrade-required-close';
-  closeButton.title = await tc('dismissPopup');
+  closeButton.title = await t('content.dismissPopup');
   closeButton.innerHTML = `
     <svg class="av-icon" viewBox="0 0 24 24">
       <line x1="18" y1="6" x2="6" y2="18"></line>

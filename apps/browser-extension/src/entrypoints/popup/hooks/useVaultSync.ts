@@ -47,7 +47,7 @@ type VaultSyncOptions = {
 export const useVaultSync = () : {
   syncVault: (options?: VaultSyncOptions) => Promise<boolean>;
 } => {
-  const { tc } = useTranslation('common');
+  const { t } = useTranslation();
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
@@ -67,7 +67,7 @@ export const useVaultSync = () : {
       }
 
       // Check app status and vault revision
-      onStatus?.(await tc('checkingVaultUpdates'));
+      onStatus?.(t('common.checkingVaultUpdates'));
       const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       // Check if server is actually available, 0.0.0 indicates connection error which triggers offline mode.
@@ -77,7 +77,7 @@ export const useVaultSync = () : {
 
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError) {
-        onError?.(await tc(statusError));
+        onError?.(t('common.errors.' + statusError));
         return false;
       }
 
@@ -92,7 +92,7 @@ export const useVaultSync = () : {
       const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
 
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
-        onStatus?.(await tc('syncingUpdatedVault'));
+        onStatus?.(t('common.syncingUpdatedVault'));
         const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse, t);
@@ -171,7 +171,7 @@ export const useVaultSync = () : {
       onError?.(errorMessage);
       return false;
     }
-  }, [authContext, dbContext, webApi, tc]);
+  }, [authContext, dbContext, webApi, t]);
 
   return { syncVault };
 };

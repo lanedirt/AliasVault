@@ -45,8 +45,8 @@ files:
     type: resx
     translation_replace:
       .en: ''
-  - source: /apps/browser-extension/src/locales/en/**/*.json
-    translation: /apps/browser-extension/src/locales/%two_letters_code%/%file_name%.%file_extension%
+  - source: /apps/browser-extension/src/locales/en.json
+    translation: /apps/browser-extension/src/locales/%two_letters_code%.json
     type: json
   - source: /apps/mobile-app/i18n/locales/en.json
     translation: /apps/mobile-app/i18n/locales/%two_letters_code%.json

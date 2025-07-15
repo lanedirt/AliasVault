@@ -3,7 +3,7 @@ import { storage } from 'wxt/utils/storage';
 
 import type { Vault, VaultResponse, VaultPostResponse } from '@/utils/dist/shared/models/webapi';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
-import { tc } from '@/utils/i18n/StandaloneI18n';
+import { t } from '@/utils/i18n/StandaloneI18n';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
@@ -59,7 +59,7 @@ export async function handleCheckAuthStatus() : Promise<{ isLoggedIn: boolean, i
       isLoggedIn,
       isVaultLocked,
       hasPendingMigrations: false,
-      error: error instanceof Error ? error.message : await tc('errors.unknownError', 'common')
+      error: error instanceof Error ? error.message : await t('common.errors.unknownError')
     };
   }
 }
@@ -101,7 +101,7 @@ export async function handleStoreVault(
     return { success: true };
   } catch (error) {
     console.error('Failed to store vault:', error);
-    return { success: false, error: await tc('errors.failedToStoreVault', 'common') };
+    return { success: false, error: await t('common.errors.failedToStoreVault') };
   }
 }
 
@@ -114,7 +114,7 @@ export async function handleSyncVault(
   const statusResponse = await webApi.getStatus();
   const statusError = webApi.validateStatusResponse(statusResponse);
   if (statusError !== null) {
-    return { success: false, error: await tc(statusError) };
+    return { success: false, error: await t('common.errors.' + statusError) };
   }
 
   const vaultRevisionNumber = await storage.getItem('session:vaultRevisionNumber') as number;
@@ -148,7 +148,7 @@ export async function handleGetVault(
 
     if (!encryptedVault) {
       console.error('Vault not available');
-      return { success: false, error: await tc('errors.vaultNotAvailable', 'common') };
+      return { success: false, error: await t('common.errors.vaultNotAvailable') };
     }
 
     const decryptedVault = await EncryptionUtility.symmetricDecrypt(
@@ -165,7 +165,7 @@ export async function handleGetVault(
     };
   } catch (error) {
     console.error('Failed to get vault:', error);
-    return { success: false, error: await tc('errors.failedToGetVault', 'common') };
+    return { success: false, error: await t('common.errors.failedToGetVault') };
   }
 }
 
@@ -193,7 +193,7 @@ export async function handleGetCredentials(
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
-    return { success: false, error: await tc('errors.vaultIsLocked', 'common') };
+    return { success: false, error: await t('common.errors.vaultIsLocked') };
   }
 
   try {
@@ -202,7 +202,7 @@ export async function handleGetCredentials(
     return { success: true, credentials: credentials };
   } catch (error) {
     console.error('Error getting credentials:', error);
-    return { success: false, error: await tc('errors.failedToGetCredentials', 'common') };
+    return { success: false, error: await t('common.errors.failedToGetCredentials') };
   }
 }
 
@@ -215,7 +215,7 @@ export async function handleCreateIdentity(
   const derivedKey = await storage.getItem('session:derivedKey') as string;
 
   if (!derivedKey) {
-    return { success: false, error: await tc('errors.vaultIsLocked', 'common') };
+    return { success: false, error: await t('common.errors.vaultIsLocked') };
   }
 
   try {
@@ -230,7 +230,7 @@ export async function handleCreateIdentity(
     return { success: true };
   } catch (error) {
     console.error('Failed to create identity:', error);
-    return { success: false, error: await tc('errors.failedToCreateIdentity', 'common') };
+    return { success: false, error: await t('common.errors.failedToCreateIdentity') };
   }
 }
 
@@ -272,7 +272,7 @@ export function handleGetDefaultEmailDomain(): Promise<stringResponse> {
       return { success: true, value: defaultEmailDomain ?? undefined };
     } catch (error) {
       console.error('Error getting default email domain:', error);
-      return { success: false, error: await tc('errors.failedToGetDefaultEmailDomain', 'common') };
+      return { success: false, error: await t('common.errors.failedToGetDefaultEmailDomain') };
     }
   })();
 }
@@ -296,7 +296,7 @@ export async function handleGetDefaultIdentitySettings(
     };
   } catch (error) {
     console.error('Error getting default identity settings:', error);
-    return { success: false, error: await tc('errors.failedToGetDefaultIdentitySettings', 'common') };
+    return { success: false, error: await t('common.errors.failedToGetDefaultIdentitySettings') };
   }
 }
 
@@ -312,7 +312,7 @@ export async function handleGetPasswordSettings(
     return { success: true, settings: passwordSettings };
   } catch (error) {
     console.error('Error getting password settings:', error);
-    return { success: false, error: await tc('errors.failedToGetPasswordSettings', 'common') };
+    return { success: false, error: await t('common.errors.failedToGetPasswordSettings') };
   }
 }
 
@@ -343,7 +343,7 @@ export async function handleUploadVault(
     return { success: true, status: response.status, newRevisionNumber: response.newRevisionNumber };
   } catch (error) {
     console.error('Failed to upload vault:', error);
-    return { success: false, error: await tc('errors.failedToUploadVault', 'common') };
+    return { success: false, error: await t('common.errors.failedToUploadVault') };
   }
 }
 
@@ -354,7 +354,7 @@ export async function handleUploadVault(
 export async function handlePersistFormValues(data: any): Promise<void> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
   if (!derivedKey) {
-    throw new Error(await tc('errors.noDerivedKeyAvailable', 'common'));
+    throw new Error(await t('common.errors.noDerivedKeyAvailable'));
   }
 
   // Always stringify the data properly
@@ -442,7 +442,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
   if (response.status === 0) {
     await storage.setItem('session:vaultRevisionNumber', response.newRevisionNumber);
   } else {
-    throw new Error(await tc('errors.failedToUploadVaultToServer', 'common'));
+    throw new Error(await t('common.errors.failedToUploadVaultToServer'));
   }
 
   return response;
@@ -455,7 +455,7 @@ async function createVaultSqliteClient() : Promise<SqliteClient> {
   const encryptedVault = await storage.getItem('session:encryptedVault') as string;
   const derivedKey = await storage.getItem('session:derivedKey') as string;
   if (!encryptedVault || !derivedKey) {
-    throw new Error(await tc('errors.noVaultOrDerivedKeyFound', 'common'));
+    throw new Error(await t('common.errors.noVaultOrDerivedKeyFound'));
   }
 
   // Decrypt the vault.

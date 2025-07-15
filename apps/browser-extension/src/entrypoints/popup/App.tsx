@@ -42,7 +42,7 @@ type RouteConfig = {
  * App component.
  */
 const App: React.FC = () => {
-  const { t } = useTranslation(['common', 'credentials', 'emails', 'settings']);
+  const { t } = useTranslation();
   const authContext = useAuth();
   const { isInitialLoading } = useLoading();
   const [isLoading, setIsLoading] = useMinDurationLoading(true, 150);
@@ -57,13 +57,13 @@ const App: React.FC = () => {
     { path: '/unlock', element: <Unlock />, showBackButton: false },
     { path: '/unlock-success', element: <UnlockSuccess />, showBackButton: false },
     { path: '/upgrade', element: <Upgrade />, showBackButton: false },
-    { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: t('settings:title') },
+    { path: '/auth-settings', element: <AuthSettings />, showBackButton: true, title: t('settings.title') },
     { path: '/credentials', element: <CredentialsList />, showBackButton: false },
-    { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: t('credentials:addCredential') },
-    { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: t('credentials:credentialDetails') },
-    { path: '/credentials/:id/edit', element: <CredentialAddEdit />, showBackButton: true, title: t('credentials:editCredential') },
+    { path: '/credentials/add', element: <CredentialAddEdit />, showBackButton: true, title: t('credentials.addCredential') },
+    { path: '/credentials/:id', element: <CredentialDetails />, showBackButton: true, title: t('credentials.credentialDetails') },
+    { path: '/credentials/:id/edit', element: <CredentialAddEdit />, showBackButton: true, title: t('credentials.editCredential') },
     { path: '/emails', element: <EmailsList />, showBackButton: false },
-    { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: t('emails:title') },
+    { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: t('emails.title') },
     { path: '/settings', element: <Settings />, showBackButton: false },
     { path: '/logout', element: <Logout />, showBackButton: false },
   ];
