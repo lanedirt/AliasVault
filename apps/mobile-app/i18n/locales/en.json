@@ -3,7 +3,6 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "save": "Save",
-    "edit": "Edit",
     "yes": "Yes",
     "no": "No",
     "ok": "OK",
@@ -11,13 +10,8 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "required": "Required",
-    "optional": "Optional",
     "never": "Never",
-    "untitled": "Untitled",
-    "copy": "Copy",
-    "copied": "Copied",
-    "version": "Version"
+    "copied": "Copied"
   },
   "auth": {
     "login": "Log in",
@@ -43,7 +37,6 @@
     "biometricPrompt": "Would you like to use {{biometric}} to unlock your vault?",
     "tryBiometricAgain": "Try {{biometric}} Again",
     "authCodeNote": "Note: if you don't have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.",
-    "noAccountYet": "No account yet?",
     "errors": {
       "credentialsRequired": "Username and password are required",
       "invalidAuthCode": "Please enter a valid 6-digit authentication code",
@@ -59,7 +52,6 @@
     "editCredential": "Edit Credential",
     "deleteCredential": "Delete Credential",
     "deleteConfirm": "Are you sure you want to delete this credential? This action cannot be undone.",
-    "credentialOptions": "Credential Options",
     "service": "Service",
     "serviceName": "Service Name",
     "serviceUrl": "Service URL",
@@ -87,8 +79,6 @@
     "noEmailsYet": "No emails received yet.",
     "offlineEmailsMessage": "You are offline. Please connect to the internet to load your emails.",
     "emailLoadError": "An error occurred while loading emails. Please try again later.",
-    "emailClaimError": "The current chosen email address is already in use. Please change the email address by editing this credential.",
-    "emailSyncError": "An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.",
     "emailUnexpectedError": "An unexpected error occurred while loading emails. Please try again later.",
     "password": "Password",
     "deletingCredential": "Deleting credential...",
@@ -102,19 +92,6 @@
     "switchBackToBrowser": "Switch back to your browser to continue.",
     "twoFactorAuth": "Two-factor authentication",
     "totpCode": "TOTP Code",
-    "actions": {
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
-    },
-    "toasts": {
-      "usernameCopied": "Username copied to clipboard",
-      "emailCopied": "Email copied to clipboard",
-      "passwordCopied": "Password copied to clipboard",
-      "credentialUpdated": "Credential updated successfully",
-      "credentialCreated": "Credential created successfully",
-      "credentialDeleted": "Credential deleted successfully"
-    },
     "errors": {
       "loadFailed": "Failed to load credential",
       "generateUsernameFailed": "Failed to generate username",
@@ -142,12 +119,9 @@
       "8hours": "8 hours"
     },
     "language": "Language",
-    "systemLanguage": "System Language",
     "languageSystemMessage": "To change the app language, configure the preferred language for AliasVault in your device settings.",
     "openSettings": "Open Settings",
-    "unableToOpenSettings": "Unable to open device settings. Please manually navigate to the app settings and change the language.",
     "vaultUnlockSettings": {
-      "title": "Vault Unlock Method",
       "description": "Choose how you want to unlock your vault.",
       "biometricEnabled": "{{biometric}} is now successfully enabled",
       "biometricNotAvailable": "{{biometric}} Not Available",
@@ -159,11 +133,9 @@
       "keystoreAndroid": "Android Keystore"
     },
     "autoLockSettings": {
-      "title": "Auto-lock Timeout",
       "description": "Choose how long the app can stay in the background before requiring re-authentication. You'll need to use Face ID or enter your password to unlock the vault again."
     },
     "identityGeneratorSettings": {
-      "title": "Identity Generator",
       "description": "Configure the default language and gender preference for generating new identities.",
       "languageSection": "Language",
       "languageDescription": "Set the language that will be used when generating new identities.",
@@ -258,19 +230,7 @@
   "navigation": {
     "credentials": "Credentials",
     "emails": "Emails",
-    "settings": "Settings",
-    "notFound": "This page doesn't exist.",
-    "oops": "Oops!",
-    "goBack": "Go back to the home page"
-  },
-  "validation": {
-    "serviceNameRequired": "Service name is required",
-    "invalidUrl": "Invalid URL format",
-    "invalidDate": "Date must be in YYYY-MM-DD format",
-    "invalidEmail": "Invalid email format"
-  },
-  "offline": {
-    "banner": "You are offline. Some features may not be available."
+    "settings": "Settings"
   },
   "emails": {
     "title": "Email Details",
@@ -291,36 +251,6 @@
       "decryptFailed": "Failed to decrypt attachment",
       "downloadFailed": "Failed to download attachment"
     }
-  },
-  "errors": {
-    "RefreshTokenRequired": "Refresh token is required.",
-    "UserNotFoundInToken": "User not found (name-1)",
-    "UserNotFoundInDatabase": "User not found (name-2)",
-    "AccountBlocked": "Your account has been disabled. If you believe this is a mistake, please contact support.",
-    "InvalidRefreshToken": "Invalid refresh token",
-    "RefreshTokenRevokedSuccessfully": "Refresh token revoked successfully",
-    "PublicRegistrationDisabled": "New account registration is currently disabled on this server. Please contact the administrator.",
-    "UserNotFound": "User not found.",
-    "UsernameRequired": "Username is required.",
-    "UsernameAlreadyInUse": "Username is already in use.",
-    "UsernameAvailable": "Username is available.",
-    "UsernameMismatch": "Username does not match the current user.",
-    "PasswordMismatch": "The provided password does not match your current password.",
-    "AccountSuccessfullyDeleted": "Account successfully deleted.",
-    "UsernameEmptyOrWhitespace": "Username cannot be empty or whitespace.",
-    "UsernameTooShort": "Username too short: must be at least 3 characters long.",
-    "UsernameTooLong": "Username too long: cannot be longer than 40 characters.",
-    "UsernameAdminNotAllowed": "Username 'admin' is not allowed.",
-    "UsernameInvalidEmail": "Invalid email address.",
-    "UsernameInvalidCharacters": "Username is invalid, can only contain letters or digits.",
-    "PendingMigrations": "There are pending migrations. Please run 'dotnet ef database update' to apply them.",
-    "SystemOk": "OK",
-    "InternalServerError": "Internal server error",
-    "VaultError": "The local vault is not up-to-date. Please synchronize your vault by refreshing the page and try again.",
-    "UnknownError": "An unknown error occurred. Please try again.",
-    "INVALID_AUTHENTICATOR_CODE": "Invalid authenticator code. Please try again.",
-    "INVALID_RECOVERY_CODE": "Invalid recovery code. Please try again.",
-    "VAULT_NOT_UP_TO_DATE": "Your vault is not up-to-date. Please synchronize your vault and try again."
   },
   "apiErrors": {
     "CLAIM_DOES_NOT_MATCH_USER": "The current chosen email address is already in use. Please change the email address by editing this credential.",
