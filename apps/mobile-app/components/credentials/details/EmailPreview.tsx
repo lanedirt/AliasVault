@@ -179,14 +179,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
             } catch {
               // Try to parse as error response instead
               const apiErrorResponse = response as ApiErrorResponse;
-
-              if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_MATCH_USER') {
-                setError(t('credentials.emailClaimError'));
-              } else if (apiErrorResponse?.code === 'CLAIM_DOES_NOT_EXIST') {
-                setError(t('credentials.emailSyncError'));
-              } else {
-                setError(t('credentials.emailLoadError'));
-              }
+              setError(t(`apiErrors.${apiErrorResponse?.code}`));
               return;
             }
           } catch {
