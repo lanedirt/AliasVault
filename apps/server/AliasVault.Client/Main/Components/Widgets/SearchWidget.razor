@@ -3,6 +3,7 @@
 @inject KeyboardShortcutService KeyboardShortcutService
 @inject JsInteropService JsInteropService
 @inject IStringLocalizerFactory LocalizerFactory
+@inject LanguageService LanguageService
 @implements IAsyncDisposable
 @using Microsoft.Extensions.Localization
 @using System.Timers
@@ -98,6 +99,7 @@
         await KeyboardShortcutService.UnregisterShortcutAsync("gs");
         await KeyboardShortcutService.UnregisterShortcutAsync("gf");
         NavigationManager.LocationChanged -= ResetSearchField;
+        LanguageService.LanguageChanged -= OnLanguageChanged;
         _searchTimer?.Dispose();
     }
 
@@ -111,12 +113,24 @@
             await KeyboardShortcutService.RegisterShortcutAsync("gs", FocusSearchField);
             await KeyboardShortcutService.RegisterShortcutAsync("gf", FocusSearchField);
             NavigationManager.LocationChanged += ResetSearchField;
+            LanguageService.LanguageChanged += OnLanguageChanged;
 
             // Initialize search timer
             _searchTimer = new Timer(300); // 300ms debounce
             _searchTimer.Elapsed += async (sender, e) => await PerformSearchAsync();
             _searchTimer.AutoReset = false;
         }
+    }
+
+    /// <summary>
+    /// Handles language change events and triggers component refresh.
+    /// </summary>
+    /// <param name="languageCode">The new language code.</param>
+    private void OnLanguageChanged(string languageCode)
+    {
+        // Reset the localizer to force it to use the new language
+        _localizer = null;
+        InvokeAsync(StateHasChanged);
     }
 
     private void OnFocus()

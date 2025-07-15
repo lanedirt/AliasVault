@@ -4,6 +4,7 @@
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
 @inject AliasVault.Client.Services.QuickCreateStateService QuickCreateStateService
+@inject LanguageService LanguageService
 @implements IAsyncDisposable
 
 <button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
@@ -55,6 +56,7 @@
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         await KeyboardShortcutService.UnregisterShortcutAsync("gc");
+        LanguageService.LanguageChanged -= OnLanguageChanged;
         if (Module is not null)
         {
             await Module.DisposeAsync();
@@ -67,8 +69,18 @@
         if (firstRender)
         {
             await KeyboardShortcutService.RegisterShortcutAsync("gc", ShowPopup);
+            LanguageService.LanguageChanged += OnLanguageChanged;
             Module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/modules/newIdentityWidget.js");
         }
+    }
+
+    /// <summary>
+    /// Handles language change events and triggers component refresh.
+    /// </summary>
+    /// <param name="languageCode">The new language code.</param>
+    private void OnLanguageChanged(string languageCode)
+    {
+        InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
