@@ -3,7 +3,6 @@ import { storage } from 'wxt/utils/storage';
 
 import type { Vault, VaultResponse, VaultPostResponse } from '@/utils/dist/shared/models/webapi';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
-import { t } from '@/utils/i18n/StandaloneI18n';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 import { CredentialsResponse as messageCredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
@@ -14,6 +13,8 @@ import { StringResponse as stringResponse } from '@/utils/types/messaging/String
 import { VaultResponse as messageVaultResponse } from '@/utils/types/messaging/VaultResponse';
 import { VaultUploadResponse as messageVaultUploadResponse } from '@/utils/types/messaging/VaultUploadResponse';
 import { WebApiService } from '@/utils/WebApiService';
+
+import { t } from '@/i18n/StandaloneI18n';
 
 /**
  * Check if the user is logged in and if the vault is locked, and also check for pending migrations.

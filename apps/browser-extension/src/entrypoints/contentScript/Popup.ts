@@ -8,12 +8,13 @@ import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator'
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
-import { t } from '@/utils/i18n/StandaloneI18n';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { IdentitySettingsResponse } from '@/utils/types/messaging/IdentitySettingsResponse';
 import { PasswordSettingsResponse } from '@/utils/types/messaging/PasswordSettingsResponse';
 import { StringResponse } from '@/utils/types/messaging/StringResponse';
+
+import { t } from '@/i18n/StandaloneI18n';
 
 import { storage } from '#imports';
 

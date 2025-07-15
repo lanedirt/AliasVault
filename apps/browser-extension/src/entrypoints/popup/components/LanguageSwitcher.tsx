@@ -1,18 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AVAILABLE_LANGUAGES, getLanguageConfig, ILanguageConfig } from '../../../i18n/config';
+
 import { storage } from '#imports';
-
-type LanguageOption = {
-  code: string;
-  name: string;
-  flag: string;
-};
-
-const languages: LanguageOption[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' }
-];
 
 type LanguageSwitcherProps = {
   variant?: 'dropdown' | 'buttons';
@@ -32,7 +23,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  const currentLanguage = getLanguageConfig(i18n.language) || AVAILABLE_LANGUAGES[0];
 
   // Close dropdown when clicking outside
   useEffect((): (() => void) => {
@@ -69,7 +60,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   if (variant === 'buttons') {
     return (
       <div className="flex space-x-2">
-        {languages.map((lang) => (
+        {AVAILABLE_LANGUAGES.map((lang: ILanguageConfig) => (
           <button
             key={lang.code}
             onClick={() => changeLanguage(lang.code)}
@@ -78,7 +69,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                 ? 'bg-primary-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500'
             }`}
-            title={lang.name}
+            title={lang.nativeName}
           >
             <span className="text-sm">{lang.flag}</span>
             <span>{lang.code.toUpperCase()}</span>
@@ -98,7 +89,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       >
         <div className="flex items-center space-x-2">
           <span className="text-lg">{currentLanguage.flag}</span>
-          <span>{currentLanguage.name}</span>
+          <span>{currentLanguage.nativeName}</span>
         </div>
         <svg
           className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -112,7 +103,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
       {isOpen && (
         <div className="absolute top-full left-0 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
-          {languages.map((lang) => (
+          {AVAILABLE_LANGUAGES.map((lang: ILanguageConfig) => (
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
@@ -122,7 +113,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             >
               <div className="flex items-center space-x-2">
                 <span className="text-lg">{lang.flag}</span>
-                <span className="text-gray-700 dark:text-gray-200">{lang.name}</span>
+                <span className="text-gray-700 dark:text-gray-200">{lang.nativeName}</span>
               </div>
               {i18n.language === lang.code && (
                 <svg className="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 20 20">

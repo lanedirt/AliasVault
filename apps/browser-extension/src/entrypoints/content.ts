@@ -5,8 +5,9 @@ import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/en
 import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup, createUpgradeRequiredPopup } from '@/entrypoints/contentScript/Popup';
 
 import { FormDetector } from '@/utils/formDetector/FormDetector';
-import { t } from '@/utils/i18n/StandaloneI18n';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
+
+import { t } from '@/i18n/StandaloneI18n';
 
 import { defineContentScript } from '#imports';
 import { createShadowRootUi } from '#imports';

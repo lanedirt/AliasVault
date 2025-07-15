@@ -35,13 +35,9 @@ To add a new language to AliasVault, follow these steps in order:
 
 ### Step 3: Browser Extension
 
-1. **Add language identifier to config**: Update `/apps/browser-extension/src/utils/i18n.ts` and insert new language based on existing structure
-1. **Create language directory**: `apps/browser-extension/src/locales/{language-code}/`
-2. **Create translation files (optional, Crowdin should make a PR for this automatically)**:
-   - `{language-code}/auth.json`
-   - `{language-code}/common.json`
-   - `{language-code}/emails.json`
-   - `{language-code}/settings.json`
+1. **Add language identifier to config**: Update `/apps/browser-extension/src/utils/i18n/config.ts` and insert new language based on existing structure
+1. **Create language file (optional, Crowdin should make a PR for this automatically)**:
+   - `apps/browser-extension/src/locales/{language-code}.json`
 
 ### Step 4: Mobile App - React Native
 
