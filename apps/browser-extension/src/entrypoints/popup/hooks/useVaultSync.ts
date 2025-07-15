@@ -47,7 +47,7 @@ type VaultSyncOptions = {
 export const useVaultSync = () : {
   syncVault: (options?: VaultSyncOptions) => Promise<boolean>;
 } => {
-  const { t } = useTranslation('common');
+  const { tc } = useTranslation('common');
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
@@ -67,7 +67,7 @@ export const useVaultSync = () : {
       }
 
       // Check app status and vault revision
-      onStatus?.(t('checkingVaultUpdates'));
+      onStatus?.(await tc('checkingVaultUpdates'));
       const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       // Check if server is actually available, 0.0.0 indicates connection error which triggers offline mode.
@@ -75,9 +75,9 @@ export const useVaultSync = () : {
         // Offline mode is not implemented for browser extension yet, let it fail below due to the validateStatusResponse check.
       }
 
-      const statusError = webApi.validateStatusResponse(statusResponse, t);
+      const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError) {
-        onError?.(statusError);
+        onError?.(await tc(statusError));
         return false;
       }
 
@@ -92,7 +92,7 @@ export const useVaultSync = () : {
       const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
 
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
-        onStatus?.(t('syncingUpdatedVault'));
+        onStatus?.(await tc('syncingUpdatedVault'));
         const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse, t);
@@ -171,7 +171,7 @@ export const useVaultSync = () : {
       onError?.(errorMessage);
       return false;
     }
-  }, [authContext, dbContext, webApi, t]);
+  }, [authContext, dbContext, webApi, tc]);
 
   return { syncVault };
 };
