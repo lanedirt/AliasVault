@@ -26,7 +26,7 @@ import { storage } from '#imports';
  */
 const Unlock: React.FC = () => {
   const { t } = useTranslation('auth');
-  const { t: tCommon } = useTranslation('common');
+  const { t: tc } = useTranslation('common');
   const authContext = useAuth();
   const dbContext = useDb();
   const navigate = useNavigate();
@@ -45,16 +45,16 @@ const Unlock: React.FC = () => {
      */
     const checkStatus = async () : Promise<void> => {
       const statusResponse = await webApi.getStatus();
-      const statusError = webApi.validateStatusResponse(statusResponse, tCommon);
+      const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
-        await webApi.logout(statusError);
+        await webApi.logout(tc(statusError));
         navigate('/logout');
       }
       setIsInitialLoading(false);
     };
 
     checkStatus();
-  }, [webApi, authContext, setIsInitialLoading, navigate, tCommon]);
+  }, [webApi, authContext, setIsInitialLoading, navigate, tc]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -146,7 +146,7 @@ const Unlock: React.FC = () => {
               {authContext.username}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t('common:success', 'Logged in')}
+              {t('loggedIn')}
             </p>
           </div>
         </div>
