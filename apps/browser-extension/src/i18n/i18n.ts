@@ -1,20 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Import consolidated translations
-import enTranslations from '../locales/en.json';
-import nlTranslations from '../locales/nl.json';
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGE_CODES,
+  LANGUAGE_RESOURCES
+} from './config';
 
 import { storage } from '#imports';
-
-const resources = {
-  en: {
-    translation: enTranslations
-  },
-  nl: {
-    translation: nlTranslations
-  }
-};
 
 // Detect browser language
 /**
@@ -23,13 +16,13 @@ const resources = {
 const detectLanguage = async (): Promise<string> => {
   // Check localStorage first
   const stored = await storage.getItem('local:language') as string;
-  if (stored && ['en', 'nl'].includes(stored)) {
+  if (stored && LANGUAGE_CODES.includes(stored)) {
     return stored;
   }
 
   // Fall back to browser language
   const browserLang = navigator.language.split('-')[0];
-  return ['en', 'nl'].includes(browserLang) ? browserLang : 'en';
+  return LANGUAGE_CODES.includes(browserLang) ? browserLang : DEFAULT_LANGUAGE;
 };
 
 /**
@@ -37,13 +30,13 @@ const detectLanguage = async (): Promise<string> => {
  */
 const initI18n = async (): Promise<void> => {
   const language = await detectLanguage();
-  
+
   await i18n
     .use(initReactI18next)
     .init({
-      resources,
+      resources: LANGUAGE_RESOURCES,
       lng: language,
-      fallbackLng: 'en',
+      fallbackLng: DEFAULT_LANGUAGE,
 
       debug: false, // Set to true for development debugging
 

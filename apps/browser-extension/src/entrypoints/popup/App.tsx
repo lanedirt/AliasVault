@@ -49,8 +49,8 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const { headerButtons } = useHeaderButtons();
 
-  // Add these route configurations
-  const routes: RouteConfig[] = [
+  // Move routes definition to useMemo to prevent recreation on every render
+  const routes: RouteConfig[] = React.useMemo(() => [
     { path: '/', element: <Index />, showBackButton: false },
     { path: '/reinitialize', element: <Reinitialize />, showBackButton: false },
     { path: '/login', element: <Login />, showBackButton: false },
@@ -66,7 +66,7 @@ const App: React.FC = () => {
     { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: t('emails.title') },
     { path: '/settings', element: <Settings />, showBackButton: false },
     { path: '/logout', element: <Logout />, showBackButton: false },
-  ];
+  ], [t]);
 
   useEffect(() => {
     if (!isInitialLoading) {

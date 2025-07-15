@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom/client';
 
-import '@/utils/i18n';
+import '@/i18n/i18n';
 
 import App from '@/entrypoints/popup/App';
 import { AuthProvider } from '@/entrypoints/popup/context/AuthContext';
