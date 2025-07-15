@@ -42,7 +42,21 @@
     "NoVaultFound": "Uw account heeft nog geen vault. Voltooi eerst de tutorial in de AliasVault webclient voordat u de browserextensie gebruikt.",
     "serverNotAvailable": "De AliasVault server is niet beschikbaar. Probeer het later opnieuw of neem contact op met de ondersteuning als het probleem aanhoudt.",
     "clientVersionNotSupported": "Deze versie van de AliasVault browserextensie wordt niet meer ondersteund door de server. Update uw browserextensie naar de nieuwste versie.",
-    "serverVersionNotSupported": "De AliasVault server moet worden bijgewerkt naar een nieuwere versie om deze browserextensie te kunnen gebruiken. Neem contact op met de ondersteuning als u hulp nodig hebt."
+    "serverVersionNotSupported": "De AliasVault server moet worden bijgewerkt naar een nieuwere versie om deze browserextensie te kunnen gebruiken. Neem contact op met de ondersteuning als u hulp nodig hebt.",
+    "unknownError": "Er is een onbekende fout opgetreden",
+    "failedToStoreVault": "Vault opslaan mislukt",
+    "vaultNotAvailable": "Vault niet beschikbaar",
+    "failedToGetVault": "Vault ophalen mislukt",
+    "vaultIsLocked": "Vault is vergrendeld",
+    "failedToGetCredentials": "Inloggegevens ophalen mislukt",
+    "failedToCreateIdentity": "Identiteit aanmaken mislukt",
+    "failedToGetDefaultEmailDomain": "Standaard e-maildomein ophalen mislukt",
+    "failedToGetDefaultIdentitySettings": "Standaard identiteitsinstellingen ophalen mislukt",
+    "failedToGetPasswordSettings": "Wachtwoordinstellingen ophalen mislukt",
+    "failedToUploadVault": "Vault uploaden mislukt",
+    "noDerivedKeyAvailable": "Geen afgeleide sleutel beschikbaar voor versleuteling",
+    "failedToUploadVaultToServer": "Nieuwe vault uploaden naar server mislukt",
+    "noVaultOrDerivedKeyFound": "Geen vault of afgeleide sleutel gevonden"
   },
   "apiErrors": {
     "UNKNOWN_ERROR": "Er is een onbekende fout opgetreden. Probeer het opnieuw.",

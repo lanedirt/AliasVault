@@ -4,11 +4,11 @@ import { filterCredentials } from '@/entrypoints/contentScript/Filter';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 
 import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
-import { t } from '@/utils/contentTranslations';
 import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
+import { tc } from '@/utils/i18n/StandaloneI18n';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { IdentitySettingsResponse } from '@/utils/types/messaging/IdentitySettingsResponse';
@@ -47,8 +47,7 @@ export function openAutofillPopup(input: HTMLInputElement, container: HTMLElemen
     if (response.success) {
       await createAutofillPopup(input, response.credentials, container);
     } else {
-      const vaultLockedText = await t('vaultLocked');
-      createVaultLockedPopup(input, container, vaultLockedText);
+      await createVaultLockedPopup(input, container);
     }
   })();
 }
@@ -158,13 +157,13 @@ export function removeExistingPopup(container: HTMLElement) : void {
  */
 export async function createAutofillPopup(input: HTMLInputElement, credentials: Credential[] | undefined, rootContainer: HTMLElement) : Promise<void> {
   // Get all translations first
-  const newText = await t('new');
-  const searchPlaceholder = await t('searchVault');
-  const hideFor1HourText = await t('hideFor1Hour');
-  const hidePermanentlyText = await t('hidePermanently');
-  const noMatchesText = await t('noMatchesFound');
-  const creatingText = await t('creatingNewAlias');
-  const failedText = await t('failedToCreateIdentity');
+  const newText = await tc('new');
+  const searchPlaceholder = await tc('searchVault');
+  const hideFor1HourText = await tc('hideFor1Hour');
+  const hidePermanentlyText = await tc('hidePermanently');
+  const noMatchesText = await tc('noMatchesFound');
+  const creatingText = await tc('creatingNewAlias');
+  const failedText = await tc('failedToCreateIdentity');
 
   // Disable browser's native autocomplete to avoid conflicts with AliasVault's autocomplete.
   input.setAttribute('autocomplete', 'false');
@@ -449,7 +448,7 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
 /**
  * Create vault locked popup.
  */
-export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: HTMLElement, vaultLockedText?: string): void {
+export async function createVaultLockedPopup(input: HTMLInputElement, rootContainer: HTMLElement): Promise<void> {
   /**
    * Handle unlock click.
    */
@@ -472,7 +471,7 @@ export function createVaultLockedPopup(input: HTMLInputElement, rootContainer: H
   // Add message
   const messageElement = document.createElement('div');
   messageElement.className = 'av-vault-locked-message';
-  messageElement.textContent = vaultLockedText || 'AliasVault is locked.';
+  messageElement.textContent = await tc('vaultLocked');
   container.appendChild(messageElement);
 
   // Add unlock button with SVG icon
@@ -772,10 +771,10 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
         <circle cx="16" cy="16" r="1"/>
       </svg>
     `;
-      const randomIdentitySubtext = await t('randomIdentityDescription');
-      const randomIdentityTitle = await t('createRandomAlias');
-      const randomIdentityTitleDropdown = await t('randomAlias');
-      const randomIdentitySubtextDropdown = 'Random identity with random email';
+      const randomIdentitySubtext = await tc('randomIdentityDescription');
+      const randomIdentityTitle = await tc('createRandomAlias');
+      const randomIdentityTitleDropdown = await tc('randomAlias');
+      const randomIdentitySubtextDropdown = await tc('randomIdentityDescriptionDropdown');
 
       const manualUsernamePasswordIcon = `
       <svg class="av-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -783,22 +782,24 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
         <path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
       </svg>
     `;
-      const manualUsernamePasswordSubtext = await t('manualCredentialDescription');
-      const manualUsernamePasswordTitle = await t('createUsernamePassword');
-      const manualUsernamePasswordTitleDropdown = await t('usernamePassword');
-      const manualUsernamePasswordSubtextDropdown = 'Manual username and password';
+      const manualUsernamePasswordSubtext = await tc('manualCredentialDescription');
+      const manualUsernamePasswordTitle = await tc('createUsernamePassword');
+      const manualUsernamePasswordTitleDropdown = await tc('usernamePassword');
+      const manualUsernamePasswordSubtextDropdown = await tc('manualCredentialDescriptionDropdown');
 
       // Get all translated strings first
-      const serviceNameText = await t('serviceName');
-      const enterServiceNameText = await t('enterServiceName');
-      const cancelText = await t('cancel');
-      const createAndSaveAliasText = await t('createAndSaveAlias');
-      const emailText = await t('email');
-      const enterEmailAddressText = await t('enterEmailAddress');
-      const usernameText = await t('username');
-      const enterUsernameText = await t('enterUsername');
-      const generatedPasswordText = await t('generatedPassword');
-      const createAndSaveCredentialText = await t('createAndSaveCredential');
+      const serviceNameText = await tc('serviceName');
+      const enterServiceNameText = await tc('enterServiceName');
+      const cancelText = await tc('cancel');
+      const createAndSaveAliasText = await tc('createAndSaveAlias');
+      const emailText = await tc('email');
+      const enterEmailAddressText = await tc('enterEmailAddress');
+      const usernameText = await tc('username');
+      const enterUsernameText = await tc('enterUsername');
+      const generatedPasswordText = await tc('generatedPassword');
+      const generateNewPasswordText = await tc('generateNewPassword');
+      const togglePasswordVisibilityText = await tc('togglePasswordVisibility');
+      const createAndSaveCredentialText = await tc('createAndSaveCredential');
 
       // Create the main content
       popup.innerHTML = `
@@ -893,13 +894,13 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
               class="av-create-popup-input"
               data-is-generated="true"
             >
-            <button id="toggle-password-visibility" class="av-create-popup-visibility-btn" title="Toggle password visibility">
+            <button id="toggle-password-visibility" class="av-create-popup-visibility-btn" title="${togglePasswordVisibilityText}">
               <svg class="av-icon" viewBox="0 0 24 24">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </button>
-            <button id="regenerate-password" class="av-create-popup-regenerate-btn" title="Generate new password">
+            <button id="regenerate-password" class="av-create-popup-regenerate-btn" title="${generateNewPasswordText}">
               <svg class="av-icon" viewBox="0 0 24 24">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                 <path d="M3 3v5h5"></path>
@@ -1138,7 +1139,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       /**
        * Handle custom save button click.
        */
-      const handleCustomSave = () : void => {
+      const handleCustomSave = async () : Promise<void> => {
         const serviceName = inputServiceName.value.trim();
         if (serviceName) {
           const email = customEmail.value.trim();
@@ -1162,14 +1163,14 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
             if (!emailLabel.querySelector('.av-create-popup-error-text')) {
               const emailError = document.createElement('span');
               emailError.className = 'av-create-popup-error-text';
-              emailError.textContent = 'Enter email and/or username';
+              emailError.textContent = await tc('enterEmailAndOrUsername');
               emailLabel.appendChild(emailError);
             }
 
             if (!usernameLabel.querySelector('.av-create-popup-error-text')) {
               const usernameError = document.createElement('span');
               usernameError.className = 'av-create-popup-error-text';
-              usernameError.textContent = 'Enter email and/or username';
+              usernameError.textContent = await tc('enterEmailAndOrUsername');
               usernameLabel.appendChild(usernameError);
             }
 
@@ -1496,7 +1497,7 @@ function addReliableClickHandler(element: HTMLElement, handler: (e: Event) => vo
 /**
  * Create upgrade required popup.
  */
-export function createUpgradeRequiredPopup(input: HTMLInputElement, rootContainer: HTMLElement, errorMessage: string): void {
+export async function createUpgradeRequiredPopup(input: HTMLInputElement, rootContainer: HTMLElement, errorMessage: string): Promise<void> {
   /**
    * Handle upgrade click.
    */
@@ -1524,7 +1525,7 @@ export function createUpgradeRequiredPopup(input: HTMLInputElement, rootContaine
 
   // Add upgrade button with SVG icon
   const button = document.createElement('button');
-  button.title = 'Open AliasVault to upgrade';
+  button.title = await tc('openAliasVaultToUpgrade');
   button.className = 'av-upgrade-required-button';
   button.innerHTML = `
     <svg class="av-icon-upgrade" viewBox="0 0 24 24">
@@ -1539,7 +1540,7 @@ export function createUpgradeRequiredPopup(input: HTMLInputElement, rootContaine
   // Add close button as a separate element positioned to the right
   const closeButton = document.createElement('button');
   closeButton.className = 'av-button av-button-close av-upgrade-required-close';
-  closeButton.title = 'Dismiss popup';
+  closeButton.title = await tc('dismissPopup');
   closeButton.innerHTML = `
     <svg class="av-icon" viewBox="0 0 24 24">
       <line x1="18" y1="6" x2="6" y2="18"></line>

@@ -182,7 +182,7 @@ const Unlock: React.FC = () => {
         </Button>
 
         <div className="text-sm font-medium text-gray-500 dark:text-gray-200 mt-6">
-          Switch accounts? <button onClick={handleLogout} className="text-primary-700 hover:underline dark:text-primary-500">{t('logout')}</button>
+          {t('switchAccounts')} <button onClick={handleLogout} className="text-primary-700 hover:underline dark:text-primary-500">{t('logout')}</button>
         </div>
       </form>
     </div>
