@@ -14,17 +14,17 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6 mb-6">
             <div class="flex items-start mb-4">
                 <div class="flex-shrink-0">
-                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="@_assistantAvatarAlt">
+                    <img class="h-10 w-10 rounded-full" src="/img/avatar.webp" alt="@Localizer["AssistantAvatarAlt"]">
                 </div>
                 <div class="ml-3 bg-blue-100 dark:bg-blue-900 rounded-lg p-3">
                     <p class="text-sm text-gray-900 dark:text-white">
-                        @_greatNowLetsSetupUsername
+                        @Localizer["GreatNowLetsSetupUsername"]
                     </p>
                     <p class="text-sm text-gray-900 dark:text-white mt-3">
-                        @_enterUsernameInstructions
+                        @Localizer["EnterUsernameInstructions"]
                     </p>
                     <p class="text-sm text-gray-900 dark:text-white mt-3 font-semibold">
-                        @_rememberUsernameNote
+                        @Localizer["RememberUsernameNote"]
                     </p>
                 </div>
             </div>
@@ -32,14 +32,14 @@
 
         <div class="space-y-4">
             <div>
-                <EditFormRow Id="username" Label="@_usernameLabel" @bind-Value="Username" Placeholder="@_usernamePlaceholder" OnFocus="@OnUsernameInputFocus" />
+                <EditFormRow Id="username" Label="@Localizer["UsernameLabel"]" @bind-Value="Username" Placeholder="@Localizer["UsernamePlaceholder"]" OnFocus="@OnUsernameInputFocus" />
                 @if (_isValidating)
                 {
-                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">@_validatingUsernameMessage</div>
+                    <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">@Localizer["ValidatingUsernameMessage"]</div>
                 }
                 else if (_isValid)
                 {
-                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">@_usernameAvailableMessage</div>
+                    <div class="mt-2 text-sm text-green-600 dark:text-green-400">@Localizer["UsernameAvailableMessage"]</div>
                 }
                 else if (!string.IsNullOrEmpty(_errorMessage))
                 {
@@ -53,18 +53,6 @@
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Setup.UsernameStep", "AliasVault.Client");
     private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
-
-    // Cached localized strings for performance
-    private string _assistantAvatarAlt = string.Empty;
-    private string _greatNowLetsSetupUsername = string.Empty;
-    private string _enterUsernameInstructions = string.Empty;
-    private string _rememberUsernameNote = string.Empty;
-    private string _usernameLabel = string.Empty;
-    private string _usernamePlaceholder = string.Empty;
-    private string _validatingUsernameMessage = string.Empty;
-    private string _usernameAvailableMessage = string.Empty;
-    private string _usernameRequiredError = string.Empty;
-    private string _serverCommunicationError = string.Empty;
 
     /// <summary>
     /// The username that is previously entered by the user. When a user navigates with back/continue
@@ -115,18 +103,6 @@
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        // Cache localized strings for performance
-        _assistantAvatarAlt = Localizer["AssistantAvatarAlt"];
-        _greatNowLetsSetupUsername = Localizer["GreatNowLetsSetupUsername"];
-        _enterUsernameInstructions = Localizer["EnterUsernameInstructions"];
-        _rememberUsernameNote = Localizer["RememberUsernameNote"];
-        _usernameLabel = Localizer["UsernameLabel"];
-        _usernamePlaceholder = Localizer["UsernamePlaceholder"];
-        _validatingUsernameMessage = Localizer["ValidatingUsernameMessage"];
-        _usernameAvailableMessage = Localizer["UsernameAvailableMessage"];
-        _usernameRequiredError = Localizer["UsernameRequiredError"];
-        _serverCommunicationError = Localizer["ServerCommunicationError"];
-
         // Set the default username if provided.
         _username = DefaultUsername;
 
@@ -190,7 +166,7 @@
             {
                 _isValidating = false;
                 _isValid = false;
-                _errorMessage = _usernameRequiredError;
+                _errorMessage = Localizer["UsernameRequiredError"];
                 await OnUsernameChange.InvokeAsync(string.Empty);
                 StateHasChanged();
                 return;
@@ -216,7 +192,7 @@
             }
             catch
             {
-                _errorMessage = _serverCommunicationError;
+                _errorMessage = Localizer["ServerCommunicationError"];
                 _isValid = false;
                 await OnUsernameChange.InvokeAsync(string.Empty);
             }

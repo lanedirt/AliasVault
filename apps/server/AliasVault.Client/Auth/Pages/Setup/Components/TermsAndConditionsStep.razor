@@ -13,18 +13,18 @@
     <div class="@(_isLoading ? "invisible opacity-0" : "opacity-100") transition-opacity duration-300 w-full">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg lg:shadow-none p-6">
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                @_pleaseReadAndAgree
+                @Localizer["PleaseReadAndAgree"]
             </p>
             <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 mb-8 h-80 overflow-y-auto">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">@_termsAndConditionsTitle</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">@Localizer["TermsAndConditionsTitle"]</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
-                    @_termsContent
+                    @Localizer["TermsContent"]
                 </p>
             </div>
             <div class="flex items-center">
                 <input type="checkbox" id="agreeTerms" @bind="AgreedToTerms" @bind:after="OnAgreedToTerms" class="mr-2">
                 <label for="agreeTerms" class="text-sm font-bold text-gray-600 dark:text-gray-400">
-                    @_agreementCheckboxLabel
+                    @Localizer["AgreementCheckboxLabel"]
                 </label>
             </div>
         </div>
@@ -33,12 +33,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Auth.Setup.TermsAndConditionsStep", "AliasVault.Client");
-
-    // Cached localized strings for performance
-    private string _pleaseReadAndAgree = string.Empty;
-    private string _termsAndConditionsTitle = string.Empty;
-    private string _termsContent = string.Empty;
-    private string _agreementCheckboxLabel = string.Empty;
     /// <summary>
     /// Gets or sets a value indicating whether the user has agreed to the terms and conditions.
     /// </summary>
@@ -63,12 +57,6 @@
     /// <inheritdoc />
     protected override void OnInitialized()
     {
-        // Cache localized strings for performance
-        _pleaseReadAndAgree = Localizer["PleaseReadAndAgree"];
-        _termsAndConditionsTitle = Localizer["TermsAndConditionsTitle"];
-        _termsContent = Localizer["TermsContent"];
-        _agreementCheckboxLabel = Localizer["AgreementCheckboxLabel"];
-
         _loadingTimer = new Timer(300);
         _loadingTimer.Elapsed += (sender, e) => FinishLoading();
         _loadingTimer.AutoReset = false;

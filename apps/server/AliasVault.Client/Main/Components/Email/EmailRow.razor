@@ -21,7 +21,7 @@
                         }
                         @if (IsNewEmail)
                         {
-                            <div class="w-2 h-2 ml-1 bg-yellow-500 rounded-full animate-pulse flex-shrink-0" title="@_newEmailTooltip"></div>
+                            <div class="w-2 h-2 ml-1 bg-yellow-500 rounded-full animate-pulse flex-shrink-0" title="@Localizer["NewEmailTooltip"]"></div>
                         }
                     </div>
                     <!-- Subject (smaller, below from) -->
@@ -44,10 +44,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Email.EmailRow", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _newEmailTooltip = "";
-    
     /// <summary>
     /// The email model.
     /// </summary>
@@ -72,12 +68,4 @@
     /// </summary>
     [Parameter]
     public bool IsNewEmail { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Cache localized strings
-        _newEmailTooltip = Localizer["NewEmailTooltip"];
-        
-        await base.OnInitializedAsync();
-    }
 }

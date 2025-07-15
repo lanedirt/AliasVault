@@ -37,14 +37,14 @@
             <!-- 2-column layout for email details -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                 <div class="space-y-1">
-                    <p><span class="font-medium">@_fromLabel</span> @(Email.FromLocal)@@@(Email.FromDomain)</p>
-                    <p><span class="font-medium">@_toLabel</span> @(Email.ToLocal)@@@(Email.ToDomain)</p>
+                    <p><span class="font-medium">@Localizer["FromLabel"]</span> @(Email.FromLocal)@@@(Email.FromDomain)</p>
+                    <p><span class="font-medium">@Localizer["ToLabel"]</span> @(Email.ToLocal)@@@(Email.ToDomain)</p>
                 </div>
                 <div class="space-y-1">
-                    <p><span class="font-medium">@_dateLabel</span> @Email.DateSystem</p>
+                    <p><span class="font-medium">@Localizer["DateLabel"]</span> @Email.DateSystem</p>
                     @if (!string.IsNullOrEmpty(CredentialName) && CredentialId != Guid.Empty)
                     {
-                        <p><span class="font-medium">@_credentialLabel</span>
+                        <p><span class="font-medium">@Localizer["CredentialLabel"]</span>
                             <button @onclick="@(() => OnCredentialClick.InvokeAsync(CredentialId))"
                                     class="text-blue-600 hover:underline dark:text-blue-400 cursor-pointer">
                                 @CredentialName
@@ -53,7 +53,7 @@
                     }
                     else
                     {
-                        <p><span class="font-medium">@_credentialLabel</span> <span class="text-gray-400 dark:text-gray-500">@_noneValue</span></p>
+                        <p><span class="font-medium">@Localizer["CredentialLabel"]</span> <span class="text-gray-400 dark:text-gray-500">@Localizer["NoneValue"]</span></p>
                     }
                 </div>
             </div>
@@ -73,7 +73,7 @@
             {
                 <!-- Attachments Section - Fixed height -->
                 <div class="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-800">
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@_attachmentsLabel</h3>
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">@Localizer["AttachmentsLabel"]</h3>
                     <div class="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
                         @foreach (var attachment in Email.Attachments)
                         {
@@ -99,7 +99,7 @@
                 <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                <p class="mt-2 text-sm">@_selectEmailMessage</p>
+                <p class="mt-2 text-sm">@Localizer["SelectEmailMessage"]</p>
             </div>
         </div>
     }
@@ -107,23 +107,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Email.EmailPreview", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _fromLabel = "";
-    private string _toLabel = "";
-    private string _dateLabel = "";
-    private string _credentialLabel = "";
-    private string _noneValue = "";
-    private string _attachmentsLabel = "";
-    private string _selectEmailMessage = "";
-    private string _deleteEmailTitle = "";
-    private string _deleteEmailConfirmation = "";
-    private string _emailDeletedSuccess = "";
-    private string _emailDeleteFailed = "";
-    private string _genericError = "";
-    private string _noEmailBody = "";
-    private string _attachmentDownloadFailed = "";
-    private string _attachmentDownloadError = "";
     /// <summary>
     /// The email to show in the preview.
     /// </summary>
@@ -176,8 +159,8 @@
         }
 
         var result = await ConfirmModalService.ShowConfirmation(
-            _deleteEmailTitle,
-            _deleteEmailConfirmation
+            Localizer["DeleteEmailTitle"],
+            Localizer["DeleteEmailConfirmation"]
         );
 
         if (result)
@@ -228,17 +211,17 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage(_emailDeletedSuccess, true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["EmailDeletedSuccess"], true);
             }
             else
             {
                 var errorMessage = await response.Content.ReadAsStringAsync();
-                GlobalNotificationService.AddErrorMessage($"{_emailDeleteFailed}: {errorMessage}", true);
+                GlobalNotificationService.AddErrorMessage($"{Localizer["EmailDeleteFailed"]}: {errorMessage}", true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"{_genericError}: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["GenericError"]}: {ex.Message}", true);
         }
     }
 
@@ -258,39 +241,17 @@
             if (response.IsSuccessStatusCode)
             {
                 await OnEmailDeleted.InvokeAsync(Email.Id);
-                GlobalNotificationService.AddSuccessMessage(_emailDeletedSuccess, true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["EmailDeletedSuccess"], true);
             }
             else
             {
-                GlobalNotificationService.AddErrorMessage(_emailDeleteFailed, true);
+                GlobalNotificationService.AddErrorMessage(Localizer["EmailDeleteFailed"], true);
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"{_emailDeleteFailed}: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["EmailDeleteFailed"]}: {ex.Message}", true);
         }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Cache localized strings
-        _fromLabel = Localizer["FromLabel"];
-        _toLabel = Localizer["ToLabel"];
-        _dateLabel = Localizer["DateLabel"];
-        _credentialLabel = Localizer["CredentialLabel"];
-        _noneValue = Localizer["NoneValue"];
-        _attachmentsLabel = Localizer["AttachmentsLabel"];
-        _selectEmailMessage = Localizer["SelectEmailMessage"];
-        _deleteEmailTitle = Localizer["DeleteEmailTitle"];
-        _deleteEmailConfirmation = Localizer["DeleteEmailConfirmation"];
-        _emailDeletedSuccess = Localizer["EmailDeletedSuccess"];
-        _emailDeleteFailed = Localizer["EmailDeleteFailed"];
-        _genericError = Localizer["GenericError"];
-        _noEmailBody = Localizer["NoEmailBody"];
-        _attachmentDownloadFailed = Localizer["AttachmentDownloadFailed"];
-        _attachmentDownloadError = Localizer["AttachmentDownloadError"];
-        
-        await base.OnInitializedAsync();
     }
 
     /// <inheritdoc />
@@ -314,7 +275,7 @@
             else
             {
                 // No HTML and no plain text available
-                EmailBody = _noEmailBody;
+                EmailBody = Localizer["NoEmailBody"];
             }
         }
     }
@@ -341,7 +302,7 @@
                 }
                 else
                 {
-                    GlobalNotificationService.AddErrorMessage(_attachmentDownloadFailed, true);
+                    GlobalNotificationService.AddErrorMessage(Localizer["AttachmentDownloadFailed"], true);
                 }
             }
             else
@@ -364,13 +325,13 @@
                 }
                 else
                 {
-                    GlobalNotificationService.AddErrorMessage(_attachmentDownloadFailed, true);
+                    GlobalNotificationService.AddErrorMessage(Localizer["AttachmentDownloadFailed"], true);
                 }
             }
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage($"{_attachmentDownloadError}: {ex.Message}", true);
+            GlobalNotificationService.AddErrorMessage($"{Localizer["AttachmentDownloadError"]}: {ex.Message}", true);
         }
     }
 }

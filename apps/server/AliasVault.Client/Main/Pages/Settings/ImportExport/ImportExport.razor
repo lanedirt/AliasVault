@@ -8,18 +8,18 @@
 @using AliasVault.Client.Main.Pages.Settings.ImportExport.Components
 @using AliasVault.ImportExport
 
-<LayoutPageTitle>@_pageTitle</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="@_pageTitle"
-    Description="@_pageDescription">
+    Title="@Localizer["PageTitle"]"
+    Description="@Localizer["PageDescription"]">
 </PageHeader>
 
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-4 text-xl font-semibold dark:text-white">@_importSectionTitle</h3>
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">@Localizer["ImportSectionTitle"]</h3>
     <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        @((MarkupString)_importSectionDescription)
+        @((MarkupString)Localizer["ImportSectionDescription"].Value)
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <ImportService1Password />
@@ -38,16 +38,16 @@
 </div>
 
 <div class="p-4 mx-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-    <h3 class="mb-4 text-xl font-semibold dark:text-white">@_exportSectionTitle</h3>
+    <h3 class="mb-4 text-xl font-semibold dark:text-white">@Localizer["ExportSectionTitle"]</h3>
     <div class="mb-4">
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            @_exportSectionDescription
+            @Localizer["ExportSectionDescription"]
         </p>
         <div>
-            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Csv))">@_exportCsvButton</Button>
+            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Csv))">@Localizer["ExportCsvButton"]</Button>
         </div>
         <div class="mt-6">
-            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Sqlite))">@_exportSqliteButton</Button>
+            <Button OnClick="@(() => ShowExportConfirmation(ExportType.Sqlite))">@Localizer["ExportSqliteButton"]</Button>
         </div>
     </div>
 </div>
@@ -55,18 +55,6 @@
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Settings.ImportExport.ImportExport", "AliasVault.Client");
     private ExportType _currentExportType;
-
-    // Cached localized strings for performance
-    private string _pageTitle = string.Empty;
-    private string _pageDescription = string.Empty;
-    private string _importSectionTitle = string.Empty;
-    private string _importSectionDescription = string.Empty;
-    private string _exportSectionTitle = string.Empty;
-    private string _exportSectionDescription = string.Empty;
-    private string _exportCsvButton = string.Empty;
-    private string _exportSqliteButton = string.Empty;
-    private string _exportWarningMessage = string.Empty;
-    private string _exportConfirmTitle = string.Empty;
 
     private enum ExportType
     {
@@ -78,28 +66,15 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        
-        // Cache localized strings for performance
-        _pageTitle = Localizer["PageTitle"];
-        _pageDescription = Localizer["PageDescription"];
-        _importSectionTitle = Localizer["ImportSectionTitle"];
-        _importSectionDescription = Localizer["ImportSectionDescription"];
-        _exportSectionTitle = Localizer["ExportSectionTitle"];
-        _exportSectionDescription = Localizer["ExportSectionDescription"];
-        _exportCsvButton = Localizer["ExportCsvButton"];
-        _exportSqliteButton = Localizer["ExportSqliteButton"];
-        _exportWarningMessage = Localizer["ExportWarningMessage"];
-        _exportConfirmTitle = Localizer["ExportConfirmTitle"];
-        
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _pageTitle });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["PageTitle"] });
     }
 
     private async Task ShowExportConfirmation(ExportType exportType)
     {
         _currentExportType = exportType;
-        var confirmMessage = _exportWarningMessage;
+        var confirmMessage = Localizer["ExportWarningMessage"];
 
-        var result = await ConfirmModalService.ShowConfirmation(_exportConfirmTitle, confirmMessage, SharedLocalizer["Confirm"], SharedLocalizer["Cancel"]);
+        var result = await ConfirmModalService.ShowConfirmation(Localizer["ExportConfirmTitle"], confirmMessage, SharedLocalizer["Confirm"], SharedLocalizer["Cancel"]);
         if (!result)
         {
             return;

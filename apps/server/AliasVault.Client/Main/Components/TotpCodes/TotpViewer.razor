@@ -9,7 +9,7 @@
 <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
     <div class="flex justify-between">
         <div>
-            <h3 class="mb-4 text-xl font-semibold dark:text-white">@_twoFactorAuthenticationTitle</h3>
+            <h3 class="mb-4 text-xl font-semibold dark:text-white">@Localizer["TwoFactorAuthenticationTitle"]</h3>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
     else if (TotpCodeList.Count == 0)
     {
         <div class="flex flex-col justify-center">
-            <p class="text-gray-500 dark:text-gray-400">@_noTotpCodesMessage</p>
+            <p class="text-gray-500 dark:text-gray-400">@Localizer["NoTotpCodesMessage"]</p>
         </div>
     }
     else
@@ -41,7 +41,7 @@
                                 <div class="text-xs">
                                     @if (IsCopied(totpCode.Id.ToString()))
                                     {
-                                        <span class="text-green-600 dark:text-green-400">@_copiedMessage</span>
+                                        <span class="text-green-600 dark:text-green-400">@Localizer["CopiedMessage"]</span>
                                     }
                                     else
                                     {
@@ -62,11 +62,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Components.TotpCodes.TotpViewer", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _twoFactorAuthenticationTitle = "";
-    private string _noTotpCodesMessage = "";
-    private string _copiedMessage = "";
 
     /// <summary>
     /// The list of TOTP codes to display.
@@ -91,11 +86,6 @@
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
-        // Cache localized strings
-        _twoFactorAuthenticationTitle = Localizer["TwoFactorAuthenticationTitle"];
-        _noTotpCodesMessage = Localizer["NoTotpCodesMessage"];
-        _copiedMessage = Localizer["CopiedMessage"];
-        
         await base.OnInitializedAsync();
 
         // Generate initial codes

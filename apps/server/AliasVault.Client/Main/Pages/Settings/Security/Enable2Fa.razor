@@ -4,13 +4,13 @@
 @inherits MainBase
 @inject HttpClient Http
 
-<LayoutPageTitle>@_pageTitle</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-        <H1>@_pageTitle</H1>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">@_pageDescription</p>
+        <H1>@Localizer["PageTitle"]</H1>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">@Localizer["PageDescription"]</p>
     </div>
 </div>
 
@@ -31,7 +31,7 @@ else
             </div>
 
             <p class="text-sm text-gray-600 text-center">
-                @_qrCodeInstructions
+                @Localizer["QrCodeInstructions"]
             </p>
             <div class="text-lg font-mono text-center bg-gray-100 p-2 rounded" id="authenticator-secret">@Secret</div>
 
@@ -39,11 +39,11 @@ else
                 <div>
                     <InputText id="verificationCode" @bind-Value="VerifyModel.Code"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="@_verificationCodePlaceholder"/>
+                               placeholder="@Localizer["VerificationCodePlaceholder"]"/>
                 </div>
                 <button type="submit"
                         class="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    @_verifyAndEnableButton
+                    @Localizer["VerifyAndEnableButton"]
                 </button>
             </EditForm>
         </div>
@@ -57,38 +57,15 @@ else
     private List<string>? RecoveryCodes { get; set; }
     private readonly VerificationModel VerifyModel = new();
 
-    private IStringLocalizer? _localizer;
-    private IStringLocalizer Localizer => _localizer ??= LocalizerFactory.Create("Components.Main.Pages.Settings.Security.Enable2Fa", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _pageTitle = string.Empty;
-    private string _pageDescription = string.Empty;
-    private string _breadcrumbSecuritySettings = string.Empty;
-    private string _breadcrumbEnable2Fa = string.Empty;
-    private string _qrCodeInstructions = string.Empty;
-    private string _verificationCodePlaceholder = string.Empty;
-    private string _verifyAndEnableButton = string.Empty;
-    private string _twoFactorEnabledSuccess = string.Empty;
-    private string _failedToEnable2Fa = string.Empty;
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Pages.Settings.Security.Enable2Fa", "AliasVault.Client");
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        // Initialize localized strings once
-        _pageTitle = Localizer["PageTitle"];
-        _pageDescription = Localizer["PageDescription"];
-        _breadcrumbSecuritySettings = Localizer["BreadcrumbSecuritySettings"];
-        _breadcrumbEnable2Fa = Localizer["BreadcrumbEnable2Fa"];
-        _qrCodeInstructions = Localizer["QrCodeInstructions"];
-        _verificationCodePlaceholder = Localizer["VerificationCodePlaceholder"];
-        _verifyAndEnableButton = Localizer["VerifyAndEnableButton"];
-        _twoFactorEnabledSuccess = Localizer["TwoFactorEnabledSuccess"];
-        _failedToEnable2Fa = Localizer["FailedToEnable2Fa"];
-        
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbSecuritySettings, Url = "/settings/security" });
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbEnable2Fa });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbSecuritySettings"], Url = "/settings/security" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbEnable2Fa"] });
     }
 
     /// <inheritdoc />
@@ -133,7 +110,7 @@ else
 
             if (result != null)
             {
-                GlobalNotificationService.AddSuccessMessage(_twoFactorEnabledSuccess, true);
+                GlobalNotificationService.AddSuccessMessage(Localizer["TwoFactorEnabledSuccess"], true);
 
                 // Show recovery codes.
                 RecoveryCodes = result.RecoveryCodes;
@@ -143,7 +120,7 @@ else
             }
         }
 
-        GlobalNotificationService.AddErrorMessage(_failedToEnable2Fa, true);
+        GlobalNotificationService.AddErrorMessage(Localizer["FailedToEnable2Fa"], true);
         StateHasChanged();
     }
 

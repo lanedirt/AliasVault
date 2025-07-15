@@ -45,16 +45,29 @@ builder.Services.AddLogging(logging =>
 {
     if (builder.HostEnvironment.IsDevelopment())
     {
-        logging.SetMinimumLevel(LogLevel.Trace);
+        logging.SetMinimumLevel(LogLevel.Information);
     }
     else
     {
         logging.SetMinimumLevel(LogLevel.Warning);
     }
 
+    // Filter out noisy components
     logging.AddFilter("Microsoft.AspNetCore.Identity.DataProtectorTokenProvider", LogLevel.Error);
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
     logging.AddFilter("System.Net.Http.HttpClient", LogLevel.Error);
+
+    // Filter out Blazor render tree debug messages
+    logging.AddFilter("Microsoft.AspNetCore.Components.RenderTree.Renderer", LogLevel.Warning);
+
+    // Filter out authorization debug messages
+    logging.AddFilter("Microsoft.AspNetCore.Authorization.DefaultAuthorizationService", LogLevel.Warning);
+
+    // Filter out authentication state debug messages
+    logging.AddFilter("Microsoft.AspNetCore.Components.Authorization", LogLevel.Warning);
+
+    // Filter out cascading value debug messages
+    logging.AddFilter("Microsoft.AspNetCore.Components.CascadingValue", LogLevel.Warning);
 });
 
 builder.RootComponents.Add<App>("#app");

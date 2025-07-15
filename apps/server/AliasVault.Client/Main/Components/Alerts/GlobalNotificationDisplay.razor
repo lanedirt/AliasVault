@@ -59,7 +59,6 @@
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         RefreshAddMessages();
-        InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
@@ -69,21 +68,33 @@
     {
         // We retrieve any additional messages from the GlobalNotificationService that we do not yet have.
         var newMessages = GlobalNotificationService.GetMessagesForDisplay();
+        bool hasChanges = false;
+
+        // Check for new messages
         foreach (var message in newMessages)
         {
             if (!Messages.Exists(m => m.Key == message.Key && m.Value == message.Value))
             {
                 Messages.Add(message);
+                hasChanges = true;
             }
         }
 
-        // Remove messages that are no longer in the GlobalNotificationService and have already been displayed.
+        // Check for messages to remove
         var messagesToRemove = Messages.Where(m => !newMessages.Exists(nm => nm.Key == m.Key && nm.Value == m.Value)).ToList();
-        foreach (var message in messagesToRemove)
+        if (messagesToRemove.Any())
         {
-            Messages.Remove(message);
+            foreach (var message in messagesToRemove)
+            {
+                Messages.Remove(message);
+            }
+            hasChanges = true;
         }
 
-        StateHasChanged();
+        // Only call StateHasChanged if there were actual changes
+        if (hasChanges)
+        {
+            InvokeAsync(StateHasChanged);
+        }
     }
 }
