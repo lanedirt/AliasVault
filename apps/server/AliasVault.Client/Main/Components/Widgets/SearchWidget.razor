@@ -43,7 +43,19 @@
 
             @if (ShowResults && SearchTerm.Length >= 2)
             {
-                @if (SearchResults.Any())
+                @if (_isLoading)
+                {
+                    <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+                        <div class="px-4 py-2 flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            @Localizer["SearchingMessage"]
+                        </div>
+                    </div>
+                }
+                else if (SearchResults.Any())
                 {
                     <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
                         @for (int i = 0; i < SearchResults.Count; i++)
@@ -92,6 +104,7 @@
     private int SelectedIndex { get; set; } = -1;
     private Timer? _searchTimer;
     private bool _isSearching = false;
+    private bool _isLoading = false;
 
     /// <inheritdoc />
     async ValueTask IAsyncDisposable.DisposeAsync()
@@ -115,8 +128,8 @@
             NavigationManager.LocationChanged += ResetSearchField;
             LanguageService.LanguageChanged += OnLanguageChanged;
 
-            // Initialize search timer
-            _searchTimer = new Timer(300); // 300ms debounce
+            // Initialize search timer with shorter debounce for better responsiveness
+            _searchTimer = new Timer(150); // Reduced from 300ms to 150ms
             _searchTimer.Elapsed += async (sender, e) => await PerformSearchAsync();
             _searchTimer.AutoReset = false;
         }
@@ -160,6 +173,14 @@
         {
             SearchResults.Clear();
             SelectedIndex = -1;
+            _isLoading = false;
+            StateHasChanged();
+        }
+        else
+        {
+            // For longer search terms, set loading state but don't clear results yet
+            // This prevents the "no results found" message from showing briefly
+            _isLoading = true;
             StateHasChanged();
         }
     }
@@ -203,6 +224,7 @@
                 SelectedIndex = -1;
             }
 
+            _isLoading = false;
             await InvokeAsync(StateHasChanged);
         }
         finally
@@ -245,6 +267,7 @@
         SelectedIndex = -1;
         ShowHelpText = false;
         ShowResults = false;
+        _isLoading = false;
         _searchTimer?.Stop();
         StateHasChanged();
     }

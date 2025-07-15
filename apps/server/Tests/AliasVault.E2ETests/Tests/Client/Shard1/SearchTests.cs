@@ -53,6 +53,9 @@ public class SearchTests : ClientPlaywrightTest
         // Type in the search bar "Test Service"
         await searchWidget.FillAsync("Test Service");
 
+        // Wait for 0.5 seconds
+        await Task.Delay(500);
+
         // We expect both test services names to appear on the page inside the div with id "searchWidgetContainer"
         var searchResults = Page.Locator("#searchWidgetContainer .search-result");
 
