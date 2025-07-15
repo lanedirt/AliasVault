@@ -10,12 +10,12 @@
 @using AliasVault.Client.Resources
 @inject HttpClient Http
 
-<LayoutPageTitle>@_pageTitle</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
-        <H1>@_pageTitle</H1>
+        <H1>@Localizer["PageTitle"]</H1>
     </div>
 </div>
 
@@ -23,25 +23,25 @@
     @if (!_showPasswordConfirm)
     {
         <div class="mb-6">
-            <MessageWarning Message="@_permanentActionWarning" />
+            <MessageWarning Message="@Localizer["PermanentActionWarning"]" />
 
             <div class="mt-4 mb-6 text-gray-600 dark:text-gray-400">
-                <p class="mb-2">@_pleaseNote</p>
+                <p class="mb-2">@Localizer["PleaseNote"]</p>
                 <ul class="list-disc list-inside space-y-2">
-                    <li>@_vaultsDeletedNote</li>
-                    <li>@_emailAliasesOrphanedNote</li>
-                    <li>@_accountCannotBeRecoveredNote</li>
+                    <li>@Localizer["VaultsDeletedNote"]</li>
+                    <li>@Localizer["EmailAliasesOrphanedNote"]</li>
+                    <li>@Localizer["AccountCannotBeRecoveredNote"]</li>
                 </ul>
             </div>
 
             <EditForm Model="@_usernameModel" OnSubmit="@ConfirmUsername">
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@_confirmUsernameLabel</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["ConfirmUsernameLabel"]</label>
                     <InputText id="username" @bind-Value="_usernameModel.Username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
                 </div>
 
                 <div class="flex space-x-3">
-                    <Button Type="submit" Color="danger">@_continueWithAccountDeletion</Button>
+                    <Button Type="submit" Color="danger">@Localizer["ContinueWithAccountDeletion"]</Button>
                     <Button Type="button" Color="secondary" OnClick="Cancel">Cancel</Button>
                 </div>
             </EditForm>
@@ -50,12 +50,12 @@
     else
     {
         <div class="mb-6">
-            <MessageWarning Message="@_finalWarning" />
+            <MessageWarning Message="@Localizer["FinalWarning"]" />
 
             <div class="mt-4 mb-6 text-gray-600 dark:text-gray-400">
-                <p class="mb-2">@_pleaseNote</p>
+                <p class="mb-2">@Localizer["PleaseNote"]</p>
                 <ul class="list-disc list-inside space-y-2">
-                    <li>@_deletionIrreversibleNote</li>
+                    <li>@Localizer["DeletionIrreversibleNote"]</li>
                 </ul>
             </div>
 
@@ -64,12 +64,12 @@
                 <ValidationSummary />
 
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@_enterPasswordLabel</label>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["EnterPasswordLabel"]</label>
                     <InputText id="password" type="password" @bind-Value="_passwordModel.Password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
                 </div>
 
                 <div class="flex space-x-3">
-                    <Button Type="submit" Color="danger">@_deleteMyAccount</Button>
+                    <Button Type="submit" Color="danger">@Localizer["DeleteMyAccount"]</Button>
                     <Button Type="button" Color="secondary" OnClick="Cancel">Cancel</Button>
                 </div>
             </EditForm>
@@ -88,30 +88,8 @@
     /// </summary>
     private readonly DeleteAccountPasswordModel _passwordModel = new();
 
-    private IStringLocalizer? _localizer;
-    private IStringLocalizer Localizer => _localizer ??= LocalizerFactory.Create("Components.Main.Pages.Settings.Security.DeleteAccount", "AliasVault.Client");
-    private IStringLocalizer? _apiErrorLocalizer;
-    private IStringLocalizer ApiErrorLocalizer => _apiErrorLocalizer ??= LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
-
-    // Cached localized strings for performance
-    private string _pageTitle = string.Empty;
-    private string _breadcrumbSecuritySettings = string.Empty;
-    private string _breadcrumbDeleteAccount = string.Empty;
-    private string _permanentActionWarning = string.Empty;
-    private string _pleaseNote = string.Empty;
-    private string _vaultsDeletedNote = string.Empty;
-    private string _emailAliasesOrphanedNote = string.Empty;
-    private string _accountCannotBeRecoveredNote = string.Empty;
-    private string _confirmUsernameLabel = string.Empty;
-    private string _continueWithAccountDeletion = string.Empty;
-    private string _finalWarning = string.Empty;
-    private string _deletionIrreversibleNote = string.Empty;
-    private string _enterPasswordLabel = string.Empty;
-    private string _deleteMyAccount = string.Empty;
-    private string _usernameRequired = string.Empty;
-    private string _usernameDoesNotMatch = string.Empty;
-    private string _deletingAccountMessage = string.Empty;
-    private string _errorProcessingRequest = string.Empty;
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Pages.Settings.Security.DeleteAccount", "AliasVault.Client");
+    private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
 
     /// <summary>
     /// Whether to show the password confirmation step.
@@ -133,28 +111,8 @@
     {
         await base.OnInitializedAsync();
 
-        // Cache localized strings for performance
-        _pageTitle = Localizer["PageTitle"];
-        _breadcrumbSecuritySettings = Localizer["BreadcrumbSecuritySettings"];
-        _breadcrumbDeleteAccount = Localizer["BreadcrumbDeleteAccount"];
-        _permanentActionWarning = Localizer["PermanentActionWarning"];
-        _pleaseNote = Localizer["PleaseNote"];
-        _vaultsDeletedNote = Localizer["VaultsDeletedNote"];
-        _emailAliasesOrphanedNote = Localizer["EmailAliasesOrphanedNote"];
-        _accountCannotBeRecoveredNote = Localizer["AccountCannotBeRecoveredNote"];
-        _confirmUsernameLabel = Localizer["ConfirmUsernameLabel"];
-        _continueWithAccountDeletion = Localizer["ContinueWithAccountDeletion"];
-        _finalWarning = Localizer["FinalWarning"];
-        _deletionIrreversibleNote = Localizer["DeletionIrreversibleNote"];
-        _enterPasswordLabel = Localizer["EnterPasswordLabel"];
-        _deleteMyAccount = Localizer["DeleteMyAccount"];
-        _usernameRequired = Localizer["UsernameRequired"];
-        _usernameDoesNotMatch = Localizer["UsernameDoesNotMatch"];
-        _deletingAccountMessage = Localizer["DeletingAccountMessage"];
-        _errorProcessingRequest = Localizer["ErrorProcessingRequest"];
-
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbSecuritySettings, Url = "/settings/security" });
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbDeleteAccount });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbSecuritySettings"], Url = "/settings/security" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbDeleteAccount"] });
     }
 
     /// <summary>
@@ -166,7 +124,7 @@
 
         if (string.IsNullOrEmpty(_usernameModel.Username))
         {
-            GlobalNotificationService.AddErrorMessage(_usernameRequired, true);
+            GlobalNotificationService.AddErrorMessage(Localizer["UsernameRequired"], true);
             return;
         }
 
@@ -174,7 +132,7 @@
         var usernameMatches = string.Equals(_usernameModel.Username.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase);
         if (!usernameMatches)
         {
-            GlobalNotificationService.AddErrorMessage(_usernameDoesNotMatch, true);
+            GlobalNotificationService.AddErrorMessage(Localizer["UsernameDoesNotMatch"], true);
             return;
         }
 
@@ -187,7 +145,7 @@
     /// </summary>
     private async Task DeleteAccountConfirmed()
     {
-        GlobalLoadingSpinner.Show(_deletingAccountMessage);
+        GlobalLoadingSpinner.Show(Localizer["DeletingAccountMessage"]);
         GlobalNotificationService.ClearMessages();
 
         try
@@ -209,7 +167,7 @@
             var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
-                GlobalNotificationService.AddErrorMessage(_errorProcessingRequest, true);
+                GlobalNotificationService.AddErrorMessage(Localizer["ErrorProcessingRequest"], true);
                 return;
             }
 

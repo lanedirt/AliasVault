@@ -5,12 +5,13 @@
 @inject IStringLocalizerFactory LocalizerFactory
 @implements IAsyncDisposable
 @using Microsoft.Extensions.Localization
+@using System.Timers
 
 <div class="relative" id="searchWidgetContainer">
     <input
         id="searchWidget"
         type="text"
-        placeholder="@_searchPlaceholder"
+        placeholder="@Localizer["SearchVaultPlaceholder"]"
         autocomplete="off"
         class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
         @bind-value="SearchTerm"
@@ -26,15 +27,15 @@
                 <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 p-2 text-sm text-gray-600 dark:text-gray-400">
                     @if (string.IsNullOrEmpty(SearchTerm))
                     {
-                        <p>@_searchHelpText</p>
+                        <p>@Localizer["SearchHelpText"]</p>
                     }
                     else if (SearchTerm.Length == 1)
                     {
-                        <p>@_searchTooShortMessage</p>
+                        <p>@Localizer["SearchTooShortMessage"]</p>
                     }
                     else
                     {
-                        <p>@string.Format(_searchingForMessage, SearchTerm)</p>
+                        <p>@string.Format(Localizer["SearchingForMessage"], SearchTerm)</p>
                     }
                 </div>
             }
@@ -70,7 +71,7 @@
                 {
                     <div class="absolute z-10 w-screen left-0 sm:left-auto sm:w-full mt-1 bg-white rounded-md shadow-lg dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
                         <div class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-                            @_noResultsFoundMessage
+                            @Localizer["NoResultsFoundMessage"]
                         </div>
                     </div>
                 }
@@ -82,26 +83,22 @@
 @code {
     private IStringLocalizer? _localizer;
     private IStringLocalizer Localizer => _localizer ??= LocalizerFactory.Create("Components.Main.Widgets.SearchWidget", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _searchPlaceholder = string.Empty;
-    private string _searchHelpText = string.Empty;
-    private string _searchTooShortMessage = string.Empty;
-    private string _searchingForMessage = string.Empty;
-    private string _noResultsFoundMessage = string.Empty;
-    
+
     private string SearchTerm { get; set; } = string.Empty;
     private List<Credential> SearchResults { get; set; } = new();
     private bool ShowResults { get; set; }
     private bool ShowHelpText { get; set; }
     private int SelectedIndex { get; set; } = -1;
+    private Timer? _searchTimer;
+    private bool _isSearching = false;
 
     /// <inheritdoc />
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         await KeyboardShortcutService.UnregisterShortcutAsync("gs");
-        await KeyboardShortcutService.UnregisterShortcutAsync("gc");
+        await KeyboardShortcutService.UnregisterShortcutAsync("gf");
         NavigationManager.LocationChanged -= ResetSearchField;
+        _searchTimer?.Dispose();
     }
 
     /// <inheritdoc />
@@ -111,16 +108,14 @@
 
         if (firstRender)
         {
-            // Initialize localized strings once
-            _searchPlaceholder = Localizer["SearchVaultPlaceholder"];
-            _searchHelpText = Localizer["SearchHelpText"];
-            _searchTooShortMessage = Localizer["SearchTooShortMessage"];
-            _searchingForMessage = Localizer["SearchingForMessage"];
-            _noResultsFoundMessage = Localizer["NoResultsFoundMessage"];
-            
             await KeyboardShortcutService.RegisterShortcutAsync("gs", FocusSearchField);
             await KeyboardShortcutService.RegisterShortcutAsync("gf", FocusSearchField);
             NavigationManager.LocationChanged += ResetSearchField;
+
+            // Initialize search timer
+            _searchTimer = new Timer(300); // 300ms debounce
+            _searchTimer.Elapsed += async (sender, e) => await PerformSearchAsync();
+            _searchTimer.AutoReset = false;
         }
     }
 
@@ -128,54 +123,78 @@
     {
         ShowHelpText = true;
         ShowResults = true;
+        StateHasChanged();
     }
 
     private void OnClose()
     {
         ShowHelpText = false;
         ShowResults = false;
+        StateHasChanged();
     }
 
-    private async Task SearchTermChanged(ChangeEventArgs e)
+    private void SearchTermChanged(ChangeEventArgs e)
     {
         SearchTerm = e.Value?.ToString() ?? string.Empty;
-        await PerformSearch();
-    }
 
-    private async Task PerformSearch()
-    {
-        var context = await DbService.GetDbContextAsync();
-        if (SearchTerm.Length >= 2)
-        {
-            var searchTerms = SearchTerm.Trim().ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        // Reset timer for debounced search
+        _searchTimer?.Stop();
+        _searchTimer?.Start();
 
-            var query = context.Credentials
-                .Include(x => x.Service)
-                .Include(x => x.Alias)
-                .Where(x => !x.IsDeleted)
-                .AsQueryable();
-
-            foreach (var term in searchTerms)
-            {
-                query = query.Where(x =>
-                    (x.Service.Name != null && EF.Functions.Like(x.Service.Name.ToLower(), $"%{term}%")) ||
-                    (x.Alias.Email != null && EF.Functions.Like(x.Alias.Email.ToLower(), $"%{term}%")) ||
-                    (x.Username != null && EF.Functions.Like(x.Username.ToLower(), $"%{term}%")) ||
-                    (x.Service.Url != null && EF.Functions.Like(x.Service.Url.ToLower(), $"%{term}%"))
-                );
-            }
-
-            SearchResults = await query.Take(10).ToListAsync();
-
-            // Select first entry by default so when pressing enter, the first result is immediately selected.
-            SelectedIndex = 0;
-        }
-        else
+        // Update UI immediately for short search terms
+        if (SearchTerm.Length < 2)
         {
             SearchResults.Clear();
+            SelectedIndex = -1;
+            StateHasChanged();
         }
+    }
 
-        StateHasChanged();
+    private async Task PerformSearchAsync()
+    {
+        if (_isSearching) return;
+
+        _isSearching = true;
+        try
+        {
+            var context = await DbService.GetDbContextAsync();
+            if (SearchTerm.Length >= 2)
+            {
+                var searchTerms = SearchTerm.Trim().ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                var query = context.Credentials
+                    .Include(x => x.Service)
+                    .Include(x => x.Alias)
+                    .Where(x => !x.IsDeleted)
+                    .AsQueryable();
+
+                foreach (var term in searchTerms)
+                {
+                    query = query.Where(x =>
+                        (x.Service.Name != null && EF.Functions.Like(x.Service.Name.ToLower(), $"%{term}%")) ||
+                        (x.Alias.Email != null && EF.Functions.Like(x.Alias.Email.ToLower(), $"%{term}%")) ||
+                        (x.Username != null && EF.Functions.Like(x.Username.ToLower(), $"%{term}%")) ||
+                        (x.Service.Url != null && EF.Functions.Like(x.Service.Url.ToLower(), $"%{term}%"))
+                    );
+                }
+
+                SearchResults = await query.Take(10).ToListAsync();
+
+                // Select first entry by default so when pressing enter, the first result is immediately selected.
+                SelectedIndex = SearchResults.Count > 0 ? 0 : -1;
+            }
+            else
+            {
+                SearchResults.Clear();
+                SelectedIndex = -1;
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        finally
+        {
+            _isSearching = false;
+        }
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
@@ -184,16 +203,17 @@
         {
             case "ArrowDown":
                 SelectedIndex = Math.Min(SelectedIndex + 1, SearchResults.Count - 1);
+                StateHasChanged();
                 break;
             case "ArrowUp":
                 SelectedIndex = Math.Max(SelectedIndex - 1, -1);
+                StateHasChanged();
                 break;
             case "Enter":
                 if (SelectedIndex >= 0 && SelectedIndex < SearchResults.Count)
                 {
                     await SelectResult(SearchResults[SelectedIndex]);
                 }
-
                 break;
         }
     }
@@ -208,8 +228,11 @@
     {
         SearchTerm = string.Empty;
         SearchResults.Clear();
+        SelectedIndex = -1;
+        ShowHelpText = false;
+        ShowResults = false;
+        _searchTimer?.Stop();
         StateHasChanged();
-        OnClose();
     }
 
     private async Task FocusSearchField()

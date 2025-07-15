@@ -16,7 +16,7 @@
 @using Microsoft.Extensions.Localization
 @implements IAsyncDisposable
 
-<LayoutPageTitle>@_pageTitle</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 @if (EmailModalVisible)
 {
@@ -25,14 +25,14 @@
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="@_pageTitle"
-    Description="@_pageDescription">
+    Title="@Localizer["PageTitle"]"
+    Description="@Localizer["PageDescription"]">
     <CustomActions>
         @if (DbService.Settings.AutoEmailRefresh)
         {
-            <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="@_autoRefreshEnabledTooltip"></div>
+            <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="@Localizer["AutoRefreshEnabledTooltip"]"></div>
         }
-        <RefreshButton OnClick="RefreshData" ButtonText="@_refreshButton" />
+        <RefreshButton OnClick="RefreshData" ButtonText="@Localizer["RefreshButton"]" />
     </CustomActions>
 </PageHeader>
 
@@ -76,7 +76,7 @@ else if (NoEmailClaims)
 {
     <div class="p-4 mx-4 mt-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="px-4 py-2 text-gray-400 rounded">
-            <p class="text-gray-500 dark:text-gray-400">@_noEmailClaimsMessage</p>
+            <p class="text-gray-500 dark:text-gray-400">@Localizer["NoEmailClaimsMessage"]</p>
         </div>
     </div>
 }
@@ -92,7 +92,7 @@ else
                     @if (EmailList.Count == 0)
                     {
                         <li class="p-4 text-center text-gray-500 dark:text-gray-300">
-                            @_noEmailsReceivedMessage
+                            @Localizer["NoEmailsReceivedMessage"]
                         </li>
                     }
                     else
@@ -150,12 +150,12 @@ else
                                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
-                                                    @_loadingText
+                                                    @Localizer["LoadingText"]
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span>@string.Format(_loadMoreButtonText, TotalRecords - EmailList.Count)</span>
+                                                <span>@string.Format(Localizer["LoadMoreButtonText"], TotalRecords - EmailList.Count)</span>
                                             }
                                         </button>
                                     </li>
@@ -182,20 +182,6 @@ else
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Emails.Home", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _pageTitle = string.Empty;
-    private string _pageDescription = string.Empty;
-    private string _autoRefreshEnabledTooltip = string.Empty;
-    private string _refreshButton = string.Empty;
-    private string _noEmailClaimsMessage = string.Empty;
-    private string _noEmailsReceivedMessage = string.Empty;
-    private string _loadingText = string.Empty;
-    private string _loadMoreButtonText = string.Empty;
-    private string _claimDoesNotExistError = string.Empty;
-    private string _loadEmailsFailedMessage = string.Empty;
-    private string _loadMoreEmailsFailedMessage = string.Empty;
-    
     private List<MailListViewModel> EmailList { get; set; } = [];
     private bool IsLoading => LoadingService.IsLoading("emails");
     private int CurrentPage { get; set; } = 1;
@@ -375,7 +361,7 @@ else
                             switch (errorResponse.Code)
                             {
                                 case "CLAIM_DOES_NOT_EXIST":
-                                    GlobalNotificationService.AddErrorMessage(_claimDoesNotExistError, true);
+                                    GlobalNotificationService.AddErrorMessage(Localizer["ClaimDoesNotExistError"], true);
                                     break;
                                 default:
                                     throw new ArgumentException(errorResponse.Message);
@@ -460,19 +446,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        // Cache localized strings to prevent infinite rendering loops
-        _pageTitle = Localizer["PageTitle"];
-        _pageDescription = Localizer["PageDescription"];
-        _autoRefreshEnabledTooltip = Localizer["AutoRefreshEnabledTooltip"];
-        _refreshButton = Localizer["RefreshButton"];
-        _noEmailClaimsMessage = Localizer["NoEmailClaimsMessage"];
-        _noEmailsReceivedMessage = Localizer["NoEmailsReceivedMessage"];
-        _loadingText = Localizer["LoadingText"];
-        _loadMoreButtonText = Localizer["LoadMoreButtonText"];
-        _claimDoesNotExistError = Localizer["ClaimDoesNotExistError"];
-        _loadEmailsFailedMessage = Localizer["LoadEmailsFailedMessage"];
-        _loadMoreEmailsFailedMessage = Localizer["LoadMoreEmailsFailedMessage"];
 
         // Create a single object reference for JS interop
         _dotNetRef = DotNetObjectReference.Create(this);
@@ -661,7 +634,7 @@ else
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage(string.Format(_loadEmailsFailedMessage, ex.Message), true);
+            GlobalNotificationService.AddErrorMessage(string.Format(Localizer["LoadEmailsFailedMessage"], ex.Message), true);
             Logger.LogError(ex, "An error occurred while loading email for preview");
         }
     }
@@ -757,7 +730,7 @@ else
         }
         catch (Exception ex)
         {
-            GlobalNotificationService.AddErrorMessage(string.Format(_loadMoreEmailsFailedMessage, ex.Message), true);
+            GlobalNotificationService.AddErrorMessage(string.Format(Localizer["LoadMoreEmailsFailedMessage"], ex.Message), true);
             Logger.LogError(ex, "An error occurred while loading more emails");
         }
         finally

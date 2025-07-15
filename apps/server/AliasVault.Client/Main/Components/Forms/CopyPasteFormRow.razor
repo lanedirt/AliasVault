@@ -14,16 +14,13 @@
     @if (Copied)
     {
         <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500 dark:text-green-400">
-            @_copiedMessage
+            @Localizer["CopiedMessage"]
         </span>
     }
 </div>
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Forms.CopyPasteFormRow", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _copiedMessage = "";
 
     /// <summary>
     /// Id for the input field. Defaults to a random GUID if not provided.
@@ -48,9 +45,6 @@
     /// <inheritdoc />
     protected override void OnInitialized()
     {
-        // Cache localized strings
-        _copiedMessage = Localizer["CopiedMessage"];
-        
         ClipboardCopyService.OnCopy += HandleCopy;
     }
 

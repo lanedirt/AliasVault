@@ -7,7 +7,7 @@
 @implements IAsyncDisposable
 
 <button @ref="buttonRef" @onclick="TogglePopup" id="quickIdentityButton" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none dark:from-primary-400 dark:to-primary-500 dark:hover:from-primary-500 dark:hover:to-primary-600 rounded-md shadow-sm transition duration-150 ease-in-out transform hover:scale-105 active:scale-95 focus:shadow-outline">
-    @_newAliasButtonShort <span class="hidden md:inline">@_newAliasButtonText.Substring(1).Trim()</span>
+    @Localizer["NewAliasButtonShort"] <span class="hidden md:inline">@Localizer["NewAliasButtonText"].Value.Substring(1).Trim()</span>
 </button>
 
 @if (IsPopupVisible)
@@ -15,25 +15,25 @@
     <ClickOutsideHandler OnClose="ClosePopup" ContentId="quickIdentityPopup,quickIdentityButton">
         <div id="quickIdentityPopup" class="absolute z-50 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-300 dark:bg-gray-800 dark:border-gray-400"
              style="@PopupStyle">
-            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">@_createNewAliasTitle</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">@Localizer["CreateNewAliasTitle"]</h3>
             <EditForm Model="Model" OnValidSubmit="CreateIdentity">
                 <DataAnnotationsValidator />
                 <div class="mb-4">
-                    <EditFormRow Id="serviceName" Label="@_serviceNameLabel" Placeholder="@_serviceNamePlaceholder" @bind-Value="Model.ServiceName"></EditFormRow>
+                    <EditFormRow Id="serviceName" Label="@Localizer["ServiceNameLabel"]" Placeholder="@Localizer["ServiceNamePlaceholder"]" @bind-Value="Model.ServiceName"></EditFormRow>
                     <ValidationMessage For="() => Model.ServiceName"/>
                 </div>
                 <div class="mb-4">
-                    <EditFormRow Id="serviceUrl" Label="@_serviceUrlLabel" OnFocus="OnFocusUrlInput" @bind-Value="Model.ServiceUrl"></EditFormRow>
+                    <EditFormRow Id="serviceUrl" Label="@Localizer["ServiceUrlLabel"]" OnFocus="OnFocusUrlInput" @bind-Value="Model.ServiceUrl"></EditFormRow>
                     <ValidationMessage For="() => Model.ServiceUrl"/>
                 </div>
                 <div class="flex justify-between items-center">
                     <button id="quickIdentitySubmit" type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                        @_createButton
+                        @Localizer["CreateButton"]
                     </button>
                 </div>
                 <div class="pt-2">
                     <a href="#" @onclick="OpenAdvancedMode" @onclick:preventDefault class="text-sm text-blue-500 hover:text-blue-700">
-                        @_advancedModeLink
+                        @Localizer["AdvancedModeLink"]
                     </a>
                 </div>
             </EditForm>
@@ -43,19 +43,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Widgets.CreateNewIdentityWidget", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _newAliasButtonShort = "";
-    private string _newAliasButtonText = "";
-    private string _createNewAliasTitle = "";
-    private string _serviceNameLabel = "";
-    private string _serviceNamePlaceholder = "";
-    private string _serviceUrlLabel = "";
-    private string _createButton = "";
-    private string _advancedModeLink = "";
-    private string _creatingNewAliasMessage = "";
-    private string _createCredentialErrorMessage = "";
-    private string _credentialCreatedSuccessMessage = "";
 
     private bool IsPopupVisible = false;
     private bool IsCreating = false;
@@ -72,24 +59,6 @@
         {
             await Module.DisposeAsync();
         }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Cache localized strings
-        _newAliasButtonShort = Localizer["NewAliasButtonShort"];
-        _newAliasButtonText = Localizer["NewAliasButtonText"];
-        _createNewAliasTitle = Localizer["CreateNewAliasTitle"];
-        _serviceNameLabel = Localizer["ServiceNameLabel"];
-        _serviceNamePlaceholder = Localizer["ServiceNamePlaceholder"];
-        _serviceUrlLabel = Localizer["ServiceUrlLabel"];
-        _createButton = Localizer["CreateButton"];
-        _advancedModeLink = Localizer["AdvancedModeLink"];
-        _creatingNewAliasMessage = Localizer["CreatingNewAliasMessage"];
-        _createCredentialErrorMessage = Localizer["CreateCredentialErrorMessage"];
-        _credentialCreatedSuccessMessage = Localizer["CredentialCreatedSuccessMessage"];
-        
-        await base.OnInitializedAsync();
     }
 
     /// <inheritdoc />
@@ -181,7 +150,7 @@
         }
 
         IsCreating = true;
-        GlobalLoadingSpinner.Show(_creatingNewAliasMessage);
+        GlobalLoadingSpinner.Show(Localizer["CreatingNewAliasMessage"]);
         StateHasChanged();
 
         var credential = new Credential();
@@ -204,12 +173,12 @@
             // Error saving.
             IsCreating = false;
             GlobalLoadingSpinner.Hide();
-            GlobalNotificationService.AddErrorMessage(_createCredentialErrorMessage, true);
+            GlobalNotificationService.AddErrorMessage(Localizer["CreateCredentialErrorMessage"], true);
             return;
         }
 
         // No error, add success message.
-        GlobalNotificationService.AddSuccessMessage(_credentialCreatedSuccessMessage);
+        GlobalNotificationService.AddSuccessMessage(Localizer["CredentialCreatedSuccessMessage"]);
 
         NavigationManager.NavigateTo("/credentials/" + id);
 

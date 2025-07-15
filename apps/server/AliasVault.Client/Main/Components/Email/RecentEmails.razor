@@ -26,12 +26,12 @@
     <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
         <div class="flex justify-between">
             <div>
-                <h3 class="mb-4 text-xl font-semibold dark:text-white">@_emailSectionTitle</h3>
+                <h3 class="mb-4 text-xl font-semibold dark:text-white">@Localizer["EmailSectionTitle"]</h3>
             </div>
             <div class="flex justify-end items-center space-x-2">
                 @if (DbService.Settings.AutoEmailRefresh)
                 {
-                    <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="@_autoRefreshEnabledTooltip"></div>
+                    <div class="w-3 h-3 mr-2 rounded-full bg-primary-300 border-2 border-primary-100 animate-pulse" title="@Localizer["AutoRefreshEnabledTooltip"]"></div>
                 }
                 <button id="recent-email-refresh" @onclick="ManualRefresh" type="button" class="text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2 text-center inline-flex items-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:focus:ring-blue-800 dark:hover:bg-blue-500">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -51,10 +51,10 @@
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
                                         <th scope="col" class="p-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-white">
-                                            @_subjectColumn
+                                            @Localizer["SubjectColumn"]
                                         </th>
                                         <th scope="col" class="p-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-white">
-                                            @_dateColumn
+                                            @Localizer["DateColumn"]
                                         </th>
                                     </tr>
                                 </thead>
@@ -87,7 +87,7 @@
         }
         else if (MailboxEmails.Count == 0)
         {
-            <div class="text-gray-500 dark:text-gray-400">@_noEmailsReceivedMessage</div>
+            <div class="text-gray-500 dark:text-gray-400">@Localizer["NoEmailsReceivedMessage"]</div>
         }
         else
         {
@@ -99,10 +99,10 @@
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
                                         <th scope="col" class="p-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-white">
-                                            @_subjectColumn
+                                            @Localizer["SubjectColumn"]
                                         </th>
                                         <th scope="col" class="p-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase dark:text-white">
-                                            @_dateColumn
+                                            @Localizer["DateColumn"]
                                         </th>
                                     </tr>
                                 </thead>
@@ -150,15 +150,6 @@
     private bool IsLoading => LoadingService.IsLoading("recentemails");
     private bool IsSpamOk { get; set; } = false;
     private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Email.RecentEmails", "AliasVault.Client");
-    
-    // Cached localized strings
-    private string _emailSectionTitle = "";
-    private string _autoRefreshEnabledTooltip = "";
-    private string _subjectColumn = "";
-    private string _dateColumn = "";
-    private string _noEmailsReceivedMessage = "";
-    private string _emailAddressInUseError = "";
-    private string _emailLoadError = "";
 
     private const int ACTIVE_TAB_REFRESH_INTERVAL = 2000; // 2 seconds
     private CancellationTokenSource? _pollingCts;
@@ -238,15 +229,6 @@
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
-        // Cache localized strings
-        _emailSectionTitle = Localizer["EmailSectionTitle"];
-        _autoRefreshEnabledTooltip = Localizer["AutoRefreshEnabledTooltip"];
-        _subjectColumn = Localizer["SubjectColumn"];
-        _dateColumn = Localizer["DateColumn"];
-        _noEmailsReceivedMessage = Localizer["NoEmailsReceivedMessage"];
-        _emailAddressInUseError = Localizer["EmailAddressInUseError"];
-        _emailLoadError = Localizer["EmailLoadError"];
-        
         await base.OnInitializedAsync();
 
         if (EmailAddress is null)
@@ -448,10 +430,10 @@
                             switch (errorResponse.Code)
                             {
                                 case "CLAIM_DOES_NOT_MATCH_USER":
-                                    Error = _emailAddressInUseError;
+                                    Error = Localizer["EmailAddressInUseError"];
                                     break;
                                 case "CLAIM_DOES_NOT_EXIST":
-                                    Error = _emailLoadError;
+                                    Error = Localizer["EmailLoadError"];
                                     break;
                                 default:
                                     throw new ArgumentException(errorResponse.Message);

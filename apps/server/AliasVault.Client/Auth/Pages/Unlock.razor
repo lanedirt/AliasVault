@@ -19,7 +19,7 @@
 else if (IsWebAuthnLoading) {
     <BoldLoadingIndicator />
     <p class="mt-6 text-center font-normal text-gray-500 dark:text-gray-400">
-        @_loggingInWithWebAuthn
+        @Localizer["LoggingInWithWebAuthn"]
     </p>
 }
 else
@@ -33,15 +33,15 @@ else
     {
         <div class="mb-6">
             <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
-                @_quickUnlockDescription
+                @Localizer["QuickUnlockDescription"]
             </p>
             <div class="flex space-x-4">
                 <button type="button" @onclick="UnlockWithWebAuthn" class="flex-grow inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                     <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-                    @_unlockWithWebAuthn
+                    @Localizer["UnlockWithWebAuthn"]
                 </button>
                 <button type="button" @onclick="ShowPasswordLogin" class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-                    @_unlockWithPassword
+                    @Localizer["UnlockWithPassword"]
                 </button>
             </div>
         </div>
@@ -49,26 +49,26 @@ else
     else
     {
         <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
-            @_enterMasterPasswordDescription
+            @Localizer["EnterMasterPasswordDescription"]
         </p>
 
         <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
             <DataAnnotationsValidator/>
             <div>
-                <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@_yourPasswordLabel</label>
+                <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["YourPasswordLabel"]</label>
                 <InputTextField id="password" @bind-Value="_unlockModel.Password" type="password" placeholder="••••••••"/>
                 <ValidationMessage For="() => _unlockModel.Password"/>
             </div>
 
             <button type="submit" class="w-full inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                 <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path></svg>
-                @_unlockButton
+                @Localizer["UnlockButton"]
             </button>
         </EditForm>
     }
 
     <div class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-6">
-        @_switchAccountsText <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">@_logOutLink</a>
+        @Localizer["SwitchAccountsText"] <a href="/user/logout" class="text-primary-700 hover:underline dark:text-primary-500">@Localizer["LogOutLink"]</a>
     </div>
 }
 
@@ -89,47 +89,11 @@ else
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Auth.Unlock", "AliasVault.Client");
     private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
 
-    // Cached localized strings
-    private string _loggingInWithWebAuthn = string.Empty;
-    private string _quickUnlockDescription = string.Empty;
-    private string _unlockWithWebAuthn = string.Empty;
-    private string _unlockWithPassword = string.Empty;
-    private string _enterMasterPasswordDescription = string.Empty;
-    private string _yourPasswordLabel = string.Empty;
-    private string _unlockButton = string.Empty;
-    private string _switchAccountsText = string.Empty;
-    private string _logOutLink = string.Empty;
-    private string _unlockingVaultMessage = string.Empty;
-    private string _unlockRequestError = string.Empty;
-    private string _incorrectPasswordError = string.Empty;
-    private string _genericUnlockError = string.Empty;
-    private string _sessionTimedOutError = string.Empty;
-    private string _connectionFailedError = string.Empty;
-    private string _webAuthnNotSupportedError = string.Empty;
-
     /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            // Cache localized strings to prevent infinite rendering loops
-            _loggingInWithWebAuthn = Localizer["LoggingInWithWebAuthn"];
-            _quickUnlockDescription = Localizer["QuickUnlockDescription"];
-            _unlockWithWebAuthn = Localizer["UnlockWithWebAuthn"];
-            _unlockWithPassword = Localizer["UnlockWithPassword"];
-            _enterMasterPasswordDescription = Localizer["EnterMasterPasswordDescription"];
-            _yourPasswordLabel = Localizer["YourPasswordLabel"];
-            _unlockButton = Localizer["UnlockButton"];
-            _switchAccountsText = Localizer["SwitchAccountsText"];
-            _logOutLink = Localizer["LogOutLink"];
-            _unlockingVaultMessage = Localizer["UnlockingVaultMessage"];
-            _unlockRequestError = Localizer["UnlockRequestError"];
-            _incorrectPasswordError = Localizer["IncorrectPasswordError"];
-            _genericUnlockError = Localizer["GenericUnlockError"];
-            _sessionTimedOutError = Localizer["SessionTimedOutError"];
-            _connectionFailedError = Localizer["ConnectionFailedError"];
-            _webAuthnNotSupportedError = Localizer["WebAuthnNotSupportedError"];
-
             // Trigger status API call to check if the user is still authenticated.
             // If user is not authenticated a redirect to the login page will be triggered automatically.
             await StatusCheck();
@@ -153,7 +117,7 @@ else
     /// </summary>
     private async Task UnlockSubmit()
     {
-        _loadingIndicator.Show(_unlockingVaultMessage);
+        _loadingIndicator.Show(Localizer["UnlockingVaultMessage"]);
         _serverValidationErrors.Clear();
 
         try
@@ -178,7 +142,7 @@ else
             var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
             if (loginResponse == null)
             {
-                _serverValidationErrors.AddError(_unlockRequestError);
+                _serverValidationErrors.AddError(Localizer["UnlockRequestError"]);
                 return;
             }
 
@@ -190,7 +154,7 @@ else
 
             if (!validPassword)
             {
-                _serverValidationErrors.AddError(_incorrectPasswordError);
+                _serverValidationErrors.AddError(Localizer["IncorrectPasswordError"]);
                 return;
             }
 
@@ -219,7 +183,7 @@ else
         catch
         {
             // If in release mode show a generic error.
-            _serverValidationErrors.AddError(_genericUnlockError);
+            _serverValidationErrors.AddError(Localizer["GenericUnlockError"]);
         }
 #endif
         finally
@@ -238,7 +202,7 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity?.IsAuthenticated == false) {
             // Not authenticated (anymore), redirect to login page.
-            GlobalNotificationService.AddErrorMessage(_sessionTimedOutError);
+            GlobalNotificationService.AddErrorMessage(Localizer["SessionTimedOutError"]);
             NavigationManager.NavigateTo("/user/login");
             return;
         }
@@ -250,7 +214,7 @@ else
             // Clear all tokens and redirect to login page.
             await AuthService.RemoveTokensAsync();
             GlobalNotificationService.ClearMessages();
-            GlobalNotificationService.AddErrorMessage(_sessionTimedOutError);
+            GlobalNotificationService.AddErrorMessage(Localizer["SessionTimedOutError"]);
             NavigationManager.NavigateTo("/user/login");
             return;
         }
@@ -264,7 +228,7 @@ else
             await AuthService.RemoveTokensAsync();
             await AuthStateProvider.GetAuthenticationStateAsync();
             GlobalNotificationService.ClearMessages();
-            GlobalNotificationService.AddErrorMessage(_sessionTimedOutError);
+            GlobalNotificationService.AddErrorMessage(Localizer["SessionTimedOutError"]);
             NavigationManager.NavigateTo("/user/login");
             return;
         }
@@ -277,7 +241,7 @@ else
         }
         catch (Exception ex)
         {
-            _serverValidationErrors.AddError(_connectionFailedError);
+            _serverValidationErrors.AddError(Localizer["ConnectionFailedError"]);
             Logger.LogError(ex, "An error occurred while checking the user status.");
             StateHasChanged();
         }
@@ -320,7 +284,7 @@ else
             }
             catch (NotSupportedException)
             {
-                GlobalNotificationService.AddErrorMessage(_webAuthnNotSupportedError, true);
+                GlobalNotificationService.AddErrorMessage(Localizer["WebAuthnNotSupportedError"], true);
             }
             catch (Exception ex)
             {

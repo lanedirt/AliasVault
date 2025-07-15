@@ -3,14 +3,14 @@
 @inherits MainBase
 @using Microsoft.Extensions.Localization
 
-<LayoutPageTitle>@_pageTitle</LayoutPageTitle>
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
 
 <PageHeader
     BreadcrumbItems="@BreadcrumbItems"
-    Title="@_pageTitle"
-    Description="@_pageDescription">
+    Title="@Localizer["PageTitle"]"
+    Description="@Localizer["PageDescription"]">
     <CustomActions>
-        <RefreshButton OnClick="LoadData" ButtonText="@_refreshButton" />
+        <RefreshButton OnClick="LoadData" ButtonText="@Localizer["RefreshButton"]" />
     </CustomActions>
 </PageHeader>
 
@@ -23,12 +23,6 @@
 
 @code {
     private IStringLocalizer Localizer => LocalizerFactory.Create("Pages.Main.Settings.Security.Security", "AliasVault.Client");
-
-    // Cached localized strings for performance
-    private string _pageTitle = string.Empty;
-    private string _pageDescription = string.Empty;
-    private string _refreshButton = string.Empty;
-    private string _breadcrumbTitle = string.Empty;
     private TwoFactorAuthenticationSection? TwoFactorSection;
     private QuickVaultUnlockSection? QuickVaultUnlockSection;
     private ActiveSessionsSection? SessionsSection;
@@ -39,13 +33,7 @@
     {
         await base.OnInitializedAsync();
 
-        // Cache localized strings for performance
-        _pageTitle = Localizer["PageTitle"];
-        _pageDescription = Localizer["PageDescription"];
-        _refreshButton = Localizer["RefreshButton"];
-        _breadcrumbTitle = Localizer["BreadcrumbTitle"];
-
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = _breadcrumbTitle });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbTitle"] });
     }
 
     /// <inheritdoc />
