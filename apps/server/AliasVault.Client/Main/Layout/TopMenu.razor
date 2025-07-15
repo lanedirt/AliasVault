@@ -1,6 +1,7 @@
 ﻿@inherits AliasVault.Client.Main.Pages.MainBase
 @using Microsoft.Extensions.Localization
 @implements IDisposable
+@inject LanguageService LanguageService
 
 <header>
     <nav class="fixed z-30 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 py-3 px-4">
@@ -132,6 +133,7 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= LocationChanged;
+        LanguageService.LanguageChanged -= OnLanguageChanged;
     }
 
     /// <inheritdoc />
@@ -140,6 +142,7 @@
         await base.OnInitializedAsync();
         Username = await GetUsernameAsync();
         NavigationManager.LocationChanged += LocationChanged;
+        LanguageService.LanguageChanged += OnLanguageChanged;
     }
 
     /// <inheritdoc />
@@ -153,6 +156,15 @@
             DotNetObjectReference<TopMenu> objRef = DotNetObjectReference.Create(this);
             await JsInteropService.TopMenuClickOutsideHandler(objRef);
         }
+    }
+
+    /// <summary>
+    /// Handles language change events and triggers component refresh.
+    /// </summary>
+    /// <param name="languageCode">The new language code.</param>
+    private void OnLanguageChanged(string languageCode)
+    {
+        InvokeAsync(StateHasChanged);
     }
 
     private void LocationChanged(object? sender, LocationChangedEventArgs e)
