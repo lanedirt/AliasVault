@@ -22,7 +22,7 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
  * Credentials list page.
  */
 const CredentialsList: React.FC = () => {
-  const { t } = useTranslation('credentials');
+  const { t } = useTranslation();
   const dbContext = useDb();
   const webApi = useWebApi();
   const navigate = useNavigate();
@@ -158,14 +158,14 @@ const CredentialsList: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-gray-900 dark:text-white text-xl">{t('title')}</h2>
+        <h2 className="text-gray-900 dark:text-white text-xl">{t('credentials.title')}</h2>
         <ReloadButton onClick={syncVaultAndRefresh} />
       </div>
 
       {credentials.length > 0 ? (
         <input
           type="text"
-          placeholder={t('searchPlaceholder')}
+          placeholder={t('credentials.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           autoFocus
@@ -178,13 +178,13 @@ const CredentialsList: React.FC = () => {
       {credentials.length === 0 ? (
         <div className="text-gray-500 dark:text-gray-400 space-y-2 mb-10">
           <p className="text-sm">
-            {t('welcomeTitle')}
+            {t('credentials.welcomeTitle')}
           </p>
           <p className="text-sm">
-            {t('welcomeDescription')}
+            {t('credentials.welcomeDescription')}
           </p>
           <p className="text-sm">
-            {t('manualCreationHint')}
+            {t('credentials.manualCreationHint')}
           </p>
         </div>
       ) : (

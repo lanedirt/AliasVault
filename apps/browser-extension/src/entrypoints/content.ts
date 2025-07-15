@@ -5,11 +5,11 @@ import { injectIcon, popupDebounceTimeHasPassed, validateInputField } from '@/en
 import { isAutoShowPopupEnabled, openAutofillPopup, removeExistingPopup, createUpgradeRequiredPopup } from '@/entrypoints/contentScript/Popup';
 
 import { FormDetector } from '@/utils/formDetector/FormDetector';
+import { t } from '@/utils/i18n/StandaloneI18n';
 import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/BoolResponse';
 
 import { defineContentScript } from '#imports';
 import { createShadowRootUi } from '#imports';
-import { tc } from '@/utils/i18n/StandaloneI18n';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -160,7 +160,7 @@ export default defineContentScript({
 
             if (authStatus.hasPendingMigrations) {
               // Show upgrade required popup
-              await createUpgradeRequiredPopup(inputElement, container, await tc('vaultUpgradeRequired'));
+              await createUpgradeRequiredPopup(inputElement, container, await t('content.vaultUpgradeRequired'));
               return;
             }
 

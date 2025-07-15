@@ -13,7 +13,7 @@ type LoginCredentialsBlockProps = {
  * Render the login credentials block.
  */
 const LoginCredentialsBlock: React.FC<LoginCredentialsBlockProps> = ({ credential }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const email = credential.Alias?.Email?.trim();
   const username = credential.Username?.trim();
   const password = credential.Password?.trim();
@@ -24,25 +24,25 @@ const LoginCredentialsBlock: React.FC<LoginCredentialsBlockProps> = ({ credentia
 
   return (
     <div className="space-y-2">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('loginCredentials')}</h2>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('common.loginCredentials')}</h2>
       {email && (
         <FormInputCopyToClipboard
           id="email"
-          label={t('email')}
+          label={t('common.email')}
           value={email}
         />
       )}
       {username && (
         <FormInputCopyToClipboard
           id="username"
-          label={t('username')}
+          label={t('common.username')}
           value={username}
         />
       )}
       {password && (
         <FormInputCopyToClipboard
           id="password"
-          label={t('password')}
+          label={t('common.password')}
           value={password}
           type="password"
         />

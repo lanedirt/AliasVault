@@ -79,7 +79,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
   showPassword: controlledShowPassword,
   onShowPasswordChange
 }, ref) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const [internalShowPassword, setInternalShowPassword] = React.useState(false);
 
   /**
@@ -114,7 +114,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(({
        * Toggle password visibility.
        */
       onClick: (): void => setShowPassword(!showPassword),
-      title: showPassword ? t('hidePassword') : t('showPassword')
+      title: showPassword ? t('common.hidePassword') : t('common.showPassword')
     }]
     : buttons;
 

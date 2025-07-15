@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
  */
 const UnlockSuccess: React.FC = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation();
 
   /**
    * Handle browsing vault contents - navigate to credentials page and reset mode parameter
@@ -31,23 +31,23 @@ const UnlockSuccess: React.FC = () => {
         </svg>
       </div>
       <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-        {t('unlockSuccessTitle')}
+        {t('auth.unlockSuccessTitle')}
       </h2>
       <p className="mb-6 text-gray-600 dark:text-gray-400">
-        {t('unlockSuccessDescription')}
+        {t('auth.unlockSuccessDescription')}
       </p>
       <div className="space-y-3 w-full">
         <button
           onClick={() => window.close()}
           className="w-full px-4 py-2 text-white bg-primary-600 rounded hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         >
-          {t('closePopup')}
+          {t('auth.closePopup')}
         </button>
         <button
           onClick={handleBrowseVaultContents}
           className="w-full px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
         >
-          {t('browseVault')}
+          {t('auth.browseVault')}
         </button>
       </div>
     </div>

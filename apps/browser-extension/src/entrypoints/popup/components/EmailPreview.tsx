@@ -19,7 +19,7 @@ type EmailPreviewProps = {
  * This component shows a preview of the latest emails in the inbox.
  */
 export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
-  const { t } = useTranslation(['common', 'emails']);
+  const { t } = useTranslation();
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
@@ -76,7 +76,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           });
 
           if (!response.ok) {
-            setError(t('emails:errors.emailLoadError'));
+            setError(t('emails.errors.emailLoadError'));
             return;
           }
 
@@ -125,17 +125,17 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
             } catch {
               // Try to parse as error response instead
               const apiErrorResponse = response as ApiErrorResponse;
-              setError(t('emails:apiErrors.' + apiErrorResponse?.code));
+              setError(t('emails.apiErrors.' + apiErrorResponse?.code));
               return;
             }
           } catch {
-            setError(t('emails:errors.emailLoadError'));
+            setError(t('emails.errors.emailLoadError'));
             return;
           }
         }
       } catch (err) {
         console.error('Error loading emails:', err);
-        setError(t('emails:errors.emailUnexpectedError'));
+        setError(t('emails.errors.emailUnexpectedError'));
       }
       setLoading(false);
     };
@@ -155,7 +155,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common:recentEmails')}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common.recentEmails')}</h2>
         </div>
         <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -168,10 +168,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common:recentEmails')}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common.recentEmails')}</h2>
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
         </div>
-        {t('common:loadingEmails')}
+        {t('common.loadingEmails')}
       </div>
     );
   }
@@ -179,10 +179,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     return (
       <div className="text-gray-500 dark:text-gray-400 mb-4">
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common:recentEmails')}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common.recentEmails')}</h2>
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
         </div>
-        {t('emails:noEmails')}
+        {t('emails.noEmails')}
       </div>
     );
   }

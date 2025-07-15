@@ -23,7 +23,7 @@ import type { Credential } from '@/utils/dist/shared/models/vault';
  * Credential details page.
  */
 const CredentialDetails: React.FC = (): React.ReactElement => {
-  const { t } = useTranslation(['common', 'credentials']);
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const dbContext = useDb();
@@ -76,13 +76,13 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
         {!PopoutUtility.isPopup() && (
           <HeaderButton
             onClick={openInNewPopup}
-            title={t('common:openInNewWindow')}
+            title={t('common.openInNewWindow')}
             iconType={HeaderIconType.EXPAND}
           />
         )}
         <HeaderButton
           onClick={handleEdit}
-          title={t('credentials:editCredential')}
+          title={t('credentials.editCredential')}
           iconType={HeaderIconType.EDIT}
         />
       </div>
@@ -97,7 +97,7 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
   }, [setHeaderButtons]);
 
   if (!credential) {
-    return <div>{t('common:loading')}</div>;
+    return <div>{t('common.loading')}</div>;
   }
 
   return (

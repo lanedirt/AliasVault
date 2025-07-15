@@ -61,7 +61,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
   value,
   type = 'text'
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -114,7 +114,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
             <button
               type="button"
               className="p-1 text-green-500 dark:text-green-400 transition-colors duration-200"
-              title={t('copied')}
+              title={t('common.copied')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name="check" />
@@ -125,7 +125,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               type="button"
               onClick={copyToClipboard}
               className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
-              title={t('copyToClipboard')}
+              title={t('common.copyToClipboard')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name="copy" />
@@ -137,7 +137,7 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-200"
-              title={showPassword ? t('hidePassword') : t('showPassword')}
+              title={showPassword ? t('common.hidePassword') : t('common.showPassword')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <Icon name={showPassword ? 'visibility-off' : 'visibility'} />

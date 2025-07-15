@@ -23,9 +23,9 @@ export function useVaultMutate() : {
   isLoading: boolean;
   syncStatus: string;
   } {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [syncStatus, setSyncStatus] = useState(t('syncingVault'));
+  const [syncStatus, setSyncStatus] = useState(t('common.syncingVault'));
   const dbContext = useDb();
   const { syncVault } = useVaultSync();
 
@@ -36,12 +36,12 @@ export function useVaultMutate() : {
     operation: () => Promise<void>,
     options: VaultMutationOptions
   ) : Promise<void> => {
-    setSyncStatus(t('savingChangesToVault'));
+    setSyncStatus(t('common.savingChangesToVault'));
 
     // Execute the provided operation (e.g. create/update/delete credential)
     await operation();
 
-    setSyncStatus(t('uploadingVaultToServer'));
+    setSyncStatus(t('common.uploadingVaultToServer'));
 
     try {
       // Upload the updated vault to the server.
@@ -103,11 +103,11 @@ export function useVaultMutate() : {
   ) => {
     try {
       setIsLoading(true);
-      setSyncStatus(t('checkingVaultUpdates'));
+      setSyncStatus(t('common.checkingVaultUpdates'));
 
       // Skip sync check if requested (e.g., during upgrade operations)
       if (options.skipSyncCheck) {
-        setSyncStatus(t('executingOperation'));
+        setSyncStatus(t('common.executingOperation'));
         await executeMutateOperation(operation, options);
         return;
       }
