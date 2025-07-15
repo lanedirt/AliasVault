@@ -9,6 +9,7 @@ import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/Boo
 
 import { defineContentScript } from '#imports';
 import { createShadowRootUi } from '#imports';
+import { tc } from '@/utils/i18n/StandaloneI18n';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -159,13 +160,13 @@ export default defineContentScript({
 
             if (authStatus.hasPendingMigrations) {
               // Show upgrade required popup
-              createUpgradeRequiredPopup(inputElement, container, 'Vault upgrade required.');
+              await createUpgradeRequiredPopup(inputElement, container, await tc('vaultUpgradeRequired'));
               return;
             }
 
             if (authStatus.error) {
               // Show upgrade required popup for version-related errors
-              createUpgradeRequiredPopup(inputElement, container, authStatus.error);
+              await createUpgradeRequiredPopup(inputElement, container, authStatus.error);
               return;
             }
 

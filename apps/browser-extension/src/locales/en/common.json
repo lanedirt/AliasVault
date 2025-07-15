@@ -42,7 +42,21 @@
     "NoVaultFound": "Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.",
     "serverNotAvailable": "The AliasVault server is not available. Please try again later or contact support if the problem persists.",
     "clientVersionNotSupported": "This version of the AliasVault browser extension is not supported by the server anymore. Please update your browser extension to the latest version.",
-    "serverVersionNotSupported": "The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help."
+    "serverVersionNotSupported": "The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help.",
+    "unknownError": "An unknown error occurred",
+    "failedToStoreVault": "Failed to store vault",
+    "vaultNotAvailable": "Vault not available",
+    "failedToGetVault": "Failed to get vault",
+    "vaultIsLocked": "Vault is locked",
+    "failedToGetCredentials": "Failed to get credentials",
+    "failedToCreateIdentity": "Failed to create identity",
+    "failedToGetDefaultEmailDomain": "Failed to get default email domain",
+    "failedToGetDefaultIdentitySettings": "Failed to get default identity settings",
+    "failedToGetPasswordSettings": "Failed to get password settings",
+    "failedToUploadVault": "Failed to upload vault",
+    "noDerivedKeyAvailable": "No derived key available for encryption",
+    "failedToUploadVaultToServer": "Failed to upload new vault to server",
+    "noVaultOrDerivedKeyFound": "No vault or derived key found"
   },
   "apiErrors": {
     "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",
