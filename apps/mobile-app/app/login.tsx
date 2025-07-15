@@ -304,10 +304,10 @@ export default function LoginScreen() : React.ReactNode {
     } catch (err) {
       if (err instanceof ApiAuthError) {
         console.error('ApiAuthError error:', err);
-        setError(err.message);
+        setError(t(`apiErrors.${err.message}`));
       } else {
         console.error('Login error:', err);
-        setError('An error occurred while logging in. Please try again later or contact support if the problem persists.');
+        setError(t('auth.errors.serverError'));
       }
       setIsLoading(false);
       setLoginStatus(null);
@@ -368,10 +368,10 @@ export default function LoginScreen() : React.ReactNode {
     } catch (err) {
       console.error('2FA error:', err);
       if (err instanceof ApiAuthError) {
-        setError(err.message);
+        setError(t(`apiErrors.${err.message}`));
       } else {
         console.error('2FA error:', err);
-        setError('Could not reach AliasVault server. Please try again later or contact support if the problem persists.');
+        setError(t('auth.errors.serverError'));
       }
       setIsLoading(false);
     }
