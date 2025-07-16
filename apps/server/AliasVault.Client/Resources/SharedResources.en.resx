@@ -259,4 +259,38 @@
     <value>If loading seems stuck, you can click the button below to refresh the page.</value>
     <comment>Text shown above refresh button on loading screen</comment>
   </data>
+  
+  <!-- Validation error messages for forms -->
+  <data name="ErrorPasswordMinLength" xml:space="preserve">
+    <value>The new password must be at least 10 characters long.</value>
+    <comment>Error message for password minimum length validation</comment>
+  </data>
+  <data name="ErrorPasswordsDoNotMatch" xml:space="preserve">
+    <value>The new passwords do not match.</value>
+    <comment>Error message when password confirmation doesn't match</comment>
+  </data>
+  <data name="ErrorPasswordMinLengthGeneric" xml:space="preserve">
+    <value>Password must be at least 10 characters long.</value>
+    <comment>Generic error message for password minimum length validation</comment>
+  </data>
+  <data name="ErrorPasswordsDoNotMatchGeneric" xml:space="preserve">
+    <value>Passwords do not match.</value>
+    <comment>Generic error message when passwords don't match</comment>
+  </data>
+  <data name="ErrorMustAcceptTerms" xml:space="preserve">
+    <value>You must accept the terms and conditions.</value>
+    <comment>Error message for terms and conditions acceptance</comment>
+  </data>
+  <data name="ErrorSecretKeyRequired" xml:space="preserve">
+    <value>Secret key is required</value>
+    <comment>Error message when secret key is required</comment>
+  </data>
+  <data name="ErrorUsernameRequired" xml:space="preserve">
+    <value>Username is required</value>
+    <comment>Error message when username is required</comment>
+  </data>
+  <data name="ErrorPasswordRequired" xml:space="preserve">
+    <value>Password is required</value>
+    <comment>Error message when password is required</comment>
+  </data>
 </root>
