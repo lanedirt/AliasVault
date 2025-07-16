@@ -3,7 +3,6 @@
     "cancel": "Annuleren",
     "delete": "Verwijderen",
     "save": "Opslaan",
-    "edit": "Bewerken",
     "yes": "Ja",
     "no": "Nee",
     "ok": "OK",
@@ -11,13 +10,8 @@
     "loading": "Laden...",
     "error": "Fout",
     "success": "Succes",
-    "required": "Vereist",
-    "optional": "Optioneel",
     "never": "Nooit",
-    "untitled": "Naamloos",
-    "copy": "Kopiëren",
-    "copied": "Gekopieerd",
-    "version": "Versie"
+    "copied": "Gekopieerd"
   },
   "auth": {
     "login": "Inloggen",
@@ -43,12 +37,12 @@
     "biometricPrompt": "Wilt u {{biometric}} gebruiken om uw kluis te ontgrendelen?",
     "tryBiometricAgain": "Probeer {{biometric}} Opnieuw",
     "authCodeNote": "Opmerking: als je geen toegang hebt tot je authenticator, kunt je je 2FA resetten door met een herstelcode in te loggen via de website.",
-    "noAccountYet": "Nog geen account?",
     "errors": {
       "credentialsRequired": "Gebruikersnaam en wachtwoord zijn vereist",
       "invalidAuthCode": "Voer een geldige 6-cijferige authenticatiecode in",
       "incorrectPassword": "Onjuist wachtwoord. Probeer het opnieuw.",
-      "enterPassword": "Voer uw wachtwoord in"
+      "enterPassword": "Voer uw wachtwoord in",
+      "serverError": "Could not reach AliasVault server. Please try again later or contact support if the problem persists."
     },
     "confirmLogout": "Weet u zeker dat u wilt uitloggen? U moet opnieuw inloggen met uw hoofdwachtwoord om toegang te krijgen tot uw kluis."
   },
@@ -58,7 +52,6 @@
     "editCredential": "Credential bewerken",
     "deleteCredential": "Credential verwijderen",
     "deleteConfirm": "Weet je zeker dat je deze credential wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-    "credentialOptions": "Credential opties",
     "service": "Dienst",
     "serviceName": "Service Naam",
     "serviceUrl": "Dienst URL",
@@ -86,8 +79,6 @@
     "noEmailsYet": "Nog geen e-mails ontvangen.",
     "offlineEmailsMessage": "U bent offline. Maak verbinding met het internet om uw e-mails te laden.",
     "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
-    "emailClaimError": "Het gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze credential te bewerken.",
-    "emailSyncError": "Er is een fout opgetreden bij het laden van de e-mails. Probeer de credential te bewerken en opnieuw op te slaan om de vault te synchroniseren, en probeer het opnieuw.",
     "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
     "password": "Wachtwoord",
     "deletingCredential": "Credential verwijderen...",
@@ -101,19 +92,6 @@
     "switchBackToBrowser": "Schakel terug naar uw browser om door te gaan.",
     "twoFactorAuth": "Twee-factor-authenticatie",
     "totpCode": "TOTP Code",
-    "actions": {
-      "copyUsername": "Kopieer Gebruikersnaam",
-      "copyEmail": "Kopieer E-mail",
-      "copyPassword": "Kopieer Wachtwoord"
-    },
-    "toasts": {
-      "usernameCopied": "Gebruikersnaam gekopieerd naar klembord",
-      "emailCopied": "E-mail gekopieerd naar klembord",
-      "passwordCopied": "Wachtwoord gekopieerd naar klembord",
-      "credentialUpdated": "Credential succesvol bijgewerkt",
-      "credentialCreated": "Credential succesvol aangemaakt",
-      "credentialDeleted": "Credential succesvol verwijderd"
-    },
     "errors": {
       "loadFailed": "Laden van credential mislukt",
       "generateUsernameFailed": "Genereren van gebruikersnaam mislukt",
@@ -141,12 +119,9 @@
       "8hours": "8 uur"
     },
     "language": "Taal",
-    "systemLanguage": "Systeemtaal",
     "languageSystemMessage": "Wijzig de app-taal via het app instellingen scherm op je apparaat.",
     "openSettings": "Open Instellingen",
-    "unableToOpenSettings": "Het openen van de instellingen is niet gelukt. Ga naar de app-instellingen en wijzig de taal.",
     "vaultUnlockSettings": {
-      "title": "Kluis Ontgrendel Methode",
       "description": "Kies hoe u uw kluis wilt ontgrendelen.",
       "biometricEnabled": "{{biometric}} is nu succesvol ingeschakeld",
       "biometricNotAvailable": "{{biometric}} Niet Beschikbaar",
@@ -158,11 +133,9 @@
       "keystoreAndroid": "Android Sleutelopslag"
     },
     "autoLockSettings": {
-      "title": "Automatisch vergrendelen",
       "description": "Kies hoe lang de app op de achtergrond kan blijven voordat je opnieuw moet aanmelden. Je moet vervolgens Face ID gebruiken of je wachtwoord invoeren om de vault opnieuw te ontgrendelen."
     },
     "identityGeneratorSettings": {
-      "title": "Identiteit Generator",
       "description": "Configureer de standaardtaal en geslachtsvoorkeur voor het genereren van nieuwe identiteiten.",
       "languageSection": "Taal",
       "languageDescription": "Stel de taal in die wordt gebruikt bij het genereren van nieuwe identiteiten.",
@@ -257,19 +230,7 @@
   "navigation": {
     "credentials": "Credentials",
     "emails": "E-mails",
-    "settings": "Instellingen",
-    "notFound": "Deze pagina bestaat niet.",
-    "oops": "Oeps!",
-    "goBack": "Ga terug naar de hoofdpagina"
-  },
-  "validation": {
-    "serviceNameRequired": "Service naam is vereist",
-    "invalidUrl": "Ongeldig URL-formaat",
-    "invalidDate": "Datum moet in YYYY-MM-DD formaat zijn",
-    "invalidEmail": "Ongeldig e-mail formaat"
-  },
-  "offline": {
-    "banner": "U bent offline. Sommige functies zijn mogelijk niet beschikbaar."
+    "settings": "Instellingen"
   },
   "emails": {
     "title": "E-mail Details",
@@ -290,5 +251,35 @@
       "decryptFailed": "Bijlage ontsleutelen mislukt",
       "downloadFailed": "Bijlage downloaden mislukt"
     }
+  },
+  "apiErrors": {
+    "CLAIM_DOES_NOT_MATCH_USER": "The current chosen email address is already in use. Please change the email address by editing this credential.",
+    "CLAIM_DOES_NOT_EXIST": "An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.",
+    "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",
+    "ACCOUNT_LOCKED": "Account temporarily locked due to too many failed attempts. Please try again later.",
+    "ACCOUNT_BLOCKED": "Your account has been disabled. If you believe this is a mistake, please contact support.",
+    "USER_NOT_FOUND": "Invalid username or password. Please try again.",
+    "INVALID_AUTHENTICATOR_CODE": "Invalid authenticator code. Please try again.",
+    "INVALID_RECOVERY_CODE": "Invalid recovery code. Please try again.",
+    "REFRESH_TOKEN_REQUIRED": "Refresh token is required.",
+    "USER_NOT_FOUND_IN_TOKEN": "User not found in token.",
+    "USER_NOT_FOUND_IN_DATABASE": "User not found in database.",
+    "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
+    "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refresh token revoked successfully.",
+    "PUBLIC_REGISTRATION_DISABLED": "New account registration is currently disabled on this server. Please contact the administrator.",
+    "USERNAME_REQUIRED": "Username is required.",
+    "USERNAME_ALREADY_IN_USE": "Username is already in use.",
+    "USERNAME_AVAILABLE": "Username is available.",
+    "USERNAME_MISMATCH": "Username does not match the current user.",
+    "PASSWORD_MISMATCH": "The provided password does not match your current password.",
+    "ACCOUNT_SUCCESSFULLY_DELETED": "Account successfully deleted.",
+    "USERNAME_EMPTY_OR_WHITESPACE": "Username cannot be empty or whitespace.",
+    "USERNAME_TOO_SHORT": "Username too short: must be at least 3 characters long.",
+    "USERNAME_TOO_LONG": "Username too long: cannot be longer than 40 characters.",
+    "USERNAME_INVALID_EMAIL": "Invalid email address.",
+    "USERNAME_INVALID_CHARACTERS": "Username is invalid, can only contain letters or digits.",
+    "VAULT_NOT_UP_TO_DATE": "Your vault is not up-to-date. Please synchronize your vault and try again.",
+    "INTERNAL_SERVER_ERROR": "Internal server error.",
+    "VAULT_ERROR": "The local vault is not up-to-date. Please synchronize your vault by refreshing the page and try again."
   }
 }
