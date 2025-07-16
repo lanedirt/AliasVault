@@ -133,7 +133,7 @@
     <comment>Generic CSV instructions part 1</comment>
   </data>
   <data name="GenericCsvStep1" xml:space="preserve">
-    <value>Download het AliasVault Import CSV sjabloon</value>
+    <value>Download het AliasVault Import CSV</value>
     <comment>Generic CSV step 1</comment>
   </data>
   <data name="GenericCsvStep2" xml:space="preserve">
