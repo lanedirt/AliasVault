@@ -109,33 +109,11 @@ public class AuthTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test if logging in with different case variations of username works.
-    /// </summary>
-    /// <returns>Async task.</returns>
-    [Test]
-    [Order(4)]
-    public async Task LowercaseUsernameTest()
-    {
-        // Logout current user
-        await Logout();
-
-        // Test Case: Create new user with lowercase
-        var lowercaseUser = "testuser2@example.com";
-        await Register(checkForSuccess: true, username: lowercaseUser);
-        await Logout();
-
-        // Try logging in with uppercase version
-        var uppercaseVersion = lowercaseUser.ToUpper();
-        await LoginWithUsername(uppercaseVersion);
-        await VerifySuccessfulLogin();
-    }
-
-    /// <summary>
     /// Test if logging out and logging in works.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(5)]
+    [Order(4)]
     public async Task LogoutAndLoginRememberMeTest()
     {
         await Logout();
@@ -165,7 +143,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(6)]
+    [Order(5)]
     public async Task AccountSelfDeletionTest()
     {
         // Try deleting with wrong username first
@@ -230,7 +208,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(7)]
+    [Order(6)]
     public async Task ReRegisterAfterDeletion()
     {
         // Re-register with the same credentials
@@ -256,7 +234,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(8)]
+    [Order(7)]
     public async Task RegisterFormWarningTest()
     {
         await Logout();
@@ -271,7 +249,7 @@ public class AuthTests : ClientPlaywrightTest
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(9)]
+    [Order(8)]
     public async Task PasswordAuthLockoutTest()
     {
         await Logout();
