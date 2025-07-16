@@ -40,7 +40,7 @@
     <comment>Message when no search results are found</comment>
   </data>
   <data name="SearchingMessage">
-    <value>Zoeken...</value>
+    <value>Searching...</value>
     <comment>Message when search is in progress</comment>
   </data>
 </root>
