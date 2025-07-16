@@ -128,7 +128,6 @@
       "USERNAME_EMPTY_OR_WHITESPACE": "Username cannot be empty or whitespace.",
       "USERNAME_TOO_SHORT": "Username too short: must be at least 3 characters long.",
       "USERNAME_TOO_LONG": "Username too long: cannot be longer than 40 characters.",
-      "USERNAME_ADMIN_NOT_ALLOWED": "Username 'admin' is not allowed.",
       "USERNAME_INVALID_EMAIL": "Invalid email address.",
       "USERNAME_INVALID_CHARACTERS": "Username is invalid, can only contain letters or digits.",
       "VAULT_NOT_UP_TO_DATE": "Your vault is not up-to-date. Please synchronize your vault and try again.",
