@@ -15,27 +15,7 @@ using Microsoft.Extensions.Localization;
 /// </summary>
 public static class ApiResponseUtility
 {
-    /// <summary>
-    /// Parses the response content and displays the server validation errors.
-    /// </summary>
-    /// <param name="responseContent">Response content.</param>
-    /// <returns>List of errors if something went wrong.</returns>
-    [Obsolete("Use ParseErrorResponse(string responseContent, IStringLocalizer localizer) instead for localized error messages.")]
-    public static List<string> ParseErrorResponse(string responseContent)
-    {
-        var returnErrors = new List<string>();
-
-        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ServerValidationErrorResponse>(responseContent);
-        if (errorResponse is not null)
-        {
-            foreach (var error in errorResponse.Errors)
-            {
-                returnErrors.AddRange(error.Value);
-            }
-        }
-
-        return returnErrors;
-    }
+    private const string GenericErrorMessage = "An error occurred. Please try again.";
 
     /// <summary>
     /// Parses the response content and returns localized error messages.
@@ -65,7 +45,7 @@ public static class ApiResponseUtility
                         {
                             // Try to get a generic error message
                             var genericError = localizer["UnknownError"];
-                            returnErrors.Add(genericError.ResourceNotFound ? "An error occurred. Please try again." : genericError.Value);
+                            returnErrors.Add(genericError.ResourceNotFound ? GenericErrorMessage : genericError.Value);
                         }
                         else
                         {
@@ -79,7 +59,7 @@ public static class ApiResponseUtility
         {
             // If parsing fails, return a generic error message
             var genericError = localizer["UnknownError"];
-            returnErrors.Add(genericError.ResourceNotFound ? "An error occurred. Please try again." : genericError.Value);
+            returnErrors.Add(genericError.ResourceNotFound ? GenericErrorMessage : genericError.Value);
         }
 
         return returnErrors;
@@ -105,12 +85,12 @@ public static class ApiResponseUtility
 
             // Fall back to ServerValidationErrorResponse
             var errors = ParseErrorResponse(responseContent, localizer);
-            return errors.Count > 0 ? errors[0] : "An error occurred. Please try again.";
+            return errors.Count > 0 ? errors[0] : GenericErrorMessage;
         }
         catch
         {
             var genericError = localizer["UnknownError"];
-            return genericError.ResourceNotFound ? "An error occurred. Please try again." : genericError.Value;
+            return genericError.ResourceNotFound ? GenericErrorMessage : genericError.Value;
         }
     }
 }
