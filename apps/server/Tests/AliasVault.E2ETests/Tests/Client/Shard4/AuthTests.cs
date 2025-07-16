@@ -246,7 +246,7 @@ public class AuthTests : ClientPlaywrightTest
         await Register(checkForSuccess: false);
 
         var warning = await Page.TextContentAsync("div[role='alert']");
-        Assert.That(warning, Does.Contain("is already taken."), "No visible warning when registering with existing email address.");
+        Assert.That(warning, Does.Contain("is already in use."), "No visible warning when registering with existing email address.");
     }
 
     /// <summary>

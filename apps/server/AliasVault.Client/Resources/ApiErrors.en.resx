@@ -167,9 +167,6 @@
   <data name="USERNAME_TOO_LONG" xml:space="preserve">
     <value>Username too long: cannot be longer than 40 characters.</value>
   </data>
-  <data name="USERNAME_ADMIN_NOT_ALLOWED" xml:space="preserve">
-    <value>Username 'admin' is not allowed.</value>
-  </data>
   <data name="USERNAME_INVALID_EMAIL" xml:space="preserve">
     <value>Invalid email address.</value>
   </data>

@@ -105,11 +105,6 @@ public enum ApiErrorCode
     USERNAME_TOO_LONG,
 
     /// <summary>
-    /// Username 'admin' is not allowed.
-    /// </summary>
-    USERNAME_ADMIN_NOT_ALLOWED,
-
-    /// <summary>
     /// Username is not a valid email address.
     /// </summary>
     USERNAME_INVALID_EMAIL,

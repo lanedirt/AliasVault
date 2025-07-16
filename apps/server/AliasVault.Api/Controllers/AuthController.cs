@@ -386,7 +386,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         }
 
         // Validate the username.
-        var (isValid, apiErrorCode) = ValidateUsername(model.Username);
+        var (isValid, apiErrorCode) = await ValidateUsername(model.Username);
         if (!isValid)
         {
             return BadRequest(ApiErrorCodeHelper.CreateValidationErrorResponse(apiErrorCode, 400));
@@ -484,7 +484,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         }
 
         // Validate the username
-        var (isValid, apiErrorCode) = ValidateUsername(normalizedUsername);
+        var (isValid, apiErrorCode) = await ValidateUsername(normalizedUsername);
 
         if (!isValid)
         {
@@ -582,60 +582,6 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     }
 
     /// <summary>
-    /// Validates if a given username meets the required criteria.
-    /// </summary>
-    /// <param name="username">The username to validate.</param>
-    /// <returns>A tuple containing a boolean indicating if the username is valid, and an error message if it's invalid.</returns>
-    private static (bool IsValid, ApiErrorCode ApiErrorCode) ValidateUsername(string username)
-    {
-        const int minimumUsernameLength = 3;
-        const int maximumUsernameLength = 40;
-        const string adminUsername = "admin";
-
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            return (false, ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE);
-        }
-
-        if (username.Length < minimumUsernameLength)
-        {
-            return (false, ApiErrorCode.USERNAME_TOO_SHORT);
-        }
-
-        if (username.Length > maximumUsernameLength)
-        {
-            return (false, ApiErrorCode.USERNAME_TOO_LONG);
-        }
-
-        if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
-        {
-            return (false, ApiErrorCode.USERNAME_ADMIN_NOT_ALLOWED);
-        }
-
-        // Check if it's a valid email address
-        if (username.Contains('@'))
-        {
-            try
-            {
-                var addr = new System.Net.Mail.MailAddress(username);
-                return (addr.Address == username, ApiErrorCode.USERNAME_INVALID_EMAIL);
-            }
-            catch
-            {
-                return (false, ApiErrorCode.USERNAME_INVALID_EMAIL);
-            }
-        }
-
-        // If it's not an email, check if it only contains letters and digits
-        if (!username.All(char.IsLetterOrDigit))
-        {
-            return (false, ApiErrorCode.USERNAME_INVALID_CHARACTERS);
-        }
-
-        return (true, ApiErrorCode.USERNAME_AVAILABLE);
-    }
-
-    /// <summary>
     /// Generate a device identifier based on request headers. This is used to associate refresh tokens
     /// with a specific device for a specific user.
     ///
@@ -711,6 +657,68 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         }
 
         return principal;
+    }
+
+    /// <summary>
+    /// Validates if a given username meets the required criteria.
+    /// </summary>
+    /// <param name="username">The username to validate.</param>
+    /// <returns>A tuple containing a boolean indicating if the username is valid, and an error message if it's invalid.</returns>
+    private async Task<(bool IsValid, ApiErrorCode ApiErrorCode)> ValidateUsername(string username)
+    {
+        const int minimumUsernameLength = 3;
+        const int maximumUsernameLength = 40;
+        const string adminUsername = "admin";
+
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return (false, ApiErrorCode.USERNAME_EMPTY_OR_WHITESPACE);
+        }
+
+        if (username.Length < minimumUsernameLength)
+        {
+            return (false, ApiErrorCode.USERNAME_TOO_SHORT);
+        }
+
+        if (username.Length > maximumUsernameLength)
+        {
+            return (false, ApiErrorCode.USERNAME_TOO_LONG);
+        }
+
+        // Disallow admin username to prevent conflicts with the default admin user
+        if (string.Equals(username, adminUsername, StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, ApiErrorCode.USERNAME_ALREADY_IN_USE);
+        }
+
+        // Check if username is not taken already
+        var existingUser = await userManager.FindByNameAsync(username);
+        if (existingUser != null)
+        {
+            return (false, ApiErrorCode.USERNAME_ALREADY_IN_USE);
+        }
+
+        // Check if it's a valid email address
+        if (username.Contains('@'))
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(username);
+                return (addr.Address == username, ApiErrorCode.USERNAME_INVALID_EMAIL);
+            }
+            catch
+            {
+                return (false, ApiErrorCode.USERNAME_INVALID_EMAIL);
+            }
+        }
+
+        // If it's not an email, check if it only contains letters and digits
+        if (!username.All(char.IsLetterOrDigit))
+        {
+            return (false, ApiErrorCode.USERNAME_INVALID_CHARACTERS);
+        }
+
+        return (true, ApiErrorCode.USERNAME_AVAILABLE);
     }
 
     /// <summary>
