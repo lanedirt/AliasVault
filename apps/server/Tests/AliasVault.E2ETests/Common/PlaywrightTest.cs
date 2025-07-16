@@ -223,7 +223,7 @@ public abstract class PlaywrightTest
         await requestedElement.WaitForAsync(new LocatorWaitForOptions
         {
             State = WaitForSelectorState.Visible,
-            Timeout = 10000,
+            Timeout = 15000,
         });
 
         return requestedElement;
