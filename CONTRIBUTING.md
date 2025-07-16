@@ -2,26 +2,37 @@
 
 Thanks for your interest in contributing to the AliasVault project! There are a lot of ways to help out.
 
-## Community Engagement
+## Table of Contents
 
-Become active in AliasVault's community, helping by:
+1. [Help spread the word](#1-help-spread-the-word)
+2. [Contributing to Translations](#2-contributing-to-translations)
+3. [Contributing to the Documentation](#3-contributing-to-the-documentation)
+4. [Contributing to the Main Codebase](#4-contributing-to-the-main-codebase)
+   - [4.1 Get in contact](#41-get-in-contact)
+   - [4.2 Set up your local development environment](#42-set-up-your-local-development-environment)
+5. [License and Contributions](#5-license-and-contributions)
 
-- **Answering questions** in our [Discord community](https://discord.gg/DsaXMTEtpF)
-- **Helping users** with self-hosting setup and troubleshooting
-- **Reporting bugs** and suggesting improvements
-- **Participating in discussions** about features and improvements
+---
 
-## Spreading the Word
+## 1. Help spread the word
 
-Getting the word out about AliasVault is important so we can reach and help more people to improve their privacy. You can help by:
+Help grow the AliasVault community by:
 
-- **Sharing on social media** (X, Reddit, Mastodon, etc.)
-- **Writing blog posts** about your AliasVault experience
-- **Creating video tutorials** or walkthroughs
-- **Mentioning AliasVault** in privacy/self-hosting discussions
-- **Telling friends and colleagues** about the project
+- Answering questions and helping users in our [Discord](https://discord.gg/DsaXMTEtpF)
+- Reporting bugs and suggesting improvements
+- Sharing on social media and writing about your experience
+- Creating tutorials and documentation
+- Spreading the word about privacy and self-hosting
 
-## Contributing to the Documentation
+## 2. Contributing to Translations
+
+Help make AliasVault accessible to users worldwide by contributing translations! AliasVault is currently available in English and Dutch, but we're looking for volunteers to help translate it into other languages such as German, French, Spanish, Ukrainian, Italian, and more.
+
+AliasVault translations are managed through [Crowdin](https://crowdin.com/), an online translation platform. If you’d like to help translate AliasVault into your native language, please contact us via email or [Discord](https://discord.gg/DsaXMTEtpF). We’ll be happy to set you up with access to the translation project.
+
+Your translation contributions will help make AliasVault more accessible to privacy-conscious users around the world!
+
+## 3. Contributing to the Documentation
 
 The docs are built using Jekyll and automatically deploy to GitHub Pages via GitHub Actions. You can build the docs locally by running `docker compose up` in the `./docs` folder.
 
@@ -29,15 +40,16 @@ The docs site is based on the open-source template called Just The Docs. Find mo
 
 To make changes to the AliasVault documentation please make a PR that directly edits the `docs` markdown files in this repository.
 
-## Contributing to the Main Codebase
-### Get in contact
-If you’re planning to work on a new feature or improvement for AliasVault, we strongly encourage you to get in touch with us first. This ensures that your proposed changes align with the project's direction and increases the likelihood of your work being accepted into the official repository. You can reach us through:
+## 4. Contributing to the Main Codebase
+
+### 4.1 Get in contact
+If you're planning to work on a new feature or improvement for AliasVault, we strongly encourage you to get in touch with us first. This ensures that your proposed changes align with the project's direction and increases the likelihood of your work being accepted into the official repository. You can reach us through:
 
 - Opening an issue on GitHub to discuss your proposed changes
 - Reaching out via Discord or email
 - Contacting the maintainers directly
 
-### Set up your local development environment
+### 4.2 Set up your local development environment
 You can find instructions on how to get your local development environment setup for the different parts of the AliasVault codebase here:
 
 https://docs.aliasvault.net/misc/dev/
@@ -46,7 +58,7 @@ https://docs.aliasvault.net/misc/dev/
 
 If you run into any issues, feel free to join our [Discord](https://discord.gg/DsaXMTEtpF) to chat with the maintainers and author.
 
-## License and Contributions
+## 5. License and Contributions
 
 AliasVault is licensed under the GNU Affero General Public License v3.0 (AGPLv3). By submitting code, documentation, or other contributions to this project, you agree that:
 
