@@ -254,4 +254,37 @@
     <value>Als het laden vastloopt, klik dan op de onderstaande knop klikken om de pagina te verversen.</value>
     <comment>Text shown above refresh button on loading screen</comment>
   </data>
+  <!-- Validation error messages for forms -->
+  <data name="ErrorPasswordMinLength" xml:space="preserve">
+    <value>Het nieuwe wachtwoord moet tenminste 10 tekens lang zijn.</value>
+    <comment>Error message for password minimum length validation</comment>
+  </data>
+  <data name="ErrorPasswordsDoNotMatch" xml:space="preserve">
+    <value>Nieuwe wachtwoorden komen niet overeen.</value>
+    <comment>Error message when password confirmation doesn't match</comment>
+  </data>
+  <data name="ErrorPasswordMinLengthGeneric" xml:space="preserve">
+    <value>Wachtwoord moet minstens 10 tekens lang zijn.</value>
+    <comment>Generic error message for password minimum length validation</comment>
+  </data>
+  <data name="ErrorPasswordsDoNotMatchGeneric" xml:space="preserve">
+    <value>Wachtwoorden komen niet overeen.</value>
+    <comment>Generic error message when passwords don't match</comment>
+  </data>
+  <data name="ErrorMustAcceptTerms" xml:space="preserve">
+    <value>Je moet de voorwaarden accepteren.</value>
+    <comment>Error message for terms and conditions acceptance</comment>
+  </data>
+  <data name="ErrorSecretKeyRequired" xml:space="preserve">
+    <value>Sleutel is vereist</value>
+    <comment>Error message when secret key is required</comment>
+  </data>
+  <data name="ErrorUsernameRequired" xml:space="preserve">
+    <value>Gebruikersnaam is vereist</value>
+    <comment>Error message when username is required</comment>
+  </data>
+  <data name="ErrorPasswordRequired" xml:space="preserve">
+    <value>Wachtwoord is vereist</value>
+    <comment>Error message when password is required</comment>
+  </data>
 </root>

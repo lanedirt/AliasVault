@@ -42,7 +42,7 @@
       "invalidAuthCode": "Voer een geldige 6-cijferige authenticatiecode in",
       "incorrectPassword": "Onjuist wachtwoord. Probeer het opnieuw.",
       "enterPassword": "Voer uw wachtwoord in",
-      "serverError": "Kan geen verbinding maken met de AliasVault server. Probeer het later opnieuw of neem contact op met de ondersteuning als het probleem aanhoudt."
+      "serverError": "Kon de AliasVault server niet bereiken. Probeer het later opnieuw of neem contact op met support als het probleem aanhoudt."
     },
     "confirmLogout": "Weet u zeker dat u wilt uitloggen? U moet opnieuw inloggen met uw hoofdwachtwoord om toegang te krijgen tot uw kluis."
   },
@@ -254,7 +254,7 @@
   },
   "apiErrors": {
     "CLAIM_DOES_NOT_MATCH_USER": "Het huidige gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze credential te bewerken.",
-    "CLAIM_DOES_NOT_EXIST": "Er is een fout opgetreden bij het laden van e-mails. Probeer de credential te bewerken en op te slaan om de database te synchroniseren, en probeer het opnieuw.",
+    "CLAIM_DOES_NOT_EXIST": "Er is een fout opgetreden bij het laden van de e-mails. Probeer de credential te bewerken en opnieuw te slaan om de database te synchroniseren, en probeer het vervolgens opnieuw.",
     "UNKNOWN_ERROR": "Er is een onbekende fout opgetreden. Probeer het opnieuw.",
     "ACCOUNT_LOCKED": "Account tijdelijk vergrendeld vanwege te veel mislukte pogingen. Probeer het later opnieuw.",
     "ACCOUNT_BLOCKED": "Uw account is uitgeschakeld. Als u denkt dat dit een vergissing is, neem dan contact op met de ondersteuning.",
@@ -265,7 +265,7 @@
     "USER_NOT_FOUND_IN_TOKEN": "Gebruiker niet gevonden in token.",
     "USER_NOT_FOUND_IN_DATABASE": "Gebruiker niet gevonden in database.",
     "INVALID_REFRESH_TOKEN": "Ongeldig vernieuwingstoken.",
-    "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Vernieuwingstoken succesvol ingetrokken.",
+    "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refreshtoken succesvol gerevoked.",
     "PUBLIC_REGISTRATION_DISABLED": "Registratie van nieuwe accounts is momenteel uitgeschakeld op deze server. Neem contact op met de beheerder.",
     "USERNAME_REQUIRED": "Gebruikersnaam is vereist.",
     "USERNAME_ALREADY_IN_USE": "Gebruikersnaam is al in gebruik.",
