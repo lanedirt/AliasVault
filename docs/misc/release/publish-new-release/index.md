@@ -82,3 +82,14 @@ The GitHub Actions workflow `Browser Extension Build` will build the browser ext
 apps/mobile-ap/android/app/build/outputs/bundle/release
 ```
     3. Take this file and upload it to the Google Play Console.
+
+### F-Droid automatic build and publish
+Note: The AliasVault GitHub repo is connected to the F-Droid alternative Android App Store. When a new Git release is published, F-Droid will automatically pull the latest changes, read the Fastlane metadata to retrieve the changelog, and build the app itself. This process is fully automatic, and publishing can take 2-3 days.
+
+The AliasVault Android app build is configured by the following file which is part of the official `fdroiddata` repo on GitLab:
+[https://gitlab.com/fdroid/fdroiddata/-/blob/master/metadata/net.aliasvault.app.yml](https://gitlab.com/fdroid/fdroiddata/-/blob/master/metadata/net.aliasvault.app.yml)
+
+If any changes were made to the Android app build process or if any new third party (expo) packages have been installed, make sure it still
+works with the F-Droid build process. This can be tested either locally via `fdroid build`, or it can be done by creating a new test commit in
+a forked `fdroiddata` repo on GitLab and making the `net.aliasvault.app.yml` point to the latest main branch. This way you can test whether
+the build itself works properly with the latest version before actually publishing a new release.
