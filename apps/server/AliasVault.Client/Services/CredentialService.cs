@@ -366,6 +366,29 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     }
 
     /// <summary>
+    /// Hard delete all credentials from the database. This permanently removes all credential records
+    /// (including soft-deleted ones) from the database for a complete vault reset.
+    /// </summary>
+    /// <returns>True if successful, false otherwise.</returns>
+    public async Task<bool> HardDeleteAllCredentialsAsync()
+    {
+        var context = await dbService.GetDbContextAsync();
+        var allCredentials = await context.Credentials.ToListAsync();
+
+        if (allCredentials.Any())
+        {
+            // Hard delete all credentials (cascade will handle related records)
+            context.Credentials.RemoveRange(allCredentials);
+
+            // Save changes locally
+            await context.SaveChangesAsync();
+        }
+
+        // Save the database to server
+        return await dbService.SaveDatabaseAsync();
+    }
+
+    /// <summary>
     /// Update the basic credential information.
     /// </summary>
     /// <param name="login">The login object to update.</param>

@@ -171,15 +171,8 @@
                 return;
             }
 
-            // Clear local vault data by soft-deleting all credentials
-            var credentials = await CredentialService.LoadAllAsync();
-            foreach (var credential in credentials)
-            {
-                await CredentialService.SoftDeleteEntryAsync(credential.Id);
-            }
-
-            // Save the database
-            await DbService.SaveDatabaseAsync();
+            // Clear local vault data by hard-deleting all credentials
+            await CredentialService.HardDeleteAllCredentialsAsync();
 
             GlobalNotificationService.AddSuccessMessage(Localizer["ResetVaultSuccessMessage"]);
 
