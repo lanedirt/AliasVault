@@ -1,0 +1,231 @@
+@page "/settings/import-export/reset-vault"
+@inherits MainBase
+@inject HttpClient Http
+@inject CredentialService CredentialService
+@inject ILogger<ResetVault> Logger
+@using System.Text.Json
+@using AliasVault.Client.Utilities
+@using AliasVault.Shared.Models.WebApi.Auth
+@using AliasVault.Cryptography.Client
+@using System.ComponentModel.DataAnnotations
+@using AliasVault.Client.Resources
+@using Microsoft.Extensions.Localization
+
+<LayoutPageTitle>@Localizer["PageTitle"]</LayoutPageTitle>
+
+<div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
+    <div class="mb-4 col-span-full xl:mb-2">
+        <Breadcrumb BreadcrumbItems="BreadcrumbItems"/>
+        <H1>@Localizer["PageTitle"]</H1>
+    </div>
+</div>
+
+<div class="p-4 mb-4 mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+    @if (!_showPasswordConfirm)
+    {
+        <div class="mb-6 text-gray-600 dark:text-gray-400">
+            <p class="mb-2">@Localizer["ResetVaultPleaseNote"]</p>
+            <ul class="list-disc list-inside space-y-2">
+                <li>@Localizer["ResetVaultCredentialsDeletedNote"]</li>
+                <li>@Localizer["ResetVaultEmailAliasesKeptNote"]</li>
+                <li>@Localizer["ResetVaultSettingsKeptNote"]</li>
+                <li>@Localizer["ResetVaultIrreversibleNote"]</li>
+            </ul>
+        </div>
+
+        <EditForm Model="@_usernameModel" OnSubmit="@ConfirmUsername">
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["ResetVaultConfirmUsernameLabel"]</label>
+                <InputText id="username" @bind-Value="_usernameModel.Username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+            </div>
+
+            <div class="flex space-x-3">
+                <Button Type="submit" Color="danger">@Localizer["ResetVaultContinueButton"]</Button>
+                <Button Type="button" Color="secondary" OnClick="Cancel">@SharedLocalizer["Cancel"]</Button>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <MessageWarning Message="@Localizer["ResetVaultFinalWarning"]" />
+
+        <div class="mt-4 mb-6 text-gray-600 dark:text-gray-400">
+            <p class="mb-2">@Localizer["ResetVaultPleaseNote"]</p>
+            <ul class="list-disc list-inside space-y-2">
+                <li>@Localizer["ResetVaultDeletionIrreversibleNote"]</li>
+            </ul>
+        </div>
+
+        <EditForm Model="@_passwordModel" OnValidSubmit="@ResetVaultConfirmed">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-4">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["ResetVaultEnterPasswordLabel"]</label>
+                <InputText id="password" type="password" @bind-Value="_passwordModel.Password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+            </div>
+
+            <div class="flex space-x-3">
+                <Button Type="submit" Color="danger">@Localizer["ResetVaultConfirmButton"]</Button>
+                <Button Type="button" Color="secondary" OnClick="Cancel">@SharedLocalizer["Cancel"]</Button>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The model for the username confirmation step.
+    /// </summary>
+    private readonly ResetVaultUsernameModel _usernameModel = new();
+
+    /// <summary>
+    /// The model for the password confirmation step.
+    /// </summary>
+    private readonly ResetVaultPasswordModel _passwordModel = new();
+
+    private IStringLocalizer Localizer => LocalizerFactory.Create("Components.Main.Pages.Settings.ImportExport.ResetVault", "AliasVault.Client");
+    private IStringLocalizer ApiErrorLocalizer => LocalizerFactory.Create("ApiErrors", "AliasVault.Client");
+
+    /// <summary>
+    /// Whether to show the password confirmation step.
+    /// </summary>
+    private bool _showPasswordConfirm;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbImportExport"], Url = "/settings/import-export" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = Localizer["BreadcrumbResetVault"] });
+    }
+
+    /// <summary>
+    /// Confirms the username for vault reset.
+    /// </summary>
+    private async Task ConfirmUsername()
+    {
+        GlobalNotificationService.ClearMessages();
+
+        if (string.IsNullOrEmpty(_usernameModel.Username))
+        {
+            GlobalNotificationService.AddErrorMessage(Localizer["ResetVaultUsernameRequired"], true);
+            return;
+        }
+
+        var username = await GetUsernameAsync();
+        var usernameMatches = string.Equals(_usernameModel.Username.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase);
+        if (!usernameMatches)
+        {
+            GlobalNotificationService.AddErrorMessage(Localizer["ResetVaultUsernameDoesNotMatch"], true);
+            return;
+        }
+
+        _showPasswordConfirm = true;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Confirms the password and performs the vault reset.
+    /// </summary>
+    private async Task ResetVaultConfirmed()
+    {
+        GlobalLoadingSpinner.Show(Localizer["ResetVaultProgressMessage"]);
+        GlobalNotificationService.ClearMessages();
+
+        try
+        {
+            // Get current username
+            var username = await GetUsernameAsync();
+
+            // Send request to server to get user salt and encryption parameters
+            var result = await Http.PostAsJsonAsync("v1/Auth/login", new LoginInitiateRequest(username));
+            var responseContent = await result.Content.ReadAsStringAsync();
+
+            if (!result.IsSuccessStatusCode)
+            {
+                var errors = ApiResponseUtility.ParseErrorResponse(responseContent, ApiErrorLocalizer);
+                foreach (var error in errors)
+                {
+                    GlobalNotificationService.AddErrorMessage(error, true);
+                }
+                return;
+            }
+
+            var loginResponse = JsonSerializer.Deserialize<LoginInitiateResponse>(responseContent);
+            if (loginResponse == null)
+            {
+                GlobalNotificationService.AddErrorMessage(Localizer["ResetVaultErrorMessage"], true);
+                return;
+            }
+
+            // Derive password hash using server parameters
+            byte[] passwordHash = await Encryption.DeriveKeyFromPasswordAsync(_passwordModel.Password, loginResponse.Salt, loginResponse.EncryptionType, loginResponse.EncryptionSettings);
+
+            // Verify the password locally using the derived password hash
+            var isValidPassword = await AuthService.ValidateEncryptionKeyAsync(passwordHash);
+            if (!isValidPassword)
+            {
+                GlobalNotificationService.AddErrorMessage(Localizer["ResetVaultPasswordIncorrect"], true);
+                return;
+            }
+
+            // Clear local vault data by soft-deleting all credentials
+            var credentials = await CredentialService.LoadAllAsync();
+            foreach (var credential in credentials)
+            {
+                await CredentialService.SoftDeleteEntryAsync(credential.Id);
+            }
+
+            // Save the database
+            await DbService.SaveDatabaseAsync();
+
+            GlobalNotificationService.AddSuccessMessage(Localizer["ResetVaultSuccessMessage"]);
+
+            // Redirect to credentials overview page to show the empty vault
+            NavigationManager.NavigateTo("/credentials");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error resetting vault");
+            GlobalNotificationService.AddErrorMessage(Localizer["ResetVaultErrorMessage"], true);
+        }
+        finally
+        {
+            GlobalLoadingSpinner.Hide();
+        }
+    }
+
+    /// <summary>
+    /// Cancels the vault reset process.
+    /// </summary>
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/settings/import-export");
+    }
+
+    /// <summary>
+    /// Model for the username confirmation step.
+    /// </summary>
+    public class ResetVaultUsernameModel
+    {
+        /// <summary>
+        /// Gets or sets the username.
+        /// </summary>
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.UsernameRequired))]
+        public string Username { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Model for the password confirmation step.
+    /// </summary>
+    public class ResetVaultPasswordModel
+    {
+        /// <summary>
+        /// Gets or sets the password.
+        /// </summary>
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
+        public string Password { get; set; } = string.Empty;
+    }
+}
