@@ -11,12 +11,13 @@
 @using Microsoft.Extensions.Localization
 
 <FullScreenLoadingIndicator @ref="_loadingIndicator" />
-<ServerValidationErrors @ref="_serverValidationErrors" />
 
 @if (IsLoading) {
+    <ServerValidationErrors @ref="_serverValidationErrors" />
     <BoldLoadingIndicator />
 }
 else if (IsWebAuthnLoading) {
+    <ServerValidationErrors @ref="_serverValidationErrors" />
     <BoldLoadingIndicator />
     <p class="mt-6 text-center font-normal text-gray-500 dark:text-gray-400">
         @Localizer["LoggingInWithWebAuthn"]
@@ -35,6 +36,9 @@ else
             <p class="text-base font-normal text-gray-500 dark:text-gray-400 mb-4">
                 @Localizer["QuickUnlockDescription"]
             </p>
+
+            <ServerValidationErrors @ref="_serverValidationErrors" />
+
             <div class="flex space-x-4">
                 <button type="button" @onclick="UnlockWithWebAuthn" class="flex-grow inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                     <svg class="w-5 h-5 mr-2 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
@@ -52,7 +56,9 @@ else
             @Localizer["EnterMasterPasswordDescription"]
         </p>
 
-        <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-8 space-y-6">
+        <ServerValidationErrors @ref="_serverValidationErrors" />
+
+        <EditForm Model="_unlockModel" OnValidSubmit="UnlockSubmit" class="mt-4 space-y-6">
             <DataAnnotationsValidator/>
             <div>
                 <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["YourPasswordLabel"]</label>
