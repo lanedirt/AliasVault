@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TwoFactorAuthenticationTitle" xml:space="preserve">
-    <value>Twee-factor-authenticatie</value>
+    <value>Tweestapsverificatie</value>
     <comment>Section title for 2FA codes</comment>
   </data>
   <data name="AddTotpCodeButton" xml:space="preserve">
@@ -67,7 +67,7 @@
     <comment>Button text to add new TOTP code</comment>
   </data>
   <data name="AddTotpCodeDescription" xml:space="preserve">
-    <value>Voeg een twee-factor-authenticatiecode toe</value>
+    <value>Voeg een tweestapsverificatie code toe</value>
     <comment>Description for adding TOTP codes</comment>
   </data>
   <data name="AddTotpCodeModalTitle" xml:space="preserve">
@@ -79,7 +79,7 @@
     <comment>Button to close the add TOTP form</comment>
   </data>
   <data name="TotpInstructions" xml:space="preserve">
-    <value>Als de website 2FA voor uw account aanbiedt of vereist, kopieer dan de geheime sleutel of QR-code URI en plak deze hieronder.</value>
+    <value>Als de website 2FA voor je account aanbiedt of vereist, kopieer dan de secret key of QR-code URI en plak deze hieronder.</value>
     <comment>Instructions for adding TOTP codes</comment>
   </data>
   <data name="NameOptionalLabel" xml:space="preserve">
@@ -103,7 +103,7 @@
     <comment>Message shown for unsaved TOTP codes</comment>
   </data>
   <data name="DeleteTotpCodeConfirmation" xml:space="preserve">
-    <value>Weet u zeker dat u deze TOTP-code wilt verwijderen?</value>
+    <value>Weet je zeker dat u deze TOTP-code wilt verwijderen?</value>
     <comment>Confirmation message for deleting TOTP code</comment>
   </data>
   <data name="DeleteTotpCodeTitle" xml:space="preserve">
