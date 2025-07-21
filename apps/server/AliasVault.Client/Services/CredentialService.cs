@@ -373,16 +373,15 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
     public async Task<bool> HardDeleteAllCredentialsAsync()
     {
         var context = await dbService.GetDbContextAsync();
-        var allCredentials = await context.Credentials.ToListAsync();
 
-        if (allCredentials.Any())
-        {
-            // Hard delete all credentials (cascade will handle related records)
-            context.Credentials.RemoveRange(allCredentials);
+        // Hard delete all attachments, aliases, services and credentials.
+        context.Attachments.RemoveRange(context.Attachments);
+        context.Aliases.RemoveRange(context.Aliases);
+        context.Services.RemoveRange(context.Services);
+        context.Credentials.RemoveRange(context.Credentials);
 
-            // Save changes locally
-            await context.SaveChangesAsync();
-        }
+        // Save changes locally
+        await context.SaveChangesAsync();
 
         // Save the database to server
         return await dbService.SaveDatabaseAsync();
