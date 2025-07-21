@@ -71,7 +71,7 @@
     <comment>Title of the create new alias popup</comment>
   </data>
   <data name="ServiceNameLabel" xml:space="preserve">
-    <value>Naam van dienst</value>
+    <value>Naam</value>
     <comment>Label for service name field</comment>
   </data>
   <data name="ServiceNamePlaceholder" xml:space="preserve">
@@ -79,7 +79,7 @@
     <comment>Placeholder text for service name field</comment>
   </data>
   <data name="ServiceUrlLabel" xml:space="preserve">
-    <value>Dienst URL</value>
+    <value>Website URL</value>
     <comment>Label for service URL field</comment>
   </data>
   <data name="CreateButton" xml:space="preserve">
