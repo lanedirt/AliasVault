@@ -59,23 +59,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Twee-factor-authenticatie</value>
+    <value>Tweestapsverificatie</value>
     <comment>Section title</comment>
   </data>
   <data name="EnabledMessage" xml:space="preserve">
-    <value>Twee-factor-authenticatie is momenteel ingeschakeld.</value>
+    <value>Tweestapsverificatie is momenteel ingeschakeld.</value>
     <comment>Status message when 2FA is enabled</comment>
   </data>
   <data name="DisabledMessage" xml:space="preserve">
-    <value>Twee-factor-authenticatie is momenteel uitgeschakeld. Om de beveiliging van je account te verbeteren raden wij je aan dit in te schakelen.</value>
+    <value>Tweestapsverificatie is momenteel uitgeschakeld. Om de beveiliging van je account te verbeteren raden wij je aan dit in te schakelen.</value>
     <comment>Status message when 2FA is disabled</comment>
   </data>
   <data name="EnableButton" xml:space="preserve">
-    <value>Twee-factor-authenticatie inschakelen</value>
+    <value>Tweestapsverificatie inschakelen</value>
     <comment>Button to enable 2FA</comment>
   </data>
   <data name="DisableButton" xml:space="preserve">
-    <value>Twee-factor-authenticatie uitschakelen</value>
+    <value>Tweestapsverificatie uitschakelen</value>
     <comment>Button to disable 2FA</comment>
   </data>
 </root>
