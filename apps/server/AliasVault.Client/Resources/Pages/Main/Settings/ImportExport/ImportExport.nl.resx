@@ -104,4 +104,12 @@
 Weet u zeker dat u wilt doorgaan met de export?</value>
     <comment>Export warning confirmation message</comment>
   </data>
+  <data name="ResetVaultSectionTitle" xml:space="preserve">
+    <value>Reset Vault</value>
+    <comment>Reset vault section title</comment>
+  </data>
+  <data name="ResetVaultSectionDescription" xml:space="preserve">
+    <value>Met deze optie kun je je vault volledig legen en tegelijkertijd je account en e-mail aliassen behouden. Gebruik deze optie als je alle geïmporteerde en aangemaakte credentials wilt verwijderen en opnieuw wilt beginnen.</value>
+    <comment>Reset vault section description</comment>
+  </data>
 </root>
