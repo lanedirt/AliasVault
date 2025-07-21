@@ -73,11 +73,11 @@
   </data>
   <!-- Warning messages -->
   <data name="PermanentActionWarning" xml:space="preserve">
-    <value>Waarschuwing: Deze actie is permanent en kan niet ongedaan worden gemaakt. Al uw gegevens worden permanent verwijderd.</value>
+    <value>Waarschuwing: Deze actie is permanent en kan niet ongedaan worden gemaakt. Al je gegevens worden permanent verwijderd.</value>
     <comment>Warning message about permanent deletion</comment>
   </data>
   <data name="FinalWarning" xml:space="preserve">
-    <value>Laatste waarschuwing: Voer uw wachtwoord in om uw account permanent te verwijderen.</value>
+    <value>Laatste waarschuwing: Voer je wachtwoord in om je account permanent te verwijderen.</value>
     <comment>Final warning message before account deletion</comment>
   </data>
   <!-- Note sections -->
