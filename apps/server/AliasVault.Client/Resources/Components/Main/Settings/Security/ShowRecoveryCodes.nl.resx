@@ -63,7 +63,7 @@
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>De onderstaande herstelcodes worden gebruikt om toegang te krijgen tot uw account in het geval dat u de toegang tot uw authenticator-apparaat verliest. Maak een foto of noteer ze en bewaar ze op een veilige locatie. Deel ze met niemand.</value>
+    <value>De onderstaande herstelcodes worden gebruikt om toegang te krijgen tot je account in het geval dat je de toegang tot je authenticator-apparaat verliest. Maak een foto of noteer ze en bewaar ze op een veilige locatie. Deel ze met niemand.</value>
     <comment>Description of recovery codes</comment>
   </data>
   <data name="WarningTitle" xml:space="preserve">
@@ -71,7 +71,7 @@
     <comment>Warning title about storing codes</comment>
   </data>
   <data name="WarningDescription" xml:space="preserve">
-    <value>Als u uw apparaat verliest en de herstelcodes niet heeft, verliest u de toegang tot uw account. Deze codes worden slechts één keer getoond!</value>
+    <value>Als je je apparaat verliest en geen toegang hebt tot deze herstelcodes, verlies je de toegang tot je account. Deze codes worden slechts één keer getoond!</value>
     <comment>Warning description about recovery codes</comment>
   </data>
 </root>
