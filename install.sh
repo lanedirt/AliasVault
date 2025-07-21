@@ -1420,11 +1420,10 @@ handle_install() {
 
 # Function to handle build
 handle_build() {
-    printf "${YELLOW}+++ Building AliasVault from source +++${NC}\n"
+    printf "\n${YELLOW}+++ Building AliasVault from source +++${NC}\n"
 
     # Set deployment mode to build to ensure container lifecycle uses build configuration
     set_deployment_mode "build"
-    printf "\n"
 
     # Initialize workspace which makes sure all required directories and files exist
     initialize_workspace
