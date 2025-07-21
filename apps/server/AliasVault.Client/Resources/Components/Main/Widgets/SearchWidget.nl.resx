@@ -20,7 +20,7 @@
     </xsd:element>
   </xsd:schema>
   <data name="SearchVaultPlaceholder">
-    <value>Kluis doorzoeken...</value>
+    <value>Vault doorzoeken...</value>
     <comment>Placeholder text for search input field</comment>
   </data>
   <data name="SearchHelpText">
@@ -40,7 +40,7 @@
     <comment>Message when no search results are found</comment>
   </data>
   <data name="SearchingMessage">
-    <value>Searching...</value>
+    <value>Zoeken...</value>
     <comment>Message when search is in progress</comment>
   </data>
 </root>
