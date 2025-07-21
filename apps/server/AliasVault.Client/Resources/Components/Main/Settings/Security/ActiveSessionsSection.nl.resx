@@ -63,7 +63,7 @@
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Hieronder is een lijst van apparaten waar uw account momenteel is ingelogd of een actieve sessie heeft. U kunt vanaf elk van deze sessies uitloggen.</value>
+    <value>Hieronder is een lijst van apparaten waar je account momenteel is ingelogd of een actieve sessie heeft. Je kunt de sessies hier op afstand uitloggen.</value>
     <comment>Description of active sessions</comment>
   </data>
   <data name="NoSessionsMessage" xml:space="preserve">
@@ -87,19 +87,19 @@
     <comment>Table column header</comment>
   </data>
   <data name="RevokeButton" xml:space="preserve">
-    <value>Intrekken</value>
+    <value>Uitloggen</value>
     <comment>Button to revoke session</comment>
   </data>
   <data name="RevokeSuccessMessage" xml:space="preserve">
-    <value>Sessie succesvol ingetrokken.</value>
+    <value>Sessie succesvol uitgelogd.</value>
     <comment>Success message when session is revoked</comment>
   </data>
   <data name="RevokeErrorMessage" xml:space="preserve">
-    <value>Kan sessie niet intrekken.</value>
+    <value>Kan sessie niet uitloggen.</value>
     <comment>Error message when session revocation fails</comment>
   </data>
   <data name="RevokeExceptionMessage" xml:space="preserve">
-    <value>Kan sessie niet intrekken: {0}.</value>
+    <value>Kan sessie niet uitloggen: {0}.</value>
     <comment>Exception message when session revocation fails. {0} is placeholder for error details</comment>
   </data>
 </root>
