@@ -123,10 +123,6 @@
     <value>Binnenkort beschikbaar</value>
     <comment>Label for features coming soon</comment>
   </data>
-  <data name="DownloadForPrefix">
-    <value>Download voor</value>
-    <comment>Prefix for download links (e.g., "Download for iOS")</comment>
-  </data>
   <data name="SoonSuffix">
     <value>(Binnenkort)</value>
     <comment>Suffix indicating feature coming soon</comment>

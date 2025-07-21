@@ -183,9 +183,6 @@ const CredentialsList: React.FC = () => {
           <p className="text-sm">
             {t('credentials.welcomeDescription')}
           </p>
-          <p className="text-sm">
-            {t('credentials.manualCreationHint')}
-          </p>
         </div>
       ) : (
         <ul className="space-y-2">

@@ -1,5 +1,11 @@
 <a href="@Href" class="space-x-3 @GetButtonClasses()">
-    @Text @if (AdditionalText.Length > 0) { <span class="hidden md:inline ms-1">@AdditionalText</span> }
+    @if (SmallText.Length > 0) {
+        <span class="hidden md:inline ms-1">@SmallText</span>
+        <span class="md:hidden">@Text</span>
+    }
+    else {
+        @Text
+    }
 </a>
 
 @code {
@@ -16,10 +22,10 @@
     public string Text { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the additional text that appears on larger screens.
+    /// Gets or sets the text that should appear when the screen is small (optional). If not set, the main text will be used.
     /// </summary>
     [Parameter]
-    public string AdditionalText { get; set; } = string.Empty;
+    public string SmallText { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the color theme of the button.
