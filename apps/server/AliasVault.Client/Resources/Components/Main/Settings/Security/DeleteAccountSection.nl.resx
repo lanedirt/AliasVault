@@ -63,7 +63,7 @@
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Verwijder uw account en alle bijbehorende gegevens permanent. Deze actie kan niet ongedaan worden gemaakt.</value>
+    <value>Verwijder je account en alle bijbehorende gegevens permanent. Deze actie kan niet ongedaan worden gemaakt.</value>
     <comment>Warning description for account deletion</comment>
   </data>
   <data name="DeleteButton" xml:space="preserve">
