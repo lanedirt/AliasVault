@@ -67,7 +67,7 @@
     <comment>Tagline emphasizing privacy protection</comment>
   </data>
   <data name="CreateNewVaultButton" xml:space="preserve">
-    <value>Nieuwe kluis aanmaken</value>
+    <value>Nieuwe vault aanmaken</value>
     <comment>Button text for creating a new vault</comment>
   </data>
   <data name="LoginExistingAccountButton" xml:space="preserve">
