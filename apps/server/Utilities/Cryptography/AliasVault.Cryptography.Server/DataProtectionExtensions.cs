@@ -47,11 +47,14 @@ public static class DataProtectionExtensions
         if (isContainer)
         {
             // When running in containers, don't use certificate-based key protection due to Linux keystore limitations
-            dataProtectionBuilder.UseCryptographicAlgorithms(new Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorConfiguration()
-            {
-                EncryptionAlgorithm = Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.EncryptionAlgorithm.AES_256_CBC,
-                ValidationAlgorithm = Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ValidationAlgorithm.HMACSHA256,
-            });
+            // Keys are protected by database access controls, TLS, and container isolation
+            dataProtectionBuilder
+                .UseCryptographicAlgorithms(new Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorConfiguration()
+                {
+                    EncryptionAlgorithm = Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.EncryptionAlgorithm.AES_256_CBC,
+                    ValidationAlgorithm = Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ValidationAlgorithm.HMACSHA256,
+                })
+                .SetDefaultKeyLifetime(TimeSpan.FromDays(90));
         }
         else
         {
