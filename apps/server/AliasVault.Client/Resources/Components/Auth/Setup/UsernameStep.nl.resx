@@ -21,15 +21,15 @@
   </xsd:schema>
   <!-- Assistant messages -->
   <data name="GreatNowLetsSetupUsername">
-    <value>Geweldig! Nu gaan we uw gebruikersnaam voor AliasVault instellen.</value>
+    <value>Geweldig! Nu gaan we je gebruikersnaam voor AliasVault instellen.</value>
     <comment>Assistant message about setting up username</comment>
   </data>
   <data name="EnterUsernameInstructions">
-    <value>Voer een gebruikersnaam in die u wilt gebruiken. Dit kan uw e-mailadres zijn of elke unieke naam die u verkiest.</value>
+    <value>Voer een gebruikersnaam in die je wilt gebruiken. Dit kan je e-mailadres zijn of een andere unieke naam.</value>
     <comment>Instructions for entering username</comment>
   </data>
   <data name="RememberUsernameNote">
-    <value>Onthoud: Dit is wat u later gebruikt om in te loggen, dus zorg ervoor dat het iets is wat u zich zult herinneren!</value>
+    <value>Onthoud: Dit is wat je later gebruikt om in te loggen, dus zorg ervoor dat het iets is wat je zult herinneren!</value>
     <comment>Important note about remembering username</comment>
   </data>
   <!-- Form labels -->
@@ -38,7 +38,7 @@
     <comment>Label for username input field</comment>
   </data>
   <data name="UsernamePlaceholder">
-    <value>Voer uw gewenste gebruikersnaam of e-mail in</value>
+    <value>Voer je gewenste gebruikersnaam of e-mail in</value>
     <comment>Placeholder text for username input</comment>
   </data>
   <!-- Validation messages -->
