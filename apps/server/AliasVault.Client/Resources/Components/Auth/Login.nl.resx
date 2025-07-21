@@ -111,7 +111,7 @@
     <comment>Link text for password recovery</comment>
   </data>
   <data name="CreateNewVaultLink" xml:space="preserve">
-    <value>Nieuwe kluis aanmaken</value>
+    <value>Nieuwe vault aanmaken</value>
     <comment>Link text for creating a new vault</comment>
   </data>
   <data name="LoginWithRecoveryCodeLink" xml:space="preserve">
