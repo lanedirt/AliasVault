@@ -91,7 +91,7 @@
     <comment>Delete email confirmation dialog title</comment>
   </data>
   <data name="DeleteEmailConfirmation" xml:space="preserve">
-    <value>Weet u zeker dat u deze e-mail wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</value>
+    <value>Weet je zeker dat je deze e-mail wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</value>
     <comment>Delete email confirmation message</comment>
   </data>
   <data name="EmailDeletedSuccess" xml:space="preserve">
