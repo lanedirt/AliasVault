@@ -75,7 +75,7 @@
     <comment>Tip about keyboard shortcut for home</comment>
   </data>
   <data name="TipLockShortcut" xml:space="preserve">
-    <value>Tip: Gebruik de g+l (ga vergrendelen) sneltoets om de kluis te vergrendelen.</value>
+    <value>Tip: Gebruik de g+l (go lock) sneltoets om de vault te vergrendelen.</value>
     <comment>Tip about keyboard shortcut for locking vault</comment>
   </data>
 </root>
