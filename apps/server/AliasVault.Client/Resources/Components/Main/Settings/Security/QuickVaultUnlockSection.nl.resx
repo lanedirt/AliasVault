@@ -59,15 +59,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Snelle kluis ontgrendeling</value>
+    <value>Quick vault unlock</value>
     <comment>Title for quick vault unlock section</comment>
   </data>
   <data name="EnabledDescription" xml:space="preserve">
-    <value>De kluis ontsleutelingssleutel wordt opgeslagen via een toegangssleutel. Dit betekent dat wanneer je de AliasVault pagina of tab herlaadt, je kunt inloggen met je gezicht, vingerafdruk of ingebouwde browser beveiligingssleutels. Als je de snelle kluis ontgrendeling wilt uitschakelen, kun je dat doen met de knop hieronder.</value>
+    <value>De vault decryption key wordt opgeslagen via een passkey. Dit betekent dat wanneer je de AliasVault pagina of tab herlaadt, je kunt inloggen met je gezicht, vingerafdruk of security key. Als je de quick vault unlock functionaliteit wilt uitschakelen, kun je dat doen met de knop hieronder.</value>
     <comment>Description when quick unlock is enabled</comment>
   </data>
   <data name="DisableButton" xml:space="preserve">
-    <value>Snelle Kluis Ontgrendeling Uitschakelen</value>
+    <value>Quick Vault Unlock Uitschakelen</value>
     <comment>Button to disable quick vault unlock</comment>
   </data>
   <data name="DisabledDescription" xml:space="preserve">
@@ -79,15 +79,15 @@
     <comment>Warning about experimental nature of the feature</comment>
   </data>
   <data name="EnableButton" xml:space="preserve">
-    <value>Snelle Kluis Ontgrendeling Inschakelen</value>
+    <value>Quick Vault Unlock Inschakelen</value>
     <comment>Button to enable quick vault unlock</comment>
   </data>
   <data name="SuccessEnabledMessage" xml:space="preserve">
-    <value>Snelle Kluis Ontgrendeling is succesvol ingeschakeld. De volgende keer dat je kluis vergrendeld is, kun je deze ontgrendelen met je aangemaakte toegangssleutel.</value>
+    <value>Quick Vault Unlock is succesvol ingeschakeld. De volgende keer dat je vault vergrendeld is, kun je deze ontgrendelen met je aangemaakte toegangssleutel.</value>
     <comment>Success message when quick unlock is enabled</comment>
   </data>
   <data name="SuccessDisabledMessage" xml:space="preserve">
-    <value>Snelle Kluis Ontgrendeling is succesvol uitgeschakeld.</value>
+    <value>Quick Vault Unlock is succesvol uitgeschakeld.</value>
     <comment>Success message when quick unlock is disabled</comment>
   </data>
   <data name="WebAuthnNotSupportedError" xml:space="preserve">
@@ -95,7 +95,7 @@
     <comment>Error when WebAuthn is not supported</comment>
   </data>
   <data name="EnableErrorMessage" xml:space="preserve">
-    <value>Er is een fout opgetreden bij het inschakelen van Snelle Kluis Ontgrendeling. Probeer het (later) opnieuw.</value>
+    <value>Er is een fout opgetreden bij het inschakelen van Quick Vault Unlock. Probeer het (later) opnieuw.</value>
     <comment>Generic error message when enabling fails</comment>
   </data>
 </root>
