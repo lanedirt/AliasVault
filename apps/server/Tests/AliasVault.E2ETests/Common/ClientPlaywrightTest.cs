@@ -405,4 +405,36 @@ public class ClientPlaywrightTest : PlaywrightTest
             await WaitForUrlAsync("welcome**", WelcomeMessage);
         }
     }
+
+    /// <summary>
+    /// Complete the tutorial shown after registration. This is required for certain tests that rely on the tutorial being completed
+    /// so it shows the empty credential list instead of redirecting to the tutorial welcome page.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    protected async Task CompleteTutorial()
+    {
+        // Wait for "Welcome to AliasVault" message to appear.
+        await WaitForUrlAsync("welcome**", WelcomeMessage);
+
+        // Click the "Continue" button.
+        var continueButton = Page.Locator("text=Continue");
+        await continueButton.ClickAsync();
+
+        // Wait for "How AliasVault works" message to appear.
+        await WaitForUrlAsync("welcome**", "How AliasVault works");
+
+        // Click the "Continue" button.
+        var continueButton2 = Page.Locator("text=Continue");
+        await continueButton2.ClickAsync();
+
+        // Wait for "Tips" message to appear.
+        await WaitForUrlAsync("welcome**", "Tips");
+
+        // Click the "Get Started" button.
+        var getStartedButton = Page.Locator("text=Get Started");
+        await getStartedButton.ClickAsync();
+
+        // Wait for "Find all of your credentials below" message to appear.
+        await WaitForUrlAsync("welcome**", "Find all of your credentials below");
+    }
 }
