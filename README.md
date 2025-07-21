@@ -69,11 +69,9 @@ For full control over your own data you can self-host and install AliasVault on 
 
 This method uses pre-built Docker images and works on minimal hardware specifications:
 
-- Linux VM with root access (Ubuntu/AlmaLinux recommended) or Raspberry Pi
-- 1 vCPU
-- 1GB RAM
-- 16GB disk space
-- Docker (20.10+) and Docker Compose (2.0+)
+- 64-bit Linux VM (Ubuntu/AlmaLinux) or Raspberry Pi, with root access
+- Minimum: 1 vCPU, 1GB RAM, 16GB disk
+- Docker ≥ 20.10 and Docker Compose ≥ 2.0
 
 ```bash
 # Download install script from latest stable release
