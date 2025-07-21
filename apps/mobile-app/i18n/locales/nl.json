@@ -21,20 +21,20 @@
     "authCode": "Authenticatiecode",
     "unlock": "Ontgrendelen",
     "unlocking": "Ontgrendelen...",
-    "unlockingVault": "Kluis ontgrendelen",
+    "unlockingVault": "Vault ontgrendelen",
     "loggingIn": "Inloggen",
     "validatingCredentials": "Gegevens valideren",
-    "syncingVault": "Kluis synchroniseren",
+    "syncingVault": "Vault synchroniseren",
     "verifyingAuthCode": "Authenticatiecode verifiëren",
     "verify": "Verifiëren",
-    "unlockVault": "Kluis Ontgrendelen",
-    "enterPassword": "Voer uw wachtwoord in om uw kluis te ontgrendelen",
+    "unlockVault": "Valt Ontgrendelen",
+    "enterPassword": "Voer uw wachtwoord in om je vault te ontgrendelen",
     "enterPasswordPlaceholder": "Wachtwoord",
     "enterAuthCode": "Voer 6-cijferige code in",
     "usernamePlaceholder": "naam / naam@bedrijf.com",
     "passwordPlaceholder": "Voer uw wachtwoord in",
     "enableBiometric": "{{biometric}} inschakelen?",
-    "biometricPrompt": "Wilt u {{biometric}} gebruiken om uw kluis te ontgrendelen?",
+    "biometricPrompt": "Wil je {{biometric}} gebruiken om je vault te ontgrendelen?",
     "tryBiometricAgain": "Probeer {{biometric}} Opnieuw",
     "authCodeNote": "Opmerking: als je geen toegang hebt tot je authenticator, kunt je je 2FA resetten door met een herstelcode in te loggen via de website.",
     "errors": {
@@ -44,7 +44,7 @@
       "enterPassword": "Voer uw wachtwoord in",
       "serverError": "Kon de AliasVault server niet bereiken. Probeer het later opnieuw of neem contact op met support als het probleem aanhoudt."
     },
-    "confirmLogout": "Weet u zeker dat u wilt uitloggen? U moet opnieuw inloggen met uw hoofdwachtwoord om toegang te krijgen tot uw kluis."
+    "confirmLogout": "Weet je zeker dat je wilt uitloggen? Je moet opnieuw inloggen met je hoofdwachtwoord om toegang te krijgen tot je vault."
   },
   "credentials": {
     "title": "Credentials",
@@ -83,10 +83,10 @@
     "password": "Wachtwoord",
     "deletingCredential": "Credential verwijderen...",
     "errorLoadingCredentials": "Fout bij het laden van credentials",
-    "vaultSyncFailed": "Kluis synchronisatie mislukt",
-    "vaultSyncedSuccessfully": "Kluis succesvol gesynchroniseerd",
-    "vaultUpToDate": "Kluis is up-to-date",
-    "offlineMessage": "U bent offline. Maak verbinding met het internet om uw kluis te synchroniseren.",
+    "vaultSyncFailed": "Vault synchronisatie mislukt",
+    "vaultSyncedSuccessfully": "Vault succesvol gesynchroniseerd",
+    "vaultUpToDate": "Vault is up-to-date",
+    "offlineMessage": "Je bent offline. Maak verbinding met het internet om je vault te synchroniseren.",
     "credentialCreated": "Credential aangemaakt!",
     "credentialCreatedMessage": "Je nieuwe credential is toegevoegd aan je vault en is klaar voor gebruik.",
     "switchBackToBrowser": "Schakel terug naar uw browser om door te gaan.",
@@ -102,7 +102,7 @@
     "title": "Instellingen",
     "iosAutofill": "iOS autofill",
     "androidAutofill": "Android autofill",
-    "vaultUnlock": "Kluis Ontgrendel Methode",
+    "vaultUnlock": "Vault Ontgrendel Methode",
     "autoLock": "Automatisch vergrendelen",
     "identityGenerator": "Identiteit Generator",
     "security": "Beveiliging",
@@ -122,13 +122,13 @@
     "languageSystemMessage": "Wijzig de app-taal via het app instellingen scherm op je apparaat.",
     "openSettings": "Open Instellingen",
     "vaultUnlockSettings": {
-      "description": "Kies hoe u uw kluis wilt ontgrendelen.",
+      "description": "Kies hoe je je vault wilt ontgrendelen.",
       "biometricEnabled": "{{biometric}} is nu succesvol ingeschakeld",
       "biometricNotAvailable": "{{biometric}} Niet Beschikbaar",
       "biometricDisabledMessage": "{{biometric}} is uitgeschakeld voor AliasVault. Om het te gebruiken, schakel het eerst in via uw apparaat-instellingen.",
-      "biometricHelp": "Uw kluis ontsleutelingssleutel wordt veilig opgeslagen op uw lokale apparaat in de {{keystore}} en kan veilig worden benaderd met {{biometric}}.",
+      "biometricHelp": "Je vault ontsleutelingssleutel wordt veilig opgeslagen op je lokale apparaat in de {{keystore}} en kan veilig worden opgehaald met {{biometric}}.",
       "biometricUnavailableHelp": "{{biometric}} is niet beschikbaar. Tik om instellingen te openen en/of ga naar je apparaat-instellingen om het in te schakelen en te configureren.",
-      "passwordHelp": "Voer uw volledige hoofdwachtwoord opnieuw in om uw kluis te ontgrendelen. Dit is altijd ingeschakeld als terugvaloptie.",
+      "passwordHelp": "Voer je volledige hoofdwachtwoord opnieuw in om je vault te ontgrendelen. Dit is altijd ingeschakeld als fallback optie.",
       "keystoreIOS": "iOS Sleutelhanger",
       "keystoreAndroid": "Android Sleutelopslag"
     },
@@ -158,7 +158,7 @@
     },
     "securitySettings": {
       "title": "Beveiliging",
-      "description": "Beheer uw account en kluis beveiligingsinstellingen.",
+      "description": "Beheer je account en vault beveiligingsinstellingen.",
       "changeMasterPassword": "Hoofdwachtwoord Wijzigen",
       "activeSessionsTitle": "Actieve Sessies",
       "recentAuthLogs": "Recente Auth Logs",
@@ -278,8 +278,8 @@
     "USERNAME_TOO_LONG": "Gebruikersnaam te lang: mag niet langer zijn dan 40 tekens.",
     "USERNAME_INVALID_EMAIL": "Ongeldig e-mailadres.",
     "USERNAME_INVALID_CHARACTERS": "Gebruikersnaam is ongeldig, mag alleen letters of cijfers bevatten.",
-    "VAULT_NOT_UP_TO_DATE": "Uw kluis is niet up-to-date. Synchroniseer uw kluis en probeer het opnieuw.",
+    "VAULT_NOT_UP_TO_DATE": "Je vault is niet up-to-date. Synchroniseer je vault en probeer het opnieuw.",
     "INTERNAL_SERVER_ERROR": "Interne serverfout.",
-    "VAULT_ERROR": "De lokale kluis is niet up-to-date. Synchroniseer uw kluis door de pagina te vernieuwen en probeer het opnieuw."
+    "VAULT_ERROR": "De lokale vault is niet up-to-date. Synchroniseer je vault door de pagina te vernieuwen en probeer het opnieuw."
   }
 }
