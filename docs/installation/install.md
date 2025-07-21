@@ -18,14 +18,10 @@ The following guide will walk you through the steps to install AliasVault on you
 To get AliasVault up and running quickly, run the install script to pull pre-built Docker images. The install script will also configure the .env file and start the AliasVault containers. You can get up and running in less than 5 minutes.
 
 ### Hardware requirements
-- Linux VM with root access (Ubuntu or RHEL based distros recommended)
-- 1 vCPU
-- 1GB RAM
-- 16GB disk space
-- Docker
-  - Docker CE (minimum version 20.10)
-  - Docker Compose (minimum version 2.0)
-  - Refer to the official installation instructions: [https://docs.docker.com/engine/install/](https://docs.docker.com/engine/install/)
+- 64-bit Linux VM with root access (Ubuntu or RHEL-based recommended)
+- Minimum: 1 vCPU, 1GB RAM, 16GB disk
+- Docker (CE ≥ 20.10) and Docker Compose (≥ 2.0)
+  → Installation guide: [Docker Docs](https://docs.docker.com/engine/install/)
 
 ### Installation steps
 1. Download the install script to a directory of your choice. All AliasVault files and directories will be created in this directory.
