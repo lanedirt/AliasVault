@@ -63,7 +63,7 @@
     <comment>Message shown while WebAuthn authentication is in progress</comment>
   </data>
   <data name="QuickUnlockDescription" xml:space="preserve">
-    <value>Ontgrendel je kluis snel met je vingerafdruk, Face ID of beveiligingssleutel. Of log in met je wachtwoord als alternatief.</value>
+    <value>Ontgrendel je vault snel met je vingerafdruk, Face ID of beveiligingssleutel. Of log in met je wachtwoord als alternatief.</value>
     <comment>Description explaining WebAuthn unlock options</comment>
   </data>
   <data name="UnlockWithWebAuthn" xml:space="preserve">
@@ -95,7 +95,7 @@
     <comment>Link text for logout</comment>
   </data>
   <data name="UnlockingVaultMessage" xml:space="preserve">
-    <value>Kluis ontgrendelen...</value>
+    <value>Vault ontgrendelen...</value>
     <comment>Loading message while unlocking vault</comment>
   </data>
   <data name="UnlockRequestError" xml:space="preserve">
