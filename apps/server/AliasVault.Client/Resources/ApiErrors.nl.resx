@@ -126,7 +126,7 @@
     <value>Gebruiker bestaat niet (name-2)</value>
   </data>
   <data name="ACCOUNT_BLOCKED" xml:space="preserve">
-    <value>Uw account is uitgeschakeld. Als u denkt dat dit een vergissing is, neem dan contact op met de ondersteuning.</value>
+    <value>Je account is uitgeschakeld. Als je denkt dat dit een vergissing is, neem dan contact op met de ondersteuning.</value>
   </data>
   <data name="INVALID_REFRESH_TOKEN" xml:space="preserve">
     <value>Ongeldig refreshtoken</value>
@@ -153,7 +153,7 @@
     <value>Gebruikersnaam komt niet overeen met de huidige gebruiker.</value>
   </data>
   <data name="PASSWORD_MISMATCH" xml:space="preserve">
-    <value>Het opgegeven wachtwoord komt niet overeen met uw huidige wachtwoord.</value>
+    <value>Het opgegeven wachtwoord komt niet overeen met je huidige wachtwoord.</value>
   </data>
   <data name="ACCOUNT_SUCCESSFULLY_DELETED" xml:space="preserve">
     <value>Account succesvol verwijderd.</value>
@@ -183,7 +183,7 @@
     <value>Interne serverfout</value>
   </data>
   <data name="VAULT_ERROR" xml:space="preserve">
-    <value>De lokale kluis is niet up-to-date. Synchroniseer uw kluis door de pagina te vernieuwen en probeer het opnieuw.</value>
+    <value>De lokale vault is niet up-to-date. Synchroniseer je vault door de pagina te vernieuwen en probeer het opnieuw.</value>
   </data>
   <data name="UNKNOWN_ERROR" xml:space="preserve">
     <value>Er is een onbekende fout opgetreden. Probeer het opnieuw.</value>
@@ -195,7 +195,7 @@
     <value>Ongeldige herstelcode. Probeer het opnieuw.</value>
   </data>
   <data name="VAULT_NOT_UP_TO_DATE" xml:space="preserve">
-    <value>Uw kluis is niet up-to-date. Synchroniseer uw kluis en probeer het opnieuw.</value>
+    <value>Je vault is niet up-to-date. Synchroniseer je vault en probeer het opnieuw.</value>
   </data>
   <data name="ACCOUNT_LOCKED" xml:space="preserve">
     <value>Je hebt te vaak een onjuist wachtwoord ingevoerd en je account is nu vergrendeld. Je kunt het over 30 minuten opnieuw proberen.</value>
