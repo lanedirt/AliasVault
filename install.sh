@@ -1242,7 +1242,7 @@ print_install_success_message() {
 
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
-    printf "${CYAN}ℹ (Re)creating Docker containers...${NC} "
+    printf "${CYAN}ℹ (Re)creating Docker containers...${NC}\n"
 
     if [ "$VERBOSE" = true ]; then
         printf "\b${NC}\n"
@@ -1454,7 +1454,7 @@ handle_build() {
 
     printf "\n${YELLOW}+++ Building and starting services +++${NC}\n"
 
-    printf "${CYAN}ℹ Building Docker Compose stack...${NC} "
+    printf "${CYAN}ℹ Building Docker Compose stack...${NC}\n"
     if [ "$VERBOSE" = true ]; then
         printf "\b${NC}\n"
         if ! $(get_docker_compose_command) build; then

@@ -18,7 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 public static class DataProtectionExtensions
 {
     /// <summary>
-    /// Setup .NET DataProtection to use common AliasVault settings with self-signed certificate.
+    /// Setup .NET DataProtection to use common AliasVault settings.
     /// </summary>
     /// <param name="services">Services.</param>
     /// <param name="applicationName">Application name.</param>
@@ -36,25 +36,41 @@ public static class DataProtectionExtensions
             certPath = Path.Combine(AppContext.BaseDirectory, $"{applicationName}.DataProtection.Development.pfx");
         }
 
-        var certificateFlags = X509KeyStorageFlags.MachineKeySet |
-                              X509KeyStorageFlags.PersistKeySet |
-                              X509KeyStorageFlags.Exportable;
+        // Use different protection methods for containerized environments
+        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true" ||
+                         Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
 
-        X509Certificate2 cert;
-        if (!File.Exists(certPath))
+        var dataProtectionBuilder = services.AddDataProtection()
+            .PersistKeysToDbContext<AliasServerDbContext>()
+            .SetApplicationName(applicationName);
+
+        if (isContainer)
         {
-            cert = CertificateGenerator.GeneratePfx($"{applicationName}.DataProtection", certPassword);
-            CertificateGenerator.SaveCertificateToFile(cert, certPassword, certPath);
+            // When running in containers, don't use certificate-based key protection due to Linux keystore limitations
+            dataProtectionBuilder.UseCryptographicAlgorithms(new Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorConfiguration()
+            {
+                EncryptionAlgorithm = Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.EncryptionAlgorithm.AES_256_CBC,
+                ValidationAlgorithm = Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ValidationAlgorithm.HMACSHA256,
+            });
         }
         else
         {
-            cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, certificateFlags);
-        }
+            // Use certificate-based protection for development
+            var certificateFlags = X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable;
 
-        services.AddDataProtection()
-            .PersistKeysToDbContext<AliasServerDbContext>()
-            .ProtectKeysWithCertificate(cert)
-            .SetApplicationName(applicationName);
+            X509Certificate2 cert;
+            if (!File.Exists(certPath))
+            {
+                cert = CertificateGenerator.GeneratePfx($"{applicationName}.DataProtection", certPassword);
+                CertificateGenerator.SaveCertificateToFile(cert, certPassword, certPath);
+            }
+            else
+            {
+                cert = X509CertificateLoader.LoadPkcs12FromFile(certPath, certPassword, certificateFlags);
+            }
+
+            dataProtectionBuilder.ProtectKeysWithCertificate(cert);
+        }
 
         return services;
     }
