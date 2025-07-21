@@ -63,15 +63,15 @@
     <comment>Welcome title for new vault creation</comment>
   </data>
   <data name="CreatingDescription" xml:space="preserve">
-    <value>Je nieuwe versleutelde kluis wordt geïnitialiseerd. Dit proces kan even duren. Even geduld.</value>
+    <value>Je nieuwe versleutelde vault wordt geïnitialiseerd. Dit proces kan even duren. Even geduld.</value>
     <comment>Description for vault creation process</comment>
   </data>
   <data name="SaveFailedError" xml:space="preserve">
-    <value>Kluis succesvol aangemaakt maar opslaan naar server mislukt. Ververs de pagina en probeer opnieuw of neem contact op met support.</value>
+    <value>Vault succesvol aangemaakt maar opslaan naar server mislukt. Ververs de pagina en probeer opnieuw of neem contact op met support.</value>
     <comment>Error message when vault creation succeeds but save fails</comment>
   </data>
   <data name="CreationFailedError" xml:space="preserve">
-    <value>Kluis aanmaken mislukt. Probeer opnieuw of neem contact op met support.</value>
+    <value>Vault aanmaken mislukt. Probeer opnieuw of neem contact op met support.</value>
     <comment>Error message when vault creation fails</comment>
   </data>
 </root>
