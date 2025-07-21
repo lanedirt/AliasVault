@@ -183,7 +183,7 @@
     <value>Interne serverfout</value>
   </data>
   <data name="VAULT_ERROR" xml:space="preserve">
-    <value>De lokale kluis is niet up-to-date. Synchroniseer uw kluis door de pagina te vernieuwen en probeer het opnieuw.</value>
+    <value>De lokale vault is niet up-to-date. Synchroniseer je vault door de pagina te vernieuwen en probeer het opnieuw.</value>
   </data>
   <data name="UNKNOWN_ERROR" xml:space="preserve">
     <value>Er is een onbekende fout opgetreden. Probeer het opnieuw.</value>
@@ -195,7 +195,7 @@
     <value>Ongeldige herstelcode. Probeer het opnieuw.</value>
   </data>
   <data name="VAULT_NOT_UP_TO_DATE" xml:space="preserve">
-    <value>Uw kluis is niet up-to-date. Synchroniseer uw kluis en probeer het opnieuw.</value>
+    <value>Je vault is niet up-to-date. Synchroniseer je vault en probeer het opnieuw.</value>
   </data>
   <data name="ACCOUNT_LOCKED" xml:space="preserve">
     <value>Je hebt te vaak een onjuist wachtwoord ingevoerd en je account is nu vergrendeld. Je kunt het over 30 minuten opnieuw proberen.</value>
