@@ -42,7 +42,7 @@
   </data>
   <!-- Welcome step content -->
   <data name="WelcomeMessage">
-    <value>Uw kluis is succesvol aangemaakt! Bescherm uw online privacy door unieke aliassen te maken voor elke service waarvoor u zich aanmeldt. Laten we leren hoe AliasVault werkt en vervolgens uw eerste veilige alias maken.</value>
+    <value>Je vault is succesvol aangemaakt! Bescherm je online privacy door unieke aliassen aan te maken voor elke website die je gebruikt. Doorloop de tutorial om te leren hoe AliasVault werkt en om vervolgens je eerste alias aan te maken.</value>
     <comment>Welcome message on the first tutorial step</comment>
   </data>
   <!-- How it works step content -->
@@ -72,7 +72,7 @@
     <comment>Title for master password tip</comment>
   </data>
   <data name="MasterPasswordTipContent">
-    <value>Uw hoofdwachtwoord is vereist om uw kluis te ontsleutelen. Deel het nooit met iemand en bewaar het op een veilige locatie. Waarschuwing: Als u uw hoofdwachtwoord verliest, kunnen uw gegevens niet worden hersteld - zelfs niet door ons team.</value>
+    <value>Je hoofdwachtwoord is vereist om je vault te ontsleutelen. Deel dit wachtwoord nooit en bewaar het op een veilige locatie. Waarschuwing: Als je je hoofdwachtwoord verliest, kunnen je gegevens niet worden hersteld - zelfs niet door het AliasVault team.</value>
     <comment>Content for master password tip</comment>
   </data>
   <data name="TwoFactorTipTitle">
@@ -80,7 +80,7 @@
     <comment>Title for two-factor authentication tip</comment>
   </data>
   <data name="TwoFactorTipContent">
-    <value>Twee-factor authenticatie voegt een extra beveiligingslaag toe aan uw account. Het vereist dat u een code invoert vanuit uw authenticator-app of een herstelcode verstrekt voordat uw versleutelde kluis kan worden geopend.</value>
+    <value>Tweestapsverificatie voegt een extra beveiligingslaag toe aan je account. Het vereist dat je een code invoert vanuit je authenticator-app voordat je versleutelde kluis kan worden geopend.</value>
     <comment>Content for two-factor authentication tip</comment>
   </data>
   <data name="ExtensionsAppsTipTitle">
