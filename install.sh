@@ -569,6 +569,32 @@ check_dependencies() {
     local spinstr='|/-\\'
     local i=0
 
+    # Check if OS is 64-bit
+    printf "\b%c" "${spinstr:$i:1}"
+    ((i = (i + 1) % 4))
+    local arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64|arm64|aarch64)
+            # 64-bit architecture - continue
+            ;;
+        *)
+            printf "\b ${RED}✗${NC}\n"
+            log_error "AliasVault requires a 64-bit operating system."
+            printf "\n"
+            printf "${RED}${BOLD}Unsupported architecture detected: $arch${NC}\n"
+            printf "\n"
+            printf "AliasVault only supports 64-bit operating systems. Your current architecture ($arch) is not supported.\n"
+            printf "\n"
+            printf "${CYAN}Supported architectures:${NC}\n"
+            printf "  ${GREEN}✓${NC} x86_64 (Intel/AMD 64-bit)\n"
+            printf "  ${GREEN}✓${NC} arm64/aarch64 (ARM 64-bit)\n"
+            printf "\n"
+            printf "${YELLOW}Please upgrade your operating system to a 64-bit version.${NC}\n"
+            printf "\n"
+            return 1
+            ;;
+    esac
+
     # Check Docker
     printf "\b%c" "${spinstr:$i:1}"
     ((i = (i + 1) % 4))
