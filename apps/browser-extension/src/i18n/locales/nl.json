@@ -26,7 +26,7 @@
     "unlockSuccessTitle": "Je vault is succesvol ontgrendeld",
     "unlockSuccessDescription": "Je kunt nu automatisch invullen gebruiken in inlogformulieren in je browser.",
     "closePopup": "Sluit deze popup",
-    "browseVault": "Bekijk vault-inhoud",
+    "browseVault": "Bekijk vault inhoud",
     "connectingTo": "Verbinden met",
     "switchAccounts": "Wisselen van account?",
     "loggedIn": "Ingelogd",
@@ -38,7 +38,7 @@
       "wrongPassword": "Onjuist wachtwoord. Probeer het opnieuw.",
       "accountLocked": "Account tijdelijk vergrendeld vanwege te veel mislukte pogingen.",
       "networkError": "Netwerkfout. Controleer de verbinding en probeer het opnieuw.",
-      "loginDataMissing": "Loginsessie verlopen. Probeer het opnieuw."
+      "loginDataMissing": "Sessie verlopen. Probeer het opnieuw."
     }
   },
   "menu": {
@@ -67,7 +67,7 @@
     "settings": "Instellingen",
     "recentEmails": "Recente e-mails",
     "loginCredentials": "Inloggegevens",
-    "twoFactorAuthentication": "Twee-factor authenticatie",
+    "twoFactorAuthentication": "Tweestapsverificatie",
     "alias": "Alias",
     "notes": "Notities",
     "fullName": "Volledige Naam",
@@ -130,9 +130,9 @@
       "USERNAME_TOO_LONG": "Gebruikersnaam te lang: mag niet langer zijn dan 40 tekens.",
       "USERNAME_INVALID_EMAIL": "Ongeldig e-mailadres.",
       "USERNAME_INVALID_CHARACTERS": "Gebruikersnaam is ongeldig, mag alleen letters of cijfers bevatten.",
-      "VAULT_NOT_UP_TO_DATE": "Uw kluis is niet up-to-date. Synchroniseer uw kluis en probeer het opnieuw.",
+      "VAULT_NOT_UP_TO_DATE": "Je vault is niet up-to-date. Synchroniseer je vault en probeer het opnieuw.",
       "INTERNAL_SERVER_ERROR": "Interne serverfout.",
-      "VAULT_ERROR": "De lokale kluis is niet up-to-date. Synchroniseer uw kluis door de pagina te vernieuwen en probeer het opnieuw."
+      "VAULT_ERROR": "Je lokale vault is niet up-to-date. Synchroniseer je vault door de pagina te vernieuwen en probeer het opnieuw."
     }
   },
   "content": {
@@ -142,7 +142,7 @@
     "vaultLocked": "AliasVault is vergrendeld.",
     "creatingNewAlias": "Nieuwe alias aanmaken...",
     "noMatchesFound": "Geen resultaten gevonden",
-    "searchVault": "Kluis doorzoeken...",
+    "searchVault": "Vault doorzoeken...",
     "serviceName": "Servicenaam",
     "email": "E-mail",
     "username": "Gebruikersnaam",
