@@ -59,11 +59,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="TwoFactorAuthenticationTitle" xml:space="preserve">
-    <value>Twee-factor-authenticatie</value>
+    <value>Tweestapsverificatie</value>
     <comment>Section title for 2FA codes</comment>
   </data>
   <data name="NoTotpCodesMessage" xml:space="preserve">
-    <value>Geen twee-factor authenticatiecodes beschikbaar</value>
+    <value>Geen tweestapsverificatie codes beschikbaar</value>
     <comment>Message shown when no TOTP codes are configured</comment>
   </data>
   <data name="CopiedMessage" xml:space="preserve">
