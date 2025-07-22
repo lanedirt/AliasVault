@@ -54,12 +54,9 @@ files:
   - source: /apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings
     translation: /apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings
     type: strings
-    scheme: macosx
   - source: apps/mobile-app/ios/**/en.lproj/*.strings
     translation: apps/mobile-app/ios/**/%two_letters_code%.lproj/%original_file_name%
     type: strings
-    scheme: macosx
-    utf_encoded: true
   - source: /apps/mobile-app/android/app/src/main/res/values/strings.xml
     translation: /apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml
     type: android
