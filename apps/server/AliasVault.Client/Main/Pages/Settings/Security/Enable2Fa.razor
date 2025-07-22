@@ -24,28 +24,30 @@ else if (RecoveryCodes is not null)
 }
 else
 {
-    <div class="p-4 mb-4  mx-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <div class="space-y-6">
-            <div id="authenticator-uri" data-url="@QrCodeUrl" class="flex justify-center">
-                <!-- QR code will be rendered here -->
-            </div>
-
-            <p class="text-sm text-gray-600 text-center">
-                @Localizer["QrCodeInstructions"]
-            </p>
-            <div class="text-lg font-mono text-center bg-gray-100 p-2 rounded" id="authenticator-secret">@Secret</div>
-
-            <EditForm Model="@VerifyModel" OnValidSubmit="@VerifySetup" class="space-y-4">
-                <div>
-                    <InputText id="verificationCode" @bind-Value="VerifyModel.Code"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="@Localizer["VerificationCodePlaceholder"]"/>
+    <div class="max-w-2xl mx-auto px-4 lg:mt-8">
+        <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="space-y-6">
+                <div id="authenticator-uri" data-url="@QrCodeUrl" class="flex justify-center">
+                    <!-- QR code will be rendered here -->
                 </div>
-                <button type="submit"
-                        class="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    @Localizer["VerifyAndEnableButton"]
-                </button>
-            </EditForm>
+
+                <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    @Localizer["QrCodeInstructions"]
+                </p>
+                <div class="text-lg font-mono text-center bg-gray-100 dark:bg-gray-700 p-3 rounded border dark:text-gray-200" id="authenticator-secret">@Secret</div>
+
+                <EditForm Model="@VerifyModel" OnValidSubmit="@VerifySetup" class="space-y-4">
+                    <div>
+                        <InputText id="verificationCode" @bind-Value="VerifyModel.Code"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                                   placeholder="@Localizer["VerificationCodePlaceholder"]"/>
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        @Localizer["VerifyAndEnableButton"]
+                    </button>
+                </EditForm>
+            </div>
         </div>
     </div>
 }

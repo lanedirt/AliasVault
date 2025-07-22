@@ -2,7 +2,7 @@
 
 @if (!string.IsNullOrEmpty(Message))
 {
-    <div class="p-4 mt-4 text-sm text-red-800 rounded-lg bg-red-50 border-2 dark:bg-red-800 dark:text-white dark:border-red-500 dark:border" role="alert">
+    <div class="p-4 @(HasTopMargin ? "mt-4" : "") text-sm text-red-800 rounded-lg bg-red-50 border-2 dark:bg-red-800 dark:text-white dark:border-red-500 dark:border" role="alert">
         @Message
     </div>
 }
@@ -13,4 +13,10 @@
     /// </summary>
     [Parameter]
     public string Message { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether to include top margin.
+    /// </summary>
+    [Parameter]
+    public bool HasTopMargin { get; set; } = true;
 }
