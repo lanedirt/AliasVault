@@ -246,7 +246,7 @@ public class CredentialProviderViewModel: ObservableObject {
         }
     }
 
-    func filterCredentials() {
+   func filterCredentials() {
         if searchText.isEmpty {
             filteredCredentials = credentials
             return
@@ -265,59 +265,61 @@ public class CredentialProviderViewModel: ObservableObject {
         if let searchUrl = URL(string: searchText), let hostname = searchUrl.host, !hostname.isEmpty {
             let baseUrl = "\(searchUrl.scheme ?? "https")://\(hostname)"
             let rootDomain = extractRootDomain(from: searchUrl.absoluteString) ?? hostname
-            let domainWithoutExtension = extractDomainWithoutExtension(from: rootDomain)
+            let domainWithoutExtension = extractDomainWithoutExtension(from: rootDomain).lowercased()
+
+            var matches: Set<Credential> = []
 
             // 1. Exact URL match
-            var matches = credentials.filter { credential in
+            let exactMatches = credentials.filter { credential in
                 if let serviceUrl = credential.service.url,
-                   let url = URL(string: serviceUrl) {
+                let url = URL(string: serviceUrl) {
                     return url.absoluteString.lowercased() == searchUrl.absoluteString.lowercased()
                 }
                 return false
             }
+            matches.formUnion(exactMatches)
 
             // 2. Base URL match (excluding query/path)
-            if matches.isEmpty {
-                matches = credentials.filter { credential in
-                    if let serviceUrl = credential.service.url,
-                       let url = URL(string: serviceUrl) {
-                        return url.absoluteString.lowercased().hasPrefix(baseUrl.lowercased())
-                    }
-                    return false
+            let baseUrlMatches = credentials.filter { credential in
+                if let serviceUrl = credential.service.url,
+                let url = URL(string: serviceUrl) {
+                    return url.absoluteString.lowercased().hasPrefix(baseUrl.lowercased())
                 }
+                return false
             }
+            matches.formUnion(baseUrlMatches)
 
             // 3. Root domain match (e.g., coolblue.nl)
-            if matches.isEmpty {
-                matches = credentials.filter { credential in
-                    if let serviceUrl = credential.service.url,
-                       let credRootDomain = extractRootDomain(from: serviceUrl) {
-                        return credRootDomain.lowercased() == rootDomain.lowercased()
-                    }
-                    return false
+            let rootDomainMatches = credentials.filter { credential in
+                if let serviceUrl = credential.service.url,
+                let credRootDomain = extractRootDomain(from: serviceUrl) {
+                    return credRootDomain.lowercased() == rootDomain.lowercased()
                 }
+                return false
             }
+            matches.formUnion(rootDomainMatches)
 
-            // 4. Domain name part match (e.g., "coolblue" in service name)
-            if matches.isEmpty {
-                matches = credentials.filter { credential in
-                    if let serviceName = credential.service.name?.lowercased() {
-                        return serviceName.contains(domainWithoutExtension.lowercased()) ||
-                               domainWithoutExtension.lowercased().contains(serviceName)
-                    }
-                    return false
-                }
+            // 4. Domain name part match (e.g., "coolblue" in service name or notes)
+            let domainNameMatches = credentials.filter { credential in
+                let serviceNameMatch = credential.service.name?.lowercased().contains(domainWithoutExtension) ?? false
+                let notesMatch = credential.notes?.lowercased().contains(domainWithoutExtension) ?? false
+                let reverseNameMatch = domainWithoutExtension.contains(credential.service.name?.lowercased() ?? "")
+                return serviceNameMatch || notesMatch || reverseNameMatch
             }
+            matches.formUnion(domainNameMatches)
 
-            filteredCredentials = matches
+            filteredCredentials = Array(matches)
         } else {
-            // Non-URL fallback: simple text search in service name or username
+            // Non-URL fallback: simple text search in service name, username, or notes
+            let lowercasedSearch = searchText.lowercased()
             filteredCredentials = credentials.filter { credential in
-                (credential.service.name?.localizedCaseInsensitiveContains(searchText) ?? false) ||
-                (credential.username?.localizedCaseInsensitiveContains(searchText) ?? false)
+                (credential.service.name?.lowercased().contains(lowercasedSearch) ?? false) ||
+                (credential.username?.lowercased().contains(lowercasedSearch) ?? false) ||
+                (credential.notes?.lowercased().contains(lowercasedSearch) ?? false)
             }
         }
     }
+
 
     func selectCredential(_ credential: Credential) {
         selectedCredential = credential
