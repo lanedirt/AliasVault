@@ -17,8 +17,8 @@
         class="w-full px-4 py-2 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:focus:ring-primary-500"
         @bind-value="SearchTerm"
         @oninput="SearchTermChanged"
-        @onfocus="OnFocus"
-        @onclick="OnInputClick"
+        @onfocus="OnFocusClick"
+        @onclick="OnFocusClick"
         @onkeydown="HandleKeyDown"/>
 
     @if (ShowHelpText || ShowResults)
@@ -147,14 +147,7 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private void OnFocus()
-    {
-        ShowHelpText = true;
-        ShowResults = true;
-        StateHasChanged();
-    }
-
-    private void OnInputClick()
+    private void OnFocusClick()
     {
         // Ensure popup stays open when clicking inside the input field
         ShowHelpText = true;
