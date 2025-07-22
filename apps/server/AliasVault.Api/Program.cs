@@ -5,8 +5,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Globalization;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AliasServerDb;
 using AliasServerDb.Configuration;
 using AliasVault.Api;
@@ -25,6 +28,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Force invariant culture to prevent regional date formatting issues
+// (e.g., times should be formatted as "09:03:09" instead of alternate region formats like "09.03.09").
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
@@ -117,7 +126,13 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ensure consistent date formatting regardless of server locale
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.WriteIndented = false;
+    });
 builder.Services.AddMemoryCache();
 
 builder.Services.AddApiVersioning(options =>
