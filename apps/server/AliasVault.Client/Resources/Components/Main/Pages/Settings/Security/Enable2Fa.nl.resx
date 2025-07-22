@@ -78,7 +78,7 @@
   </data>
   <!-- Setup instructions -->
   <data name="QrCodeInstructions" xml:space="preserve">
-    <value>Scan deze QR-code met je authenticator-app of voer de volgende geheime handleiding in:</value>
+    <value>Scan deze QR-code met je authenticator-app of voer de volgende code handmatig in:</value>
     <comment>Instructions for scanning QR code or entering secret</comment>
   </data>
   <!-- Form elements -->
