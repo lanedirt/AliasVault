@@ -58,8 +58,9 @@ class AutofillTest {
             "www.coolblue.nl",
         )
 
-        assertEquals(1, matches.size)
+        assertEquals(2, matches.size)
         assertEquals("Coolblue", matches[0].service.name)
+        assertEquals("Coolblue App", matches[1].service.name)
     }
 
     @Test

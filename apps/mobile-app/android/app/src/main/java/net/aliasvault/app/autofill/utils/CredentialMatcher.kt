@@ -94,12 +94,17 @@ object CredentialMatcher {
             }
         }
 
-        // 4. Domain key match against notes only (since name is already checked in step 3)
+        // 4. Domain key match against service name, URL, and notes
         matches += credentials.filter { cred ->
-            cred.notes?.lowercase()?.contains(domainKey) == true
+            val nameMatches = cred.service.name?.trim()?.lowercase()?.contains(domainKey) == true
+            val urlMatches = cred.service.url?.trim()?.lowercase()?.contains(domainKey) == true
+            val notesMatches = cred.notes?.lowercase()?.contains(domainKey) == true
+
+            nameMatches || urlMatches || notesMatches
         }
 
-        return matches
+        // Deduplicate matches based on credential ID to avoid duplicates from different matching strategies
+        return matches.distinctBy { it.id }
     }
 
     /**
