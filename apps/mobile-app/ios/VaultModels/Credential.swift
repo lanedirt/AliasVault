@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Credential: Codable {
+public struct Credential: Codable, Hashable, Equatable {
     public let id: UUID
     public let alias: Alias?
     public let service: Service
@@ -31,6 +31,14 @@ public struct Credential: Codable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.isDeleted = isDeleted
+    }
+
+    public static func == (lhs: Credential, rhs: Credential) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
