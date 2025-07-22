@@ -142,6 +142,13 @@ else
     }
 
     /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "General logs" });
+    }
+
+    /// <inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

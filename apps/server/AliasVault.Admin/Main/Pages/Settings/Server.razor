@@ -117,6 +117,9 @@
     /// <inheritdoc/>
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Server settings" });
+
         Settings = await SettingsService.GetAllSettingsAsync();
     }
 

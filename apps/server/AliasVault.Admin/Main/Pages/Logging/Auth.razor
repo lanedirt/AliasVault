@@ -157,6 +157,8 @@ else
     {
         await base.OnInitializedAsync();
 
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Auth logs" });
+
         Navigation.LocationChanged += OnLocationChanged;
         ParseQueryAndRefresh();
         await RefreshData();

@@ -29,8 +29,6 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        // Add base breadcrumbs.
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Home", Url = "/" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Manage account" });
     }
 }

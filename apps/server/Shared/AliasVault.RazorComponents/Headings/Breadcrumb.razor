@@ -40,10 +40,10 @@
     public List<BreadcrumbItem> BreadcrumbItems { get; set; } = new();
 
     /// <inheritdoc />
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
-        base.OnInitialized();
-        // Remove first item if it is the home page
+        base.OnParametersSet();
+        // Remove first item if it is the home page to avoid showing "Home > Home"
         if (BreadcrumbItems.Any() && BreadcrumbItems[0].DisplayName == "Home")
         {
             BreadcrumbItems.RemoveAt(0);

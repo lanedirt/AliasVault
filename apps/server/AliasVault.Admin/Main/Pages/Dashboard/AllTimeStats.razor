@@ -266,6 +266,8 @@
     {
         await base.OnInitializedAsync();
 
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "All-Time Statistics" });
+
         // Load statistics asynchronously for better perceived performance
         _ = LoadBasicStatisticsAsync();
         _ = LoadDetailedStatisticsAsync();
