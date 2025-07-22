@@ -208,12 +208,40 @@ export default function CredentialsScreen() : React.ReactNode {
   const filteredCredentials = credentialsList.filter(credential => {
     const searchLower = searchQuery.toLowerCase();
 
-    return (
-      credential.ServiceName?.toLowerCase().includes(searchLower) ??
-      credential.Username?.toLowerCase().includes(searchLower) ??
-      credential.Alias?.Email?.toLowerCase().includes(searchLower) ??
-      credential.ServiceUrl?.toLowerCase().includes(searchLower)
-    );
+    /**
+     * We filter credentials by searching in the following fields:
+     * - Service name
+     * - Username
+     * - Alias email
+     * - Service URL
+     * - Notes
+     */
+    const matchesServiceName = credential.ServiceName?.toLowerCase().includes(searchLower);
+    if (matchesServiceName) {
+      return true;
+    }
+
+    const matchesUsername = credential.Username?.toLowerCase().includes(searchLower);
+    if (matchesUsername) {
+      return true;
+    }
+
+    const matchesAliasEmail = credential.Alias?.Email?.toLowerCase().includes(searchLower);
+    if (matchesAliasEmail) {
+      return true;
+    }
+
+    const matchesServiceUrl = credential.ServiceUrl?.toLowerCase().includes(searchLower);
+    if (matchesServiceUrl) {
+      return true;
+    }
+
+    const matchesNotes = credential.Notes?.toLowerCase().includes(searchLower);
+    if (matchesNotes) {
+      return true;
+    }
+
+    return false;
   });
 
   const styles = StyleSheet.create({
