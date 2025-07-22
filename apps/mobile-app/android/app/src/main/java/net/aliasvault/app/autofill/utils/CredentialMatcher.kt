@@ -87,12 +87,18 @@ object CredentialMatcher {
             }
         }
 
-        // 4. Domain key match against service name
+        // 4. Domain key match against service name and notes
         if (matches.isEmpty()) {
             matches += credentials.filter { cred ->
-                cred.service.name?.lowercase()?.let { name ->
+                val matchesServiceName = cred.service.name?.lowercase()?.let { name ->
                     name.contains(domainKey) || domainKey.contains(name)
                 } == true
+
+                val matchesNotes = cred.notes?.lowercase()?.let { notes ->
+                    notes.contains(domainKey) || domainKey.contains(notes)
+                } == true
+
+                matchesServiceName || matchesNotes
             }
         }
 
