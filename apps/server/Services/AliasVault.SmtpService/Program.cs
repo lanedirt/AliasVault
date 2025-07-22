@@ -5,6 +5,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Globalization;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
@@ -19,6 +20,12 @@ using SmtpServer;
 using SmtpServer.Storage;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+// Force invariant culture to prevent regional date formatting issues
+// (e.g., times should be formatted as "09:03:09" instead of alternate region formats like "09.03.09").
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../../logs");
