@@ -1,29 +1,29 @@
-/* Dutch localization strings for Autofill extension */
-"loading_error" = "Laadprobleem";
-"loading_error_message" = "Het laden van referenties ging mis. Open de AliasVault app om te controleren op updates.";
+/* English localization strings for Autofill extension */
+"loading_error" = "Fout bij laden";
+"loading_error_message" = "Er is een fout opgetreden tijdens het laden van de credentials. Open de AliasVault app om te controleren op updates.";
 "ok" = "OK";
 "login_required" = "Inloggen Vereist";
-"login_required_message" = "Om AliasVault autofill te gebruiken, log eerst in op uw AliasVault account in de AliasVault app.";
+"login_required_message" = "Om AliasVault autofill te gebruiken dien je eerst in te loggen in de AliasVault app.";
 "biometric_required" = "%@ Vereist";
-"biometric_required_message" = "Om AliasVault autofill te gebruiken, schakel %@ in bij uw apparaat instellingen en/of ga naar de AliasVault app instellingen om het te configureren.";
-"biometric_app_required_message" = "Om AliasVault autofill te gebruiken, schakel %@ in als uw kluis ontgrendel methode in de AliasVault app instellingen.";
-"loading_credentials" = "Referenties laden...";
-"no_credentials_found" = "Geen referenties gevonden";
-"no_credentials_match" = "Geen bestaande referenties komen overeen met uw zoekopdracht";
+"biometric_required_message" = "Om AliasVault autofill te gebruiken dien je eerst %@ in te schakelen voor AliasVault in de app instellingen.";
+"biometric_app_required_message" = "Om AliasVault autofill te gebruiken dien je eerst %@ in te schakelen als kluis ontgrendel methode in de AliasVault app instellingen.";
+"loading_credentials" = "Credentials laden...";
+"no_credentials_found" = "Geen credentials gevonden";
+"no_credentials_match" = "Er zijn geen credentials gevonden die overeenkomen met je zoekopdracht";
 "create_new_credential" = "Nieuwe Referentie Aanmaken";
-"select_credential" = "Selecteer Referentie";
+"select_credential" = "Selecteer Credential";
 "select_text_to_insert" = "Selecteer Tekst om In te Voegen";
 "cancel" = "Annuleren";
 "choose_username" = "Kies Gebruikersnaam";
-"select_text_to_insert_message" = "Selecteer de tekst om in te voegen in het gefocuste invoerveld";
-"choose_username_message" = "Deze website vereist mogelijk uw gebruikersnaam of e-mailadres om in te loggen";
+"select_text_to_insert_message" = "Selecteer de tekst om in te voegen";
+"choose_username_message" = "Deze website vereist mogelijk je gebruikersnaam of e-mailadres om in te loggen";
 "username_prefix" = "Gebruikersnaam: ";
 "email_prefix" = "E-mail: ";
 "password" = "Wachtwoord";
 "error" = "Fout";
-"credentials_load_error" = "Laden van referenties mislukt. Open de AliasVault app om te controleren op updates.";
-"no_credential_selected" = "Geen referentie geselecteerd.";
-"failed_to_load_credentials" = "Laden van referenties mislukt";
+"credentials_load_error" = "Laden van credentials mislukt. Open de AliasVault app om te controleren op updates.";
+"no_credential_selected" = "Geen credential geselecteerd.";
+"failed_to_load_credentials" = "Laden van credentials mislukt";
 "face_id_touch_id" = "Face ID / Touch ID";
 "face_id" = "Face ID";
 "touch_id" = "Touch ID";
@@ -39,4 +39,4 @@
 "email_copied" = "E-mail gekopieerd";
 
 /* Search bar */
-"search_credentials" = "Zoek referenties...";
+"search_credentials" = "Zoek credentials...";
