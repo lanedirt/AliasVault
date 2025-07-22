@@ -1,0 +1,42 @@
+/* English localization strings for Autofill extension */
+"loading_error" = "Loading Error";
+"loading_error_message" = "Loading credentials went wrong. Please open the AliasVault app to check for updates.";
+"ok" = "OK";
+"login_required" = "Login Required";
+"login_required_message" = "To use Autofill, please login to your AliasVault account in the AliasVault app.";
+"biometric_required" = "%@ Required";
+"biometric_required_message" = "To use AliasVault Autofill, please enable %@ in your device settings and/or go to the AliasVault app settings to configure it.";
+"biometric_app_required_message" = "To use Autofill, please enable %@ as your vault unlock method in the AliasVault app settings.";
+"loading_credentials" = "Loading credentials...";
+"no_credentials_found" = "No credentials found";
+"no_credentials_match" = "No existing credentials match your search";
+"create_new_credential" = "Create New Credential";
+"select_credential" = "Select Credential";
+"select_text_to_insert" = "Select Text to Insert";
+"cancel" = "Cancel";
+"choose_username" = "Choose Username";
+"select_text_to_insert_message" = "Select the text to insert into the focused input field";
+"choose_username_message" = "This website may require either your username or your email address to log in";
+"username_prefix" = "Username: ";
+"email_prefix" = "Email: ";
+"password" = "Password";
+"error" = "Error";
+"credentials_load_error" = "Failed to load credentials. Please open the AliasVault app to check for updates.";
+"no_credential_selected" = "No credential selected.";
+"failed_to_load_credentials" = "Failed to load credentials";
+"face_id_touch_id" = "Face ID / Touch ID";
+"face_id" = "Face ID";
+"touch_id" = "Touch ID";
+
+/* Context menu strings */
+"copy_username" = "Copy Username";
+"copy_password" = "Copy Password";
+"copy_email" = "Copy Email";
+"view_details" = "View Details";
+"edit" = "Edit";
+"username_copied" = "Username copied";
+"password_copied" = "Password copied";
+"email_copied" = "Email copied";
+
+/* Search bar */
+"search_credentials" = "Search credentials...";
