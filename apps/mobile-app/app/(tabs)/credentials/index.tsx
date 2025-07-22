@@ -216,32 +216,14 @@ export default function CredentialsScreen() : React.ReactNode {
      * - Service URL
      * - Notes
      */
-    const matchesServiceName = credential.ServiceName?.toLowerCase().includes(searchLower);
-    if (matchesServiceName) {
-      return true;
-    }
-
-    const matchesUsername = credential.Username?.toLowerCase().includes(searchLower);
-    if (matchesUsername) {
-      return true;
-    }
-
-    const matchesAliasEmail = credential.Alias?.Email?.toLowerCase().includes(searchLower);
-    if (matchesAliasEmail) {
-      return true;
-    }
-
-    const matchesServiceUrl = credential.ServiceUrl?.toLowerCase().includes(searchLower);
-    if (matchesServiceUrl) {
-      return true;
-    }
-
-    const matchesNotes = credential.Notes?.toLowerCase().includes(searchLower);
-    if (matchesNotes) {
-      return true;
-    }
-
-    return false;
+    const searchableFields = [
+      credential.ServiceName?.toLowerCase(),
+      credential.Username?.toLowerCase(),
+      credential.Alias?.Email?.toLowerCase(),
+      credential.ServiceUrl?.toLowerCase(),
+      credential.Notes?.toLowerCase(),
+    ];
+    return searchableFields.some(field => field?.includes(searchLower));
   });
 
   const styles = StyleSheet.create({
