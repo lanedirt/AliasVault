@@ -51,18 +51,14 @@ files:
   - source: /apps/mobile-app/i18n/locales/en.json
     translation: /apps/mobile-app/i18n/locales/%two_letters_code%.json
     type: json
-  - source: /apps/mobile-app/ios/AliasVault/en.lproj/Localizable.strings
-    translation: /apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/Localizable.strings
-    type: strings
   - source: /apps/mobile-app/ios/AliasVault/en.lproj/InfoPlist.strings
     translation: /apps/mobile-app/ios/AliasVault/%two_letters_code%.lproj/InfoPlist.strings
     type: strings
+    scheme: macosx
   - source: /apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings
     translation: /apps/mobile-app/ios/Autofill/%two_letters_code%.lproj/Localizable.strings
     type: strings
-  - source: /apps/mobile-app/ios/VaultUI/en.lproj/Localizable.strings
-    translation: /apps/mobile-app/ios/VaultUI/%two_letters_code%.lproj/Localizable.strings
-    type: strings
+    scheme: macosx
   - source: /apps/mobile-app/android/app/src/main/res/values/strings.xml
     translation: /apps/mobile-app/android/app/src/main/res/values-%two_letters_code%/strings.xml
     type: android
