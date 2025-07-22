@@ -65,41 +65,38 @@ object CredentialMatcher {
                 )
             }
             // 2. Base URL match
-            if (matches.isEmpty()) {
-                matches += credentials.filter { cred ->
-                    cred.service.url?.trim()?.lowercase()?.let { url ->
-                        url.startsWith("https://$host") || url.startsWith("http://$host")
-                    } == true
-                }
+            matches += credentials.filter { cred ->
+                cred.service.url?.trim()?.lowercase()?.let { url ->
+                    url.startsWith("https://$host") || url.startsWith("http://$host")
+                } == true
             }
         }
 
-        if (matches.isEmpty() && rootDomain != null) {
-            // 3. Root domain match
+        // 3. Root domain fuzzy match on both URL and service name
+        if (rootDomain != null) {
+            val rootDomainNoTld = rootDomain.substringBefore('.') // e.g., "coolblue" from "coolblue.nl"
+
             matches += credentials.filter { cred ->
-                cred.service.url?.trim()?.lowercase()?.let { url ->
+                val urlMatches = cred.service.url?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }?.let { url ->
                     val u = url.removePrefix("https://")
                         .removePrefix("http://")
                         .removePrefix("www.")
                         .substringBefore("/")
-                    extractRootDomain(u) == rootDomain
+                    val base = extractRootDomain(u)
+                    base.contains(rootDomainNoTld) || rootDomainNoTld.contains(base)
                 } == true
+
+                val nameMatches = cred.service.name?.trim()?.lowercase()?.let { name ->
+                    name.contains(rootDomainNoTld) || rootDomainNoTld.contains(name)
+                } == true
+
+                urlMatches || nameMatches
             }
         }
 
-        // 4. Domain key match against service name and notes
-        if (matches.isEmpty()) {
-            matches += credentials.filter { cred ->
-                val matchesServiceName = cred.service.name?.lowercase()?.let { name ->
-                    name.contains(domainKey) || domainKey.contains(name)
-                } == true
-
-                val matchesNotes = cred.notes?.lowercase()?.let { notes ->
-                    notes.contains(domainKey) || domainKey.contains(notes)
-                } == true
-
-                matchesServiceName || matchesNotes
-            }
+        // 4. Domain key match against notes only (since name is already checked in step 3)
+        matches += credentials.filter { cred ->
+            cred.notes?.lowercase()?.contains(domainKey) == true
         }
 
         return matches
