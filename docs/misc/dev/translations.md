@@ -103,5 +103,34 @@ The Crowdin GitHub App automatically:
 - Offers new content for translation in the Crowdin web interface
 - Manages translation file synchronization across all applications
 
+Installing Crowdin CLI on MacOS for manually syncing source files:
 
+```bash
+brew tap crowdin/crowdin
+brew install crowdin@4
+brew link --force --overwrite crowdin@4
+```
+
+To test uploading of source files via CLI to detect any issues with formatting:
+
+```bash
+crowdin upload --token=[api_token] --project-id=808100
+```
+
+Example output which may indicate errors:
+
+```bash
+✔️  Directory 'apps/mobile-app/ios/Autofill'
+✔️  Directory 'apps/mobile-app/ios/Autofill/en.lproj'
+❌ File 'apps/mobile-app/ios/Autofill/en.lproj/Localizable.strings'
+❌ Wrong parameters:
+<key: type, code: callbackValue, message: Unsupported type>
+✔️  Directory 'apps/mobile-app/android'
+✔️  Directory 'apps/mobile-app/android/app'
+✔️  Directory 'apps/mobile-app/android/app/src'
+✔️  Directory 'apps/mobile-app/android/app/src/main'
+✔️  Directory 'apps/mobile-app/android/app/src/main/res'
+✔️  Directory 'apps/mobile-app/android/app/src/main/res/values'
+✔️  File 'apps/mobile-app/android/app/src/main/res/values/strings.xml'
+````
 
