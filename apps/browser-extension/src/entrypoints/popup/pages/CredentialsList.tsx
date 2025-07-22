@@ -135,14 +135,23 @@ const CredentialsList: React.FC = () => {
     refreshCredentials();
   }, [dbContext?.sqliteClient, setIsLoading, setIsInitialLoading]);
 
-  // Add this function to filter credentials
-  const filteredCredentials = credentials.filter(cred => {
+  const filteredCredentials = credentials.filter(credential => {
     const searchLower = searchTerm.toLowerCase();
+
+    /**
+     * We filter credentials by searching in the following fields:
+     * - Service name
+     * - Username
+     * - Alias email
+     * - Service URL
+     * - Notes
+     */
     const searchableFields = [
-      cred.ServiceName?.toLowerCase(),
-      cred.Username?.toLowerCase(),
-      cred.Alias?.Email?.toLowerCase(),
-      cred.ServiceUrl?.toLowerCase()
+      credential.ServiceName?.toLowerCase(),
+      credential.Username?.toLowerCase(),
+      credential.Alias?.Email?.toLowerCase(),
+      credential.ServiceUrl?.toLowerCase(),
+      credential.Notes?.toLowerCase(),
     ];
     return searchableFields.some(field => field?.includes(searchLower));
   });
