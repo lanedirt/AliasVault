@@ -264,6 +264,10 @@ export default function EmailDetailsScreen() : React.ReactNode {
       justifyContent: 'flex-start',
       padding: 2,
     },
+    metadataSubject: {
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
     metadataText: {
       color: colors.text,
       fontSize: 13,
@@ -271,10 +275,6 @@ export default function EmailDetailsScreen() : React.ReactNode {
       marginTop: 0,
       paddingBottom: 0,
       paddingTop: 0,
-    },
-    metadataSubject: {
-      textAlign: 'center',
-      fontWeight: 'bold',
     },
     metadataValue: {
       flex: 1,
@@ -389,7 +389,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
       <TouchableOpacity onPress={() => setMetadataMaximized(!isMetadataMaximized)}>
         <View style={styles.metadataContainer}>
           <View style={styles.metadataRow}>
-            <View style={[styles.metadataValue, { flex: 1 }]}>
+            <View style={styles.metadataValue}>
               <ThemedText style={[styles.metadataText, styles.metadataSubject]}>{email.subject}</ThemedText>
               {associatedCredential && (
                 <View>

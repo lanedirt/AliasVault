@@ -93,7 +93,7 @@ export default function EmailsScreen() : React.ReactNode {
     } catch (err) {
       setError(err instanceof Error ? err.message : t('emails.errors.generic'));
     }
-  }, [dbContext?.sqliteClient, webApi, setIsLoading, authContext.isOffline]);
+  }, [dbContext?.sqliteClient, webApi, setIsLoading, authContext.isOffline, t]);
 
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
