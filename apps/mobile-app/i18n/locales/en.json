@@ -11,7 +11,8 @@
     "error": "Error",
     "success": "Success",
     "never": "Never",
-    "copied": "Copied"
+    "copied": "Copied",
+    "loadMore": "Load more"
   },
   "auth": {
     "login": "Log in",
@@ -44,7 +45,11 @@
       "enterPassword": "Please enter your password",
       "serverError": "Could not reach AliasVault server. Please try again later or contact support if the problem persists."
     },
-    "confirmLogout": "Are you sure you want to logout? You need to login again with your master password to access your vault."
+    "confirmLogout": "Are you sure you want to logout? You need to login again with your master password to access your vault.",
+    "noAccountYet": "No account yet?",
+    "createNewVault": "Create new vault",
+    "connectingTo": "Connecting to",
+    "loggedInAs": "Logged in as"
   },
   "credentials": {
     "title": "Credentials",
@@ -101,6 +106,18 @@
   "settings": {
     "title": "Settings",
     "iosAutofill": "iOS Autofill",
+    "iosAutofillSettings": {
+      "headerText": "You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.",
+      "howToEnable": "How to enable:",
+      "step1": "1. Open iOS Settings via the button below",
+      "step2": "2. Go to \"General\"",
+      "step3": "3. Tap \"AutoFill & Passwords\"",
+      "step4": "4. Enable \"AliasVault\"",
+      "step5": "5. Disable other password providers (e.g. \"iCloud Passwords\") to avoid conflicts",
+      "openIosSettings": "Open iOS Settings",
+      "alreadyConfigured": "I already configured it",
+      "warningText": "Note: You'll need to authenticate with Face ID/Touch ID or your device passcode when using autofill."
+    },
     "androidAutofill": "Android Autofill",
     "vaultUnlock": "Vault Unlock Method",
     "autoLock": "Auto-lock Timeout",
@@ -233,7 +250,8 @@
     "settings": "Settings"
   },
   "emails": {
-    "title": "Email Details",
+    "title": "Emails",
+    "emailDetails": "Email Details",
     "subject": "Subject:",
     "date": "Date:",
     "from": "From:",
@@ -244,8 +262,11 @@
     "emailNotFound": "Email not found",
     "noPlainText": "This email does not contain any plain-text.",
     "sizeKB": "KB",
+    "offlineMessage": "You are offline. Please connect to the internet to load your emails.",
+    "emptyMessage": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
     "errors": {
       "generic": "An error occurred",
+      "loadFailed": "Failed to load emails",
       "deleteFailed": "Failed to delete email",
       "dbNotAvailable": "Database context or email not available",
       "decryptFailed": "Failed to decrypt attachment",

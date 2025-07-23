@@ -234,6 +234,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
     },
     metadataCredential: {
       alignItems: 'center',
+      alignSelf: 'center',
       flexDirection: 'row',
     },
     metadataCredentialIcon: {
@@ -270,6 +271,10 @@ export default function EmailDetailsScreen() : React.ReactNode {
       marginTop: 0,
       paddingBottom: 0,
       paddingTop: 0,
+    },
+    metadataSubject: {
+      textAlign: 'center',
+      fontWeight: 'bold',
     },
     metadataValue: {
       flex: 1,
@@ -343,7 +348,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
   if (isLoading) {
     return (
       <ThemedView style={styles.centerContainer}>
-        <Stack.Screen options={{ title: t('emails.title') }} />
+        <Stack.Screen options={{ title: t('emails.emailDetails') }} />
         <ActivityIndicator size="large" />
       </ThemedView>
     );
@@ -384,20 +389,20 @@ export default function EmailDetailsScreen() : React.ReactNode {
       <TouchableOpacity onPress={() => setMetadataMaximized(!isMetadataMaximized)}>
         <View style={styles.metadataContainer}>
           <View style={styles.metadataRow}>
-            <View style={styles.metadataLabel}>
-              <ThemedText style={styles.metadataHeading}>{t('emails.subject')}</ThemedText>
-            </View>
-            <View style={styles.metadataValue}>
-              <ThemedText style={styles.metadataText}>{email.subject}</ThemedText>
+            <View style={[styles.metadataValue, { flex: 1 }]}>
+              <ThemedText style={[styles.metadataText, styles.metadataSubject]}>{email.subject}</ThemedText>
               {associatedCredential && (
-                <>
-                  <TouchableOpacity onPress={handleOpenCredential} style={styles.metadataCredential}>
+                <View>
+                  <TouchableOpacity
+                    onPress={handleOpenCredential}
+                    style={styles.metadataCredential}
+                  >
                     <IconSymbol size={16} name={IconSymbolName.Key} color={colors.primary} style={styles.metadataCredentialIcon} />
                     <ThemedText style={[styles.metadataText, { color: colors.primary }]}>
                       {associatedCredential.ServiceName}
                     </ThemedText>
                   </TouchableOpacity>
-                </>
+                </View>
               )}
             </View>
             <View style={styles.metadataIcon}>
@@ -474,7 +479,7 @@ export default function EmailDetailsScreen() : React.ReactNode {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen options={{ title: t('emails.title') }} />
+      <Stack.Screen options={{ title: t('emails.emailDetails') }} />
       {metadataView}
       {emailView}
       {email.attachments && email.attachments.length > 0 && (

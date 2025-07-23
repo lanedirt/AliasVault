@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from 'expo-router';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, ScrollView, RefreshControl, Animated , Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -26,6 +27,7 @@ import { useWebApi } from '@/context/WebApiContext';
  * Emails screen.
  */
 export default function EmailsScreen() : React.ReactNode {
+  const { t } = useTranslation();
   const dbContext = useDb();
   const webApi = useWebApi();
   const authContext = useAuth();
@@ -81,15 +83,15 @@ export default function EmailsScreen() : React.ReactNode {
         // Show toast and throw error
         Toast.show({
           type: 'error',
-          text1: 'Failed to load emails',
+          text1: t('emails.errors.loadFailed'),
           position: 'bottom',
         });
-        throw new Error('Failed to load emails');
+        throw new Error(t('emails.errors.loadFailed'));
       } finally {
         setIsLoading(false);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('emails.errors.generic'));
     }
   }, [dbContext?.sqliteClient, webApi, setIsLoading, authContext.isOffline]);
 
@@ -190,7 +192,7 @@ export default function EmailsScreen() : React.ReactNode {
     if (authContext.isOffline) {
       return (
         <View style={styles.centerContainer}>
-          <ThemedText style={styles.emptyText}>You are offline. Please connect to the internet to load your emails.</ThemedText>
+          <ThemedText style={styles.emptyText}>{t('emails.offlineMessage')}</ThemedText>
         </View>
       );
     }
@@ -198,7 +200,7 @@ export default function EmailsScreen() : React.ReactNode {
     if (error) {
       return (
         <View style={styles.centerContainer}>
-          <ThemedText style={styles.errorText}>Error: {error}</ThemedText>
+          <ThemedText style={styles.errorText}>{t('common.error')}: {error}</ThemedText>
         </View>
       );
     }
@@ -207,7 +209,7 @@ export default function EmailsScreen() : React.ReactNode {
       return (
         <View style={styles.centerContainer}>
           <ThemedText style={styles.emptyText}>
-              You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.
+            {t('emails.emptyMessage')}
           </ThemedText>
         </View>
       );
@@ -221,7 +223,7 @@ export default function EmailsScreen() : React.ReactNode {
   return (
     <ThemedContainer>
       <CollapsibleHeader
-        title="Emails"
+        title={t('emails.title')}
         scrollY={scrollY}
         showNavigationHeader={true}
       />
@@ -243,7 +245,7 @@ export default function EmailsScreen() : React.ReactNode {
           />
         }
       >
-        <TitleContainer title="Emails" />
+        <TitleContainer title={t('emails.title')} />
         {renderContent()}
       </Animated.ScrollView>
     </ThemedContainer>

@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -14,6 +15,7 @@ import NativeVaultManager from '@/specs/NativeVaultManager';
  */
 export default function IosAutofillScreen() : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const { markAutofillConfigured, shouldShowAutofillReminder } = useAuth();
 
   /**
@@ -96,13 +98,13 @@ export default function IosAutofillScreen() : React.ReactNode {
     <ThemedContainer>
       <ThemedScrollView>
         <ThemedText style={styles.headerText}>
-          You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.
+          {t('settings.iosAutofillSettings.headerText')}
         </ThemedText>
 
         <View style={styles.instructionContainer}>
-          <ThemedText style={styles.instructionTitle}>How to enable:</ThemedText>
+          <ThemedText style={styles.instructionTitle}>{t('settings.iosAutofillSettings.howToEnable')}</ThemedText>
           <ThemedText style={styles.instructionStep}>
-            1. Open iOS Settings via the button below
+            {t('settings.iosAutofillSettings.step1')}
           </ThemedText>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -110,24 +112,24 @@ export default function IosAutofillScreen() : React.ReactNode {
               onPress={handleConfigurePress}
             >
               <ThemedText style={styles.configureButtonText}>
-                Open iOS Settings
+                {t('settings.iosAutofillSettings.openIosSettings')}
               </ThemedText>
             </TouchableOpacity>
           </View>
           <ThemedText style={styles.instructionStep}>
-            2. Go to &quot;General&quot;
+            {t('settings.iosAutofillSettings.step2')}
           </ThemedText>
           <ThemedText style={styles.instructionStep}>
-            3. Tap &quot;AutoFill & Passwords&quot;
+            {t('settings.iosAutofillSettings.step3')}
           </ThemedText>
           <ThemedText style={styles.instructionStep}>
-            4. Enable &quot;AliasVault&quot;
+            {t('settings.iosAutofillSettings.step4')}
           </ThemedText>
           <ThemedText style={styles.instructionStep}>
-            5. Disable other password providers (e.g. &quot;iCloud Passwords&quot;) to avoid conflicts
+            {t('settings.iosAutofillSettings.step5')}
           </ThemedText>
           <ThemedText style={styles.warningText}>
-            Note: You&apos;ll need to authenticate with Face ID/Touch ID or your device passcode when using autofill.
+            {t('settings.iosAutofillSettings.warningText')}
           </ThemedText>
           <View style={styles.buttonContainer}>
             {shouldShowAutofillReminder && (
@@ -136,7 +138,7 @@ export default function IosAutofillScreen() : React.ReactNode {
                 onPress={handleAlreadyConfigured}
               >
                 <ThemedText style={styles.secondaryButtonText}>
-                I already configured it
+                  {t('settings.iosAutofillSettings.alreadyConfigured')}
                 </ThemedText>
               </TouchableOpacity>
             )}

@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { AppInfo } from '@/utils/AppInfo';
 import type { ApiErrorResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
@@ -26,17 +27,39 @@ type EmailPreviewProps = {
  */
 export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.ReactNode => {
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
+  const [displayedEmails, setDisplayedEmails] = useState<MailboxEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
   const [isSpamOk, setIsSpamOk] = useState(false);
   const [isComponentVisible, setIsComponentVisible] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSupportedDomain, setIsSupportedDomain] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(2);
   const webApi = useWebApi();
   const dbContext = useDb();
   const authContext = useAuth();
   const colors = useColors();
   const { t } = useTranslation();
+
+  const emailsPerLoad = 3;
+  const canLoadMore = displayedCount < emails.length;
+
+  /**
+   * Updates the displayed emails based on the current count.
+   */
+  const updateDisplayedEmails = useCallback((allEmails: MailboxEmail[], count: number) => {
+    const displayed = allEmails.slice(0, count);
+    setDisplayedEmails(displayed);
+  }, []);
+
+  /**
+   * Loads more emails.
+   */
+  const loadMoreEmails = useCallback(() => {
+    const newCount = Math.min(displayedCount + emailsPerLoad, emails.length);
+    setDisplayedCount(newCount);
+    updateDisplayedEmails(emails, newCount);
+  }, [displayedCount, emails, emailsPerLoad, updateDisplayedEmails]);
 
   /**
    * Check if the email is a public domain.
@@ -129,17 +152,17 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
 
           const data = await response.json();
 
-          // Only show the latest 2 emails to save space in UI
-          const latestMails = data?.mails
+          // Store all emails, sorted by date
+          const allMails = data?.mails
             ?.sort((a: MailboxEmail, b: MailboxEmail) =>
-              new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
-            ?.slice(0, 2) ?? [];
+              new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime()) ?? [];
 
-          if (loading && latestMails.length > 0) {
-            setLastEmailId(latestMails[0].id);
+          if (loading && allMails.length > 0) {
+            setLastEmailId(allMails[0].id);
           }
 
-          setEmails(latestMails);
+          setEmails(allMails);
+          updateDisplayedEmails(allMails, displayedCount);
         } else if (isPrivate) {
           // For private domains, use existing encrypted email logic
           if (!dbContext?.sqliteClient) {
@@ -155,15 +178,14 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
             try {
               const data = response as { mails: MailboxEmail[] };
 
-              // Only show the latest 2 emails to save space in UI
-              const latestMails = data.mails
-                .sort((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
-                .slice(0, 2);
+              // Store all emails, sorted by date
+              const allMails = data.mails
+                .sort((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime());
 
-              if (latestMails) {
+              if (allMails) {
                 // Loop through all emails and decrypt them locally
                 const decryptedEmails = await EncryptionUtility.decryptEmailList(
-                  latestMails,
+                  allMails,
                   encryptionKeys
                 );
 
@@ -172,6 +194,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
                 }
 
                 setEmails(decryptedEmails);
+                updateDisplayedEmails(decryptedEmails, displayedCount);
 
                 // Reset error
                 setError(null);
@@ -203,7 +226,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
         clearInterval(interval);
       }
     };
-  }, [email, loading, webApi, dbContext, isPublicDomain, isPrivateDomain, authContext.isOffline, isComponentVisible, t]);
+  }, [email, loading, webApi, dbContext, isPublicDomain, isPrivateDomain, authContext.isOffline, isComponentVisible, t, displayedCount, updateDisplayedEmails]);
 
   const styles = StyleSheet.create({
     date: {
@@ -253,6 +276,22 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
       alignItems: 'center',
       flexDirection: 'row',
       gap: 8,
+    },
+    loadMoreButton: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 8,
+      marginTop: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    loadMoreText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontWeight: '500',
     },
   });
 
@@ -317,10 +356,10 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
   return (
     <ThemedView style={styles.section}>
       <View style={styles.titleContainer}>
-        <ThemedText type="title" style={styles.title}>Recent emails</ThemedText>
+        <ThemedText type="title" style={styles.title}>{t('credentials.recentEmails')}</ThemedText>
         <PulseDot />
       </View>
-      {emails.map((mail) => (
+      {displayedEmails.map((mail) => (
         <TouchableOpacity
           key={mail.id}
           style={[
@@ -344,6 +383,12 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
           </ThemedText>
         </TouchableOpacity>
       ))}
+      {canLoadMore && (
+        <TouchableOpacity style={styles.loadMoreButton} onPress={loadMoreEmails}>
+          <ThemedText style={styles.loadMoreText}>{t('common.loadMore')}</ThemedText>
+          <MaterialIcons name="keyboard-arrow-down" size={16} color={colors.textMuted} />
+        </TouchableOpacity>
+      )}
     </ThemedView>
   );
 };
