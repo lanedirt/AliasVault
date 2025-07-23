@@ -21,13 +21,35 @@ type EmailPreviewProps = {
 export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   const { t } = useTranslation();
   const [emails, setEmails] = useState<MailboxEmail[]>([]);
+  const [displayedEmails, setDisplayedEmails] = useState<MailboxEmail[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastEmailId, setLastEmailId] = useState<number>(0);
   const [isSpamOk, setIsSpamOk] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSupportedDomain, setIsSupportedDomain] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(2);
   const webApi = useWebApi();
   const dbContext = useDb();
+
+  const emailsPerLoad = 3;
+  const canLoadMore = displayedCount < emails.length;
+
+  /**
+   * Updates the displayed emails based on the current count.
+   */
+  const updateDisplayedEmails = (allEmails: MailboxEmail[], count: number) => {
+    const displayed = allEmails.slice(0, count);
+    setDisplayedEmails(displayed);
+  };
+
+  /**
+   * Loads more emails.
+   */
+  const loadMoreEmails = (): void => {
+    const newCount = Math.min(displayedCount + emailsPerLoad, emails.length);
+    setDisplayedCount(newCount);
+    updateDisplayedEmails(emails, newCount);
+  };
 
   /**
    * Checks if the email is a public domain.
@@ -82,17 +104,24 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
 
           const data = await response.json();
 
-          // Only show the latest 2 emails to save space in UI
-          const latestMails = data?.mails
+          // Store all emails, sorted by date
+          const allMails = data?.mails
             ?.toSorted((a: MailboxEmail, b: MailboxEmail) =>
-              new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
-            ?.slice(0, 2) ?? [];
+              new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime()) ?? [];
 
-          if (loading && latestMails.length > 0) {
-            setLastEmailId(latestMails[0].id);
+          if (loading && allMails.length > 0) {
+            setLastEmailId(allMails[0].id);
           }
 
-          setEmails(latestMails);
+          // Only update emails if they actually changed to preserve displayedCount
+          setEmails(prevEmails => {
+            const emailsChanged = JSON.stringify(prevEmails.map(e => e.id)) !== JSON.stringify(allMails.map(e => e.id));
+            if (emailsChanged) {
+              updateDisplayedEmails(allMails, displayedCount);
+              return allMails;
+            }
+            return prevEmails;
+          });
         } else if (isPrivate) {
           // For private domains, use existing encrypted email logic
           try {
@@ -104,15 +133,14 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
             try {
               const data = response as { mails: MailboxEmail[] };
 
-              // Only show the latest 2 emails to save space in UI
-              const latestMails = data.mails
-                .toSorted((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime())
-                .slice(0, 2);
+              // Store all emails, sorted by date
+              const allMails = data.mails
+                .toSorted((a, b) => new Date(b.dateSystem).getTime() - new Date(a.dateSystem).getTime());
 
-              if (latestMails) {
+              if (allMails) {
                 // Loop through all emails and decrypt them locally
                 const decryptedEmails: MailboxEmail[] = await EncryptionUtility.decryptEmailList(
-                  latestMails,
+                  allMails,
                   dbContext.sqliteClient!.getAllEncryptionKeys()
                 );
 
@@ -120,7 +148,15 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
                   setLastEmailId(decryptedEmails[0].id);
                 }
 
-                setEmails(decryptedEmails);
+                // Only update emails if they actually changed to preserve displayedCount
+                setEmails(prevEmails => {
+                  const emailsChanged = JSON.stringify(prevEmails.map(e => e.id)) !== JSON.stringify(decryptedEmails.map(e => e.id));
+                  if (emailsChanged) {
+                    updateDisplayedEmails(decryptedEmails, displayedCount);
+                    return decryptedEmails;
+                  }
+                  return prevEmails;
+                });
               }
             } catch {
               // Try to parse as error response instead
@@ -144,7 +180,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
     // Set up auto-refresh interval
     const interval = setInterval(loadEmails, 2000);
     return () : void => clearInterval(interval);
-  }, [email, loading, webApi, dbContext, t]);
+  }, [email, loading, webApi, dbContext, t, displayedCount]);
 
   // Don't render anything if the domain is not supported
   if (!isSupportedDomain) {
@@ -190,11 +226,11 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   return (
     <div className="space-y-2 mb-4">
       <div className="flex items-center gap-2 mb-2">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent emails</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('common.recentEmails')}</h2>
         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
       </div>
 
-      {emails.map((mail) => (
+      {displayedEmails.map((mail) => (
         isSpamOk ? (
           <a
             key={mail.id}
@@ -233,6 +269,18 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
           </Link>
         )
       ))}
+
+      {canLoadMore && (
+        <button
+          onClick={loadMoreEmails}
+          className="w-full mt-2 py-1 px-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md transition-colors duration-200 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 flex items-center justify-center gap-1"
+        >
+          <span>{t('common.loadMore')}</span>
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 };
