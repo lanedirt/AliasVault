@@ -1,9 +1,9 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, TouchableOpacity, Linking, AppState } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import { AppInfo } from '@/utils/AppInfo';
 import type { ApiErrorResponse, MailboxEmail } from '@/utils/dist/shared/models/webapi';
@@ -255,6 +255,22 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
       color: colors.errorText,
       fontSize: 14,
     },
+    loadMoreButton: {
+      alignItems: 'center',
+      backgroundColor: colors.accentBackground,
+      borderRadius: 8,
+      flexDirection: 'row',
+      gap: 6,
+      justifyContent: 'center',
+      marginTop: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
+    loadMoreText: {
+      color: colors.textMuted,
+      fontSize: 14,
+      fontWeight: '500',
+    },
     placeholderText: {
       color: colors.textMuted,
       marginBottom: 8,
@@ -276,22 +292,6 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
       alignItems: 'center',
       flexDirection: 'row',
       gap: 8,
-    },
-    loadMoreButton: {
-      backgroundColor: colors.accentBackground,
-      borderRadius: 8,
-      marginTop: 8,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-    },
-    loadMoreText: {
-      color: colors.textMuted,
-      fontSize: 14,
-      fontWeight: '500',
     },
   });
 

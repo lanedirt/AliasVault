@@ -37,7 +37,7 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) => {
   /**
    * Updates the displayed emails based on the current count.
    */
-  const updateDisplayedEmails = (allEmails: MailboxEmail[], count: number) => {
+  const updateDisplayedEmails = (allEmails: MailboxEmail[], count: number) : void => {
     const displayed = allEmails.slice(0, count);
     setDisplayedEmails(displayed);
   };
