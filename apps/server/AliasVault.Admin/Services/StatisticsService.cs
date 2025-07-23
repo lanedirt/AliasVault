@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 /// </summary>
 public class StatisticsService
 {
+    private const string UnknownUsername = "Unknown";
     private readonly IAliasServerDbContextFactory _contextFactory;
 
     /// <summary>
@@ -149,10 +150,10 @@ public class StatisticsService
             .Where(v => v.UserId == userId && v.CreatedAt >= cutoffDate)
             .ToListAsync();
 
-        if (recentVaultVersions.Any())
+        if (recentVaultVersions.Count > 0)
         {
             var latestRecentVault = recentVaultVersions.OrderByDescending(v => v.Version).First();
-            var earliestRecentVault = recentVaultVersions.OrderBy(v => v.Version).FirstOrDefault();
+            var earliestRecentVault = recentVaultVersions.OrderBy(v => v.Version).First();
 
             if (earliestRecentVault != null)
             {
@@ -280,7 +281,7 @@ public class StatisticsService
         return topUsers.Select(u => new TopUserByStorage
         {
             UserId = u.UserId,
-            Username = u.Username ?? "Unknown",
+            Username = u.Username ?? UnknownUsername,
             StorageBytes = u.TotalStorageBytes,
             StorageDisplaySize = FormatKilobytes(u.TotalStorageBytes),
         }).ToList();
@@ -309,7 +310,7 @@ public class StatisticsService
         return topUsers.Select(u => new TopUserByAliases
         {
             UserId = u.UserId!,
-            Username = u.Username ?? "Unknown",
+            Username = u.Username ?? UnknownUsername,
             AliasCount = u.AliasCount,
         }).ToList();
     }
@@ -373,7 +374,7 @@ public class StatisticsService
         return topUsers.Select(u => new RecentUsageAliases
         {
             UserId = u.UserId!,
-            Username = u.Username ?? "Unknown",
+            Username = u.Username ?? UnknownUsername,
             AliasCount72h = u.AliasCount72h,
             IsDisabled = u.IsDisabled,
             RegistrationDate = u.RegistrationDate,
@@ -407,7 +408,7 @@ public class StatisticsService
         return topUsers.Select(u => new RecentUsageEmails
         {
             UserId = u.UserId!,
-            Username = u.Username ?? "Unknown",
+            Username = u.Username ?? UnknownUsername,
             EmailCount72h = u.EmailCount72h,
             IsDisabled = u.IsDisabled,
             RegistrationDate = u.RegistrationDate,

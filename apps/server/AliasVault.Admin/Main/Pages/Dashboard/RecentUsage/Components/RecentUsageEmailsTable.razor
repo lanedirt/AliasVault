@@ -1,4 +1,5 @@
 @using AliasVault.Admin.Main.Models
+@using AliasVault.Admin.Services
 @using AliasVault.RazorComponents.Tables
 
 <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
@@ -31,13 +32,13 @@
                             }
                         </SortableTableColumn>
                         <SortableTableColumn>@user.EmailCount72h.ToString("N0")</SortableTableColumn>
-                        <SortableTableColumn>@GetAccountAge(user.RegistrationDate)</SortableTableColumn>
+                        <SortableTableColumn>@StatisticsService.GetAccountAge(user.RegistrationDate)</SortableTableColumn>
                     </SortableTableRow>
                 }
             </SortableTable>
         </div>
     }
-    else if (Data != null && !Data.Any())
+    else if (Data != null)
     {
         <div class="text-center text-gray-500 dark:text-gray-400">
             <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,27 +77,5 @@
     {
         CurrentPage = page;
         StateHasChanged();
-    }
-
-    private string GetAccountAge(DateTime registrationDate)
-    {
-        var days = (DateTime.UtcNow - registrationDate).Days;
-        
-        if (days == 0)
-            return "Today";
-        else if (days == 1)
-            return "1 day";
-        else if (days < 30)
-            return $"{days} days";
-        else if (days < 365)
-        {
-            var months = days / 30;
-            return months == 1 ? "1 month" : $"{months} months";
-        }
-        else
-        {
-            var years = days / 365;
-            return years == 1 ? "1 year" : $"{years} years";
-        }
     }
 }
