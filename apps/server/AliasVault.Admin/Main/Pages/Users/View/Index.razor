@@ -1,6 +1,9 @@
 ﻿@page "/users/{Id}"
 @using AliasVault.Admin.Main.Pages.Users.View.Components
+@using AliasVault.Admin.Main.Models
+@using AliasVault.Admin.Services
 @inherits MainBase
+@inject StatisticsService StatisticsService
 
 <LayoutPageTitle>User</LayoutPageTitle>
 
@@ -27,13 +30,43 @@ else
                     <div>
                         <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-200 pb-2">@User.UserName</h3>
 
+                        <!-- Usage Statistics Section -->
+                        @if (UserUsageStats != null)
+                        {
+                            <div class="mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white text-center mb-3">Usage Statistics</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="text-left">
+                                        <div class="text-xl text-center font-semibold text-gray-900 dark:text-white">@UserUsageStats.TotalCredentials.ToString("N0")</div>
+                                        <div class="text-sm text-center text-gray-600 dark:text-gray-400">Total Credentials</div>
+                                        @if (UserUsageStats.RecentCredentials72h > 0)
+                                        {
+                                            <div class="text-xs text-center text-green-500 dark:text-green-400">(+@UserUsageStats.RecentCredentials72h.ToString("N0") in last 72h)</div>
+                                        }
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-xl text-center font-semibold text-gray-900 dark:text-white">@UserUsageStats.TotalEmailClaims.ToString("N0")</div>
+                                        <div class="text-sm text-center text-gray-600 dark:text-gray-400">Total Email Claims</div>
+                                        @if (UserUsageStats.RecentEmailClaims72h > 0)
+                                        {
+                                            <div class="text-xs text-center text-green-500 dark:text-green-400">(+@UserUsageStats.RecentEmailClaims72h.ToString("N0") in last 72h)</div>
+                                        }
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-xl text-center font-semibold text-gray-900 dark:text-white">@UserUsageStats.TotalReceivedEmails.ToString("N0")</div>
+                                        <div class="text-sm text-center text-gray-600 dark:text-gray-400">Total Received Emails</div>
+                                        @if (UserUsageStats.RecentReceivedEmails72h > 0)
+                                        {
+                                            <div class="text-xs text-center text-green-500 dark:text-green-400">(+@UserUsageStats.RecentReceivedEmails72h.ToString("N0") in last 72h)</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
                         <div class="w-full mb-4 overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                 <tbody>
-                                    <tr class="border-b dark:border-gray-700">
-                                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Id</th>
-                                        <td class="px-4 py-3">@User.Id</td>
-                                    </tr>
                                     <tr class="border-b dark:border-gray-700">
                                         <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Registered at</th>
                                         <td class="px-4 py-3">@User.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
@@ -143,6 +176,7 @@ else
     private List<AliasVaultUserRefreshToken> RefreshTokenList { get; set; } = [];
     private List<Vault> VaultList { get; set; } = [];
     private List<AuthLog> AuthLogList { get; set; } = [];
+    private UserUsageStatistics? UserUsageStats { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -223,6 +257,17 @@ else
             .OrderByDescending(x => x.Timestamp)
             .Take(5)
             .ToListAsync();
+
+        // Load user usage statistics
+        try
+        {
+            UserUsageStats = await StatisticsService.GetUserUsageStatisticsAsync(User.Id);
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading user usage statistics: {ex.Message}");
+            UserUsageStats = null;
+        }
 
         IsLoading = false;
         StateHasChanged();
