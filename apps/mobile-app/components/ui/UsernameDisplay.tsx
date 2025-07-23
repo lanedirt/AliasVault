@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -11,6 +12,7 @@ import { Avatar } from './Avatar';
  * Username display component that shows the avatar and "Logged in as" text.
  */
 export function UsernameDisplay(): React.ReactNode {
+  const { t } = useTranslation();
   const colors = useColors();
   const { username } = useAuth();
 
@@ -31,7 +33,7 @@ export function UsernameDisplay(): React.ReactNode {
   return (
     <View style={styles.userInfoContainer}>
       <Avatar />
-      <ThemedText style={styles.usernameText}>Logged in as: {username}</ThemedText>
+      <ThemedText style={styles.usernameText}>{t('auth.loggedInAs')}: {username}</ThemedText>
     </View>
   );
 }
