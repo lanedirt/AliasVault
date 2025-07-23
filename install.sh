@@ -39,6 +39,9 @@ MIN_DOCKER_VERSION="20.10.0"
 MIN_COMPOSE_VERSION="2.0.0"
 MIN_DISK_SPACE_GB=5
 
+# Global cache for latest version to avoid rate limiting
+CACHED_LATEST_VERSION=""
+
 # Function to show usage
 show_usage() {
     print_logo
@@ -913,14 +916,38 @@ main() {
     esac
 }
 
-# Function to get the latest release version from GitHub
+# Function to get the latest release version from GitHub (with session caching)
 get_latest_version() {
-    local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
-    if [ -z "$latest_version" ]; then
-        printf "${RED}> Failed to get latest version from GitHub.${NC}\n" >&2
-        return 1
+    # Check if we have a cached version for this session
+    if [ -n "${CACHED_LATEST_VERSION:-}" ]; then
+        echo "$CACHED_LATEST_VERSION"
+        return 0
     fi
-    echo "$latest_version"
+
+    local attempt=1
+    local max_attempts=5
+    local wait_time=1
+
+    while [ $attempt -le $max_attempts ]; do
+        local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+
+        if [ -n "$latest_version" ]; then
+            # Cache the version for this session
+            CACHED_LATEST_VERSION="$latest_version"
+            echo "$latest_version"
+            return 0
+        fi
+
+        printf "${YELLOW}> Attempt ${attempt}/${max_attempts}: Failed to get latest version from GitHub. Retrying in ${wait_time}s...${NC}\n" >&2
+        sleep $wait_time
+
+        # Exponential backoff - double the wait time for next attempt
+        wait_time=$((wait_time * 2))
+        attempt=$((attempt + 1))
+    done
+
+    printf "${RED}> Failed to get latest version from GitHub after ${max_attempts} attempts.${NC}\n" >&2
+    return 1
 }
 
 # Function to initialize workspace and create required directories
