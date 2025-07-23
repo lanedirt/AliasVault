@@ -11,7 +11,8 @@
     "error": "Fout",
     "success": "Succes",
     "never": "Nooit",
-    "copied": "Gekopieerd"
+    "copied": "Gekopieerd",
+    "loadMore": "Load more"
   },
   "auth": {
     "login": "Inloggen",
@@ -44,7 +45,11 @@
       "enterPassword": "Voer je wachtwoord in",
       "serverError": "Kon de AliasVault server niet bereiken. Probeer het later opnieuw of neem contact op met support als het probleem aanhoudt."
     },
-    "confirmLogout": "Weet je zeker dat je wilt uitloggen? Je moet opnieuw inloggen met je hoofdwachtwoord om toegang te krijgen tot je vault."
+    "confirmLogout": "Weet je zeker dat je wilt uitloggen? Je moet opnieuw inloggen met je hoofdwachtwoord om toegang te krijgen tot je vault.",
+    "noAccountYet": "No account yet?",
+    "createNewVault": "Create new vault",
+    "connectingTo": "Connecting to",
+    "loggedInAs": "Logged in as"
   },
   "credentials": {
     "title": "Credentials",
@@ -101,6 +106,18 @@
   "settings": {
     "title": "Instellingen",
     "iosAutofill": "iOS autofill",
+    "iosAutofillSettings": {
+      "headerText": "You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.",
+      "howToEnable": "How to enable:",
+      "step1": "1. Open iOS Settings via the button below",
+      "step2": "2. Go to \"General\"",
+      "step3": "3. Tap \"AutoFill & Passwords\"",
+      "step4": "4. Enable \"AliasVault\"",
+      "step5": "5. Disable other password providers (e.g. \"iCloud Passwords\") to avoid conflicts",
+      "openIosSettings": "Open iOS Settings",
+      "alreadyConfigured": "I already configured it",
+      "warningText": "Note: You'll need to authenticate with Face ID/Touch ID or your device passcode when using autofill."
+    },
     "androidAutofill": "Android autofill",
     "vaultUnlock": "Vault ontgrendelmethode",
     "autoLock": "Automatisch vergrendelen",
@@ -233,7 +250,8 @@
     "settings": "Instellingen"
   },
   "emails": {
-    "title": "E-mail Details",
+    "title": "Emails",
+    "emailDetails": "Email Details",
     "subject": "Onderwerp:",
     "date": "Datum:",
     "from": "Van:",
@@ -244,8 +262,11 @@
     "emailNotFound": "E-mail niet gevonden",
     "noPlainText": "Deze e-mail bevat geen platte tekst.",
     "sizeKB": "KB",
+    "offlineMessage": "You are offline. Please connect to the internet to load your emails.",
+    "emptyMessage": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
     "errors": {
       "generic": "Er is een fout opgetreden",
+      "loadFailed": "Failed to load emails",
       "deleteFailed": "E-mail verwijderen mislukt",
       "dbNotAvailable": "Database context of e-mail niet beschikbaar",
       "decryptFailed": "Bijlage ontsleutelen mislukt",
