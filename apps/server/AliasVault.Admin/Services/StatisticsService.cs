@@ -9,6 +9,7 @@ namespace AliasVault.Admin.Services;
 
 using AliasServerDb;
 using AliasVault.Admin.Main.Models;
+using AliasVault.Shared.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
@@ -25,6 +26,39 @@ public class StatisticsService
     public StatisticsService(IAliasServerDbContextFactory contextFactory)
     {
         _contextFactory = contextFactory;
+    }
+
+    /// <summary>
+    /// Formats the account age into a human-readable string.
+    /// </summary>
+    /// <param name="registrationDate">The registration date to format.</param>
+    /// <returns>Formatted account age string.</returns>
+    public static string GetAccountAge(DateTime registrationDate)
+    {
+        var days = (DateTime.UtcNow - registrationDate).Days;
+
+        if (days == 0)
+        {
+            return "Today";
+        }
+        else if (days == 1)
+        {
+            return "1 day";
+        }
+        else if (days < 30)
+        {
+            return $"{days} days";
+        }
+        else if (days < 365)
+        {
+            var months = days / 30;
+            return months == 1 ? "1 month" : $"{months} months";
+        }
+        else
+        {
+            var years = days / 365;
+            return years == 1 ? "1 year" : $"{years} years";
+        }
     }
 
     /// <summary>
@@ -55,6 +89,82 @@ public class StatisticsService
         stats.TopUsersByStorage = await GetTopUsersByStorageAsync();
         stats.TopUsersByAliases = await GetTopUsersByAliasesAsync();
         stats.TopIpAddresses = await GetTopIpAddressesAsync();
+
+        return stats;
+    }
+
+    /// <summary>
+    /// Gets recent usage statistics for the last 72 hours.
+    /// </summary>
+    /// <returns>Recent usage statistics object.</returns>
+    public async Task<RecentUsageStatistics> GetRecentUsageStatisticsAsync()
+    {
+        var stats = new RecentUsageStatistics();
+
+        // Get recent usage data in parallel
+        var tasks = new Task[]
+        {
+            GetTopUsersByAliases72hAsync().ContinueWith(t => stats.TopUsersByAliases72h = t.Result),
+            GetTopUsersByEmails72hAsync().ContinueWith(t => stats.TopUsersByEmails72h = t.Result),
+            GetTopIpsByRegistrations72hAsync().ContinueWith(t => stats.TopIpsByRegistrations72h = t.Result),
+        };
+
+        await Task.WhenAll(tasks);
+
+        return stats;
+    }
+
+    /// <summary>
+    /// Gets user-specific usage statistics for both all-time and recent periods.
+    /// </summary>
+    /// <param name="userId">The user ID to get statistics for.</param>
+    /// <returns>User usage statistics object.</returns>
+    public async Task<UserUsageStatistics> GetUserUsageStatisticsAsync(string userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var stats = new UserUsageStatistics();
+        var cutoffDate = DateTime.UtcNow.AddHours(-72);
+
+        // Get latest vault for this user to get credential and email claim counts
+        var latestVault = await context.Vaults
+            .Where(v => v.UserId == userId)
+            .OrderByDescending(v => v.Version)
+            .FirstOrDefaultAsync();
+
+        if (latestVault != null)
+        {
+            stats.TotalCredentials = latestVault.CredentialsCount;
+            stats.TotalEmailClaims = latestVault.EmailClaimsCount;
+        }
+
+        // Get total received emails (all-time) - using UserEncryptionKey relationship
+        stats.TotalReceivedEmails = await context.Emails
+            .Where(e => e.EncryptionKey.UserId == userId)
+            .CountAsync();
+
+        // Get recent statistics (last 72 hours) - this is approximated since we don't have creation timestamps on individual credentials
+        // For recent credentials and email claims, we'll use vault versions created in the last 72h as a proxy
+        var recentVaultVersions = await context.Vaults
+            .Where(v => v.UserId == userId && v.CreatedAt >= cutoffDate)
+            .ToListAsync();
+
+        if (recentVaultVersions.Any())
+        {
+            var latestRecentVault = recentVaultVersions.OrderByDescending(v => v.Version).First();
+            var earliestRecentVault = recentVaultVersions.OrderBy(v => v.Version).FirstOrDefault();
+
+            if (earliestRecentVault != null)
+            {
+                stats.RecentCredentials72h = Math.Max(0, latestRecentVault.CredentialsCount - earliestRecentVault.CredentialsCount);
+                stats.RecentEmailClaims72h = Math.Max(0, latestRecentVault.EmailClaimsCount - earliestRecentVault.EmailClaimsCount);
+            }
+        }
+
+        // Get recent received emails (last 72 hours) - using DateSystem as created date
+        stats.RecentReceivedEmails72h = await context.Emails
+            .Where(e => e.EncryptionKey.UserId == userId && e.DateSystem >= cutoffDate)
+            .CountAsync();
 
         return stats;
     }
@@ -233,6 +343,108 @@ public class StatisticsService
             IpAddress = AnonymizeIpAddress(ip.IpAddress!),
             UniqueUserCount = ip.UniqueUsernames,
             LastActivity = ip.LastActivity,
+        }).ToList();
+    }
+
+    /// <summary>
+    /// Gets the top 20 users by number of aliases created in the last 72 hours.
+    /// </summary>
+    /// <returns>List of top users by recent aliases.</returns>
+    private async Task<List<RecentUsageAliases>> GetTopUsersByAliases72hAsync()
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var cutoffDate = DateTime.UtcNow.AddHours(-72);
+
+        var topUsers = await context.UserEmailClaims
+            .Where(uec => uec.UserId != null && uec.CreatedAt >= cutoffDate)
+            .GroupBy(uec => new { uec.UserId, uec.User!.UserName, uec.User.Blocked, uec.User.CreatedAt })
+            .Select(g => new
+            {
+                UserId = g.Key.UserId,
+                Username = g.Key.UserName,
+                IsDisabled = g.Key.Blocked,
+                RegistrationDate = g.Key.CreatedAt,
+                AliasCount72h = g.Count(),
+            })
+            .OrderByDescending(u => u.AliasCount72h)
+            .Take(20)
+            .ToListAsync();
+
+        return topUsers.Select(u => new RecentUsageAliases
+        {
+            UserId = u.UserId!,
+            Username = u.Username ?? "Unknown",
+            AliasCount72h = u.AliasCount72h,
+            IsDisabled = u.IsDisabled,
+            RegistrationDate = u.RegistrationDate,
+        }).ToList();
+    }
+
+    /// <summary>
+    /// Gets the top 20 users by number of emails received in the last 72 hours.
+    /// </summary>
+    /// <returns>List of top users by recent emails.</returns>
+    private async Task<List<RecentUsageEmails>> GetTopUsersByEmails72hAsync()
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var cutoffDate = DateTime.UtcNow.AddHours(-72);
+
+        var topUsers = await context.Emails
+            .Where(e => e.DateSystem >= cutoffDate)
+            .GroupBy(e => new { e.EncryptionKey.UserId, e.EncryptionKey.User!.UserName, e.EncryptionKey.User.Blocked, e.EncryptionKey.User.CreatedAt })
+            .Select(g => new
+            {
+                UserId = g.Key.UserId,
+                Username = g.Key.UserName,
+                IsDisabled = g.Key.Blocked,
+                RegistrationDate = g.Key.CreatedAt,
+                EmailCount72h = g.Count(),
+            })
+            .OrderByDescending(u => u.EmailCount72h)
+            .Take(20)
+            .ToListAsync();
+
+        return topUsers.Select(u => new RecentUsageEmails
+        {
+            UserId = u.UserId!,
+            Username = u.Username ?? "Unknown",
+            EmailCount72h = u.EmailCount72h,
+            IsDisabled = u.IsDisabled,
+            RegistrationDate = u.RegistrationDate,
+        }).ToList();
+    }
+
+    /// <summary>
+    /// Gets the top 20 IP addresses by number of registrations in the last 72 hours.
+    /// </summary>
+    /// <returns>List of top IP addresses by recent registrations.</returns>
+    private async Task<List<RecentUsageRegistrations>> GetTopIpsByRegistrations72hAsync()
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var cutoffDate = DateTime.UtcNow.AddHours(-72);
+
+        // Get registrations by IP from successful auth logs (using Register event type)
+        var topIps = await context.AuthLogs
+            .Where(al => al.Timestamp >= cutoffDate &&
+                        al.IpAddress != null &&
+                        al.IpAddress != "xxx.xxx.xxx.xxx" &&
+                        al.IsSuccess &&
+                        al.EventType == AuthEventType.Register)
+            .GroupBy(al => al.IpAddress)
+            .Select(g => new
+            {
+                IpAddress = g.Key,
+                RegistrationCount72h = g.Count(),
+            })
+            .OrderByDescending(ip => ip.RegistrationCount72h)
+            .Take(20)
+            .ToListAsync();
+
+        return topIps.Select(ip => new RecentUsageRegistrations
+        {
+            OriginalIpAddress = ip.IpAddress!,
+            IpAddress = AnonymizeIpAddress(ip.IpAddress!),
+            RegistrationCount72h = ip.RegistrationCount72h,
         }).ToList();
     }
 }
