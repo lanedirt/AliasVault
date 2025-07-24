@@ -35,7 +35,7 @@ else
                         {
                             <div class="mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
                                 <h4 class="text-lg font-semibold text-gray-900 dark:text-white text-center mb-3">Usage Statistics</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     <div class="text-left">
                                         <div class="text-xl text-center font-semibold text-gray-900 dark:text-white">@UserUsageStats.TotalCredentials.ToString("N0")</div>
                                         <div class="text-sm text-center text-gray-600 dark:text-gray-400">Total Credentials</div>
@@ -58,6 +58,14 @@ else
                                         @if (UserUsageStats.RecentReceivedEmails72h > 0)
                                         {
                                             <div class="text-xs text-center text-green-500 dark:text-green-400">(+@UserUsageStats.RecentReceivedEmails72h.ToString("N0") in last 72h)</div>
+                                        }
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-xl text-center font-semibold text-gray-900 dark:text-white">@UserUsageStats.TotalEmailAttachments.ToString("N0")</div>
+                                        <div class="text-sm text-center text-gray-600 dark:text-gray-400">Email Attachments</div>
+                                        @if (UserUsageStats.TotalEmailAttachmentStorageMB > 0)
+                                        {
+                                            <div class="text-xs text-center text-blue-500 dark:text-blue-400">@UserUsageStats.TotalEmailAttachmentStorageMB.ToString("N2") MB</div>
                                         }
                                     </div>
                                 </div>
