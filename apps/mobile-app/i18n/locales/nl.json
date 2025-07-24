@@ -12,7 +12,7 @@
     "success": "Succes",
     "never": "Nooit",
     "copied": "Gekopieerd",
-    "loadMore": "Load more"
+    "loadMore": "Laad meer"
   },
   "auth": {
     "login": "Inloggen",
@@ -46,10 +46,10 @@
       "serverError": "Kon de AliasVault server niet bereiken. Probeer het later opnieuw of neem contact op met support als het probleem aanhoudt."
     },
     "confirmLogout": "Weet je zeker dat je wilt uitloggen? Je moet opnieuw inloggen met je hoofdwachtwoord om toegang te krijgen tot je vault.",
-    "noAccountYet": "No account yet?",
-    "createNewVault": "Create new vault",
-    "connectingTo": "Connecting to",
-    "loggedInAs": "Logged in as"
+    "noAccountYet": "Nog geen account?",
+    "createNewVault": "Nieuwe vault aanmaken",
+    "connectingTo": "Verbinden met",
+    "loggedInAs": "Ingelogd als"
   },
   "credentials": {
     "title": "Credentials",
@@ -107,16 +107,16 @@
     "title": "Instellingen",
     "iosAutofill": "iOS autofill",
     "iosAutofillSettings": {
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
-      "step1": "1. Open iOS Settings via the button below",
-      "step2": "2. Go to \"General\"",
-      "step3": "3. Tap \"AutoFill & Passwords\"",
-      "step4": "4. Enable \"AliasVault\"",
-      "step5": "5. Disable other password providers (e.g. \"iCloud Passwords\") to avoid conflicts",
-      "openIosSettings": "Open iOS Settings",
-      "alreadyConfigured": "I already configured it",
-      "warningText": "Note: You'll need to authenticate with Face ID/Touch ID or your device passcode when using autofill."
+      "headerText": "Je kunt AliasVault instellen als autofill provider in iOS. Volg de instructies hieronder om deze in te schakelen.",
+      "howToEnable": "Hoe in te schakelen:",
+      "step1": "1. Open iOS instellingen via de knop hieronder",
+      "step2": "2. Ga naar \"Algemeen\"",
+      "step3": "3. Tik op \"AutoFill & Wachtwoorden\"",
+      "step4": "4. Schakel \"AliasVault\" in",
+      "step5": "5. Schakel andere opties (bijvoorbeeld \"iCloud Passwords\") uit om conflicten te voorkomen",
+      "openIosSettings": "Open iOS instellingen",
+      "alreadyConfigured": "Al geconfigureerd",
+      "warningText": "Let op: Face ID/Touch ID of je toegangscode is vereist bij het gebruik van autofill."
     },
     "androidAutofill": "Android autofill",
     "vaultUnlock": "Vault ontgrendelmethode",
@@ -250,8 +250,8 @@
     "settings": "Instellingen"
   },
   "emails": {
-    "title": "Emails",
-    "emailDetails": "Email Details",
+    "title": "E-mails",
+    "emailDetails": "E-mail details",
     "subject": "Onderwerp:",
     "date": "Datum:",
     "from": "Van:",
@@ -262,11 +262,11 @@
     "emailNotFound": "E-mail niet gevonden",
     "noPlainText": "Deze e-mail bevat geen platte tekst.",
     "sizeKB": "KB",
-    "offlineMessage": "You are offline. Please connect to the internet to load your emails.",
-    "emptyMessage": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
+    "offlineMessage": "Je bent offline. Maak verbinding met het internet om je e-mails te laden.",
+    "emptyMessage": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
     "errors": {
       "generic": "Er is een fout opgetreden",
-      "loadFailed": "Failed to load emails",
+      "loadFailed": "Laden van e-mails mislukt",
       "deleteFailed": "E-mail verwijderen mislukt",
       "dbNotAvailable": "Database context of e-mail niet beschikbaar",
       "decryptFailed": "Bijlage ontsleutelen mislukt",
