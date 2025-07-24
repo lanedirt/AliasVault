@@ -86,4 +86,8 @@
     <value>Er is een fout opgetreden bij het laden van de e-mails. Probeer de credential te bewerken en opnieuw te slaan om de database te synchroniseren, en probeer het vervolgens opnieuw.</value>
     <comment>Error message when email loading fails</comment>
   </data>
+  <data name="LoadMoreButton" xml:space="preserve">
+    <value>Laad meer</value>
+    <comment>Button text to load more emails</comment>
+  </data>
 </root>
