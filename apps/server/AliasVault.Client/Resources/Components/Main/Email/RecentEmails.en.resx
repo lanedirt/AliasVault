@@ -86,4 +86,8 @@
     <value>An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.</value>
     <comment>Error message when email loading fails</comment>
   </data>
+  <data name="LoadMoreButton" xml:space="preserve">
+    <value>Load more</value>
+    <comment>Button text to load more emails</comment>
+  </data>
 </root>
