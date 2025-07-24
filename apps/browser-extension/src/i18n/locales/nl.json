@@ -84,7 +84,7 @@
     "checkingVaultUpdates": "Controleren op vault updates",
     "syncingUpdatedVault": "Bijgewerkte vault synchroniseren",
     "executingOperation": "Actie uitvoeren...",
-    "loadMore": "Load more",
+    "loadMore": "Laad meer",
     "errors": {
       "VaultMergeRequired": "Je vault moet worden bijgewerkt. Log in op de AliasVault website en volg de stappen.",
       "VaultOutdated": "Je vault is verouderd. Log in op de AliasVault website en volg de stappen.",
