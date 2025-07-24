@@ -41,4 +41,19 @@ public class UserUsageStatistics
     /// Gets or sets the number of emails received in the last 72 hours.
     /// </summary>
     public int RecentReceivedEmails72h { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of email attachments (all-time).
+    /// </summary>
+    public int TotalEmailAttachments { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total storage size of email attachments in bytes (all-time).
+    /// </summary>
+    public long TotalEmailAttachmentStorage { get; set; }
+
+    /// <summary>
+    /// Gets the total storage size of email attachments in MB for display purposes.
+    /// </summary>
+    public double TotalEmailAttachmentStorageMB => TotalEmailAttachmentStorage / (1024.0 * 1024.0);
 }

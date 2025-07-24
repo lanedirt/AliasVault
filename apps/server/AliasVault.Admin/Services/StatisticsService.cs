@@ -167,6 +167,15 @@ public class StatisticsService
             .Where(e => e.EncryptionKey.UserId == userId && e.DateSystem >= cutoffDate)
             .CountAsync();
 
+        // Get email attachment statistics (all-time)
+        var emailAttachmentQuery = context.EmailAttachments
+            .Where(a => a.Email.EncryptionKey.UserId == userId);
+
+        stats.TotalEmailAttachments = await emailAttachmentQuery.CountAsync();
+        stats.TotalEmailAttachmentStorage = stats.TotalEmailAttachments > 0
+            ? await emailAttachmentQuery.SumAsync(a => (long)a.Filesize)
+            : 0L;
+
         return stats;
     }
 
