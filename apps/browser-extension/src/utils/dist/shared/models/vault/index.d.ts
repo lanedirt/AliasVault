@@ -77,4 +77,17 @@ type Alias = {
     Email?: string;
 };
 
-export type { Alias, Credential, EncryptionKey, PasswordSettings, TotpCode };
+/**
+ * Attachment SQLite database type.
+ */
+type Attachment = {
+    Id: string;
+    Filename: string;
+    Blob: Uint8Array | number[];
+    CredentialId: string;
+    CreatedAt: string;
+    UpdatedAt: string;
+    IsDeleted?: boolean;
+};
+
+export type { Alias, Attachment, Credential, EncryptionKey, PasswordSettings, TotpCode };

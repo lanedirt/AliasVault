@@ -1,6 +1,6 @@
 import initSqlJs, { Database } from 'sql.js';
 
-import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
+import type { Attachment, Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
 import type { VaultVersion } from '@/utils/dist/shared/vault-sql';
 import { VaultSqlGenerator } from '@/utils/dist/shared/vault-sql';
 
@@ -637,6 +637,39 @@ export class SqliteClient {
     } catch (error) {
       console.error('Error getting TOTP codes:', error);
       // Return empty array instead of throwing to be robust
+      return [];
+    }
+  }
+
+  /**
+   * Get attachments for a specific credential
+   * @param credentialId - The ID of the credential
+   * @returns Array of attachments for the credential
+   */
+  public getAttachmentsForCredential(credentialId: string): Attachment[] {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    try {
+      if (!this.tableExists('Attachments')) {
+        return [];
+      }
+
+      const query = `
+        SELECT
+          Id,
+          Filename,
+          Blob,
+          CredentialId,
+          CreatedAt,
+          UpdatedAt,
+          IsDeleted
+        FROM Attachments
+        WHERE CredentialId = ? AND IsDeleted = 0`;
+      return this.executeQuery<Attachment>(query, [credentialId]);
+    } catch (error) {
+      console.error('Error getting attachments:', error);
       return [];
     }
   }
