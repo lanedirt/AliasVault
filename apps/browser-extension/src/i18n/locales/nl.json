@@ -177,7 +177,7 @@
   },
   "credentials": {
     "title": "Credentials",
-    "addCredential": "Inloggegevens toevoegen",
+    "addCredential": "Credential toevoegen",
     "editCredential": "Credential bewerken",
     "deleteCredential": "Credential verwijderen",
     "credentialDetails": "Credential details",
