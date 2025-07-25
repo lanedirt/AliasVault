@@ -1,4 +1,5 @@
 import AliasBlock from './AliasBlock';
+import AttachmentBlock from './AttachmentBlock';
 import EmailBlock from './EmailBlock';
 import HeaderBlock from './HeaderBlock';
 import LoginCredentialsBlock from './LoginCredentialsBlock';
@@ -11,5 +12,6 @@ export {
   TotpBlock,
   LoginCredentialsBlock,
   AliasBlock,
-  NotesBlock
+  NotesBlock,
+  AttachmentBlock
 };

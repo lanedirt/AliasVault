@@ -8,7 +8,8 @@ import {
   TotpBlock,
   LoginCredentialsBlock,
   AliasBlock,
-  NotesBlock
+  NotesBlock,
+  AttachmentBlock
 } from '@/entrypoints/popup/components/CredentialDetails';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
@@ -114,6 +115,7 @@ const CredentialDetails: React.FC = (): React.ReactElement => {
       <LoginCredentialsBlock credential={credential} />
       <AliasBlock credential={credential} />
       <NotesBlock notes={credential.Notes} />
+      <AttachmentBlock credentialId={credential.Id} />
     </div>
   );
 };
