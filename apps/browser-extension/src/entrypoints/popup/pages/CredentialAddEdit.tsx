@@ -8,21 +8,21 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { sendMessage } from 'webext-bridge/popup';
 import * as Yup from 'yup';
 
+import AttachmentUploader from '@/entrypoints/popup/components/CredentialDetails/AttachmentUploader';
 import { FormInput } from '@/entrypoints/popup/components/FormInput';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
+import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import Modal from '@/entrypoints/popup/components/Modal';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
+import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 import { useWebApi } from '@/entrypoints/popup/context/WebApiContext';
 import { useVaultMutate } from '@/entrypoints/popup/hooks/useVaultMutate';
 
 import { IdentityHelperUtils, CreateIdentityGenerator, CreateUsernameEmailGenerator, Identity, Gender } from '@/utils/dist/shared/identity-generator';
-import type { Credential } from '@/utils/dist/shared/models/vault';
+import type { Attachment, Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator } from '@/utils/dist/shared/password-generator';
-
-import LoadingSpinner from '../components/LoadingSpinner';
-import { useLoading } from '../context/LoadingContext';
 
 type CredentialMode = 'random' | 'manual';
 
@@ -80,6 +80,8 @@ const CredentialAddEdit: React.FC = () => {
   const [localLoading, setLocalLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [originalAttachmentIds, setOriginalAttachmentIds] = useState<string[]>([]);
   const webApi = useWebApi();
 
   const serviceNameRef = useRef<HTMLInputElement>(null);
@@ -239,6 +241,11 @@ const CredentialAddEdit: React.FC = () => {
         Object.entries(result).forEach(([key, value]) => {
           setValue(key as keyof Credential, value);
         });
+
+        // Load attachments for this credential
+        const credentialAttachments = dbContext.sqliteClient.getAttachmentsForCredential(id);
+        setAttachments(credentialAttachments);
+        setOriginalAttachmentIds(credentialAttachments.map(a => a.Id));
 
         setMode('manual');
         setIsInitialLoading(false);
@@ -429,7 +436,7 @@ const CredentialAddEdit: React.FC = () => {
       setLocalLoading(false);
 
       if (isEditMode) {
-        await dbContext.sqliteClient!.updateCredentialById(data);
+        await dbContext.sqliteClient!.updateCredentialById(data, originalAttachmentIds, attachments);
       } else {
         const credentialId = await dbContext.sqliteClient!.createCredential(data);
         data.Id = credentialId.toString();
@@ -450,7 +457,7 @@ const CredentialAddEdit: React.FC = () => {
         }
       },
     });
-  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias, webApi, clearPersistedValues]);
+  }, [isEditMode, dbContext.sqliteClient, executeVaultMutation, navigate, mode, watch, generateRandomAlias, webApi, clearPersistedValues, originalAttachmentIds, attachments]);
 
   // Set header buttons on mount and clear on unmount
   useEffect((): (() => void) => {
@@ -679,6 +686,12 @@ const CredentialAddEdit: React.FC = () => {
                 />
               </div>
             </div>
+
+            <AttachmentUploader
+              attachments={attachments}
+              onAttachmentsChange={setAttachments}
+              originalAttachmentIds={originalAttachmentIds}
+            />
           </>
         )}
       </div>
