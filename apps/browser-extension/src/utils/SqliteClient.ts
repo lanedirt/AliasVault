@@ -1,6 +1,7 @@
 import initSqlJs, { Database } from 'sql.js';
 
-import type { Attachment, Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
+import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
+import type { Attachment } from '@/utils/dist/shared/models/vault';
 import type { VaultVersion } from '@/utils/dist/shared/vault-sql';
 import { VaultSqlGenerator } from '@/utils/dist/shared/vault-sql';
 
@@ -244,7 +245,7 @@ export class SqliteClient {
         BirthDate: row.BirthDate,
         Gender: row.Gender,
         Email: row.Email
-      }
+      },
     };
   }
 
@@ -424,9 +425,10 @@ export class SqliteClient {
   /**
    * Create a new credential with associated entities
    * @param credential The credential object to insert
+   * @param attachments The attachments to insert
    * @returns The ID of the created credential
    */
-  public async createCredential(credential: Credential): Promise<string> {
+  public async createCredential(credential: Credential, attachments: Attachment[]): Promise<string> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -518,6 +520,26 @@ export class SqliteClient {
           currentDateTime,
           0
         ]);
+      }
+
+      // 5. Insert Attachment
+      if (attachments) {
+        for (const attachment of attachments) {
+          const attachmentQuery = `
+            INSERT INTO Attachments (Id, Filename, Blob, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+          const attachmentId = crypto.randomUUID().toUpperCase();
+          this.executeUpdate(attachmentQuery, [
+            attachmentId,
+            attachment.Filename,
+            attachment.Blob as Uint8Array,
+            credentialId,
+            currentDateTime,
+            currentDateTime,
+            0
+          ]);
+        }
       }
 
       await this.commitTransaction();
@@ -735,9 +757,11 @@ export class SqliteClient {
   /**
    * Update an existing credential with associated entities
    * @param credential The credential object to update
+   * @param originalAttachmentIds The IDs of the original attachments
+   * @param attachments The attachments to update
    * @returns The number of rows modified
    */
-  public async updateCredentialById(credential: Credential): Promise<number> {
+  public async updateCredentialById(credential: Credential, originalAttachmentIds: string[], attachments: Attachment[]): Promise<number> {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
@@ -880,6 +904,60 @@ export class SqliteClient {
             currentDateTime,
             credential.Id
           ]);
+        }
+      }
+
+      // 5. Handle Attachments
+      if (attachments) {
+        // Get current attachment IDs to track what needs to be deleted
+        const currentAttachmentIds = attachments.map(a => a.Id);
+
+        // Delete attachments that were removed (in originalAttachmentIds but not in current attachments)
+        const attachmentsToDelete = originalAttachmentIds.filter(id => !currentAttachmentIds.includes(id));
+        for (const attachmentId of attachmentsToDelete) {
+          const deleteQuery = `
+            UPDATE Attachments
+            SET IsDeleted = 1,
+                UpdatedAt = ?
+            WHERE Id = ?`;
+          this.executeUpdate(deleteQuery, [currentDateTime, attachmentId]);
+        }
+
+        // Process each attachment
+        for (const attachment of attachments) {
+          const isExistingAttachment = originalAttachmentIds.includes(attachment.Id);
+
+          if (isExistingAttachment) {
+            // Update existing attachment
+            const updateQuery = `
+              UPDATE Attachments
+              SET Filename = ?,
+                  Blob = ?,
+                  UpdatedAt = ?,
+                  IsDeleted = ?
+              WHERE Id = ?`;
+            this.executeUpdate(updateQuery, [
+              attachment.Filename,
+              attachment.Blob as Uint8Array,
+              currentDateTime,
+              attachment.IsDeleted ? 1 : 0,
+              attachment.Id
+            ]);
+          } else {
+            // Insert new attachment
+            const insertQuery = `
+              INSERT INTO Attachments (Id, Filename, Blob, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+              VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            this.executeUpdate(insertQuery, [
+              attachment.Id,
+              attachment.Filename,
+              attachment.Blob as Uint8Array,
+              credential.Id,
+              currentDateTime,
+              currentDateTime,
+              0
+            ]);
+          }
         }
       }
 

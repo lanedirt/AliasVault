@@ -438,7 +438,7 @@ const CredentialAddEdit: React.FC = () => {
       if (isEditMode) {
         await dbContext.sqliteClient!.updateCredentialById(data, originalAttachmentIds, attachments);
       } else {
-        const credentialId = await dbContext.sqliteClient!.createCredential(data);
+        const credentialId = await dbContext.sqliteClient!.createCredential(data, attachments);
         data.Id = credentialId.toString();
       }
     }, {
