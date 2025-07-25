@@ -333,7 +333,7 @@ const Settings: React.FC = () => {
                     : 'bg-red-500 hover:bg-red-600 text-white'
                 }`}
               >
-                {settings.isContextMenuEnabled ? t('enabled') : t('disabled')}
+                {settings.isContextMenuEnabled ? t('settings.enabled') : t('settings.disabled')}
               </button>
             </div>
           </div>
