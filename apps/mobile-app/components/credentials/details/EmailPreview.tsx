@@ -207,14 +207,13 @@ export const EmailPreview: React.FC<EmailPreviewProps> = ({ email }) : React.Rea
             }
           } catch {
             setError(t('credentials.emailLoadError'));
-            return;
-          } finally {
-            setLoading(false);
           }
         }
       } catch (err) {
         console.error('Error loading emails:', err);
         setError(t('credentials.emailUnexpectedError'));
+      } finally {
+        setLoading(false);
       }
     };
 
