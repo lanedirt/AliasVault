@@ -137,7 +137,7 @@ declare class UsernameEmailGenerator {
  * @param language - The language to use for generating the identity (e.g. "en", "nl").
  * @returns A new identity generator instance.
  */
-declare const CreateIdentityGenerator: (language: string) => IIdentityGenerator;
+declare const CreateIdentityGenerator: (language: string) => IdentityGenerator;
 
 /**
  * Creates a new username email generator. This is used by the .NET Blazor WASM JSinterop
