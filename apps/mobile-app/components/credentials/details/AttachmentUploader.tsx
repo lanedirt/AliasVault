@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
@@ -34,7 +35,7 @@ export const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
     try {
       const result = await DocumentPicker.getDocumentAsync({
         multiple: true,
-        copyToCacheDirectory: false,
+        copyToCacheDirectory: true,
       });
 
       if (result.canceled) {
@@ -45,22 +46,59 @@ export const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
 
       for (const file of result.assets) {
         if (file.uri) {
-          // Read file as bytes
-          const response = await fetch(file.uri);
-          const arrayBuffer = await response.arrayBuffer();
-          const byteArray = new Uint8Array(arrayBuffer);
+          try {
+            let fileUri = file.uri;
 
-          const attachment: Attachment = {
-            Id: crypto.randomUUID(),
-            Filename: file.name,
-            Blob: byteArray,
-            CredentialId: '', // Will be set when saving credential
-            CreatedAt: new Date().toISOString(),
-            UpdatedAt: new Date().toISOString(),
-            IsDeleted: false,
-          };
+            /*
+             * If the URI is a content:// URI and copyToCacheDirectory didn't work,
+             * try to copy it to a readable location
+             */
+            if (fileUri.startsWith('content://')) {
+              const tempUri = `${FileSystem.cacheDirectory}${file.name}`;
+              await FileSystem.copyAsync({
+                from: fileUri,
+                to: tempUri,
+              });
+              fileUri = tempUri;
+            }
 
-          newAttachments.push(attachment);
+            // Read file as base64 string using FileSystem
+            const base64Data = await FileSystem.readAsStringAsync(fileUri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+
+            // Convert base64 to Uint8Array
+            const binaryString = atob(base64Data);
+            const byteArray = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              byteArray[i] = binaryString.charCodeAt(i);
+            }
+
+            const attachment: Attachment = {
+              Id: crypto.randomUUID(),
+              Filename: file.name,
+              Blob: byteArray,
+              CredentialId: '', // Will be set when saving credential
+              CreatedAt: new Date().toISOString(),
+              UpdatedAt: new Date().toISOString(),
+              IsDeleted: false,
+            };
+
+            newAttachments.push(attachment);
+
+            // Clean up temporary file if we created one
+            if (fileUri !== file.uri) {
+              try {
+                await FileSystem.deleteAsync(fileUri);
+              } catch (cleanupError) {
+                console.warn('Failed to cleanup temporary file:', cleanupError);
+              }
+            }
+          } catch (fileError) {
+            console.error('Error reading file:', fileError);
+            setStatusMessage(`Error reading file ${file.name}.`);
+            setTimeout(() => setStatusMessage(''), 3000);
+          }
         }
       }
 

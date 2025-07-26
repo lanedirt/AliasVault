@@ -1,9 +1,10 @@
+import { Buffer } from 'buffer';
+
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert, Share } from 'react-native';
 
 import type { Credential, Attachment } from '@/utils/dist/shared/models/vault';
 import emitter from '@/utils/EventEmitter';
@@ -32,42 +33,38 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({ credential
    */
   const downloadAttachment = async (attachment: Attachment): Promise<void> => {
     try {
-      // Convert Uint8Array or number[] to Uint8Array
-      const byteArray = attachment.Blob instanceof Uint8Array
-        ? attachment.Blob
-        : new Uint8Array(attachment.Blob);
+      const tempFile = `${FileSystem.cacheDirectory}${attachment.Filename}`;
 
-      const fileUri = `${FileSystem.documentDirectory}${attachment.Filename}`;
+      // Step 1: Create a Blob
+      if (typeof attachment.Blob === 'string') {
+        // If attachment.Blob is already a base64 string
+        const base64Data = attachment.Blob;
 
-      // Convert byte array to base64
-      let binary = '';
-      const bytes = new Uint8Array(byteArray);
-      const len = bytes.byteLength;
-      for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
+        await FileSystem.writeAsStringAsync(tempFile, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
       }
-      const base64 = btoa(binary);
+      else {
+        // Convert attachment.Blob to base64
+        const base64Data = Buffer.from(attachment.Blob as unknown as string, 'base64');
+        await FileSystem.writeAsStringAsync(tempFile, base64Data.toString(), {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      }
 
-      // Write file to local storage
-      await FileSystem.writeAsStringAsync(fileUri, base64, {
-        encoding: FileSystem.EncodingType.Base64,
+      // Step 2: Share using Sharing API (better handles mime types)
+      await Share.share({
+        url: tempFile,
+        title: attachment.Filename,
       });
 
-      // Share the file
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/octet-stream',
-          dialogTitle: attachment.Filename,
-        });
-      } else {
-        Alert.alert('Download Complete', `File saved to: ${fileUri}`);
-      }
+      // Optional cleanup
+      await FileSystem.deleteAsync(tempFile);
     } catch (error) {
       console.error('Error downloading attachment:', error);
       Alert.alert('Error', 'Failed to download attachment');
     }
   };
-
   /**
    * Load the attachments.
    */
@@ -87,7 +84,6 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({ credential
   useEffect((): (() => void) => {
     loadAttachments();
 
-    // Add listener for credential changes to reload attachments
     const credentialChangedSub = emitter.addListener('credentialChanged', async (changedId: string) => {
       if (changedId === credential.Id) {
         await loadAttachments();

@@ -927,23 +927,7 @@ export class SqliteClient {
         for (const attachment of attachments) {
           const isExistingAttachment = originalAttachmentIds.includes(attachment.Id);
 
-          if (isExistingAttachment) {
-            // Update existing attachment
-            const updateQuery = `
-              UPDATE Attachments
-              SET Filename = ?,
-                  Blob = ?,
-                  UpdatedAt = ?,
-                  IsDeleted = ?
-              WHERE Id = ?`;
-            this.executeUpdate(updateQuery, [
-              attachment.Filename,
-              attachment.Blob as Uint8Array,
-              currentDateTime,
-              attachment.IsDeleted ? 1 : 0,
-              attachment.Id
-            ]);
-          } else {
+          if (!isExistingAttachment) {
             // Insert new attachment
             const insertQuery = `
               INSERT INTO Attachments (Id, Filename, Blob, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
