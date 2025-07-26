@@ -9,7 +9,7 @@ import { StyleSheet, View, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingVi
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Toast from 'react-native-toast-message';
 
-import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/dist/shared/identity-generator';
+import { CreateIdentityGenerator, IdentityGenerator, IdentityHelperUtils } from '@/utils/dist/shared/identity-generator';
 import type { Attachment, Credential } from '@/utils/dist/shared/models/vault';
 import type { FaviconExtractModel } from '@/utils/dist/shared/models/webapi';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
@@ -145,7 +145,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
   /**
    * Initialize the identity and password generators with settings from user's vault.
-   * @returns {identityGenerator: IdentityGenerator, passwordGenerator: PasswordGenerator}
+   * @returns {identityGenerator: IIdentityGenerator, passwordGenerator: PasswordGenerator}
    */
   const initializeGenerators = useCallback(async () : Promise<{ identityGenerator: IdentityGenerator, passwordGenerator: PasswordGenerator }> => {
     // Get default identity language from database
@@ -724,7 +724,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                   <AttachmentUploader
                     attachments={attachments}
                     onAttachmentsChange={setAttachments}
-                    originalAttachmentIds={originalAttachmentIds}
                   />
                 </View>
 
