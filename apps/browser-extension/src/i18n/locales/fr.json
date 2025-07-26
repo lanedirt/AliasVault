@@ -64,6 +64,8 @@
     "copyToClipboard": "Copy to clipboard",
     "loadingEmails": "Loading emails...",
     "loadingTotpCodes": "Loading TOTP codes...",
+    "attachments": "Attachments",
+    "loadingAttachments": "Loading attachments...",
     "settings": "Settings",
     "recentEmails": "Recent emails",
     "loginCredentials": "Login credentials",
