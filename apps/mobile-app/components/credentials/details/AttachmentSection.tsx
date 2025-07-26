@@ -1,10 +1,12 @@
-import * as Sharing from 'expo-sharing';
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { View, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 
 import type { Credential, Attachment } from '@/utils/dist/shared/models/vault';
+import emitter from '@/utils/EventEmitter';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -66,31 +68,59 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({ credential
     }
   };
 
-  useEffect(() => {
-    /**
-     * Load the attachments.
-     */
-    const loadAttachments = async (): Promise<void> => {
-      if (!dbContext?.sqliteClient) {
-        return;
-      }
+  /**
+   * Load the attachments.
+   */
+  const loadAttachments = useCallback(async (): Promise<void> => {
+    if (!dbContext?.sqliteClient) {
+      return;
+    }
 
-      try {
-        const attachmentList = await dbContext.sqliteClient.getAttachmentsForCredential(credential.Id);
-        setAttachments(attachmentList);
-      } catch (error) {
-        console.error('Error loading attachments:', error);
-      }
-    };
-
-    loadAttachments();
+    try {
+      const attachmentList = await dbContext.sqliteClient.getAttachmentsForCredential(credential.Id);
+      setAttachments(attachmentList);
+    } catch (error) {
+      console.error('Error loading attachments:', error);
+    }
   }, [credential.Id, dbContext?.sqliteClient]);
+
+  useEffect((): (() => void) => {
+    loadAttachments();
+
+    // Add listener for credential changes to reload attachments
+    const credentialChangedSub = emitter.addListener('credentialChanged', async (changedId: string) => {
+      if (changedId === credential.Id) {
+        await loadAttachments();
+      }
+    });
+
+    return () => {
+      credentialChangedSub.remove();
+    };
+  }, [credential.Id, dbContext?.sqliteClient, loadAttachments]);
 
   if (attachments.length === 0) {
     return null;
   }
 
   const styles = StyleSheet.create({
+    attachmentDate: {
+      fontSize: 12,
+    },
+    attachmentInfo: {
+      flex: 1,
+    },
+    attachmentItem: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+    },
+    attachmentName: {
+      fontSize: 14,
+      fontWeight: '500',
+      marginBottom: 2,
+    },
     container: {
       paddingTop: 16,
     },
@@ -99,23 +129,6 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({ credential
       borderRadius: 8,
       marginTop: 8,
       padding: 12,
-    },
-    attachmentItem: {
-      alignItems: 'center',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 8,
-    },
-    attachmentInfo: {
-      flex: 1,
-    },
-    attachmentName: {
-      fontSize: 14,
-      fontWeight: '500',
-      marginBottom: 2,
-    },
-    attachmentDate: {
-      fontSize: 12,
     },
     downloadIcon: {
       marginLeft: 12,
@@ -143,7 +156,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({ credential
               </ThemedText>
             </View>
             <View style={styles.downloadIcon}>
-              <ThemedText type="subtitle">📎</ThemedText>
+              <Ionicons name="download-outline" size={24} color={colors.text} />
             </View>
           </View>
         </TouchableOpacity>

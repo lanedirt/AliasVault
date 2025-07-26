@@ -10,7 +10,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Toast from 'react-native-toast-message';
 
 import { CreateIdentityGenerator, IdentityHelperUtils, IdentityGenerator } from '@/utils/dist/shared/identity-generator';
-import type { Credential } from '@/utils/dist/shared/models/vault';
+import type { Attachment, Credential } from '@/utils/dist/shared/models/vault';
 import type { FaviconExtractModel } from '@/utils/dist/shared/models/webapi';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import emitter from '@/utils/EventEmitter';
@@ -20,6 +20,7 @@ import { credentialSchema } from '@/utils/ValidationSchema';
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 
+import { AttachmentUploader } from '@/components/credentials/details/AttachmentUploader';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
@@ -48,6 +49,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const serviceNameRef = useRef<ValidatedFormFieldRef>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [originalAttachmentIds, setOriginalAttachmentIds] = useState<string[]>([]);
   const { t } = useTranslation();
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
@@ -89,6 +92,11 @@ export default function AddEditCredentialScreen() : React.ReactNode {
         if (existingCredential.Alias?.FirstName || existingCredential.Alias?.LastName) {
           setMode('manual');
         }
+
+        // Load attachments for this credential
+        const credentialAttachments = await dbContext.sqliteClient!.getAttachmentsForCredential(id);
+        setAttachments(credentialAttachments);
+        setOriginalAttachmentIds(credentialAttachments.map(a => a.Id));
       }
     } catch (err) {
       console.error('Error loading credential:', err);
@@ -282,9 +290,9 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
     await executeVaultMutation(async () => {
       if (isEditMode) {
-        await dbContext.sqliteClient!.updateCredentialById(credentialToSave);
+        await dbContext.sqliteClient!.updateCredentialById(credentialToSave, originalAttachmentIds, attachments);
       } else {
-        const credentialId = await dbContext.sqliteClient!.createCredential(credentialToSave);
+        const credentialId = await dbContext.sqliteClient!.createCredential(credentialToSave, attachments);
         credentialToSave.Id = credentialId;
       }
 
@@ -315,7 +323,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
       setIsSyncing(false);
     }
-  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsSyncing, isSaveDisabled, t]);
+  }, [isEditMode, id, serviceUrl, router, executeVaultMutation, dbContext.sqliteClient, mode, generateRandomAlias, webApi, watch, setIsSaveDisabled, setIsSyncing, isSaveDisabled, t, originalAttachmentIds, attachments]);
 
   /**
    * Generate a random username.
@@ -708,6 +716,16 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                     textAlignVertical="top"
                   />
                   {/* TODO: Add TOTP management */}
+                </View>
+
+                <View style={styles.section}>
+                  <ThemedText style={styles.sectionTitle}>{t('credentials.attachments')}</ThemedText>
+
+                  <AttachmentUploader
+                    attachments={attachments}
+                    onAttachmentsChange={setAttachments}
+                    originalAttachmentIds={originalAttachmentIds}
+                  />
                 </View>
 
                 {isEditMode && (
