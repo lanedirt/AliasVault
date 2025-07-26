@@ -64,6 +64,8 @@
     "copyToClipboard": "Naar klembord kopiëren",
     "loadingEmails": "E-mails laden...",
     "loadingTotpCodes": "TOTP-codes laden...",
+    "attachments": "Attachments",
+    "loadingAttachments": "Loading attachments...",
     "settings": "Instellingen",
     "recentEmails": "Recente e-mails",
     "loginCredentials": "Inloggegevens",
