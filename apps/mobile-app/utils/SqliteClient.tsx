@@ -1,5 +1,5 @@
 import type { EncryptionKeyDerivationParams, VaultMetadata } from '@/utils/dist/shared/models/metadata';
-import type { Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
+import type { Attachment, Credential, EncryptionKey, PasswordSettings, TotpCode } from '@/utils/dist/shared/models/vault';
 import { VaultSqlGenerator, VaultVersion } from '@/utils/dist/shared/vault-sql';
 
 import NativeVaultManager from '@/specs/NativeVaultManager';
@@ -497,9 +497,10 @@ class SqliteClient {
   /**
    * Create a new credential with associated entities
    * @param credential The credential object to insert
+   * @param attachments The attachments to insert
    * @returns The ID of the newly created credential
    */
-  public async createCredential(credential: Credential): Promise<string> {
+  public async createCredential(credential: Credential, attachments: Attachment[]): Promise<string> {
     try {
       await NativeVaultManager.beginTransaction();
 
@@ -582,6 +583,22 @@ class SqliteClient {
         await this.executeUpdate(passwordQuery, [
           passwordId,
           credential.Password,
+          credentialId,
+          currentDateTime,
+          currentDateTime,
+          0
+        ]);
+      }
+
+      // 5. Insert Attachments
+      for (const attachment of attachments) {
+        const attachmentQuery = `
+          INSERT INTO Attachments (Id, Filename, Blob, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        await this.executeUpdate(attachmentQuery, [
+          attachment.Id,
+          attachment.Filename,
+          attachment.Blob as Uint8Array,
           credentialId,
           currentDateTime,
           currentDateTime,
@@ -795,9 +812,11 @@ class SqliteClient {
   /**
    * Update an existing credential with associated entities
    * @param credential The credential object to update
+   * @param originalAttachmentIds The IDs of the original attachments
+   * @param attachments The attachments to update
    * @returns The number of rows modified
    */
-  public async updateCredentialById(credential: Credential): Promise<number> {
+  public async updateCredentialById(credential: Credential, originalAttachmentIds: string[], attachments: Attachment[]): Promise<number> {
     try {
       await NativeVaultManager.beginTransaction();
       const currentDateTime = new Date().toISOString()
@@ -936,6 +955,58 @@ class SqliteClient {
             currentDateTime,
             credential.Id
           ]);
+        }
+      }
+
+      // 5. Handle Attachments
+      if (attachments) {
+        // Get current attachment IDs to track what needs to be deleted
+        const currentAttachmentIds = attachments.map(a => a.Id);
+
+        // Delete attachments that were removed (in originalAttachmentIds but not in current attachments)
+        const attachmentsToDelete = originalAttachmentIds.filter(id => !currentAttachmentIds.includes(id));
+        for (const attachmentId of attachmentsToDelete) {
+          const deleteQuery = `
+            UPDATE Attachments
+            SET IsDeleted = 1,
+                UpdatedAt = ?
+            WHERE Id = ?`;
+          await this.executeUpdate(deleteQuery, [currentDateTime, attachmentId]);
+        }
+
+        // Process each attachment
+        for (const attachment of attachments) {
+          const isExistingAttachment = originalAttachmentIds.includes(attachment.Id);
+
+          if (isExistingAttachment) {
+            // Update existing attachment
+            const updateQuery = `
+              UPDATE Attachments
+              SET Filename = ?,
+                  Blob = ?,
+                  UpdatedAt = ?
+              WHERE Id = ?`;
+            await this.executeUpdate(updateQuery, [
+              attachment.Filename,
+              attachment.Blob as Uint8Array,
+              currentDateTime,
+              attachment.Id
+            ]);
+          } else {
+            // Insert new attachment
+            const insertQuery = `
+              INSERT INTO Attachments (Id, Filename, Blob, CredentialId, CreatedAt, UpdatedAt, IsDeleted)
+              VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            await this.executeUpdate(insertQuery, [
+              attachment.Id,
+              attachment.Filename,
+              attachment.Blob as Uint8Array,
+              credential.Id,
+              currentDateTime,
+              currentDateTime,
+              0
+            ]);
+          }
         }
       }
 
