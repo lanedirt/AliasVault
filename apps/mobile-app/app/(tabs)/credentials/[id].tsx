@@ -11,6 +11,7 @@ import { useColors } from '@/hooks/useColorScheme';
 
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { AliasDetails } from '@/components/credentials/details/AliasDetails';
+import { AttachmentSection } from '@/components/credentials/details/AttachmentSection';
 import { EmailPreview } from '@/components/credentials/details/EmailPreview';
 import { LoginCredentials } from '@/components/credentials/details/LoginCredentials';
 import { NotesSection } from '@/components/credentials/details/NotesSection';
@@ -135,6 +136,7 @@ export default function CredentialDetailsScreen() : React.ReactNode {
         <LoginCredentials credential={credential} />
         <AliasDetails credential={credential} />
         <NotesSection credential={credential} />
+        <AttachmentSection credential={credential} />
       </ThemedScrollView>
     </ThemedContainer>
   );
