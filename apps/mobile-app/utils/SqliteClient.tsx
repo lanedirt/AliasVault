@@ -687,6 +687,35 @@ class SqliteClient {
   }
 
   /**
+   * Get attachments for a specific credential
+   * @param credentialId - The ID of the credential
+   * @returns Array of attachments for the credential
+   */
+  public async getAttachmentsForCredential(credentialId: string): Promise<Attachment[]> {
+    try {
+      if (!await this.tableExists('Attachments')) {
+        return [];
+      }
+
+      const query = `
+        SELECT
+          Id,
+          Filename,
+          Blob,
+          CredentialId,
+          CreatedAt,
+          UpdatedAt,
+          IsDeleted
+        FROM Attachments
+        WHERE CredentialId = ? AND IsDeleted = 0`;
+      return this.executeQuery<Attachment>(query, [credentialId]);
+    } catch (error) {
+      console.error('Error getting attachments:', error);
+      return [];
+    }
+  }
+
+  /**
    * Check if a table exists in the database
    * @param tableName - The name of the table to check
    * @returns True if the table exists, false otherwise
