@@ -159,7 +159,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     header: {
       alignItems: 'center',
       backgroundColor: colors.background,
-      borderBottomColor: colors.border ?? colors.text + '20',
+      borderBottomColor: colors.text + '20',
       borderBottomWidth: 1,
       flexDirection: 'row',
       paddingBottom: 12,
