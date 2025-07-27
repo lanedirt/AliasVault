@@ -97,6 +97,14 @@
     "switchBackToBrowser": "Switch back to your browser to continue.",
     "twoFactorAuth": "Two-factor authentication",
     "totpCode": "TOTP Code",
+    "attachments": "Attachments",
+    "loadingAttachments": "Loading attachments...",
+    "addAttachments": "Add Attachments",
+    "deleteAttachment": "Delete",
+    "toasts": {
+      "credentialUpdated": "Credential updated successfully",
+      "credentialCreated": "Credential created successfully"
+    },
     "errors": {
       "loadFailed": "Failed to load credential",
       "generateUsernameFailed": "Failed to generate username",
