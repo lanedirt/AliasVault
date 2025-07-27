@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -254,12 +254,16 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({ credential
               </ThemedText>
             </View>
             <View style={styles.downloadIcon}>
-              <Ionicons name="eye-outline" size={24} color={colors.text} />
+              <MaterialIcons
+                name={"visibility"}
+                size={20}
+                color={colors.primary}
+              />
             </View>
           </View>
         </TouchableOpacity>
       ))}
-      
+
       {selectedFile && (
         <FilePreviewModal
           visible={previewModalVisible}
