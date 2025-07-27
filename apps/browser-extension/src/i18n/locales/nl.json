@@ -42,7 +42,7 @@
     }
   },
   "menu": {
-    "credentials": "Inloggegevens",
+    "credentials": "Credentials",
     "emails": "E-mails",
     "settings": "Instellingen"
   },
@@ -64,8 +64,8 @@
     "copyToClipboard": "Naar klembord kopiëren",
     "loadingEmails": "E-mails laden...",
     "loadingTotpCodes": "TOTP-codes laden...",
-    "attachments": "Attachments",
-    "loadingAttachments": "Loading attachments...",
+    "attachments": "Bijlagen",
+    "loadingAttachments": "Bijlagen laden...",
     "settings": "Instellingen",
     "recentEmails": "Recente e-mails",
     "loginCredentials": "Inloggegevens",
@@ -99,7 +99,7 @@
       "vaultNotAvailable": "Vault niet beschikbaar",
       "failedToGetVault": "Vault ophalen mislukt",
       "vaultIsLocked": "Vault is vergrendeld",
-      "failedToGetCredentials": "Inloggegevens ophalen mislukt",
+      "failedToGetCredentials": "Credentials ophalen mislukt",
       "failedToCreateIdentity": "Identiteit aanmaken mislukt",
       "failedToGetDefaultEmailDomain": "Standaard e-maildomein ophalen mislukt",
       "failedToGetDefaultIdentitySettings": "Standaard identiteit instellingen ophalen mislukt",
@@ -160,7 +160,7 @@
     "randomAlias": "Alias",
     "usernamePassword": "Gebruikersnaam/wachtwoord",
     "createAndSaveAlias": "Alias aanmaken en opslaan",
-    "createAndSaveCredential": "Inloggegevens aanmaken en opslaan",
+    "createAndSaveCredential": "Credential aanmaken",
     "randomIdentityDescription": "Genereer een willekeurige identiteit met een willekeurig e-mailadres toegankelijk in AliasVault.",
     "randomIdentityDescriptionDropdown": "Willekeurige identiteit met willekeurige e-mail",
     "manualCredentialDescription": "Specificeer je eigen e-mailadres en gebruikersnaam.",
