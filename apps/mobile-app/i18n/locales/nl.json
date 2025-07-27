@@ -97,6 +97,14 @@
     "switchBackToBrowser": "Schakel terug naar je browser om door te gaan.",
     "twoFactorAuth": "Tweestapsverificatie",
     "totpCode": "TOTP Code",
+    "attachments": "Attachments",
+    "loadingAttachments": "Loading attachments...",
+    "addAttachments": "Add Attachments",
+    "deleteAttachment": "Delete",
+    "toasts": {
+      "credentialUpdated": "Credential updated successfully",
+      "credentialCreated": "Credential created successfully"
+    },
     "errors": {
       "loadFailed": "Laden van credential mislukt",
       "generateUsernameFailed": "Genereren van gebruikersnaam mislukt",
