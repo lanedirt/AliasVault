@@ -797,7 +797,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       const enterEmailAddressText = await t('content.enterEmailAddress');
       const usernameText = await t('content.username');
       const enterUsernameText = await t('content.enterUsername');
-      const generatedPasswordText = await t('content.generatedPassword');
+      const passwordText = await t('content.password');
       const generateNewPasswordText = await t('content.generateNewPassword');
       const togglePasswordVisibilityText = await t('content.togglePasswordVisibility');
       const createAndSaveCredentialText = await t('content.createAndSaveCredential');
@@ -889,7 +889,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
           >
         </div>
         <div class="av-create-popup-field-group">
-          <label>${generatedPasswordText}</label>
+          <label>${passwordText}</label>
           <div class="av-create-popup-password-preview">
             <input
               type="text"
