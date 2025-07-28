@@ -898,3 +898,287 @@ body {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Password Configuration Styles */
+.av-password-length-container {
+  margin-top: 12px;
+  padding-top: 8px;
+}
+
+.av-password-length-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.av-password-length-header label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.av-password-length-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.av-password-length-value {
+  font-size: 0.875rem;
+  color: #e5e7eb;
+  font-family: 'Courier New', monospace;
+  min-width: 24px;
+  text-align: center;
+}
+
+.av-password-config-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.av-password-config-btn:hover {
+  color: #e5e7eb;
+  background-color: rgba(75, 85, 99, 0.3);
+}
+
+.av-password-config-btn .av-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.av-password-length-slider {
+  width: 100%;
+  height: 8px;
+  background: #374151;
+  border-radius: 4px;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.av-password-length-slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #d68338;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.av-password-length-slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #d68338;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Password Config Dialog */
+.av-password-config-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.av-password-config-dialog {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 90vw;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.av-password-config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #374151;
+}
+
+.av-password-config-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8f9fa;
+}
+
+.av-password-config-close {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.av-password-config-close:hover {
+  color: #e5e7eb;
+  background-color: #374151;
+}
+
+.av-password-config-close .av-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.av-password-config-content {
+  padding: 20px;
+}
+
+.av-password-preview-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.av-password-config-preview {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  background: #374151;
+  color: #f8f9fa;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  outline: none;
+}
+
+.av-password-config-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: #374151;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.av-password-config-refresh:hover {
+  background-color: #4b5563;
+}
+
+.av-password-config-refresh .av-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.av-password-config-options {
+  margin-bottom: 20px;
+}
+
+.av-password-config-toggles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.av-password-config-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: #374151;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.2s ease;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.av-password-config-toggle:hover {
+  background-color: #4b5563;
+}
+
+.av-password-config-toggle.active {
+  background-color: #d68338;
+  color: white;
+}
+
+.av-password-config-toggle.active:hover {
+  background-color: #c97731;
+}
+
+.av-password-config-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.av-password-config-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #e5e7eb;
+  margin: 0;
+}
+
+.av-password-config-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #d68338;
+  cursor: pointer;
+}
+
+.av-password-config-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.av-password-config-use {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: #6b7280;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.av-password-config-use:hover {
+  background-color: #4b5563;
+}
+
+.av-password-config-use .av-icon {
+  width: 16px;
+  height: 16px;
+}

@@ -6,7 +6,7 @@ import { fillCredential } from '@/entrypoints/contentScript/Form';
 import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
 import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
-import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
+import { CreatePasswordGenerator, PasswordGenerator, PasswordSettings } from '@/utils/dist/shared/password-generator';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
@@ -908,6 +908,22 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
               </svg>
             </button>
           </div>
+
+          <div class="av-password-length-container">
+            <div class="av-password-length-header">
+              <label for="password-length-slider">Password length</label>
+              <div class="av-password-length-controls">
+                <span id="password-length-value" class="av-password-length-value">12</span>
+                <button id="password-config-btn" class="av-password-config-btn" title="Change password complexity">
+                  <svg class="av-icon" viewBox="0 0 24 24">
+                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <input type="range" id="password-length-slider" min="8" max="64" value="12" class="av-password-length-slider">
+          </div>
         </div>
         <div class="av-create-popup-actions">
           <button id="custom-cancel-btn" class="av-create-popup-cancel">${cancelText}</button>
@@ -979,18 +995,28 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
       // Get password settings from background
       let passwordGenerator: PasswordGenerator;
+      let currentPasswordSettings: PasswordSettings = {
+        Length: 12,
+        UseLowercase: true,
+        UseUppercase: true,
+        UseNumbers: true,
+        UseSpecialChars: true,
+        UseNonAmbiguousChars: true
+      };
+
       sendMessage('GET_PASSWORD_SETTINGS', {}, 'background').then((response) => {
         const passwordSettingsResponse = response as PasswordSettingsResponse;
-        passwordGenerator = CreatePasswordGenerator(passwordSettingsResponse.settings ?? {
-          Length: 12,
-          UseLowercase: true,
-          UseUppercase: true,
-          UseNumbers: true,
-          UseSpecialChars: true,
-          UseNonAmbiguousChars: true
-        });
+        currentPasswordSettings = passwordSettingsResponse.settings ?? currentPasswordSettings;
+        passwordGenerator = CreatePasswordGenerator(currentPasswordSettings);
+
+        // Update UI with loaded settings
+        const lengthSlider = popup.querySelector('#password-length-slider') as HTMLInputElement;
+        const lengthValue = popup.querySelector('#password-length-value') as HTMLSpanElement;
+        lengthSlider.value = currentPasswordSettings.Length.toString();
+        lengthValue.textContent = currentPasswordSettings.Length.toString();
+
         // Generate initial password after settings are loaded
-        passwordGenerator.generateRandomPassword();
+        generatePassword();
       });
 
       /**
@@ -1009,6 +1035,28 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
       // Handle regenerate button click
       regenerateBtn.addEventListener('click', generatePassword);
+
+      // Handle password length slider
+      const lengthSlider = popup.querySelector('#password-length-slider') as HTMLInputElement;
+      const lengthValue = popup.querySelector('#password-length-value') as HTMLSpanElement;
+
+      lengthSlider.addEventListener('input', () => {
+        const newLength = parseInt(lengthSlider.value, 10);
+        currentPasswordSettings.Length = newLength;
+        lengthValue.textContent = newLength.toString();
+
+        // Regenerate password with new settings
+        if (passwordGenerator) {
+          passwordGenerator = CreatePasswordGenerator(currentPasswordSettings);
+          generatePassword();
+        }
+      });
+
+      // Handle advanced configuration button
+      const configBtn = popup.querySelector('#password-config-btn') as HTMLButtonElement;
+      configBtn.addEventListener('click', () => {
+        showPasswordConfigDialog();
+      });
 
       // Add password visibility toggle functionality
       const passwordInput = popup.querySelector('#password-preview') as HTMLInputElement;
@@ -1040,6 +1088,144 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       };
 
       toggleVisibilityBtn.addEventListener('click', togglePasswordVisibility);
+
+      /**
+       * Show password configuration dialog
+       */
+      const showPasswordConfigDialog = (): void => {
+        // Create dialog overlay
+        const dialogOverlay = document.createElement('div');
+        dialogOverlay.className = 'av-password-config-overlay';
+
+        const dialog = document.createElement('div');
+        dialog.className = 'av-password-config-dialog';
+
+        dialog.innerHTML = `
+          <div class="av-password-config-header">
+            <h3>Change password complexity</h3>
+            <button class="av-password-config-close">
+              <svg class="av-icon" viewBox="0 0 24 24">
+                <path d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="av-password-config-content">
+            <div class="av-password-preview-section">
+              <input type="text" id="config-preview" class="av-password-config-preview" readonly>
+              <button id="config-refresh" class="av-password-config-refresh" title="Generate new preview">
+                <svg class="av-icon" viewBox="0 0 24 24">
+                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="av-password-config-options">
+              <div class="av-password-config-toggles">
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseLowercase ? 'active' : ''}" data-setting="UseLowercase" title="Include lowercase letters">
+                  <span>a-z</span>
+                </button>
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseUppercase ? 'active' : ''}" data-setting="UseUppercase" title="Include uppercase letters">
+                  <span>A-Z</span>
+                </button>
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseNumbers ? 'active' : ''}" data-setting="UseNumbers" title="Include numbers">
+                  <span>0-9</span>
+                </button>
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseSpecialChars ? 'active' : ''}" data-setting="UseSpecialChars" title="Include special characters">
+                  <span>!@#</span>
+                </button>
+              </div>
+
+              <div class="av-password-config-checkbox">
+                <label>
+                  <input type="checkbox" id="avoid-ambiguous" ${currentPasswordSettings.UseNonAmbiguousChars ? 'checked' : ''}>
+                  <span>Avoid ambiguous characters (o, 0, etc.)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="av-password-config-actions">
+              <button id="config-use-btn" class="av-password-config-use">
+                <svg class="av-icon" viewBox="0 0 24 24">
+                  <path d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"/>
+                </svg>
+                Use
+              </button>
+            </div>
+          </div>
+        `;
+
+        dialogOverlay.appendChild(dialog);
+        popup.appendChild(dialogOverlay);
+
+        // Generate initial preview
+        const configPreview = dialog.querySelector('#config-preview') as HTMLInputElement;
+        /**
+         * Update the config preview.
+         */
+        const updateConfigPreview = (): void => {
+          if (passwordGenerator) {
+            passwordGenerator = CreatePasswordGenerator(currentPasswordSettings);
+            configPreview.value = passwordGenerator.generateRandomPassword();
+          }
+        };
+        updateConfigPreview();
+
+        // Handle toggle buttons
+        dialog.querySelectorAll('.av-password-config-toggle').forEach(toggle => {
+          toggle.addEventListener('click', () => {
+            const setting = (toggle as HTMLElement).dataset.setting;
+            if (setting) {
+              currentPasswordSettings[setting] = !currentPasswordSettings[setting];
+              toggle.classList.toggle('active', currentPasswordSettings[setting]);
+              updateConfigPreview();
+            }
+          });
+        });
+
+        // Handle checkbox
+        const avoidAmbiguousCheckbox = dialog.querySelector('#avoid-ambiguous') as HTMLInputElement;
+        avoidAmbiguousCheckbox.addEventListener('change', () => {
+          currentPasswordSettings.UseNonAmbiguousChars = avoidAmbiguousCheckbox.checked;
+          updateConfigPreview();
+        });
+
+        // Handle refresh button
+        const refreshBtn = dialog.querySelector('#config-refresh') as HTMLButtonElement;
+        refreshBtn.addEventListener('click', updateConfigPreview);
+
+        // Handle use button
+        const useBtn = dialog.querySelector('#config-use-btn') as HTMLButtonElement;
+        useBtn.addEventListener('click', () => {
+          passwordPreview.value = configPreview.value;
+          passwordPreview.type = 'text';
+          passwordPreview.dataset.isGenerated = 'true';
+          updateVisibilityIcon(true);
+
+          // Update main password generator
+          passwordGenerator = CreatePasswordGenerator(currentPasswordSettings);
+
+          // Update slider value
+          lengthSlider.value = currentPasswordSettings.Length.toString();
+          lengthValue.textContent = currentPasswordSettings.Length.toString();
+
+          // Close dialog
+          dialogOverlay.remove();
+        });
+
+        // Handle close button
+        const closeBtn = dialog.querySelector('.av-password-config-close') as HTMLButtonElement;
+        closeBtn.addEventListener('click', () => {
+          dialogOverlay.remove();
+        });
+
+        // Handle click outside to close
+        dialogOverlay.addEventListener('click', (e) => {
+          if (e.target === dialogOverlay) {
+            dialogOverlay.remove();
+          }
+        });
+      };
 
       /**
        * Handle password input changes
