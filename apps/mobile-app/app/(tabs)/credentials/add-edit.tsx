@@ -10,7 +10,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Toast from 'react-native-toast-message';
 
 import { CreateIdentityGenerator, IdentityGenerator, IdentityHelperUtils } from '@/utils/dist/shared/identity-generator';
-import type { Attachment, Credential } from '@/utils/dist/shared/models/vault';
+import type { Attachment, Credential, PasswordSettings } from '@/utils/dist/shared/models/vault';
 import type { FaviconExtractModel } from '@/utils/dist/shared/models/webapi';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import emitter from '@/utils/EventEmitter';
@@ -21,6 +21,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
 
 import { AttachmentUploader } from '@/components/credentials/details/AttachmentUploader';
+import { AdvancedPasswordField } from '@/components/form/AdvancedPasswordField';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
@@ -51,6 +52,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [originalAttachmentIds, setOriginalAttachmentIds] = useState<string[]>([]);
+  const [passwordSettings, setPasswordSettings] = useState<PasswordSettings | null>(null);
   const { t } = useTranslation();
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
@@ -113,35 +115,50 @@ export default function AddEditCredentialScreen() : React.ReactNode {
    * if we're in add mode and the service URL is provided (by native autofill component).
    */
   useEffect(() => {
-    if (authContext.isOffline) {
-      // Show toast and close the modal
-      setTimeout(() => {
-        Toast.show({
-          type: 'error',
-          text1: t('credentials.offlineMessage'),
-          position: 'bottom'
-        });
-      }, 100);
-      router.dismiss();
-      return;
-    }
+    /**
+     * Initialize the component by loading settings and handling initial state.
+     */
+    const initializeComponent = async (): Promise<void> => {
+      if (authContext.isOffline) {
+        // Show toast and close the modal
+        setTimeout(() => {
+          Toast.show({
+            type: 'error',
+            text1: t('credentials.offlineMessage'),
+            position: 'bottom'
+          });
+        }, 100);
+        router.dismiss();
+        return;
+      }
 
-    if (isEditMode) {
-      loadExistingCredential();
-    } else if (serviceUrl) {
-      const decodedUrl = decodeURIComponent(serviceUrl);
-      const serviceName = extractServiceNameFromUrl(decodedUrl);
-      setValue('ServiceUrl', decodedUrl);
-      setValue('ServiceName', serviceName);
-    }
+      // Load password settings
+      try {
+        const settings = await dbContext.sqliteClient!.getPasswordSettings();
+        setPasswordSettings(settings);
+      } catch (err) {
+        console.error('Error loading password settings:', err);
+      }
 
-    // On create mode, focus the service name field after a short delay to ensure the component is mounted
-    if (!isEditMode) {
-      setTimeout(() => {
-        serviceNameRef.current?.focus();
-      }, 100);
-    }
-  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue, authContext.isOffline, router, t]);
+      if (isEditMode) {
+        loadExistingCredential();
+      } else if (serviceUrl) {
+        const decodedUrl = decodeURIComponent(serviceUrl);
+        const serviceName = extractServiceNameFromUrl(decodedUrl);
+        setValue('ServiceUrl', decodedUrl);
+        setValue('ServiceName', serviceName);
+      }
+
+      // On create mode, focus the service name field after a short delay to ensure the component is mounted
+      if (!isEditMode) {
+        setTimeout(() => {
+          serviceNameRef.current?.focus();
+        }, 100);
+      }
+    };
+
+    initializeComponent();
+  }, [id, isEditMode, serviceUrl, loadExistingCredential, setValue, authContext.isOffline, router, t, dbContext.sqliteClient]);
 
   /**
    * Initialize the identity and password generators with settings from user's vault.
@@ -648,25 +665,36 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                       }
                     ]}
                   />
-                  <ValidatedFormField
-                    control={control}
-                    name="Password"
-                    label={t('credentials.password')}
-                    secureTextEntry={!isPasswordVisible}
-                    buttons={[
-                      {
-                        icon: isPasswordVisible ? "visibility-off" : "visibility",
-                        /**
-                         * Toggle the visibility of the password.
-                         */
-                        onPress: () => setIsPasswordVisible(!isPasswordVisible)
-                      },
-                      {
-                        icon: "refresh",
-                        onPress: generateRandomPassword
-                      }
-                    ]}
-                  />
+                  {passwordSettings ? (
+                    <AdvancedPasswordField
+                      control={control}
+                      name="Password"
+                      label={t('credentials.password')}
+                      initialSettings={passwordSettings}
+                      showPassword={isPasswordVisible}
+                      onShowPasswordChange={setIsPasswordVisible}
+                    />
+                  ) : (
+                    <ValidatedFormField
+                      control={control}
+                      name="Password"
+                      label={t('credentials.password')}
+                      secureTextEntry={!isPasswordVisible}
+                      buttons={[
+                        {
+                          icon: isPasswordVisible ? "visibility-off" : "visibility",
+                          /**
+                           * Toggle the visibility of the password.
+                           */
+                          onPress: () => setIsPasswordVisible(!isPasswordVisible)
+                        },
+                        {
+                          icon: "refresh",
+                          onPress: generateRandomPassword
+                        }
+                      ]}
+                    />
+                  )}
                 </View>
 
                 <View style={styles.section}>
