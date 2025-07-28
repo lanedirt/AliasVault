@@ -150,7 +150,7 @@
     "serviceName": "Service name",
     "email": "Email",
     "username": "Username",
-    "generatedPassword": "Generated password",
+    "password": "Password",
     "enterServiceName": "Enter service name",
     "enterEmailAddress": "Enter email address",
     "enterUsername": "Enter username",

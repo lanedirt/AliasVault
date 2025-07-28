@@ -149,7 +149,6 @@
     "serviceName": "Servicenaam",
     "email": "E-mail",
     "username": "Gebruikersnaam",
-    "generatedPassword": "Gegenereerd wachtwoord",
     "enterServiceName": "Voer servicenaam in",
     "enterEmailAddress": "Voer e-mailadres in",
     "enterUsername": "Voer gebruikersnaam in",
