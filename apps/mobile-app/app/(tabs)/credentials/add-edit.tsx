@@ -673,6 +673,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                       initialSettings={passwordSettings}
                       showPassword={isPasswordVisible}
                       onShowPasswordChange={setIsPasswordVisible}
+                      isNewCredential={!isEditMode}
                     />
                   ) : (
                     <ValidatedFormField
