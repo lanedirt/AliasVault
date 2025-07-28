@@ -8,19 +8,43 @@ export function registerClickOutsideHandler(dotNetHelper, contentIds, methodName
     const idArray = Array.isArray(contentIds) ? contentIds : contentIds.split(',').map(id => id.trim());
 
     const mouseHandler = (event) => {
+        // Check if dotNetHelper is still valid
+        if (!currentDotNetHelper) {
+            unregisterClickOutsideHandler();
+            return;
+        }
+
         const isOutside = idArray.every(id => {
             const content = document.getElementById(id);
             return !content?.contains(event.target);
         });
 
         if (isOutside) {
-            currentDotNetHelper.invokeMethodAsync(methodName);
+            try {
+                currentDotNetHelper.invokeMethodAsync(methodName);
+            } catch (error) {
+                console.warn('Failed to invoke click outside method:', error);
+                // Clean up if the DotNetObjectReference is disposed
+                unregisterClickOutsideHandler();
+            }
         }
     };
 
     const keyHandler = (event) => {
         if (event.key === 'Escape') {
-            currentDotNetHelper.invokeMethodAsync(methodName);
+            // Check if dotNetHelper is still valid
+            if (!currentDotNetHelper) {
+                unregisterClickOutsideHandler();
+                return;
+            }
+
+            try {
+                currentDotNetHelper.invokeMethodAsync(methodName);
+            } catch (error) {
+                console.warn('Failed to invoke escape key method:', error);
+                // Clean up if the DotNetObjectReference is disposed
+                unregisterClickOutsideHandler();
+            }
         }
     };
 
@@ -35,8 +59,9 @@ export function registerClickOutsideHandler(dotNetHelper, contentIds, methodName
 
 export function unregisterClickOutsideHandler() {
     if (currentHandler) {
-        document.removeEventListener('mousedown', currentHandler);
-        document.removeEventListener('keydown', currentHandler);
+        document.removeEventListener('mousedown', currentHandler.mouse);
+        document.removeEventListener('keydown', currentHandler.key);
         currentHandler = null;
+        currentDotNetHelper = null;
     }
 }
