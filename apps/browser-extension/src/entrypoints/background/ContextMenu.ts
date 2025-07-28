@@ -58,10 +58,13 @@ export function handleContextMenuClick(info: Browser.contextMenus.OnClickData, t
 
     // Use browser.scripting to write password to clipboard from active tab
     if (tab?.id) {
-      browser.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: copyPasswordToClipboard,
-        args: [password]
+      // Get confirm text translation.
+      t('content.passwordCopiedToClipboard').then((message) => {
+        browser.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: copyPasswordToClipboard,
+          args: [message, password]
+        });
       });
     }
   } else if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
@@ -82,9 +85,9 @@ export function handleContextMenuClick(info: Browser.contextMenus.OnClickData, t
 /**
  * Copy provided password to clipboard.
  */
-async function copyPasswordToClipboard(generatedPassword: string) : Promise<void> {
-  navigator.clipboard.writeText(generatedPassword).then(async () => {
-    showToast(await t('content.passwordCopiedToClipboard'));
+function copyPasswordToClipboard(message: string, generatedPassword: string) : void {
+  navigator.clipboard.writeText(generatedPassword).then(() => {
+    showToast(message);
   });
 
   /**
