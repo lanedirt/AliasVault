@@ -133,11 +133,42 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
   const handleSettingChange = useCallback((key: keyof PasswordSettings, value: boolean | number) => {
     const newSettings = { ...currentSettings, [key]: value };
     setCurrentSettings(newSettings);
-    /*
-     * Don't auto-generate preview to avoid modal flickering.
-     * User can use the refresh button to see changes.
-     */
-  }, [currentSettings]);
+    // Auto-regenerate preview when settings change
+    generatePreview(newSettings);
+  }, [currentSettings, generatePreview]);
+
+  /**
+   * Individual handlers for each switch to prevent re-renders.
+   */
+  const handleLowercaseChange = useCallback((value: boolean) => {
+    const newSettings = { ...currentSettings, UseLowercase: value };
+    setCurrentSettings(newSettings);
+    generatePreview(newSettings);
+  }, [currentSettings, generatePreview]);
+
+  const handleUppercaseChange = useCallback((value: boolean) => {
+    const newSettings = { ...currentSettings, UseUppercase: value };
+    setCurrentSettings(newSettings);
+    generatePreview(newSettings);
+  }, [currentSettings, generatePreview]);
+
+  const handleNumbersChange = useCallback((value: boolean) => {
+    const newSettings = { ...currentSettings, UseNumbers: value };
+    setCurrentSettings(newSettings);
+    generatePreview(newSettings);
+  }, [currentSettings, generatePreview]);
+
+  const handleSpecialCharsChange = useCallback((value: boolean) => {
+    const newSettings = { ...currentSettings, UseSpecialChars: value };
+    setCurrentSettings(newSettings);
+    generatePreview(newSettings);
+  }, [currentSettings, generatePreview]);
+
+  const handleNonAmbiguousChange = useCallback((value: boolean) => {
+    const newSettings = { ...currentSettings, UseNonAmbiguousChars: value };
+    setCurrentSettings(newSettings);
+    generatePreview(newSettings);
+  }, [currentSettings, generatePreview]);
 
   /**
    * Handle opening the settings modal.
@@ -240,28 +271,26 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
     previewContainer: {
       marginBottom: 20,
     },
-    previewInput: {
+    previewInputContainer: {
+      alignItems: 'center',
       backgroundColor: colors.accentBackground,
       borderColor: colors.accentBorder,
       borderRadius: 6,
       borderWidth: 1,
+      flexDirection: 'row',
+    },
+    previewInput: {
       color: colors.text,
+      flex: 1,
       fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
       fontSize: 14,
       padding: 12,
       textAlign: 'center',
     },
     refreshButton: {
-      alignItems: 'center',
-      backgroundColor: colors.primary,
-      borderRadius: 6,
-      marginTop: 8,
+      borderLeftColor: colors.accentBorder,
+      borderLeftWidth: 1,
       padding: 10,
-    },
-    refreshButtonText: {
-      color: colors.primarySurfaceText,
-      fontSize: 14,
-      fontWeight: '600',
     },
     requiredIndicator: {
       color: colorRed,
@@ -314,117 +343,151 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
     },
     useButton: {
       alignItems: 'center',
-      backgroundColor: colors.primary,
+      backgroundColor: colors.accentBackground,
+      borderColor: colors.accentBorder,
       borderRadius: 6,
+      borderWidth: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
       padding: 12,
     },
     useButtonText: {
-      color: colors.primarySurfaceText,
+      color: colors.text,
       fontSize: 16,
       fontWeight: '600',
+      marginLeft: 8,
     },
   });
 
   /**
-   * Settings modal component for advanced password configuration.
+   * Handle closing the settings modal.
    */
-  const SettingsModal = ({ onChange }: { onChange: (value: string) => void }): React.ReactElement => (
-    <Modal
-      visible={showSettingsModal}
-      transparent
-      animationType="fade"
-      onRequestClose={() => setShowSettingsModal(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <ThemedText style={styles.modalTitle}>Password Settings</ThemedText>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowSettingsModal(false)}
-            >
-              <MaterialIcons name="close" size={24} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
+  const handleCloseModal = useCallback(() => {
+    setShowSettingsModal(false);
+  }, []);
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.previewContainer}>
-              <TextInput
-                style={styles.previewInput}
-                value={previewPassword}
-                editable={false}
-              />
+  /**
+   * Render the settings modal.
+   */
+  const renderSettingsModal = useCallback((onChange: (value: string) => void) => {
+    if (!showSettingsModal) {
+      return null;
+    }
+
+    return (
+      <Modal
+        visible={showSettingsModal}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>{t('credentials.changePasswordComplexity')}</ThemedText>
               <TouchableOpacity
-                style={styles.refreshButton}
-                onPress={handleRefreshPreview}
+                style={styles.closeButton}
+                onPress={handleCloseModal}
               >
-                <ThemedText style={styles.refreshButtonText}>Generate New</ThemedText>
+                <MaterialIcons name="close" size={24} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.settingsSection}>
-              <View style={styles.settingItem}>
-                <ThemedText style={styles.settingLabel}>Lowercase (a-z)</ThemedText>
-                <Switch
-                  value={currentSettings.UseLowercase}
-                  onValueChange={(value) => handleSettingChange('UseLowercase', value)}
-                  trackColor={{ false: colors.accentBorder, true: colors.primary }}
-                  thumbColor={Platform.OS === 'android' ? colors.background : undefined}
-                />
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.previewContainer}>
+                <View style={styles.previewInputContainer}>
+                  <TextInput
+                    style={styles.previewInput}
+                    value={previewPassword}
+                    editable={false}
+                  />
+                  <TouchableOpacity
+                    style={styles.refreshButton}
+                    onPress={handleRefreshPreview}
+                  >
+                    <MaterialIcons name="refresh" size={20} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
               </View>
 
-              <View style={styles.settingItem}>
-                <ThemedText style={styles.settingLabel}>Uppercase (A-Z)</ThemedText>
-                <Switch
-                  value={currentSettings.UseUppercase}
-                  onValueChange={(value) => handleSettingChange('UseUppercase', value)}
-                  trackColor={{ false: colors.accentBorder, true: colors.primary }}
-                  thumbColor={Platform.OS === 'android' ? colors.background : undefined}
-                />
+              <View style={styles.settingsSection}>
+                <View style={styles.settingItem}>
+                  <ThemedText style={styles.settingLabel}>Lowercase (a-z)</ThemedText>
+                  <Switch
+                    value={currentSettings.UseLowercase}
+                    onValueChange={handleLowercaseChange}
+                    trackColor={{ false: colors.accentBorder, true: colors.primary }}
+                    thumbColor={Platform.OS === 'android' ? colors.background : undefined}
+                  />
+                </View>
+
+                <View style={styles.settingItem}>
+                  <ThemedText style={styles.settingLabel}>Uppercase (A-Z)</ThemedText>
+                  <Switch
+                    value={currentSettings.UseUppercase}
+                    onValueChange={handleUppercaseChange}
+                    trackColor={{ false: colors.accentBorder, true: colors.primary }}
+                    thumbColor={Platform.OS === 'android' ? colors.background : undefined}
+                  />
+                </View>
+
+                <View style={styles.settingItem}>
+                  <ThemedText style={styles.settingLabel}>Numbers (0-9)</ThemedText>
+                  <Switch
+                    value={currentSettings.UseNumbers}
+                    onValueChange={handleNumbersChange}
+                    trackColor={{ false: colors.accentBorder, true: colors.primary }}
+                    thumbColor={Platform.OS === 'android' ? colors.background : undefined}
+                  />
+                </View>
+
+                <View style={styles.settingItem}>
+                  <ThemedText style={styles.settingLabel}>Special Characters (!@#)</ThemedText>
+                  <Switch
+                    value={currentSettings.UseSpecialChars}
+                    onValueChange={handleSpecialCharsChange}
+                    trackColor={{ false: colors.accentBorder, true: colors.primary }}
+                    thumbColor={Platform.OS === 'android' ? colors.background : undefined}
+                  />
+                </View>
+
+                <View style={styles.settingItem}>
+                  <ThemedText style={styles.settingLabel}>Avoid Ambiguous Characters</ThemedText>
+                  <Switch
+                    value={currentSettings.UseNonAmbiguousChars}
+                    onValueChange={handleNonAmbiguousChange}
+                    trackColor={{ false: colors.accentBorder, true: colors.primary }}
+                    thumbColor={Platform.OS === 'android' ? colors.background : undefined}
+                  />
+                </View>
               </View>
 
-              <View style={styles.settingItem}>
-                <ThemedText style={styles.settingLabel}>Numbers (0-9)</ThemedText>
-                <Switch
-                  value={currentSettings.UseNumbers}
-                  onValueChange={(value) => handleSettingChange('UseNumbers', value)}
-                  trackColor={{ false: colors.accentBorder, true: colors.primary }}
-                  thumbColor={Platform.OS === 'android' ? colors.background : undefined}
-                />
-              </View>
-
-              <View style={styles.settingItem}>
-                <ThemedText style={styles.settingLabel}>Special Characters (!@#)</ThemedText>
-                <Switch
-                  value={currentSettings.UseSpecialChars}
-                  onValueChange={(value) => handleSettingChange('UseSpecialChars', value)}
-                  trackColor={{ false: colors.accentBorder, true: colors.primary }}
-                  thumbColor={Platform.OS === 'android' ? colors.background : undefined}
-                />
-              </View>
-
-              <View style={styles.settingItem}>
-                <ThemedText style={styles.settingLabel}>Avoid Ambiguous Characters</ThemedText>
-                <Switch
-                  value={currentSettings.UseNonAmbiguousChars}
-                  onValueChange={(value) => handleSettingChange('UseNonAmbiguousChars', value)}
-                  trackColor={{ false: colors.accentBorder, true: colors.primary }}
-                  thumbColor={Platform.OS === 'android' ? colors.background : undefined}
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.useButton}
-              onPress={() => handleUsePassword(onChange)}
-            >
-              <ThemedText style={styles.useButtonText}>Use This Password</ThemedText>
-            </TouchableOpacity>
-          </ScrollView>
+              <TouchableOpacity
+                style={styles.useButton}
+                onPress={() => handleUsePassword(onChange)}
+              >
+                <ThemedText style={styles.useButtonText}>Use This Password</ThemedText>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
         </View>
-      </View>
-    </Modal>
-  );
+      </Modal>
+    );
+  }, [
+    showSettingsModal,
+    styles,
+    previewPassword,
+    handleRefreshPreview,
+    currentSettings,
+    handleLowercaseChange,
+    handleUppercaseChange,
+    handleNumbersChange,
+    handleSpecialCharsChange,
+    handleNonAmbiguousChange,
+    colors,
+    handleUsePassword,
+    handleCloseModal
+  ]);
 
   return (
     <Controller
@@ -518,7 +581,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
             
             {error && <ThemedText style={styles.errorText}>{error.message}</ThemedText>}
             
-            <SettingsModal onChange={onChange} />
+            {renderSettingsModal(onChange)}
           </View>
         );
       }}
