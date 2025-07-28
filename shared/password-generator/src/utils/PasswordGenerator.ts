@@ -8,7 +8,7 @@ export class PasswordGenerator {
   private readonly uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   private readonly numberChars = '0123456789';
   private readonly specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-  private readonly ambiguousChars = 'Il1O0';
+  private readonly ambiguousChars = 'Il1O0o';
 
   private length: number = 18;
   private useLowercase: boolean = true;
