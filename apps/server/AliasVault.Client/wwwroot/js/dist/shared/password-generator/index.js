@@ -39,7 +39,7 @@ var PasswordGenerator = class {
     this.uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     this.numberChars = "0123456789";
     this.specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
-    this.ambiguousChars = "Il1O0";
+    this.ambiguousChars = "Il1O0o";
     this.length = 18;
     this.useLowercase = true;
     this.useUppercase = true;
