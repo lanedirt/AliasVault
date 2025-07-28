@@ -577,19 +577,13 @@ const CredentialAddEdit: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials.loginCredentials')}</h2>
               <div className="space-y-4">
-                <FormInput
+                <UsernameField
                   id="username"
                   label={t('common.username')}
                   value={watch('Username') ?? ''}
                   onChange={(value) => setValue('Username', value)}
                   error={errors.Username?.message}
-                  buttons={[
-                    {
-                      icon: 'refresh',
-                      onClick: generateRandomUsername,
-                      title: t('credentials.generateRandomUsername')
-                    }
-                  ]}
+                  onRegenerate={generateRandomUsername}
                 />
                 <PasswordField
                   id="password"
