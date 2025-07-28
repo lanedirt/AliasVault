@@ -92,83 +92,12 @@ const PasswordConfigDialog: React.FC<IPasswordConfigDialogProps> = ({
           <div className="sm:flex sm:items-start">
             <div className="w-full mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
               <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
-                {t('credentials.advancedPasswordOptions')}
+                {t('credentials.changePasswordComplexity')}
               </h3>
-              
+
               <div className="space-y-4">
-                {/* Character Type Checkboxes */}
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <input
-                      id="use-lowercase"
-                      type="checkbox"
-                      checked={settings.UseLowercase}
-                      onChange={(e) => handleSettingChange('UseLowercase', e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label htmlFor="use-lowercase" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      {t('credentials.includeLowercase')} (a-z)
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      id="use-uppercase"
-                      type="checkbox"
-                      checked={settings.UseUppercase}
-                      onChange={(e) => handleSettingChange('UseUppercase', e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label htmlFor="use-uppercase" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      {t('credentials.includeUppercase')} (A-Z)
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      id="use-numbers"
-                      type="checkbox"
-                      checked={settings.UseNumbers}
-                      onChange={(e) => handleSettingChange('UseNumbers', e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label htmlFor="use-numbers" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      {t('credentials.includeNumbers')} (0-9)
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      id="use-special-chars"
-                      type="checkbox"
-                      checked={settings.UseSpecialChars}
-                      onChange={(e) => handleSettingChange('UseSpecialChars', e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label htmlFor="use-special-chars" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      {t('credentials.includeSpecialChars')} (!@#$%^&*)
-                    </label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      id="use-non-ambiguous"
-                      type="checkbox"
-                      checked={settings.UseNonAmbiguousChars}
-                      onChange={(e) => handleSettingChange('UseNonAmbiguousChars', e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label htmlFor="use-non-ambiguous" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                      {t('credentials.avoidAmbiguousChars')} (avoid 0, O, l, I, etc.)
-                    </label>
-                  </div>
-                </div>
-
                 {/* Password Preview */}
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t('credentials.preview')}:
-                  </label>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
@@ -182,10 +111,85 @@ const PasswordConfigDialog: React.FC<IPasswordConfigDialogProps> = ({
                       className="px-3 py-2 text-sm text-gray-500 dark:text-white bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
                       title={t('credentials.generateNewPreview')}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                       </svg>
                     </button>
+                  </div>
+                </div>
+
+                {/* Character Type Toggle Buttons */}
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Lowercase Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleSettingChange('UseLowercase', !settings.UseLowercase)}
+                      className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        settings.UseLowercase
+                          ? 'bg-primary-600 text-white hover:bg-primary-700'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                      title={t('credentials.includeLowercase')}
+                    >
+                      <span className="font-mono text-base">a-z</span>
+                    </button>
+
+                    {/* Uppercase Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleSettingChange('UseUppercase', !settings.UseUppercase)}
+                      className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        settings.UseUppercase
+                          ? 'bg-primary-600 text-white hover:bg-primary-700'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                      title={t('credentials.includeUppercase')}
+                    >
+                      <span className="font-mono text-base">A-Z</span>
+                    </button>
+
+                    {/* Numbers Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleSettingChange('UseNumbers', !settings.UseNumbers)}
+                      className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        settings.UseNumbers
+                          ? 'bg-primary-600 text-white hover:bg-primary-700'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                      title={t('credentials.includeNumbers')}
+                    >
+                      <span className="font-mono text-base">0-9</span>
+                    </button>
+
+                    {/* Special Characters Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleSettingChange('UseSpecialChars', !settings.UseSpecialChars)}
+                      className={`flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        settings.UseSpecialChars
+                          ? 'bg-primary-600 text-white hover:bg-primary-700'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                      title={t('credentials.includeSpecialChars')}
+                    >
+                      <span className="font-mono text-base">!@#</span>
+                    </button>
+                  </div>
+
+                  {/* Avoid Ambiguous Characters - Checkbox */}
+                  <div className="flex items-center">
+                    <input
+                      id="use-non-ambiguous"
+                      type="checkbox"
+                      checked={settings.UseNonAmbiguousChars}
+                      onChange={(e) => handleSettingChange('UseNonAmbiguousChars', e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label htmlFor="use-non-ambiguous" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      {t('credentials.avoidAmbiguousChars')}
+                    </label>
                   </div>
                 </div>
               </div>
@@ -194,17 +198,13 @@ const PasswordConfigDialog: React.FC<IPasswordConfigDialogProps> = ({
               <div className="mt-5 sm:mt-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="inline-flex w-full justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 sm:ml-3 sm:w-auto"
+                  className="inline-flex w-full justify-center items-center gap-1 rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 sm:ml-3 sm:w-auto"
                   onClick={handleSave}
                 >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" />
+                  </svg>
                   {t('common.use')}
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto dark:bg-gray-700 dark:text-white dark:ring-gray-600 dark:hover:bg-gray-600"
-                  onClick={handleCancel}
-                >
-                  {t('common.cancel')}
                 </button>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -75,12 +75,15 @@ const CredentialAddEdit: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dbContext = useDb();
+  // If we received an ID, we're in edit mode
+  const isEditMode = id !== undefined && id.length > 0;
+
   const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
   const [mode, setMode] = useState<CredentialMode>('random');
   const { setHeaderButtons } = useHeaderButtons();
   const { setIsInitialLoading } = useLoading();
   const [localLoading, setLocalLoading] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(!isEditMode);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [originalAttachmentIds, setOriginalAttachmentIds] = useState<string[]>([]);
@@ -146,9 +149,6 @@ const CredentialAddEdit: React.FC = () => {
     });
     return (): void => subscription.unsubscribe();
   }, [watch, persistFormValues]);
-
-  // If we received an ID, we're in edit mode
-  const isEditMode = id !== undefined && id.length > 0;
 
   /**
    * Loads persisted form values from storage. This is used to keep track of form changes
@@ -229,7 +229,15 @@ const CredentialAddEdit: React.FC = () => {
       setIsInitialLoading(false);
 
       // Load persisted form values if they exist.
-      loadPersistedValues();
+      loadPersistedValues().then(() => {
+        // Generate default password if no persisted password exists
+        if (!watch('Password')) {
+          const passwordSettings = dbContext.sqliteClient!.getPasswordSettings();
+          const passwordGenerator = CreatePasswordGenerator(passwordSettings);
+          const defaultPassword = passwordGenerator.generateRandomPassword();
+          setValue('Password', defaultPassword);
+        }
+      });
       return;
     }
 
@@ -262,7 +270,7 @@ const CredentialAddEdit: React.FC = () => {
       console.error('Error loading credential:', err);
       setIsInitialLoading(false);
     }
-  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, setValue, loadPersistedValues]);
+  }, [dbContext.sqliteClient, id, navigate, setIsInitialLoading, setValue, loadPersistedValues, watch]);
 
   /**
    * Handle the delete button click.
@@ -379,8 +387,8 @@ const CredentialAddEdit: React.FC = () => {
     }
   }, [setValue, watch]);
 
-  const getCurrentPasswordSettings = useCallback(() => {
-    return dbContext.sqliteClient!.getPasswordSettings();
+  const initialPasswordSettings = useMemo(() => {
+    return dbContext.sqliteClient?.getPasswordSettings();
   }, [dbContext.sqliteClient]);
 
   /**
@@ -577,6 +585,13 @@ const CredentialAddEdit: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials.loginCredentials')}</h2>
               <div className="space-y-4">
+                <FormInput
+                  id="email"
+                  label={t('common.email')}
+                  value={watch('Alias.Email') ?? ''}
+                  onChange={(value) => setValue('Alias.Email', value)}
+                  error={errors.Alias?.Email?.message}
+                />
                 <UsernameField
                   id="username"
                   label={t('common.username')}
@@ -585,23 +600,18 @@ const CredentialAddEdit: React.FC = () => {
                   error={errors.Username?.message}
                   onRegenerate={generateRandomUsername}
                 />
-                <PasswordField
-                  id="password"
-                  label={t('common.password')}
-                  value={watch('Password') ?? ''}
-                  onChange={(value) => setValue('Password', value)}
-                  error={errors.Password?.message}
-                  showPassword={showPassword}
-                  onShowPasswordChange={setShowPassword}
-                  initialSettings={getCurrentPasswordSettings()}
-                />
-                <FormInput
-                  id="email"
-                  label={t('common.email')}
-                  value={watch('Alias.Email') ?? ''}
-                  onChange={(value) => setValue('Alias.Email', value)}
-                  error={errors.Alias?.Email?.message}
-                />
+                {initialPasswordSettings && (
+                  <PasswordField
+                    id="password"
+                    label={t('common.password')}
+                    value={watch('Password') ?? ''}
+                    onChange={(value) => setValue('Password', value)}
+                    error={errors.Password?.message}
+                    showPassword={showPassword}
+                    onShowPasswordChange={setShowPassword}
+                    initialSettings={initialPasswordSettings}
+                  />
+                )}
               </div>
             </div>
 
@@ -611,9 +621,17 @@ const CredentialAddEdit: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleGenerateRandomAlias}
-                  className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 flex items-center justify-center gap-2"
                 >
-                  {t('credentials.generateRandomAlias')}
+                  <svg className='w-5 h-5 inline-block' viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8" cy="8" r="1"/>
+                    <circle cx="16" cy="8" r="1"/>
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="8" cy="16" r="1"/>
+                    <circle cx="16" cy="16" r="1"/>
+                  </svg>
+                  <span>{t('credentials.generateRandomAlias')}</span>
                 </button>
                 <FormInput
                   id="firstName"
