@@ -14,6 +14,8 @@ import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
 import Modal from '@/entrypoints/popup/components/Modal';
+import PasswordField from '@/entrypoints/popup/components/PasswordField';
+import UsernameField from '@/entrypoints/popup/components/UsernameField';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
@@ -377,16 +379,9 @@ const CredentialAddEdit: React.FC = () => {
     }
   }, [setValue, watch]);
 
-  const generateRandomPassword = useCallback(async () => {
-    try {
-      const { passwordGenerator } = await initializeGenerators();
-      const password = passwordGenerator.generateRandomPassword();
-      setValue('Password', password);
-      setShowPassword(true);
-    } catch (error) {
-      console.error('Error generating random password:', error);
-    }
-  }, [initializeGenerators, setValue]);
+  const getCurrentPasswordSettings = useCallback(() => {
+    return dbContext.sqliteClient!.getPasswordSettings();
+  }, [dbContext.sqliteClient]);
 
   /**
    * Handle form submission.
@@ -596,30 +591,16 @@ const CredentialAddEdit: React.FC = () => {
                     }
                   ]}
                 />
-                <FormInput
+                <PasswordField
                   id="password"
                   label={t('common.password')}
-                  type="password"
                   value={watch('Password') ?? ''}
                   onChange={(value) => setValue('Password', value)}
                   error={errors.Password?.message}
                   showPassword={showPassword}
                   onShowPasswordChange={setShowPassword}
-                  buttons={[
-                    {
-                      icon: 'refresh',
-                      onClick: generateRandomPassword,
-                      title: t('credentials.generateRandomPassword')
-                    }
-                  ]}
+                  initialSettings={getCurrentPasswordSettings()}
                 />
-                <button
-                  type="button"
-                  onClick={handleGenerateRandomAlias}
-                  className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  {t('credentials.generateRandomAlias')}
-                </button>
                 <FormInput
                   id="email"
                   label={t('common.email')}
@@ -633,6 +614,13 @@ const CredentialAddEdit: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials.alias')}</h2>
               <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={handleGenerateRandomAlias}
+                  className="w-full bg-primary-500 text-white py-2 px-4 rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                >
+                  {t('credentials.generateRandomAlias')}
+                </button>
                 <FormInput
                   id="firstName"
                   label={t('credentials.firstName')}
