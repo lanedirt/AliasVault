@@ -801,6 +801,8 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       const generateNewPasswordText = await t('content.generateNewPassword');
       const togglePasswordVisibilityText = await t('content.togglePasswordVisibility');
       const createAndSaveCredentialText = await t('content.createAndSaveCredential');
+      const passwordLengthText = await t('credentials.passwordLength');
+      const changePasswordComplexityText = await t('credentials.changePasswordComplexity');
 
       // Create the main content
       popup.innerHTML = `
@@ -911,10 +913,10 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
           <div class="av-password-length-container">
             <div class="av-password-length-header">
-              <label for="password-length-slider">Password length</label>
+              <label for="password-length-slider">${passwordLengthText}</label>
               <div class="av-password-length-controls">
                 <span id="password-length-value" class="av-password-length-value">12</span>
-                <button id="password-config-btn" class="av-password-config-btn" title="Change password complexity">
+                <button id="password-config-btn" class="av-password-config-btn" title="${changePasswordComplexityText}">
                   <svg class="av-icon" viewBox="0 0 24 24">
                     <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                     <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -1092,7 +1094,17 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       /**
        * Show password configuration dialog
        */
-      const showPasswordConfigDialog = (): void => {
+      const showPasswordConfigDialog = async (): Promise<void> => {
+        // Get all translations first
+        const changePasswordComplexityText = await t('credentials.changePasswordComplexity');
+        const generateNewPreviewText = await t('credentials.generateNewPreview');
+        const includeLowercaseText = await t('credentials.includeLowercase');
+        const includeUppercaseText = await t('credentials.includeUppercase');
+        const includeNumbersText = await t('credentials.includeNumbers');
+        const includeSpecialCharsText = await t('credentials.includeSpecialChars');
+        const avoidAmbiguousCharsText = await t('credentials.avoidAmbiguousChars');
+        const useText = await t('common.use');
+
         // Create dialog overlay
         const dialogOverlay = document.createElement('div');
         dialogOverlay.className = 'av-password-config-overlay';
@@ -1102,7 +1114,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
         dialog.innerHTML = `
           <div class="av-password-config-header">
-            <h3>Change password complexity</h3>
+            <h3>${changePasswordComplexityText}</h3>
             <button class="av-password-config-close">
               <svg class="av-icon" viewBox="0 0 24 24">
                 <path d="M6 18L18 6M6 6l12 12"/>
@@ -1113,7 +1125,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
           <div class="av-password-config-content">
             <div class="av-password-preview-section">
               <input type="text" id="config-preview" class="av-password-config-preview" readonly>
-              <button id="config-refresh" class="av-password-config-refresh" title="Generate new preview">
+              <button id="config-refresh" class="av-password-config-refresh" title="${generateNewPreviewText}">
                 <svg class="av-icon" viewBox="0 0 24 24">
                   <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -1122,16 +1134,16 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 
             <div class="av-password-config-options">
               <div class="av-password-config-toggles">
-                <button class="av-password-config-toggle ${currentPasswordSettings.UseLowercase ? 'active' : ''}" data-setting="UseLowercase" title="Include lowercase letters">
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseLowercase ? 'active' : ''}" data-setting="UseLowercase" title="${includeLowercaseText}">
                   <span>a-z</span>
                 </button>
-                <button class="av-password-config-toggle ${currentPasswordSettings.UseUppercase ? 'active' : ''}" data-setting="UseUppercase" title="Include uppercase letters">
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseUppercase ? 'active' : ''}" data-setting="UseUppercase" title="${includeUppercaseText}">
                   <span>A-Z</span>
                 </button>
-                <button class="av-password-config-toggle ${currentPasswordSettings.UseNumbers ? 'active' : ''}" data-setting="UseNumbers" title="Include numbers">
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseNumbers ? 'active' : ''}" data-setting="UseNumbers" title="${includeNumbersText}">
                   <span>0-9</span>
                 </button>
-                <button class="av-password-config-toggle ${currentPasswordSettings.UseSpecialChars ? 'active' : ''}" data-setting="UseSpecialChars" title="Include special characters">
+                <button class="av-password-config-toggle ${currentPasswordSettings.UseSpecialChars ? 'active' : ''}" data-setting="UseSpecialChars" title="${includeSpecialCharsText}">
                   <span>!@#</span>
                 </button>
               </div>
@@ -1139,7 +1151,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
               <div class="av-password-config-checkbox">
                 <label>
                   <input type="checkbox" id="avoid-ambiguous" ${currentPasswordSettings.UseNonAmbiguousChars ? 'checked' : ''}>
-                  <span>Avoid ambiguous characters (o, 0, etc.)</span>
+                  <span>${avoidAmbiguousCharsText}</span>
                 </label>
               </div>
             </div>
@@ -1149,7 +1161,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
                 <svg class="av-icon" viewBox="0 0 24 24">
                   <path d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"/>
                 </svg>
-                Use
+                ${useText}
               </button>
             </div>
           </div>
@@ -1176,8 +1188,24 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
           toggle.addEventListener('click', () => {
             const setting = (toggle as HTMLElement).dataset.setting;
             if (setting) {
-              currentPasswordSettings[setting] = !currentPasswordSettings[setting];
-              toggle.classList.toggle('active', currentPasswordSettings[setting]);
+              switch (setting) {
+                case 'UseLowercase':
+                  currentPasswordSettings.UseLowercase = !currentPasswordSettings.UseLowercase;
+                  toggle.classList.toggle('active', currentPasswordSettings.UseLowercase);
+                  break;
+                case 'UseUppercase':
+                  currentPasswordSettings.UseUppercase = !currentPasswordSettings.UseUppercase;
+                  toggle.classList.toggle('active', currentPasswordSettings.UseUppercase);
+                  break;
+                case 'UseNumbers':
+                  currentPasswordSettings.UseNumbers = !currentPasswordSettings.UseNumbers;
+                  toggle.classList.toggle('active', currentPasswordSettings.UseNumbers);
+                  break;
+                case 'UseSpecialChars':
+                  currentPasswordSettings.UseSpecialChars = !currentPasswordSettings.UseSpecialChars;
+                  toggle.classList.toggle('active', currentPasswordSettings.UseSpecialChars);
+                  break;
+              }
               updateConfigPreview();
             }
           });
