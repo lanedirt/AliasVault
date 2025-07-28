@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import React, { forwardRef, useImperativeHandle, useRef, useState, useCallback, useEffect } from 'react';
 import { Controller, Control, FieldValues, Path } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { View, TextInput, TextInputProps, StyleSheet, TouchableHighlight, Platform, Modal, ScrollView, Switch, TouchableOpacity } from 'react-native';
 
 import type { PasswordSettings } from '@/utils/dist/shared/models/vault';
@@ -40,6 +41,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
   ...props
 }, ref) => {
   const colors = useColors();
+  const { t } = useTranslation();
   const inputRef = React.useRef<TextInput>(null);
   const currentValue = useRef<string>('');
   const [isFocused, setIsFocused] = React.useState(false);
@@ -128,16 +130,6 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
   }, [currentSettings, generatePassword]);
 
   /**
-   * Handle password setting toggle changes.
-   */
-  const handleSettingChange = useCallback((key: keyof PasswordSettings, value: boolean | number) => {
-    const newSettings = { ...currentSettings, [key]: value };
-    setCurrentSettings(newSettings);
-    // Auto-regenerate preview when settings change
-    generatePreview(newSettings);
-  }, [currentSettings, generatePreview]);
-
-  /**
    * Individual handlers for each switch to prevent re-renders.
    */
   const handleLowercaseChange = useCallback((value: boolean) => {
@@ -196,7 +188,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
   }, [previewPassword, setShowPasswordState]);
 
   const colorRed = 'red';
-  const modalBackgroundColor = 'rgba(0, 0, 0, 0.5)';
+  const modalBackgroundColor = 'rgba(0, 0, 0, 0.8)';
 
   const styles = StyleSheet.create({
     button: {
@@ -244,7 +236,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
       marginBottom: 4,
     },
     modalContent: {
-      backgroundColor: colors.background,
+      backgroundColor: colors.accentBackground,
       borderRadius: 12,
       maxHeight: '80%',
       maxWidth: 400,
@@ -271,14 +263,6 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
     previewContainer: {
       marginBottom: 20,
     },
-    previewInputContainer: {
-      alignItems: 'center',
-      backgroundColor: colors.accentBackground,
-      borderColor: colors.accentBorder,
-      borderRadius: 6,
-      borderWidth: 1,
-      flexDirection: 'row',
-    },
     previewInput: {
       color: colors.text,
       flex: 1,
@@ -286,6 +270,14 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
       fontSize: 14,
       padding: 12,
       textAlign: 'center',
+    },
+    previewInputContainer: {
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      borderColor: colors.accentBorder,
+      borderRadius: 6,
+      borderWidth: 1,
+      flexDirection: 'row',
     },
     refreshButton: {
       borderLeftColor: colors.accentBorder,
@@ -343,13 +335,14 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
     },
     useButton: {
       alignItems: 'center',
-      backgroundColor: colors.accentBackground,
+      backgroundColor: colors.primary,
       borderColor: colors.accentBorder,
+      color: colors.primarySurfaceText,
       borderRadius: 6,
       borderWidth: 1,
       flexDirection: 'row',
       justifyContent: 'center',
-      padding: 12,
+      padding: 6,
     },
     useButtonText: {
       color: colors.text,
@@ -412,7 +405,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
 
               <View style={styles.settingsSection}>
                 <View style={styles.settingItem}>
-                  <ThemedText style={styles.settingLabel}>Lowercase (a-z)</ThemedText>
+                  <ThemedText style={styles.settingLabel}>{t('credentials.includeLowercase')}</ThemedText>
                   <Switch
                     value={currentSettings.UseLowercase}
                     onValueChange={handleLowercaseChange}
@@ -422,7 +415,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 </View>
 
                 <View style={styles.settingItem}>
-                  <ThemedText style={styles.settingLabel}>Uppercase (A-Z)</ThemedText>
+                  <ThemedText style={styles.settingLabel}>{t('credentials.includeUppercase')}</ThemedText>
                   <Switch
                     value={currentSettings.UseUppercase}
                     onValueChange={handleUppercaseChange}
@@ -432,7 +425,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 </View>
 
                 <View style={styles.settingItem}>
-                  <ThemedText style={styles.settingLabel}>Numbers (0-9)</ThemedText>
+                  <ThemedText style={styles.settingLabel}>{t('credentials.includeNumbers')}</ThemedText>
                   <Switch
                     value={currentSettings.UseNumbers}
                     onValueChange={handleNumbersChange}
@@ -442,7 +435,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 </View>
 
                 <View style={styles.settingItem}>
-                  <ThemedText style={styles.settingLabel}>Special Characters (!@#)</ThemedText>
+                  <ThemedText style={styles.settingLabel}>{t('credentials.includeSpecialChars')}</ThemedText>
                   <Switch
                     value={currentSettings.UseSpecialChars}
                     onValueChange={handleSpecialCharsChange}
@@ -452,7 +445,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 </View>
 
                 <View style={styles.settingItem}>
-                  <ThemedText style={styles.settingLabel}>Avoid Ambiguous Characters</ThemedText>
+                  <ThemedText style={styles.settingLabel}>{t('credentials.avoidAmbiguousChars')}</ThemedText>
                   <Switch
                     value={currentSettings.UseNonAmbiguousChars}
                     onValueChange={handleNonAmbiguousChange}
@@ -466,7 +459,8 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 style={styles.useButton}
                 onPress={() => handleUsePassword(onChange)}
               >
-                <ThemedText style={styles.useButtonText}>Use This Password</ThemedText>
+                <MaterialIcons name="keyboard-arrow-down" size={20} color={colors.text} />
+                <ThemedText style={styles.useButtonText}>{t('common.use')}</ThemedText>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -486,7 +480,8 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
     handleNonAmbiguousChange,
     colors,
     handleUsePassword,
-    handleCloseModal
+    handleCloseModal,
+    t
   ]);
 
   return (
@@ -502,7 +497,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
             <ThemedText style={styles.inputLabel}>
               {label} {required && <ThemedText style={styles.requiredIndicator}>*</ThemedText>}
             </ThemedText>
-            
+
             <View style={[styles.inputContainer, error ? styles.inputError : null]}>
               <TextInput
                 ref={inputRef}
@@ -519,7 +514,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 secureTextEntry={!showPassword}
                 {...props}
               />
-              
+
               {showClearButton && (
                 <TouchableHighlight
                   style={styles.clearButton}
@@ -529,19 +524,19 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                   <MaterialIcons name="close" size={16} color={colors.textMuted} />
                 </TouchableHighlight>
               )}
-              
+
               <TouchableHighlight
                 style={styles.button}
                 onPress={() => setShowPasswordState(!showPassword)}
                 underlayColor={colors.accentBackground}
               >
-                <MaterialIcons 
-                  name={showPassword ? "visibility-off" : "visibility"} 
-                  size={20} 
-                  color={colors.primary} 
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={20}
+                  color={colors.primary}
                 />
               </TouchableHighlight>
-              
+
               <TouchableHighlight
                 style={styles.button}
                 onPress={() => generatePassword(currentSettings, onChange)}
@@ -550,11 +545,11 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 <MaterialIcons name="refresh" size={20} color={colors.primary} />
               </TouchableHighlight>
             </View>
-            
+
             {/* Inline Password Length Slider */}
             <View style={styles.sliderContainer}>
               <View style={styles.sliderHeader}>
-                <ThemedText style={styles.sliderLabel}>Password Length</ThemedText>
+                <ThemedText style={styles.sliderLabel}>{t('credentials.passwordLength')}</ThemedText>
                 <View style={styles.sliderValueContainer}>
                   <ThemedText style={styles.sliderValue}>{currentSettings.Length}</ThemedText>
                   <TouchableOpacity
@@ -565,7 +560,7 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                   </TouchableOpacity>
                 </View>
               </View>
-              
+
               <Slider
                 style={styles.slider}
                 minimumValue={8}
@@ -578,9 +573,9 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 thumbTintColor={colors.primary}
               />
             </View>
-            
+
             {error && <ThemedText style={styles.errorText}>{error.message}</ThemedText>}
-            
+
             {renderSettingsModal(onChange)}
           </View>
         );
