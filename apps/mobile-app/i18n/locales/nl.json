@@ -12,7 +12,8 @@
     "success": "Succes",
     "never": "Nooit",
     "copied": "Gekopieerd",
-    "loadMore": "Laad meer"
+    "loadMore": "Laad meer",
+    "use": "Gebruik"
   },
   "auth": {
     "login": "Inloggen",
@@ -86,6 +87,13 @@
     "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
     "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
     "password": "Wachtwoord",
+    "passwordLength": "Wachtwoordlengte",
+    "changePasswordComplexity": "Wachtwoordinstellingen",
+    "includeLowercase": "Kleine letters (a-z)",
+    "includeUppercase": "Hoofdletters (A-Z)",
+    "includeNumbers": "Cijfers (0-9)",
+    "includeSpecialChars": "Speciale tekens (!@#)",
+    "avoidAmbiguousChars": "Onduidelijke tekens vermijden",
     "deletingCredential": "Credential verwijderen...",
     "errorLoadingCredentials": "Fout bij het laden van credentials",
     "vaultSyncFailed": "Vault synchronisatie mislukt",
