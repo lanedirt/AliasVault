@@ -451,7 +451,6 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       borderRadius: 8,
       flexDirection: 'row',
       marginBottom: 8,
-      marginTop: 16,
       paddingHorizontal: 12,
       paddingVertical: 8,
     },
@@ -635,6 +634,11 @@ export default function AddEditCredentialScreen() : React.ReactNode {
 
                   <ValidatedFormField
                     control={control}
+                    name="Alias.Email"
+                    label={t('credentials.email')}
+                  />
+                  <ValidatedFormField
+                    control={control}
                     name="Username"
                     label={t('credentials.username')}
                     buttons={[
@@ -663,19 +667,14 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                       }
                     ]}
                   />
-                  <TouchableOpacity style={styles.generateButton} onPress={handleGenerateRandomAlias}>
-                    <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
-                    <ThemedText style={styles.generateButtonText}>{t('credentials.generateRandomAlias')}</ThemedText>
-                  </TouchableOpacity>
-                  <ValidatedFormField
-                    control={control}
-                    name="Alias.Email"
-                    label={t('credentials.email')}
-                  />
                 </View>
 
                 <View style={styles.section}>
                   <ThemedText style={styles.sectionTitle}>{t('credentials.alias')}</ThemedText>
+                  <TouchableOpacity style={styles.generateButton} onPress={handleGenerateRandomAlias}>
+                    <MaterialIcons name="auto-fix-high" size={20} color="#fff" />
+                    <ThemedText style={styles.generateButtonText}>{t('credentials.generateRandomAlias')}</ThemedText>
+                  </TouchableOpacity>
                   <ValidatedFormField
                     control={control}
                     name="Alias.FirstName"
