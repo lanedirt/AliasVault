@@ -303,8 +303,10 @@
     "emptyMessage": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
     "time": {
       "justNow": "just now",
-      "minutesAgo": "{{count}} {{count, plural, one {min} other {mins}}} ago",
-      "hoursAgo": "{{count}} {{count, plural, one {hr} other {hrs}}} ago",
+      "minutesAgo_single": "{{count}} min ago",
+      "minutesAgo_plural": "{{count}} mins ago",
+      "hoursAgo_single": "{{count}} hr ago",
+      "hoursAgo_plural": "{{count}} hrs ago",
       "yesterday": "yesterday"
     },
     "errors": {
