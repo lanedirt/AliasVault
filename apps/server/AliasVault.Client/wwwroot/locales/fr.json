@@ -2,24 +2,24 @@
   "loading": {
     "title": "AliasVault is loading",
     "message": "Initializing secure environment. AliasVault prioritizes your privacy by running entirely in your browser. The first load might take a short while.",
-    "refreshText": "If loading seems stuck, you can click the button below to refresh the page.",
-    "refreshButtonText": "Refresh Page"
+    "refreshText": "Si le chargement semble bloqué, vous pouvez cliquer sur le bouton ci-dessous pour actualiser la page.",
+    "refreshButtonText": "Actualiser la page"
   },
   "errors": {
-    "unhandledError": "An unhandled error has occurred. Please try reloading the page. If the issue persists, please contact support.",
-    "webAssemblyError": "AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.",
-    "reloadPageText": "Reload Page"
+    "unhandledError": "Une erreur non gérée s'est produite. Veuillez essayer de recharger la page. Si le problème persiste, veuillez contacter le support.",
+    "webAssemblyError": "AliasVault nécessite WebAssembly, qui n'est pas pris en charge par ce navigateur. Essayez d'utiliser un navigateur plus moderne qui supporte WebAssembly.",
+    "reloadPageText": "Actualiser la page"
   },
   "quotes": {
     "security": [
-      "Your identity is your most valuable asset. Protect it like one.",
-      "In the digital world, a strong password is your first line of defense.",
-      "Security is not a product, but a process.",
-      "The weakest link in the security chain is the human element.",
-      "Security is always excessive until it's not enough.",
-      "Trust, but verify - especially online.",
-      "Your data is only as secure as your weakest password.",
-      "The most secure password is the one you can't remember."
+      "Votre identité est votre bien le plus précieux. Protégez-la comme tel.",
+      "Dans le monde numérique, un mot de passe fort est votre première ligne de défense.",
+      "La sécurité n'est pas un produit, mais un processus.",
+      "Le maillon le plus faible de la chaîne de sécurité est l'élément humain.",
+      "La sécurité est toujours excessive jusqu'à ce qu'elle ne soit pas suffisante.",
+      "Faites confiance, mais vérifiez - surtout en ligne.",
+      "Vos données sont aussi sécurisées que votre mot de passe le plus faible.",
+      "Le mot de passe le plus sécurisé est celui dont vous ne vous souvenez pas."
     ]
   }
 }
