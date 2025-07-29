@@ -23,7 +23,6 @@
     "authCode": "Authenticatiecode",
     "unlock": "Ontgrendelen",
     "unlocking": "Ontgrendelen...",
-    "unlockingVault": "Vault ontgrendelen",
     "loggingIn": "Inloggen",
     "validatingCredentials": "Gegevens valideren",
     "syncingVault": "Vault synchroniseren",
@@ -354,5 +353,61 @@
     "VAULT_NOT_UP_TO_DATE": "Je vault is niet up-to-date. Synchroniseer je vault en probeer het opnieuw.",
     "INTERNAL_SERVER_ERROR": "Interne serverfout.",
     "VAULT_ERROR": "De lokale vault is niet up-to-date. Synchroniseer je vault door de pagina te vernieuwen en probeer het opnieuw."
+  },
+  "app": {
+    "status": {
+      "unlockingVault": "Unlocking vault",
+      "decryptingVault": "Decrypting vault",
+      "openingVaultReadOnly": "Opening vault in read-only mode",
+      "retryingConnection": "Retrying connection..."
+    },
+    "alerts": {
+      "syncIssue": "Sync Issue",
+      "syncIssueMessage": "The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?",
+      "openLocalVault": "Open Local Vault",
+      "retrySync": "Retry Sync",
+      "error": "Error"
+    },
+    "navigation": {
+      "login": "Login",
+      "notFound": "Not Found"
+    },
+    "reinitialize": {
+      "vaultAutoLockedMessage": "Vault auto-locked after timeout.",
+      "attemptingToUnlockMessage": "Attempting to unlock."
+    }
+  },
+  "upgrade": {
+    "title": "Upgrade Vault",
+    "subtitle": "AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.",
+    "versionInformation": "Version Information",
+    "yourVault": "Your vault:",
+    "newVersion": "New version:",
+    "upgrade": "Upgrade",
+    "upgrading": "Upgrading...",
+    "logout": "Logout",
+    "whatsNew": "What's New",
+    "whatsNewDescription": "An upgrade is required to support the following changes:",
+    "noDescriptionAvailable": "No description available for this version.",
+    "okay": "Ok",
+    "status": {
+      "preparingUpgrade": "Preparing upgrade...",
+      "vaultAlreadyUpToDate": "Vault is already up to date",
+      "startingDatabaseTransaction": "Starting database transaction...",
+      "applyingDatabaseMigrations": "Applying database migrations...",
+      "applyingMigration": "Applying migration {{current}} of {{total}}...",
+      "committingChanges": "Committing changes..."
+    },
+    "alerts": {
+      "error": "Error",
+      "unableToGetVersionInfo": "Unable to get version information. Please try again.",
+      "selfHostedServer": "Self-Hosted Server",
+      "selfHostedWarning": "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
+      "cancel": "Cancel",
+      "continueUpgrade": "Continue Upgrade",
+      "upgradeFailed": "Upgrade Failed",
+      "failedToApplyMigration": "Failed to apply migration ({{current}} of {{total}})",
+      "unknownErrorDuringUpgrade": "An unknown error occurred during the upgrade. Please try again."
+    }
   }
 }
