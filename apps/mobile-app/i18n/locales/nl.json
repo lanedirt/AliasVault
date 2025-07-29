@@ -158,7 +158,7 @@
     "androidAutofill": "Android autofill",
     "vaultUnlock": "Vault ontgrendelmethode",
     "autoLock": "Automatisch vergrendelen",
-    "identityGenerator": "Identiteit Generator",
+    "identityGenerator": "Identiteit generator",
     "security": "Beveiliging",
     "appVersion": "App versie {{version}} ({{url}})",
     "autoLockOptions": {
@@ -303,6 +303,10 @@
     "emptyMessage": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
     "time": {
       "justNow": "zojuist",
+      "minutesAgo_single": "{{count}} min ago",
+      "minutesAgo_plural": "{{count}} mins ago",
+      "hoursAgo_single": "{{count}} hr ago",
+      "hoursAgo_plural": "{{count}} hrs ago",
       "yesterday": "gisteren"
     },
     "errors": {
