@@ -28,7 +28,9 @@ Help grow the AliasVault community by:
 
 Help make AliasVault accessible to users worldwide by contributing translations! AliasVault is currently available in English and Dutch, but we're looking for volunteers to help translate it into other languages such as German, French, Spanish, Ukrainian, Italian, and more.
 
-AliasVault translations are managed through [Crowdin](https://crowdin.com/), an online translation platform. If you’d like to help translate AliasVault into your native language, please join our [Discord](https://discord.gg/DsaXMTEtpF) to chat (quickest), or contact us via email at [contact@support.aliasvault.net](mailto:contact@support.aliasvault.net). We’ll be happy to set you up with access to the translation project.
+AliasVault translations are managed through [Crowdin](https://crowdin.com/), an online translation platform. If you’d like to help translate AliasVault into your native language, please [request access to the Crowdin project](https://crowdin.com/project/aliasvault).
+
+If you're willing to help, we also encourage you to get in contact via [Discord](https://discord.gg/DsaXMTEtpF) to chat (quickest), or contact us via email at [contact@support.aliasvault.net](mailto:contact@support.aliasvault.net) to discuss the language(s) you are willing to contribute to, and so we can answer any technical questions you might have.
 
 Your translation contributions will help make AliasVault more accessible to privacy-conscious users around the world!
 
