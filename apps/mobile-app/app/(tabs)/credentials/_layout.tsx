@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
 
 import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
@@ -8,12 +9,14 @@ import { defaultHeaderOptions } from '@/components/themed/ThemedHeader';
  * @returns {React.ReactNode} The credentials layout component
  */
 export default function CredentialsLayout(): React.ReactNode {
+  const { t } = useTranslation();
+
   return (
     <Stack>
       <Stack.Screen
         name="index"
         options={{
-          title: 'Credentials',
+          title: t('credentials.title'),
           headerShown: Platform.OS === 'android',
           ...defaultHeaderOptions,
         }}
@@ -21,7 +24,7 @@ export default function CredentialsLayout(): React.ReactNode {
       <Stack.Screen
         name="add-edit"
         options={{
-          title: 'Add Credential',
+          title: t('credentials.addCredential'),
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           ...defaultHeaderOptions,
         }}
@@ -29,14 +32,14 @@ export default function CredentialsLayout(): React.ReactNode {
       <Stack.Screen
         name="add-edit-page"
         options={{
-          title: 'Add Credential',
+          title: t('credentials.addCredential'),
           ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
         name="autofill-credential-created"
         options={{
-          title: 'Credential Created',
+          title: t('credentials.credentialCreated'),
           presentation: Platform.OS === 'ios' ? 'modal' : 'card',
           ...defaultHeaderOptions,
         }}
@@ -44,14 +47,14 @@ export default function CredentialsLayout(): React.ReactNode {
       <Stack.Screen
         name="[id]"
         options={{
-          title: 'Credential Details',
+          title: t('credentials.credentialDetails'),
           ...defaultHeaderOptions,
         }}
       />
       <Stack.Screen
         name="email/[id]"
         options={{
-          title: 'Email Preview',
+          title: t('credentials.emailPreview'),
         }}
       />
     </Stack>
