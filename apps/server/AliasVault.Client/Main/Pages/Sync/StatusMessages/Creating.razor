@@ -91,7 +91,7 @@
         {
             Console.WriteLine("Initializing vault settings with user preferences detected from the browser.");
             // Get the current browser language preference
-            var browserLanguage = await LanguageService.GetBrowserLanguageAsync();
+            var browserLanguage = await LanguageService.GetCurrentLanguageAsync();
 
             // Set the AppLanguage setting in the vault to match the browser preference
             await DbService.Settings.SetAppLanguage(browserLanguage);

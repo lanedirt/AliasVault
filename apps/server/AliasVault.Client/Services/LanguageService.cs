@@ -149,22 +149,40 @@ public class LanguageService(
             }
             catch
             {
+                // Ignore errors and fall back to local storage first, then browser language
+            }
+
+            // If no vault setting found, check localStorage to migrate user's pre-auth preference
+            try
+            {
+                var storedLanguage = await _localStorage.GetItemAsync<string>(AppLanguageKey);
+                if (!string.IsNullOrEmpty(storedLanguage))
+                {
+                    // Migrate the localStorage setting to vault and then return it
+                    await MigrateLanguageSettingToVault(storedLanguage);
+                    return storedLanguage;
+                }
+            }
+            catch
+            {
                 // Ignore errors and fall back to browser language
             }
         }
-
-        // User is not authenticated or no language preference set, check local storage
-        try
+        else
         {
-            var storedLanguage = await _localStorage.GetItemAsync<string>(AppLanguageKey);
-            if (!string.IsNullOrEmpty(storedLanguage))
+            // User is not authenticated, check local storage
+            try
             {
-                return storedLanguage;
+                var storedLanguage = await _localStorage.GetItemAsync<string>(AppLanguageKey);
+                if (!string.IsNullOrEmpty(storedLanguage))
+                {
+                    return storedLanguage;
+                }
             }
-        }
-        catch
-        {
-            // Ignore errors and fall back to browser language
+            catch
+            {
+                // Ignore errors and fall back to browser language
+            }
         }
 
         // Fall back to browser language
@@ -283,6 +301,28 @@ public class LanguageService(
         catch
         {
             // Ignore if blazorCulture is not available yet
+        }
+    }
+
+    /// <summary>
+    /// Migrates a language setting from localStorage to vault settings.
+    /// This is called when a user was anonymous, set a language preference, then authenticated.
+    /// </summary>
+    /// <param name="languageCode">The language code to migrate.</param>
+    /// <returns>Task.</returns>
+    private async Task MigrateLanguageSettingToVault(string languageCode)
+    {
+        try
+        {
+            // Save to vault settings
+            await _dbService.Settings.SetSettingAsync(AppLanguageKey, languageCode);
+
+            // Clear from localStorage since it's now in vault
+            await _localStorage.RemoveItemAsync(AppLanguageKey);
+        }
+        catch
+        {
+            // Ignore migration errors - user can still change language manually
         }
     }
 
