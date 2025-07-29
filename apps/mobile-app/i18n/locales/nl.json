@@ -52,6 +52,25 @@
     "connectingTo": "Verbinden met",
     "loggedInAs": "Ingelogd als"
   },
+  "vault": {
+    "syncingVault": "Syncing vault",
+    "uploadingVaultToServer": "Uploading vault to server",
+    "savingChangesToVault": "Saving changes to vault",
+    "checkingForVaultUpdates": "Checking for vault updates",
+    "executingOperation": "Executing operation...",
+    "errors": {
+      "failedToGetEncryptedDatabase": "Failed to get encrypted database",
+      "usernameNotFound": "Username not found",
+      "vaultMergeRequired": "Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.",
+      "vaultOutdated": "Your vault is outdated. Please login on the AliasVault website and follow the steps.",
+      "failedToUploadVault": "Failed to upload vault to server. Please try again by re-opening the app.",
+      "usernameNotFoundLoginAgain": "Username not found. Please login again.",
+      "errorDuringPasswordChange": "Error during password change operation. Please log in again to retrieve your latest vault.",
+      "failedToSyncVault": "Failed to sync vault",
+      "operationFailed": "Operation failed",
+      "unknownError": "Unknown error"
+    }
+  },
   "credentials": {
     "title": "Credentials",
     "addCredential": "Credential toevoegen",
@@ -102,6 +121,8 @@
     "offlineMessage": "Je bent offline. Maak verbinding met het internet om je vault te synchroniseren.",
     "credentialCreated": "Credential aangemaakt!",
     "credentialCreatedMessage": "Je nieuwe credential is toegevoegd aan je vault en is klaar voor gebruik.",
+    "credentialDetails": "Credential Details",
+    "emailPreview": "Email Preview",
     "switchBackToBrowser": "Schakel terug naar je browser om door te gaan.",
     "twoFactorAuth": "Tweestapsverificatie",
     "totpCode": "TOTP Code",
@@ -280,6 +301,12 @@
     "sizeKB": "KB",
     "offlineMessage": "Je bent offline. Maak verbinding met het internet om je e-mails te laden.",
     "emptyMessage": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{{count}} {{count, plural, one {min} other {mins}}} ago",
+      "hoursAgo": "{{count}} {{count, plural, one {hr} other {hrs}}} ago",
+      "yesterday": "yesterday"
+    },
     "errors": {
       "generic": "Er is een fout opgetreden",
       "loadFailed": "Laden van e-mails mislukt",
@@ -288,6 +315,13 @@
       "decryptFailed": "Bijlage ontsleutelen mislukt",
       "downloadFailed": "Bijlage downloaden mislukt"
     }
+  },
+  "validation": {
+    "required": "This field is required",
+    "serviceNameRequired": "Service name is required",
+    "invalidUrlFormat": "Invalid URL format",
+    "invalidDateFormat": "Date must be in YYYY-MM-DD format",
+    "invalidEmailFormat": "Invalid email format"
   },
   "apiErrors": {
     "CLAIM_DOES_NOT_MATCH_USER": "Het huidige gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze credential te bewerken.",
