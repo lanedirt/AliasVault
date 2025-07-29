@@ -303,8 +303,6 @@
     "emptyMessage": "Vous n'avez pas encore reçu d'e-mails sur vos adresses e-mail privées. Quand vous recevez un nouvel e-mail, il apparaîtra ici.",
     "time": {
       "justNow": "just now",
-      "minutesAgo": "{{count}} {{count, plural, one {min} other {mins}}} ago",
-      "hoursAgo": "{{count}} {{count, plural, one {hr} other {hrs}}} ago",
       "yesterday": "yesterday"
     },
     "errors": {

@@ -285,10 +285,6 @@
     "noEmailsDescription": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
     "dateFormat": {
       "justNow": "zojuist",
-      "minutesAgo_one": "{{count}} min geleden",
-      "minutesAgo_other": "{{count}} min. geleden",
-      "hoursAgo_one": "{{count}} uur geleden",
-      "hoursAgo_other": "{{count}} uur geleden",
       "yesterday": "gisteren"
     },
     "errors": {

@@ -110,11 +110,19 @@ const EmailsList: React.FC = () => {
     } else if (secondsAgo < 3600) {
       // Less than 1 hour ago
       const minutes = Math.floor(secondsAgo / 60);
-      return t('emails.dateFormat.minutesAgo', { count: minutes });
+      if (minutes === 1) {
+        return t('emails.time.minutesAgo_single', { count: minutes });
+      } else {
+        return t('emails.time.minutesAgo_plural', { count: minutes });
+      }
     } else if (secondsAgo < 86400) {
       // Less than 24 hours ago
       const hours = Math.floor(secondsAgo / 3600);
-      return t('emails.dateFormat.hoursAgo', { count: hours });
+      if (hours === 1) {
+        return t('emails.time.hoursAgo_single', { count: hours });
+      } else {
+        return t('emails.time.hoursAgo_plural', { count: hours });
+      }
     } else if (secondsAgo < 172800) {
       // Less than 48 hours ago
       return t('emails.dateFormat.yesterday');

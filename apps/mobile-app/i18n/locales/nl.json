@@ -303,8 +303,6 @@
     "emptyMessage": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
     "time": {
       "justNow": "zojuist",
-      "minutesAgo": "{{count}} {{count, plural, one {min} other {min}}} geleden",
-      "hoursAgo": "{{count}} {{count, plural, one {uur} other {uur}}} geleden",
       "yesterday": "gisteren"
     },
     "errors": {
