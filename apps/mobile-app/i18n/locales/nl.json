@@ -356,58 +356,58 @@
   },
   "app": {
     "status": {
-      "unlockingVault": "Unlocking vault",
-      "decryptingVault": "Decrypting vault",
-      "openingVaultReadOnly": "Opening vault in read-only mode",
-      "retryingConnection": "Retrying connection..."
+      "unlockingVault": "Vault ontgrendelen",
+      "decryptingVault": "Vault decrypten",
+      "openingVaultReadOnly": "Vault openen in alleen-lezen modus",
+      "retryingConnection": "Opnieuw proberen..."
     },
     "alerts": {
-      "syncIssue": "Sync Issue",
-      "syncIssueMessage": "The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?",
-      "openLocalVault": "Open Local Vault",
-      "retrySync": "Retry Sync",
-      "error": "Error"
+      "syncIssue": "Synchronisatieprobleem",
+      "syncIssueMessage": "De AliasVault server kon niet worden bereikt en je vault kon niet worden gesynchroniseerd. Wil je je lokale vault openen in alleen-lezen modus of de verbinding opnieuw proberen?",
+      "openLocalVault": "Open lokale vault",
+      "retrySync": "Opnieuw proberen",
+      "error": "Fout"
     },
     "navigation": {
       "login": "Login",
-      "notFound": "Not Found"
+      "notFound": "Niet gevonden"
     },
     "reinitialize": {
-      "vaultAutoLockedMessage": "Vault auto-locked after timeout.",
-      "attemptingToUnlockMessage": "Attempting to unlock."
+      "vaultAutoLockedMessage": "Vault automatisch vergrendeld na time-out.",
+      "attemptingToUnlockMessage": "Bezig met ontgrendelen."
     }
   },
   "upgrade": {
-    "title": "Upgrade Vault",
-    "subtitle": "AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.",
-    "versionInformation": "Version Information",
-    "yourVault": "Your vault:",
-    "newVersion": "New version:",
+    "title": "Vault upgraden",
+    "subtitle": "AliasVault is vernieuwd en je vault moet worden bijgewerkt. Dit kan enkele seconden duren.",
+    "versionInformation": "Versie-informatie",
+    "yourVault": "Jouw vault:",
+    "newVersion": "Nieuwe versie:",
     "upgrade": "Upgrade",
-    "upgrading": "Upgrading...",
-    "logout": "Logout",
-    "whatsNew": "What's New",
-    "whatsNewDescription": "An upgrade is required to support the following changes:",
-    "noDescriptionAvailable": "No description available for this version.",
+    "upgrading": "Aan het upgraden...",
+    "logout": "Uitloggen",
+    "whatsNew": "Wat is er nieuw",
+    "whatsNewDescription": "Een upgrade is vereist vanwege de volgende wijzigingen:",
+    "noDescriptionAvailable": "Voor deze versie is geen beschrijving beschikbaar.",
     "okay": "Ok",
     "status": {
-      "preparingUpgrade": "Preparing upgrade...",
-      "vaultAlreadyUpToDate": "Vault is already up to date",
-      "startingDatabaseTransaction": "Starting database transaction...",
-      "applyingDatabaseMigrations": "Applying database migrations...",
-      "applyingMigration": "Applying migration {{current}} of {{total}}...",
-      "committingChanges": "Committing changes..."
+      "preparingUpgrade": "Upgrade voorbereiden...",
+      "vaultAlreadyUpToDate": "De vault is al bijgewerkt",
+      "startingDatabaseTransaction": "Starten van database transactie...",
+      "applyingDatabaseMigrations": "Databasemigratie toepassen...",
+      "applyingMigration": "Toepassen van migratie {{current}} van {{total}}...",
+      "committingChanges": "Wijzigingen doorvoeren..."
     },
     "alerts": {
-      "error": "Error",
-      "unableToGetVersionInfo": "Unable to get version information. Please try again.",
-      "selfHostedServer": "Self-Hosted Server",
-      "selfHostedWarning": "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
-      "cancel": "Cancel",
-      "continueUpgrade": "Continue Upgrade",
-      "upgradeFailed": "Upgrade Failed",
-      "failedToApplyMigration": "Failed to apply migration ({{current}} of {{total}})",
-      "unknownErrorDuringUpgrade": "An unknown error occurred during the upgrade. Please try again."
+      "error": "Fout",
+      "unableToGetVersionInfo": "Kan versie-informatie niet ophalen. Probeer het opnieuw.",
+      "selfHostedServer": "Self-hosted server",
+      "selfHostedWarning": "Als je een self-hosted server gebruikt, zorg er dan voor dat je ook je eigen self-hosted instantie bijwerkt, omdat anders het inloggen via de web client niet meer zal werken.",
+      "cancel": "Annuleren",
+      "continueUpgrade": "Verdergaan",
+      "upgradeFailed": "Upgrade mislukt",
+      "failedToApplyMigration": "Kon migratie niet toepassen ({{current}} van {{total}})",
+      "unknownErrorDuringUpgrade": "Er is een onbekende fout opgetreden tijdens de upgrade. Probeer het opnieuw."
     }
   }
 }
