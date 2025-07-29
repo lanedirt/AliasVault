@@ -52,6 +52,25 @@
     "connectingTo": "Connecting to",
     "loggedInAs": "Logged in as"
   },
+  "vault": {
+    "syncingVault": "Syncing vault",
+    "uploadingVaultToServer": "Uploading vault to server",
+    "savingChangesToVault": "Saving changes to vault",
+    "checkingForVaultUpdates": "Checking for vault updates",
+    "executingOperation": "Executing operation...",
+    "errors": {
+      "failedToGetEncryptedDatabase": "Failed to get encrypted database",
+      "usernameNotFound": "Username not found",
+      "vaultMergeRequired": "Vault merge required. Please login via the web app to merge the multiple pending updates to your vault.",
+      "vaultOutdated": "Your vault is outdated. Please login on the AliasVault website and follow the steps.",
+      "failedToUploadVault": "Failed to upload vault to server. Please try again by re-opening the app.",
+      "usernameNotFoundLoginAgain": "Username not found. Please login again.",
+      "errorDuringPasswordChange": "Error during password change operation. Please log in again to retrieve your latest vault.",
+      "failedToSyncVault": "Failed to sync vault",
+      "operationFailed": "Operation failed",
+      "unknownError": "Unknown error"
+    }
+  },
   "credentials": {
     "title": "Credentials",
     "addCredential": "Add Credential",
@@ -102,6 +121,8 @@
     "offlineMessage": "You are offline. Please connect to the internet to sync your vault.",
     "credentialCreated": "Credential Created!",
     "credentialCreatedMessage": "Your new credential has been added to your vault and is ready to use.",
+    "credentialDetails": "Credential Details",
+    "emailPreview": "Email Preview",
     "switchBackToBrowser": "Switch back to your browser to continue.",
     "twoFactorAuth": "Two-factor authentication",
     "totpCode": "TOTP Code",
