@@ -3,6 +3,8 @@ import { useCallback } from 'react';
 import { AppInfo } from '@/utils/AppInfo';
 import type { VaultResponse } from '@/utils/dist/shared/models/webapi';
 
+import { useTranslation } from '@/hooks/useTranslation';
+
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
@@ -47,6 +49,7 @@ type VaultSyncOptions = {
 export const useVaultSync = () : {
   syncVault: (options?: VaultSyncOptions) => Promise<boolean>;
 } => {
+  const { t } = useTranslation();
   const authContext = useAuth();
   const dbContext = useDb();
   const webApi = useWebApi();
@@ -66,7 +69,7 @@ export const useVaultSync = () : {
       }
 
       // Check app status and vault revision
-      onStatus?.('Checking vault updates');
+      onStatus?.(t('vault.checkingVaultUpdates'));
       const statusResponse = await withMinimumDelay(() => webApi.getStatus(), 300, enableDelay);
 
       if (statusResponse.serverVersion === '0.0.0') {
@@ -76,13 +79,13 @@ export const useVaultSync = () : {
       }
 
       if (!statusResponse.clientVersionSupported) {
-        const statusError = 'This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.';
+        const statusError = t('vault.errors.versionNotSupported');
         onError?.(statusError);
         return false;
       }
 
       if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-        const statusError = 'The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.';
+        const statusError = t('vault.errors.serverNeedsUpdate');
         onError?.(statusError);
         return false;
       }
@@ -95,7 +98,7 @@ export const useVaultSync = () : {
       const vaultRevisionNumber = vaultMetadata?.vaultRevisionNumber ?? 0;
 
       if (statusResponse.vaultRevision > vaultRevisionNumber) {
-        onStatus?.('Syncing updated vault');
+        onStatus?.(t('vault.syncingUpdatedVault'));
         const vaultResponseJson = await withMinimumDelay(() => webApi.get<VaultResponse>('Vault'), 1000, enableDelay);
 
         const vaultError = webApi.validateVaultResponse(vaultResponseJson as VaultResponse);
@@ -125,7 +128,7 @@ export const useVaultSync = () : {
           return true;
         } catch {
           // Vault could not be decrypted, throw an error
-          throw new Error('Vault could not be decrypted, if the problem persists please logout and login again.');
+          throw new Error(t('vault.errors.vaultDecryptFailed'));
         }
       }
 
@@ -138,7 +141,7 @@ export const useVaultSync = () : {
       await withMinimumDelay(() => Promise.resolve(onSuccess?.(false)), 300, enableDelay);
       return false;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error during vault sync';
+      const errorMessage = err instanceof Error ? err.message : t('vault.errors.unknownErrorDuringSync');
       console.error('Vault sync error:', err);
 
       // Check if it's a network error
@@ -150,7 +153,7 @@ export const useVaultSync = () : {
       onError?.(errorMessage);
       return false;
     }
-  }, [authContext, dbContext, webApi]);
+  }, [authContext, dbContext, webApi, t]);
 
   return { syncVault };
 };
