@@ -285,10 +285,10 @@
     "noEmailsDescription": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
     "dateFormat": {
       "justNow": "just now",
-      "minutesAgo_single": "{{count}} min ago",
-      "minutesAgo_plural": "{{count}} mins ago",
-      "hoursAgo_single": "{{count}} hr ago",
-      "hoursAgo_plural": "{{count}} hrs ago",
+      "minutesAgo_one": "{{count}} min ago",
+      "minutesAgo_other": "{{count}} mins ago",
+      "hoursAgo_one": "{{count}} hr ago",
+      "hoursAgo_other": "{{count}} hrs ago",
       "yesterday": "yesterday"
     },
     "errors": {
