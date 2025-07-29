@@ -2,11 +2,13 @@ import * as Yup from 'yup';
 
 /**
  * Credential add/edit form validation schema used by react-hook-form.
+ * @param t - Translation function
  */
-export const credentialSchema = Yup.object().shape({
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const createCredentialSchema = (t: (key: string) => string) => Yup.object().shape({
   Id: Yup.string().optional(),
-  ServiceName: Yup.string().required('Service name is required'),
-  ServiceUrl: Yup.string().url('Invalid URL format').nullable().notRequired(),
+  ServiceName: Yup.string().required(t('validation.serviceNameRequired')),
+  ServiceUrl: Yup.string().url(t('validation.invalidUrlFormat')).nullable().notRequired(),
   Alias: Yup.object().shape({
     FirstName: Yup.string().nullable().notRequired(),
     LastName: Yup.string().nullable().notRequired(),
@@ -16,7 +18,7 @@ export const credentialSchema = Yup.object().shape({
       .notRequired()
       .test(
         'is-valid-date-format',
-        'Date must be in YYYY-MM-DD format',
+        t('validation.invalidDateFormat'),
         value => {
           if (!value) {
             return true;
@@ -25,7 +27,7 @@ export const credentialSchema = Yup.object().shape({
         },
       ),
     Gender: Yup.string().nullable().notRequired(),
-    Email: Yup.string().email('Invalid email format').nullable().notRequired()
+    Email: Yup.string().email(t('validation.invalidEmailFormat')).nullable().notRequired()
   }),
   Username: Yup.string().nullable().notRequired(),
   Password: Yup.string().nullable().notRequired(),

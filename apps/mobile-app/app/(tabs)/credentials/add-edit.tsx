@@ -15,7 +15,7 @@ import type { FaviconExtractModel } from '@/utils/dist/shared/models/webapi';
 import { CreatePasswordGenerator, PasswordGenerator } from '@/utils/dist/shared/password-generator';
 import emitter from '@/utils/EventEmitter';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
-import { credentialSchema } from '@/utils/ValidationSchema';
+import { createCredentialSchema } from '@/utils/ValidationSchema';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useVaultMutate } from '@/hooks/useVaultMutate';
@@ -56,7 +56,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
   const { t } = useTranslation();
 
   const { control, handleSubmit, setValue, watch } = useForm<Credential>({
-    resolver: yupResolver(credentialSchema) as Resolver<Credential>,
+    resolver: yupResolver(createCredentialSchema(t)) as Resolver<Credential>,
     defaultValues: {
       Id: "",
       Username: "",

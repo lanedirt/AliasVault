@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
@@ -20,6 +21,7 @@ import { useMinDurationLoading } from '@/hooks/useMinDurationLoading';
  * Emails list page.
  */
 const EmailsList: React.FC = () => {
+  const { t } = useTranslation();
   const dbContext = useDb();
   const webApi = useWebApi();
   const { setHeaderButtons } = useHeaderButtons();
@@ -64,15 +66,15 @@ const EmailsList: React.FC = () => {
         setEmails(decryptedEmails);
       } catch (error) {
         console.error(error);
-        throw new Error('Failed to load emails');
+        throw new Error(t('emails.errors.emailLoadError'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t('common.errors.unknownError'));
     } finally {
       setIsLoading(false);
       setIsInitialLoading(false);
     }
-  }, [dbContext?.sqliteClient, webApi, setIsLoading, setIsInitialLoading]);
+  }, [dbContext?.sqliteClient, webApi, setIsLoading, setIsInitialLoading, t]);
 
   useEffect(() => {
     loadEmails();
@@ -83,7 +85,7 @@ const EmailsList: React.FC = () => {
     const headerButtonsJSX = !PopoutUtility.isPopup() ? (
       <HeaderButton
         onClick={() => PopoutUtility.openInNewPopup()}
-        title="Open in new window"
+        title={t('common.openInNewWindow')}
         iconType={HeaderIconType.EXPAND}
       />
     ) : null;
@@ -93,7 +95,7 @@ const EmailsList: React.FC = () => {
     return () => {
       setHeaderButtons(null);
     };
-  }, [setHeaderButtons]);
+  }, [setHeaderButtons, t]);
 
   /**
    * Formats the date display for emails
@@ -104,18 +106,18 @@ const EmailsList: React.FC = () => {
     const secondsAgo = Math.floor((now.getTime() - emailDate.getTime()) / 1000);
 
     if (secondsAgo < 60) {
-      return 'just now';
+      return t('emails.dateFormat.justNow');
     } else if (secondsAgo < 3600) {
       // Less than 1 hour ago
       const minutes = Math.floor(secondsAgo / 60);
-      return `${minutes} ${minutes === 1 ? 'min' : 'mins'} ago`;
+      return t('emails.dateFormat.minutesAgo', { count: minutes });
     } else if (secondsAgo < 86400) {
       // Less than 24 hours ago
       const hours = Math.floor(secondsAgo / 3600);
-      return `${hours} ${hours === 1 ? 'hr' : 'hrs'} ago`;
+      return t('emails.dateFormat.hoursAgo', { count: hours });
     } else if (secondsAgo < 172800) {
       // Less than 48 hours ago
-      return 'yesterday';
+      return t('emails.dateFormat.yesterday');
     } else {
       // Older than 48 hours
       return emailDate.toLocaleDateString('en-GB', {
@@ -134,19 +136,19 @@ const EmailsList: React.FC = () => {
   }
 
   if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+    return <div className="text-red-500">{t('common.error')}: {error}</div>;
   }
 
   if (emails.length === 0) {
     return (
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-gray-900 dark:text-white text-xl">Emails</h2>
+          <h2 className="text-gray-900 dark:text-white text-xl">{t('emails.title')}</h2>
           <ReloadButton onClick={loadEmails} />
         </div>
         <div className="text-gray-500 dark:text-gray-400 space-y-2">
           <p className="text-sm">
-            You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.
+            {t('emails.noEmailsDescription')}
           </p>
         </div>
       </div>
@@ -156,7 +158,7 @@ const EmailsList: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-gray-900 dark:text-white text-xl">Emails</h2>
+        <h2 className="text-gray-900 dark:text-white text-xl">{t('emails.title')}</h2>
         <ReloadButton onClick={loadEmails} />
       </div>
       <div className="space-y-2">

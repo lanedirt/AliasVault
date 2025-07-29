@@ -6,6 +6,7 @@ import type { Credential } from '@/utils/dist/shared/models/vault';
 import type { MailboxEmail } from '@/utils/dist/shared/models/webapi';
 
 import { useColors } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/hooks/useTranslation';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -21,6 +22,7 @@ type EmailCardProps = {
  */
 export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const dbContext = useDb();
   const [associatedCredential, setAssociatedCredential] = useState<Credential | null>(null);
 
@@ -53,15 +55,15 @@ export function EmailCard({ email }: EmailCardProps) : React.ReactNode {
     const secondsAgo = Math.floor((now.getTime() - emailDate.getTime()) / 1000);
 
     if (secondsAgo < 60) {
-      return 'just now';
+      return t('emails.time.justNow');
     } else if (secondsAgo < 3600) {
       const minutes = Math.floor(secondsAgo / 60);
-      return `${minutes} ${minutes === 1 ? 'min' : 'mins'} ago`;
+      return t('emails.time.minutesAgo', { count: minutes });
     } else if (secondsAgo < 86400) {
       const hours = Math.floor(secondsAgo / 3600);
-      return `${hours} ${hours === 1 ? 'hr' : 'hrs'} ago`;
+      return t('emails.time.hoursAgo', { count: hours });
     } else if (secondsAgo < 172800) {
-      return 'yesterday';
+      return t('emails.time.yesterday');
     } else {
       return emailDate.toLocaleDateString('en-GB', {
         day: '2-digit',
