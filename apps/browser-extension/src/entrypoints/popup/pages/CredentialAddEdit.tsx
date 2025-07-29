@@ -36,38 +36,6 @@ type PersistedFormData = {
 }
 
 /**
- * Validation schema for the credential form.
- */
-const credentialSchema = Yup.object().shape({
-  Id: Yup.string(),
-  ServiceName: Yup.string().required('Service name is required'),
-  ServiceUrl: Yup.string().url('Invalid URL format').nullable().optional(),
-  Alias: Yup.object().shape({
-    FirstName: Yup.string().nullable().optional(),
-    LastName: Yup.string().nullable().optional(),
-    NickName: Yup.string().nullable().optional(),
-    BirthDate: Yup.string()
-      .nullable()
-      .optional()
-      .test(
-        'is-valid-date-format',
-        'Date must be in YYYY-MM-DD format',
-        value => {
-          if (!value) {
-            return true;
-          }
-          return /^\d{4}-\d{2}-\d{2}$/.test(value);
-        },
-      ),
-    Gender: Yup.string().nullable().optional(),
-    Email: Yup.string().email('Invalid email format').nullable().optional()
-  }),
-  Username: Yup.string().nullable().optional(),
-  Password: Yup.string().nullable().optional(),
-  Notes: Yup.string().nullable().optional()
-});
-
-/**
  * Add or edit credential page.
  */
 const CredentialAddEdit: React.FC = () => {
@@ -77,6 +45,38 @@ const CredentialAddEdit: React.FC = () => {
   const dbContext = useDb();
   // If we received an ID, we're in edit mode
   const isEditMode = id !== undefined && id.length > 0;
+
+  /**
+   * Validation schema for the credential form with translatable messages.
+   */
+  const credentialSchema = useMemo(() => Yup.object().shape({
+    Id: Yup.string(),
+    ServiceName: Yup.string().required(t('credentials.validation.serviceNameRequired')),
+    ServiceUrl: Yup.string().url(t('credentials.validation.invalidUrl')).nullable().optional(),
+    Alias: Yup.object().shape({
+      FirstName: Yup.string().nullable().optional(),
+      LastName: Yup.string().nullable().optional(),
+      NickName: Yup.string().nullable().optional(),
+      BirthDate: Yup.string()
+        .nullable()
+        .optional()
+        .test(
+          'is-valid-date-format',
+          t('credentials.validation.invalidDateFormat'),
+          value => {
+            if (!value) {
+              return true;
+            }
+            return /^\d{4}-\d{2}-\d{2}$/.test(value);
+          },
+        ),
+      Gender: Yup.string().nullable().optional(),
+      Email: Yup.string().email(t('credentials.validation.invalidEmail')).nullable().optional()
+    }),
+    Username: Yup.string().nullable().optional(),
+    Password: Yup.string().nullable().optional(),
+    Notes: Yup.string().nullable().optional()
+  }), [t]);
 
   const { executeVaultMutation, isLoading, syncStatus } = useVaultMutate();
   const [mode, setMode] = useState<CredentialMode>('random');

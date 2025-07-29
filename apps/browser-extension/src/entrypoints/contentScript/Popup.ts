@@ -804,6 +804,8 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       const passwordLengthText = await t('credentials.passwordLength');
       const changePasswordComplexityText = await t('credentials.changePasswordComplexity');
 
+      const suggestedNamesHtml = await getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '');
+
       // Create the main content
       popup.innerHTML = `
       <div class="av-create-popup-header">
@@ -853,11 +855,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
           class="av-create-popup-input"
           placeholder="${enterServiceNameText}"
         >
-        ${suggestedNames.length > 1 ? `
-          <div class="av-suggested-names">
-            ${getSuggestedNamesHtml(suggestedNames, suggestedNames[0] ?? '')}
-          </div>
-        ` : ''}
+        ${suggestedNames.length > 1 ? `<div class="av-suggested-names">${suggestedNamesHtml}</div>` : ''}
       </div>
 
       <div class="av-create-popup-mode av-create-popup-random-mode">
@@ -1475,7 +1473,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
       /**
        * Handle suggested name click.
        */
-      const handleSuggestedNameClick = (e: Event) : void => {
+      const handleSuggestedNameClick = async (e: Event) : Promise<void> => {
         const target = e.target as HTMLElement;
         if (target.classList.contains('av-suggested-name')) {
           const name = target.dataset.name;
@@ -1488,7 +1486,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
             const suggestedNamesContainer = target.closest('.av-suggested-names');
             if (suggestedNamesContainer) {
             // Update the suggestions HTML using the helper function
-              suggestedNamesContainer.innerHTML = getSuggestedNamesHtml(suggestedNames, name);
+              suggestedNamesContainer.innerHTML = await getSuggestedNamesHtml(suggestedNames, name);
             }
           }
         }
@@ -1505,7 +1503,7 @@ export async function createAliasCreationPopup(suggestedNames: string[], rootCon
 /**
  * Get suggested names HTML with current input value excluded
  */
-function getSuggestedNamesHtml(suggestedNames: string[], currentValue: string): string {
+async function getSuggestedNamesHtml(suggestedNames: string[], currentValue: string): Promise<string> {
   // Filter out the current value and create unique set of remaining suggestions
   const filteredSuggestions = [...new Set(suggestedNames.filter(n => n !== currentValue))];
 
@@ -1513,7 +1511,9 @@ function getSuggestedNamesHtml(suggestedNames: string[], currentValue: string): 
     return '';
   }
 
-  return `or ${filteredSuggestions.map((name, index) =>
+  const orLabel = await t('content.or');
+
+  return `${orLabel} ${filteredSuggestions.map((name, index) =>
     `<span class="av-suggested-name" data-name="${name}">${name}</span>${index < filteredSuggestions.length - 1 ? ', ' : ''}`
   ).join('')}?`;
 }
