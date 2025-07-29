@@ -340,36 +340,36 @@
     }
   },
   "upgrade": {
-    "title": "Upgrade Vault",
-    "subtitle": "AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.",
-    "versionInformation": "Version Information",
-    "yourVault": "Your vault:",
-    "newVersion": "New version:",
-    "upgrade": "Upgrade Vault",
-    "upgrading": "Upgrading...",
-    "logout": "Logout",
-    "whatsNew": "What's New",
-    "whatsNewDescription": "An upgrade is required to support the following changes:",
-    "noDescriptionAvailable": "No description available for this version.",
+    "title": "Vault upgraden",
+    "subtitle": "AliasVault is vernieuwd en je vault moet worden bijgewerkt. Dit kan enkele seconden duren.",
+    "versionInformation": "Versie-informatie",
+    "yourVault": "Jouw vault:",
+    "newVersion": "Nieuwe versie:",
+    "upgrade": "Vault upgraden",
+    "upgrading": "Aan het upgraden...",
+    "logout": "Uitloggen",
+    "whatsNew": "Wat is er nieuw",
+    "whatsNewDescription": "Een upgrade is vereist vanwege de volgende wijzigingen:",
+    "noDescriptionAvailable": "Voor deze versie is geen beschrijving beschikbaar.",
     "okay": "Ok",
     "status": {
-      "preparingUpgrade": "Preparing upgrade...",
-      "vaultAlreadyUpToDate": "Vault is already up to date",
-      "startingDatabaseTransaction": "Starting database transaction...",
-      "applyingDatabaseMigrations": "Applying database migrations...",
-      "applyingMigration": "Applying migration {{current}} of {{total}}...",
-      "committingChanges": "Committing changes..."
+      "preparingUpgrade": "Upgrade voorbereiden...",
+      "vaultAlreadyUpToDate": "De vault is al bijgewerkt",
+      "startingDatabaseTransaction": "Starten van database transactie...",
+      "applyingDatabaseMigrations": "Databasemigratie toepassen...",
+      "applyingMigration": "Toepassen van migratie {{current}} van {{total}}...",
+      "committingChanges": "Wijzigingen doorvoeren..."
     },
     "alerts": {
-      "error": "Error",
-      "unableToGetVersionInfo": "Unable to get version information. Please try again.",
-      "selfHostedServer": "Self-Hosted Server",
-      "selfHostedWarning": "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
-      "cancel": "Cancel",
-      "continueUpgrade": "Continue Upgrade",
-      "upgradeFailed": "Upgrade Failed",
-      "failedToApplyMigration": "Failed to apply migration ({{current}} of {{total}})",
-      "unknownErrorDuringUpgrade": "An unknown error occurred during the upgrade. Please try again."
+      "error": "Fout",
+      "unableToGetVersionInfo": "Kan versie-informatie niet ophalen. Probeer het opnieuw.",
+      "selfHostedServer": "Self-hosted server",
+      "selfHostedWarning": "Als je een self-hosted server gebruikt, zorg er dan voor dat je ook je eigen self-hosted instantie bijwerkt, omdat anders het inloggen via de web client niet meer zal werken.",
+      "cancel": "Annuleren",
+      "continueUpgrade": "Verdergaan",
+      "upgradeFailed": "Upgrade mislukt",
+      "failedToApplyMigration": "Kon migratie niet toepassen ({{current}} van {{total}})",
+      "unknownErrorDuringUpgrade": "Er is een onbekende fout opgetreden tijdens de upgrade. Probeer het opnieuw."
     }
   }
 }
