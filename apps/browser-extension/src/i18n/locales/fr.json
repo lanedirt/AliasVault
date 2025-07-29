@@ -87,7 +87,7 @@
     "checkingVaultUpdates": "Checking for vault updates",
     "syncingUpdatedVault": "Syncing updated vault",
     "executingOperation": "Executing operation...",
-    "loadMore": "Load more",
+    "loadMore": "Voir plus",
     "errors": {
       "VaultMergeRequired": "Your vault needs to be updated. Please login on the AliasVault website and follow the steps.",
       "VaultOutdated": "Your vault is outdated. Please login on the AliasVault website and follow the steps.",
@@ -140,6 +140,7 @@
     }
   },
   "content": {
+    "or": "or",
     "new": "New",
     "cancel": "Cancel",
     "search": "Search",
@@ -256,16 +257,22 @@
     "birthDatePlaceholder": "YYYY-MM-DD",
     "metadata": "Metadata",
     "errors": {
-      "serviceNameRequired": "Service name is required",
       "invalidUrl": "Please enter a valid URL",
       "saveError": "Failed to save credential",
       "loadError": "Failed to load credentials",
       "deleteError": "Failed to delete credential",
       "copyError": "Failed to copy to clipboard"
+    },
+    "validation": {
+      "required": "This field is required",
+      "serviceNameRequired": "Service name is required",
+      "invalidUrl": "Invalid URL format",
+      "invalidEmail": "Invalid email format",
+      "invalidDateFormat": "Date must be in YYYY-MM-DD format"
     }
   },
   "emails": {
-    "title": "Email Details",
+    "title": "Emails",
     "deleteEmailTitle": "Delete Email",
     "deleteEmailConfirm": "Are you sure you want to permanently delete this email?",
     "from": "From",
@@ -275,6 +282,15 @@
     "attachments": "Attachments",
     "emailNotFound": "Email not found",
     "noEmails": "No emails found",
+    "noEmailsDescription": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
+    "dateFormat": {
+      "justNow": "just now",
+      "minutesAgo_one": "{{count}} min ago",
+      "minutesAgo_other": "{{count}} mins ago",
+      "hoursAgo_one": "{{count}} hr ago",
+      "hoursAgo_other": "{{count}} hrs ago",
+      "yesterday": "yesterday"
+    },
     "errors": {
       "emailLoadError": "An error occurred while loading emails. Please try again later.",
       "emailUnexpectedError": "An unexpected error occurred while loading emails. Please try again later."

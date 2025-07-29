@@ -52,6 +52,25 @@
     "connectingTo": "Verbinden met",
     "loggedInAs": "Ingelogd als"
   },
+  "vault": {
+    "syncingVault": "Vault synchroniseren",
+    "uploadingVaultToServer": "Vault uploaden naar server",
+    "savingChangesToVault": "Wijzigingen opslaan in vault",
+    "checkingForVaultUpdates": "Controleren op vault updates",
+    "executingOperation": "Bezig met uitvoeren...",
+    "errors": {
+      "failedToGetEncryptedDatabase": "Fout bij ophalen van versleutelde vault",
+      "usernameNotFound": "Gebruikersnaam niet gevonden",
+      "vaultMergeRequired": "Vault merge is vereist. Login via de web app om meerdere vault updates te kunnen verwerken.",
+      "vaultOutdated": "Je vault is verouderd. Log in op de AliasVault website en volg de stappen.",
+      "failedToUploadVault": "Fout bij het uploaden van de vault naar de server. Probeer het opnieuw door de app af te sluiten en opnieuw te openen.",
+      "usernameNotFoundLoginAgain": "Gebruikersnaam niet gevonden. Log opnieuw in.",
+      "errorDuringPasswordChange": "Fout tijdens het wijzigen van het wachtwoord. Log opnieuw in om de vault te synchroniseren en probeer het opnieuw.",
+      "failedToSyncVault": "Vault ophalen mislukt",
+      "operationFailed": "Bewerking mislukt",
+      "unknownError": "Onbekende fout"
+    }
+  },
   "credentials": {
     "title": "Credentials",
     "addCredential": "Credential toevoegen",
@@ -102,6 +121,8 @@
     "offlineMessage": "Je bent offline. Maak verbinding met het internet om je vault te synchroniseren.",
     "credentialCreated": "Credential aangemaakt!",
     "credentialCreatedMessage": "Je nieuwe credential is toegevoegd aan je vault en is klaar voor gebruik.",
+    "credentialDetails": "Credential details",
+    "emailPreview": "E-mail voorbeeld",
     "switchBackToBrowser": "Schakel terug naar je browser om door te gaan.",
     "twoFactorAuth": "Tweestapsverificatie",
     "totpCode": "TOTP Code",
@@ -193,8 +214,8 @@
       "title": "Beveiliging",
       "description": "Beheer je account en vault beveiligingsinstellingen.",
       "changeMasterPassword": "Hoofdwachtwoord wijzigen",
-      "activeSessionsTitle": "Actieve Sessies",
-      "recentAuthLogs": "Recente Auth Logs",
+      "activeSessionsTitle": "Actieve sessies",
+      "recentAuthLogs": "Recente authenticatielogs",
       "deleteAccountTitle": "Account Verwijderen",
       "changePassword": {
         "headerText": "Het wijzigen van je hoofdwachtwoord wijzigt ook de encryptie sleutels. Het wordt aanbevolen om je hoofdwachtwoord periodiek te wijzigen om je vault veilig te houden.",
@@ -280,6 +301,12 @@
     "sizeKB": "KB",
     "offlineMessage": "Je bent offline. Maak verbinding met het internet om je e-mails te laden.",
     "emptyMessage": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
+    "time": {
+      "justNow": "zojuist",
+      "minutesAgo": "{{count}} {{count, plural, one {min} other {min}}} geleden",
+      "hoursAgo": "{{count}} {{count, plural, one {uur} other {uur}}} geleden",
+      "yesterday": "gisteren"
+    },
     "errors": {
       "generic": "Er is een fout opgetreden",
       "loadFailed": "Laden van e-mails mislukt",
@@ -288,6 +315,13 @@
       "decryptFailed": "Bijlage ontsleutelen mislukt",
       "downloadFailed": "Bijlage downloaden mislukt"
     }
+  },
+  "validation": {
+    "required": "Dit veld is verplicht",
+    "serviceNameRequired": "Servicenaam is verplicht",
+    "invalidUrlFormat": "Ongeldig URL-formaat",
+    "invalidDateFormat": "Datum moet in YYYY-MM-DD formaat zijn",
+    "invalidEmailFormat": "Ongeldig e-mailformaat"
   },
   "apiErrors": {
     "CLAIM_DOES_NOT_MATCH_USER": "Het huidige gekozen e-mailadres is al in gebruik. Wijzig het e-mailadres door deze credential te bewerken.",
@@ -298,7 +332,7 @@
     "USER_NOT_FOUND": "Gebruikersnaam of wachtwoord is onjuist. Probeer het opnieuw.",
     "INVALID_AUTHENTICATOR_CODE": "Ongeldige authenticator code. Probeer het opnieuw.",
     "INVALID_RECOVERY_CODE": "Ongeldige herstelcode. Probeer het opnieuw.",
-    "REFRESH_TOKEN_REQUIRED": "Vernieuwingstoken is vereist.",
+    "REFRESH_TOKEN_REQUIRED": "Refreshtoken is vereist.",
     "USER_NOT_FOUND_IN_TOKEN": "Gebruiker niet gevonden in token.",
     "USER_NOT_FOUND_IN_DATABASE": "Gebruiker niet gevonden in database.",
     "INVALID_REFRESH_TOKEN": "Ongeldige refreshtoken.",

@@ -140,6 +140,7 @@
     }
   },
   "content": {
+    "or": "of",
     "new": "Nieuw",
     "cancel": "Annuleren",
     "search": "Zoeken",
@@ -256,16 +257,22 @@
     "birthDatePlaceholder": "YYYY-MM-DD",
     "metadata": "Metadata",
     "errors": {
-      "serviceNameRequired": "Servicenaam is verplicht",
       "invalidUrl": "Voer een geldige URL in",
       "saveError": "Credential opslaan mislukt",
       "loadError": "Credential laden mislukt",
       "deleteError": "Credential verwijderen mislukt",
       "copyError": "Kopiëren naar klembord mislukt"
+    },
+    "validation": {
+      "required": "Dit veld is verplicht",
+      "serviceNameRequired": "Servicenaam is verplicht",
+      "invalidUrl": "Ongeldig URL-formaat",
+      "invalidEmail": "Ongeldig e-mailformaat",
+      "invalidDateFormat": "Datum moet in YYYY-MM-DD formaat zijn"
     }
   },
   "emails": {
-    "title": "E-mail details",
+    "title": "E-mails",
     "deleteEmailTitle": "E-mail verwijderen",
     "deleteEmailConfirm": "Weet je zeker dat je deze e-mail definitief wilt verwijderen?",
     "from": "Van",
@@ -275,6 +282,15 @@
     "attachments": "Bijlagen",
     "emailNotFound": "E-mail niet gevonden",
     "noEmails": "Geen e-mails gevonden",
+    "noEmailsDescription": "Je hebt nog geen e-mails ontvangen op je privé e-mailadressen. Wanneer je een nieuwe e-mail ontvangt, zal deze hier verschijnen.",
+    "dateFormat": {
+      "justNow": "zojuist",
+      "minutesAgo_one": "{{count}} min geleden",
+      "minutesAgo_other": "{{count}} min. geleden",
+      "hoursAgo_one": "{{count}} uur geleden",
+      "hoursAgo_other": "{{count}} uur geleden",
+      "yesterday": "gisteren"
+    },
     "errors": {
       "emailLoadError": "Er is een fout opgetreden bij het laden van e-mails. Probeer het later opnieuw.",
       "emailUnexpectedError": "Er is een onverwachte fout opgetreden bij het laden van e-mails. Probeer het later opnieuw."
