@@ -87,7 +87,7 @@
     "checkingVaultUpdates": "Checking for vault updates",
     "syncingUpdatedVault": "Syncing updated vault",
     "executingOperation": "Executing operation...",
-    "loadMore": "Voir plus",
+    "loadMore": "Load more",
     "errors": {
       "VaultMergeRequired": "Your vault needs to be updated. Please login on the AliasVault website and follow the steps.",
       "VaultOutdated": "Your vault is outdated. Please login on the AliasVault website and follow the steps.",
