@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect } from 'react';
+import { useNavigation } from 'expo-router';
+import { useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import { AppInfo } from '@/utils/AppInfo';
 
 import { useColors } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/hooks/useTranslation';
 
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
@@ -15,28 +17,33 @@ type ApiOption = {
   value: string;
 };
 
-const DEFAULT_OPTIONS: ApiOption[] = [
-  { label: 'Aliasvault.net', value: AppInfo.DEFAULT_API_URL },
-  { label: 'Self-hosted', value: 'custom' }
-];
-
 /**
  * Settings screen (for logged out users).
  */
 export default function SettingsScreen() : React.ReactNode {
   const colors = useColors();
-  const [selectedOption, setSelectedOption] = useState<string>(DEFAULT_OPTIONS[0].value);
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+  const [selectedOption, setSelectedOption] = useState<string>(AppInfo.DEFAULT_API_URL);
   const [customUrl, setCustomUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadStoredSettings();
-  }, []);
+  const DEFAULT_OPTIONS: ApiOption[] = useMemo(() => [
+    { label: t('app.loginSettings.aliasvaultNet'), value: AppInfo.DEFAULT_API_URL },
+    { label: t('app.loginSettings.selfHosted'), value: 'custom' },
+  ], [t]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: t('app.navigation.loginSettings'),
+      headerBackTitle: t('app.navigation.login'),
+    });
+  }, [navigation, t]);
 
   /**
    * Load the stored settings.
    */
-  const loadStoredSettings = async () : Promise<void> => {
+  const loadStoredSettings = useCallback(async () : Promise<void> => {
     try {
       const apiUrl = await AsyncStorage.getItem('apiUrl');
       const matchingOption = DEFAULT_OPTIONS.find(opt => opt.value === apiUrl);
@@ -52,7 +59,11 @@ export default function SettingsScreen() : React.ReactNode {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [DEFAULT_OPTIONS]);
+
+  useEffect(() => {
+    loadStoredSettings();
+  }, [loadStoredSettings]);
 
   /**
    * Handle the option change.
@@ -146,50 +157,52 @@ export default function SettingsScreen() : React.ReactNode {
   }
 
   return (
-    <ThemedContainer>
-      <ThemedScrollView>
-        <ThemedView style={styles.content}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>API Connection</Text>
-          </View>
+    <>
+      <ThemedContainer>
+        <ThemedScrollView>
+          <ThemedView style={styles.content}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{t('app.loginSettings.title')}</Text>
+            </View>
 
-          <View style={styles.formContainer}>
-            {DEFAULT_OPTIONS.map(option => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.optionButton,
-                  selectedOption === option.value && styles.optionButtonSelected
-                ]}
-                onPress={() => handleOptionChange(option.value)}
-              >
-                <Text style={[
-                  styles.optionButtonText,
-                  selectedOption === option.value && styles.optionButtonTextSelected
-                ]}>
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            <View style={styles.formContainer}>
+              {DEFAULT_OPTIONS.map(option => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionButton,
+                    selectedOption === option.value && styles.optionButtonSelected
+                  ]}
+                  onPress={() => handleOptionChange(option.value)}
+                >
+                  <Text style={[
+                    styles.optionButtonText,
+                    selectedOption === option.value && styles.optionButtonTextSelected
+                  ]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
 
-            {selectedOption === 'custom' && (
-              <View>
-                <Text style={styles.label}>Custom API URL</Text>
-                <TextInput
-                  style={styles.input}
-                  value={customUrl}
-                  onChangeText={handleCustomUrlChange}
-                  placeholder="https://my-aliasvault-instance.com/api"
-                  placeholderTextColor={colors.textMuted}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
-            )}
-          </View>
-          <Text style={styles.versionText}>Version: {AppInfo.VERSION}</Text>
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedContainer>
+              {selectedOption === 'custom' && (
+                <View>
+                  <Text style={styles.label}>{t('app.loginSettings.customApiUrl')}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={customUrl}
+                    onChangeText={handleCustomUrlChange}
+                    placeholder={t('app.loginSettings.customApiUrlPlaceholder')}
+                    placeholderTextColor={colors.textMuted}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+              )}
+            </View>
+            <Text style={styles.versionText}>{t('app.loginSettings.version', { version: AppInfo.VERSION })}</Text>
+          </ThemedView>
+        </ThemedScrollView>
+      </ThemedContainer>
+    </>
   );
 }

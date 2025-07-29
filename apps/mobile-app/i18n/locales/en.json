@@ -370,11 +370,20 @@
     },
     "navigation": {
       "login": "Login",
+      "loginSettings": "Login Settings",
       "notFound": "Not Found"
     },
     "reinitialize": {
       "vaultAutoLockedMessage": "Vault auto-locked after timeout.",
       "attemptingToUnlockMessage": "Attempting to unlock."
+    },
+    "loginSettings": {
+      "title": "API Connection",
+      "aliasvaultNet": "Aliasvault.net",
+      "selfHosted": "Self-hosted",
+      "customApiUrl": "Custom API URL",
+      "customApiUrlPlaceholder": "https://my-aliasvault-instance.com/api",
+      "version": "Version: {{version}}"
     }
   },
   "upgrade": {

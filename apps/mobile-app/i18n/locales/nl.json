@@ -370,6 +370,7 @@
     },
     "navigation": {
       "login": "Login",
+      "loginSettings": "Login Settings",
       "notFound": "Niet gevonden"
     },
     "reinitialize": {

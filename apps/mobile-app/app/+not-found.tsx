@@ -13,7 +13,7 @@ export default function NotFoundScreen() : React.ReactNode {
       <Stack.Screen options={{ title: 'Oops!' }} />
       <ThemedView style={styles.container}>
         <ThemedText type="title">This page doesn&apos;t exist.</ThemedText>
-        <Link href="/sync" style={styles.link}>
+        <Link href="/reinitialize" style={styles.link}>
           <ThemedText type="link">Go back to the home page</ThemedText>
         </Link>
       </ThemedView>
