@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableWithoutFeedback, Keyboard, Text } from 'react-native';
 
 import type { VaultVersion } from '@/utils/dist/shared/vault-sql';
@@ -29,11 +30,17 @@ export default function UpgradeScreen() : React.ReactNode {
   const [isLoading, setIsLoading] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<VaultVersion | null>(null);
   const [latestVersion, setLatestVersion] = useState<VaultVersion | null>(null);
-  const [upgradeStatus, setUpgradeStatus] = useState('Preparing upgrade...');
+  const [upgradeStatus, setUpgradeStatus] = useState('');
   const colors = useColors();
+  const { t } = useTranslation();
   const webApi = useWebApi();
   const { executeVaultMutation, isLoading: isVaultMutationLoading, syncStatus } = useVaultMutate();
   const { syncVault } = useVaultSync();
+
+  // Initialize upgrade status with translation
+  useEffect(() => {
+    setUpgradeStatus(t('upgrade.status.preparingUpgrade'));
+  }, [t]);
 
   /**
    * Load version information from the database.
@@ -60,19 +67,19 @@ export default function UpgradeScreen() : React.ReactNode {
    */
   const handleUpgrade = async (): Promise<void> => {
     if (!sqliteClient || !currentVersion || !latestVersion) {
-      Alert.alert('Error', 'Unable to get version information. Please try again.');
+      Alert.alert(t('upgrade.alerts.error'), t('upgrade.alerts.unableToGetVersionInfo'));
       return;
     }
 
     // Check if this is a self-hosted instance and show warning if needed
     if (await webApi.isSelfHosted()) {
       Alert.alert(
-        'Self-Hosted Server',
-        "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
+        t('upgrade.alerts.selfHostedServer'),
+        t('upgrade.alerts.selfHostedWarning'),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('upgrade.alerts.cancel'), style: 'cancel' },
           {
-            text: 'Continue Upgrade',
+            text: t('upgrade.alerts.continueUpgrade'),
             style: 'default',
             /**
              * Continue upgrade.
@@ -93,26 +100,25 @@ export default function UpgradeScreen() : React.ReactNode {
    */
   const performUpgrade = async (): Promise<void> => {
     if (!sqliteClient || !currentVersion || !latestVersion) {
-      Alert.alert('Error', 'Unable to get version information. Please try again.');
+      Alert.alert(t('upgrade.alerts.error'), t('upgrade.alerts.unableToGetVersionInfo'));
       return;
     }
 
     setIsLoading(true);
-    setUpgradeStatus('Preparing upgrade...');
+    setUpgradeStatus(t('upgrade.status.preparingUpgrade'));
 
     try {
       // Get upgrade SQL commands from vault-sql shared library
-      setUpgradeStatus('Generating upgrade SQL...');
       const vaultSqlGenerator = new VaultSqlGenerator();
       const upgradeResult = vaultSqlGenerator.getUpgradeVaultSql(currentVersion.revision, latestVersion.revision);
 
       if (!upgradeResult.success) {
-        throw new Error(upgradeResult.error ?? 'Failed to generate upgrade SQL');
+        throw new Error(upgradeResult.error ?? t('upgrade.alerts.upgradeFailed'));
       }
 
       if (upgradeResult.sqlCommands.length === 0) {
         // No upgrade needed, vault is already up to date
-        setUpgradeStatus('Vault is already up to date');
+        setUpgradeStatus(t('upgrade.status.vaultAlreadyUpToDate'));
         await new Promise(resolve => setTimeout(resolve, 1000));
         await handleUpgradeSuccess();
         return;
@@ -121,26 +127,26 @@ export default function UpgradeScreen() : React.ReactNode {
       // Use the useVaultMutate hook to handle the upgrade and vault upload
       await executeVaultMutation(async () => {
         // Begin transaction
-        setUpgradeStatus('Starting database transaction...');
+        setUpgradeStatus(t('upgrade.status.startingDatabaseTransaction'));
         await NativeVaultManager.beginTransaction();
 
         // Execute each SQL command
-        setUpgradeStatus('Applying database migrations...');
+        setUpgradeStatus(t('upgrade.status.applyingDatabaseMigrations'));
         for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
           const sqlCommand = upgradeResult.sqlCommands[i];
-          setUpgradeStatus(`Applying migration ${i + 1} of ${upgradeResult.sqlCommands.length}...`);
+          setUpgradeStatus(t('upgrade.status.applyingMigration', { current: i + 1, total: upgradeResult.sqlCommands.length }));
 
           try {
             await NativeVaultManager.executeRaw(sqlCommand);
           } catch (error) {
             console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
             await NativeVaultManager.rollbackTransaction();
-            throw new Error(`Failed to apply migration (${i + 1} of ${upgradeResult.sqlCommands.length})`);
+            throw new Error(t('upgrade.alerts.failedToApplyMigration', { current: i + 1, total: upgradeResult.sqlCommands.length }));
           }
         }
 
         // Commit transaction
-        setUpgradeStatus('Committing changes...');
+        setUpgradeStatus(t('upgrade.status.committingChanges'));
         await NativeVaultManager.commitTransaction();
       }, {
         skipSyncCheck: true, // Skip sync check during upgrade to prevent loop
@@ -155,16 +161,16 @@ export default function UpgradeScreen() : React.ReactNode {
          */
         onError: (error: Error) => {
           console.error('Upgrade failed:', error);
-          Alert.alert('Upgrade Failed', error.message);
+          Alert.alert(t('upgrade.alerts.upgradeFailed'), error.message);
         }
       });
 
     } catch (error) {
       console.error('Upgrade failed:', error);
-      Alert.alert('Upgrade Failed', error instanceof Error ? error.message : 'An unknown error occurred during the upgrade. Please try again.');
+      Alert.alert(t('upgrade.alerts.upgradeFailed'), error instanceof Error ? error.message : t('upgrade.alerts.unknownErrorDuringUpgrade'));
     } finally {
       setIsLoading(false);
-      setUpgradeStatus('Preparing upgrade...');
+      setUpgradeStatus(t('upgrade.status.preparingUpgrade'));
     }
   };
 
@@ -219,10 +225,10 @@ export default function UpgradeScreen() : React.ReactNode {
    */
   const showVersionDialog = (): void => {
     Alert.alert(
-      "What's New",
-      `An upgrade is required to support the following changes:\n\n${latestVersion?.description ?? 'No description available for this version.'}`,
+      t('upgrade.whatsNew'),
+      `${t('upgrade.whatsNewDescription')}\n\n${latestVersion?.description ?? t('upgrade.noDescriptionAvailable')}`,
       [
-        { text: 'Okay', style: 'default' }
+        { text: t('upgrade.okay'), style: 'default' }
       ]
     );
   };
@@ -399,7 +405,7 @@ export default function UpgradeScreen() : React.ReactNode {
                 <View style={styles.headerSection}>
                   <View style={styles.logoContainer}>
                     <Logo width={80} height={80} />
-                    <Text style={styles.appName}>Upgrade Vault</Text>
+                    <Text style={styles.appName}>{t('upgrade.title')}</Text>
                   </View>
                 </View>
                 <View style={styles.content}>
@@ -407,10 +413,10 @@ export default function UpgradeScreen() : React.ReactNode {
                     <Avatar />
                     <ThemedText style={styles.username}>{username}</ThemedText>
                   </View>
-                  <ThemedText style={styles.subtitle}>AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.</ThemedText>
+                  <ThemedText style={styles.subtitle}>{t('upgrade.subtitle')}</ThemedText>
                   <View style={styles.versionContainer}>
                     <View style={styles.versionHeader}>
-                      <ThemedText style={styles.versionTitle}>Version Information</ThemedText>
+                      <ThemedText style={styles.versionTitle}>{t('upgrade.versionInformation')}</ThemedText>
                       <TouchableOpacity
                         style={styles.helpButton}
                         onPress={showVersionDialog}
@@ -419,13 +425,13 @@ export default function UpgradeScreen() : React.ReactNode {
                       </TouchableOpacity>
                     </View>
                     <View style={styles.versionRow}>
-                      <ThemedText style={styles.versionLabel}>Your vault:</ThemedText>
+                      <ThemedText style={styles.versionLabel}>{t('upgrade.yourVault')}</ThemedText>
                       <ThemedText style={[styles.versionValue, styles.currentVersionValue]}>
                         {currentVersion?.releaseVersion ?? '...'}
                       </ThemedText>
                     </View>
                     <View style={styles.versionRow}>
-                      <ThemedText style={styles.versionLabel}>New version:</ThemedText>
+                      <ThemedText style={styles.versionLabel}>{t('upgrade.newVersion')}</ThemedText>
                       <ThemedText style={[styles.versionValue, styles.latestVersionValue]}>
                         {latestVersion?.releaseVersion ?? '...'}
                       </ThemedText>
@@ -438,7 +444,7 @@ export default function UpgradeScreen() : React.ReactNode {
                     disabled={isLoading || isVaultMutationLoading}
                   >
                     <ThemedText style={styles.buttonText}>
-                      {isLoading || isVaultMutationLoading ? (syncStatus || 'Upgrading...') : 'Upgrade'}
+                      {isLoading || isVaultMutationLoading ? (syncStatus || t('upgrade.upgrading')) : t('upgrade.upgrade')}
                     </ThemedText>
                   </TouchableOpacity>
 
@@ -446,7 +452,7 @@ export default function UpgradeScreen() : React.ReactNode {
                     style={styles.logoutButton}
                     onPress={handleLogout}
                   >
-                    <ThemedText style={styles.logoutButtonText}>Logout</ThemedText>
+                    <ThemedText style={styles.logoutButtonText}>{t('upgrade.logout')}</ThemedText>
                   </TouchableOpacity>
                 </View>
               </View>

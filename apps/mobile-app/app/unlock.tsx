@@ -269,7 +269,7 @@ export default function UnlockScreen() : React.ReactNode {
     <ThemedView style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <LoadingIndicator status={t('auth.unlockingVault')} />
+          <LoadingIndicator status={t('app.status.unlockingVault')} />
         </View>
       ) : (
         <KeyboardAvoidingView

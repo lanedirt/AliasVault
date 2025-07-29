@@ -1,5 +1,6 @@
 import { Href, router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Alert } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -23,6 +24,7 @@ export default function ReinitializeScreen() : React.ReactNode {
   const [status, setStatus] = useState('');
   const hasInitialized = useRef(false);
   const colors = useColors();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (hasInitialized.current) {
@@ -89,11 +91,11 @@ export default function ReinitializeScreen() : React.ReactNode {
             return;
           }
 
-          setStatus('Unlocking vault');
+          setStatus(t('app.status.unlockingVault'));
           const isUnlocked = await dbContext.unlockVault();
           if (isUnlocked) {
             await new Promise(resolve => setTimeout(resolve, 1000));
-            setStatus('Decrypting vault');
+            setStatus(t('app.status.decryptingVault'));
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Check if the vault is up to date, if not, redirect to the upgrade page.
@@ -151,26 +153,26 @@ export default function ReinitializeScreen() : React.ReactNode {
          */
         onOffline: () => {
           Alert.alert(
-            'Sync Issue',
-            'The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
+            t('app.alerts.syncIssue'),
+            t('app.alerts.syncIssueMessage'),
             [
               {
-                text: 'Open Local Vault',
+                text: t('app.alerts.openLocalVault'),
                 /**
                  * Handle opening vault in read-only mode.
                  */
                 onPress: async () : Promise<void> => {
-                  setStatus('Opening vault in read-only mode');
+                  setStatus(t('app.status.openingVaultReadOnly'));
                   await handleVaultUnlock();
                 }
               },
               {
-                text: 'Retry Sync',
+                text: t('app.alerts.retrySync'),
                 /**
                  * Handle retrying the connection.
                  */
                 onPress: () : void => {
-                  setStatus('Retrying connection...');
+                  setStatus(t('app.status.retryingConnection'));
                   initialize();
                 }
               }
@@ -187,7 +189,7 @@ export default function ReinitializeScreen() : React.ReactNode {
     };
 
     initialize();
-  }, [syncVault, authContext, dbContext]);
+  }, [syncVault, authContext, dbContext, t]);
 
   const styles = StyleSheet.create({
     container: {
@@ -212,8 +214,8 @@ export default function ReinitializeScreen() : React.ReactNode {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.messageContainer}>
-        <ThemedText style={styles.message1}>Vault auto-locked after timeout.</ThemedText>
-        <ThemedText style={styles.message2}>Attempting to unlock.</ThemedText>
+        <ThemedText style={styles.message1}>{t('app.reinitialize.vaultAutoLockedMessage')}</ThemedText>
+        <ThemedText style={styles.message2}>{t('app.reinitialize.attemptingToUnlockMessage')}</ThemedText>
         {status ? <LoadingIndicator status={status} /> : null}
       </View>
     </ThemedView>

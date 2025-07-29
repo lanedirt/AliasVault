@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { Href, Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Linking, StyleSheet, Alert, Platform } from 'react-native';
 import 'react-native-reanimated';
 import 'react-native-get-random-values';
@@ -35,6 +36,7 @@ function RootLayoutNav() : React.ReactNode {
   const { syncVault } = useVaultSync();
   const dbContext = useDb();
   const webApi = useWebApi();
+  const { t } = useTranslation();
 
   const [bootComplete, setBootComplete] = useState(false);
   const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
@@ -73,11 +75,11 @@ function RootLayoutNav() : React.ReactNode {
               return;
             }
 
-            setStatus('Unlocking vault');
+            setStatus(t('app.status.unlockingVault'));
             const isUnlocked = await dbContext.unlockVault();
             if (isUnlocked) {
               await new Promise(resolve => setTimeout(resolve, 750));
-              setStatus('Decrypting vault');
+              setStatus(t('app.status.decryptingVault'));
               await new Promise(resolve => setTimeout(resolve, 750));
 
               // Check if the vault is up to date, if not, redirect to the upgrade page.
@@ -139,26 +141,26 @@ function RootLayoutNav() : React.ReactNode {
            */
           onOffline: async () => {
             Alert.alert(
-              'Sync Issue',
-              'The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?',
+              t('app.alerts.syncIssue'),
+              t('app.alerts.syncIssueMessage'),
               [
                 {
-                  text: 'Open Local Vault',
+                  text: t('app.alerts.openLocalVault'),
                   /**
                    * Handle opening vault in read-only mode.
                    */
                   onPress: async () : Promise<void> => {
-                    setStatus('Opening vault in read-only mode');
+                    setStatus(t('app.status.openingVaultReadOnly'));
                     await handleVaultUnlock();
                   }
                 },
                 {
-                  text: 'Retry Sync',
+                  text: t('app.alerts.retrySync'),
                   /**
                    * Handle retrying the connection.
                    */
                   onPress: () : void => {
-                    setStatus('Retrying connection...');
+                    setStatus(t('app.status.retryingConnection'));
                     initialize();
                   }
                 }
@@ -170,7 +172,7 @@ function RootLayoutNav() : React.ReactNode {
            */
           onError: async (error: string) => {
           // Show modal with error message
-            Alert.alert('Error', error);
+            Alert.alert(t('app.alerts.error'), error);
 
             // The logout user and navigate to the login screen.
             await webApi.logout(error);
@@ -191,7 +193,7 @@ function RootLayoutNav() : React.ReactNode {
     };
 
     initializeApp();
-  }, [dbContext, syncVault, initializeAuth, webApi]);
+  }, [dbContext, syncVault, initializeAuth, webApi, t]);
 
   useEffect(() => {
     /**
@@ -284,13 +286,13 @@ function RootLayoutNav() : React.ReactNode {
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ title: 'Login', headerShown: false }} />
+        <Stack.Screen name="login" options={{ title: t('app.navigation.login'), headerShown: false }} />
         <Stack.Screen name="login-settings" options={{ title: 'Login Settings' }} />
         <Stack.Screen name="reinitialize" options={{ headerShown: false }} />
         <Stack.Screen name="unlock" options={{ headerShown: false }} />
         <Stack.Screen name="upgrade" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
+        <Stack.Screen name="+not-found" options={{ title: t('app.navigation.notFound') }} />
       </Stack>
       <AliasVaultToast />
     </ThemeProvider>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import Button from '@/entrypoints/popup/components/Button';
@@ -22,6 +23,7 @@ import { VaultSqlGenerator } from '@/utils/dist/shared/vault-sql';
  * Upgrade page for handling vault version upgrades.
  */
 const Upgrade: React.FC = () => {
+  const { t } = useTranslation();
   const { username } = useAuth();
   const dbContext = useDb();
   const { sqliteClient } = dbContext;
@@ -44,7 +46,7 @@ const Upgrade: React.FC = () => {
       <>
         <HeaderButton
           onClick={() => PopoutUtility.openInNewPopup()}
-          title="Open in new window"
+          title={t('common.openInNewWindow')}
           iconType={HeaderIconType.EXPAND}
         />
       </>
@@ -55,7 +57,7 @@ const Upgrade: React.FC = () => {
     return () => {
       setHeaderButtons(null);
     };
-  }, [setHeaderButtons]);
+  }, [setHeaderButtons, t]);
 
   /**
    * Load version information from the database.
@@ -71,9 +73,9 @@ const Upgrade: React.FC = () => {
       setIsInitialLoading(false);
     } catch (error) {
       console.error('Failed to load version information:', error);
-      setError('Failed to load version information. Please try again.');
+      setError(t('upgrade.alerts.unableToGetVersionInfo'));
     }
-  }, [sqliteClient, setIsInitialLoading]);
+  }, [sqliteClient, setIsInitialLoading, t]);
 
   useEffect(() => {
     loadVersionInfo();
@@ -84,7 +86,7 @@ const Upgrade: React.FC = () => {
    */
   const handleUpgrade = async (): Promise<void> => {
     if (!sqliteClient || !currentVersion || !latestVersion) {
-      setError('Unable to get version information. Please try again.');
+      setError(t('upgrade.alerts.unableToGetVersionInfo'));
       return;
     }
 
@@ -102,7 +104,7 @@ const Upgrade: React.FC = () => {
    */
   const performUpgrade = async (): Promise<void> => {
     if (!sqliteClient || !currentVersion || !latestVersion) {
-      setError('Unable to get version information. Please try again.');
+      setError(t('upgrade.alerts.unableToGetVersionInfo'));
       return;
     }
 
@@ -115,7 +117,7 @@ const Upgrade: React.FC = () => {
       const upgradeResult = vaultSqlGenerator.getUpgradeVaultSql(currentVersion.revision, latestVersion.revision);
 
       if (!upgradeResult.success) {
-        throw new Error(upgradeResult.error ?? 'Failed to generate upgrade SQL');
+        throw new Error(upgradeResult.error ?? t('upgrade.alerts.upgradeFailed'));
       }
 
       if (upgradeResult.sqlCommands.length === 0) {
@@ -125,30 +127,24 @@ const Upgrade: React.FC = () => {
       }
 
       // Use the useVaultMutate hook to handle the upgrade and vault upload
-      console.debug('executeVaultMutation');
       await executeVaultMutation(async () => {
         // Begin transaction
-        console.debug('beginTransaction');
         sqliteClient.beginTransaction();
 
         // Execute each SQL command
-        console.debug('executeRaw', upgradeResult.sqlCommands.length);
         for (let i = 0; i < upgradeResult.sqlCommands.length; i++) {
           const sqlCommand = upgradeResult.sqlCommands[i];
 
           try {
-            console.debug('executeRaw', sqlCommand);
             sqliteClient.executeRaw(sqlCommand);
           } catch (error) {
-            console.debug('error', error);
             console.error(`Error executing SQL command ${i + 1}:`, sqlCommand, error);
             sqliteClient.rollbackTransaction();
-            throw new Error(`Failed to apply migration ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(t('upgrade.alerts.failedToApplyMigration', { current: i + 1, total: upgradeResult.sqlCommands.length }));
           }
         }
 
         // Commit transaction
-        console.debug('commitTransaction');
         sqliteClient.commitTransaction();
       }, {
         skipSyncCheck: true, // Skip sync check during upgrade to prevent loop
@@ -156,14 +152,12 @@ const Upgrade: React.FC = () => {
          * Handle successful upgrade completion.
          */
         onSuccess: () => {
-          console.debug('onSuccess');
           void handleUpgradeSuccess();
         },
         /**
          * Handle upgrade error.
          */
         onError: (error: Error) => {
-          console.debug('onError');
           console.error('Upgrade failed:', error);
           setError(error.message);
         }
@@ -171,7 +165,7 @@ const Upgrade: React.FC = () => {
       console.debug('executeVaultMutation done?');
     } catch (error) {
       console.error('Upgrade failed:', error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred during the upgrade. Please try again.');
+      setError(error instanceof Error ? error.message : t('upgrade.alerts.unknownErrorDuringUpgrade'));
     } finally {
       setIsLoading(false);
     }
@@ -229,7 +223,7 @@ const Upgrade: React.FC = () => {
         <div className="fixed inset-0 flex flex-col justify-center items-center bg-white dark:bg-gray-900 bg-opacity-90 dark:bg-opacity-90 z-50">
           <LoadingSpinner />
           <div className="text-sm text-gray-500 mt-2">
-            {syncStatus || 'Upgrading vault...'}
+            {syncStatus || t('upgrade.upgrading')}
           </div>
         </div>
       )}
@@ -242,10 +236,10 @@ const Upgrade: React.FC = () => {
           setShowSelfHostedWarning(false);
           void performUpgrade();
         }}
-        title="Self-Hosted Server"
-        message="If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working. Do you want to continue with the upgrade?"
-        confirmText="Continue"
-        cancelText="Cancel"
+        title={t('upgrade.alerts.selfHostedServer')}
+        message={t('upgrade.alerts.selfHostedWarning')}
+        confirmText={t('upgrade.alerts.continueUpgrade')}
+        cancelText={t('upgrade.alerts.cancel')}
       />
 
       {/* Version info modal */}
@@ -253,8 +247,8 @@ const Upgrade: React.FC = () => {
         isOpen={showVersionInfo}
         onClose={() => setShowVersionInfo(false)}
         onConfirm={() => setShowVersionInfo(false)}
-        title="What's New"
-        message={`An upgrade is required to support the following changes:\n\n${latestVersion?.description ?? 'No description available for this version.'}`}
+        title={t('upgrade.whatsNew')}
+        message={`${t('upgrade.whatsNewDescription')}\n\n${latestVersion?.description ?? t('upgrade.noDescriptionAvailable')}`}
       />
 
       <form className="w-full px-2 pt-2 pb-2 mb-4">
@@ -280,33 +274,33 @@ const Upgrade: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="text-xl font-bold dark:text-gray-200 mb-4">Upgrade Vault</h2>
+        <h2 className="text-xl font-bold dark:text-gray-200 mb-4">{t('upgrade.title')}</h2>
 
         <div className="mb-6">
           <p className="text-gray-700 dark:text-gray-200 text-sm mb-4">
-            AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.
+            {t('upgrade.subtitle')}
           </p>
           <div className="bg-gray-50 dark:bg-gray-800 rounded p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Version Information</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('upgrade.versionInformation')}</span>
               <button
                 type="button"
                 onClick={showVersionDialog}
                 className="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold hover:bg-gray-300 dark:hover:bg-gray-500"
-                title="Show version details"
+                title={t('upgrade.whatsNew')}
               >
                 ?
               </button>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Your vault:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('upgrade.yourVault')}</span>
                 <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
                   {currentVersion?.releaseVersion ?? '...'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">New version:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('upgrade.newVersion')}</span>
                 <span className="text-sm font-bold text-green-600 dark:text-green-400">
                   {latestVersion?.releaseVersion ?? '...'}
                 </span>
@@ -320,7 +314,7 @@ const Upgrade: React.FC = () => {
             type="button"
             onClick={handleUpgrade}
           >
-            {isLoading || isVaultMutationLoading ? (syncStatus || 'Upgrading...') : 'Upgrade Vault'}
+            {isLoading || isVaultMutationLoading ? (syncStatus || t('upgrade.upgrading')) : t('upgrade.upgrade')}
           </Button>
           <button
             type="button"
@@ -328,7 +322,7 @@ const Upgrade: React.FC = () => {
             className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium py-2"
             disabled={isLoading || isVaultMutationLoading}
           >
-            Logout
+            {t('upgrade.logout')}
           </button>
         </div>
       </form>
