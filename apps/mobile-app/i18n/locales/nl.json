@@ -57,6 +57,8 @@
     "savingChangesToVault": "Wijzigingen opslaan in vault",
     "checkingForVaultUpdates": "Controleren op vault updates",
     "executingOperation": "Bezig met uitvoeren...",
+    "checkingVaultUpdates": "Checking vault updates",
+    "syncingUpdatedVault": "Syncing updated vault",
     "errors": {
       "failedToGetEncryptedDatabase": "Fout bij ophalen van versleutelde vault",
       "usernameNotFound": "Gebruikersnaam niet gevonden",
@@ -67,7 +69,11 @@
       "errorDuringPasswordChange": "Fout tijdens het wijzigen van het wachtwoord. Log opnieuw in om de vault te synchroniseren en probeer het opnieuw.",
       "failedToSyncVault": "Vault ophalen mislukt",
       "operationFailed": "Bewerking mislukt",
-      "unknownError": "Onbekende fout"
+      "unknownError": "Onbekende fout",
+      "versionNotSupported": "This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.",
+      "serverNeedsUpdate": "The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.",
+      "vaultDecryptFailed": "Vault could not be decrypted, if the problem persists please logout and login again.",
+      "unknownErrorDuringSync": "Unknown error during vault sync"
     }
   },
   "credentials": {
@@ -370,11 +376,20 @@
     },
     "navigation": {
       "login": "Login",
+      "loginSettings": "Login Settings",
       "notFound": "Niet gevonden"
     },
     "reinitialize": {
       "vaultAutoLockedMessage": "Vault automatisch vergrendeld na time-out.",
       "attemptingToUnlockMessage": "Bezig met ontgrendelen."
+    },
+    "loginSettings": {
+      "title": "API Connection",
+      "aliasvaultNet": "Aliasvault.net",
+      "selfHosted": "Self-hosted",
+      "customApiUrl": "Custom API URL",
+      "customApiUrlPlaceholder": "https://my-aliasvault-instance.com/api",
+      "version": "Version: {{version}}"
     }
   },
   "upgrade": {
