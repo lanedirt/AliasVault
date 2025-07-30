@@ -1,0 +1,5 @@
+- Add Dutch translations
+- Add advanced password generator options
+- Add attachment upload, preview and download
+- Improve credential search and filtering
+- Add "Load more" button to recent emails

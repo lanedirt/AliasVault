@@ -1,0 +1,5 @@
+- AliasVault is nu beschikbaar in het Nederlands
+- Nieuwe geavanceerde wachtwoord generator opties
+- Bijlages uploaden, previewen en downloaden
+- Zoeken en filteren op credentials verbeterd
+- "Meer laden" knop toegevoegd aan recente e-mails
