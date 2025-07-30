@@ -1,0 +1,3 @@
+- Add identity generator settings
+- Disable autocorrect on autofill search field
+- Add vault upgrade mechanism
