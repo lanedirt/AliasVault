@@ -57,6 +57,8 @@
     "savingChangesToVault": "Wijzigingen opslaan in vault",
     "checkingForVaultUpdates": "Controleren op vault updates",
     "executingOperation": "Bezig met uitvoeren...",
+    "checkingVaultUpdates": "Controleren op vault updates",
+    "syncingUpdatedVault": "Bijgewerkte vault synchroniseren",
     "errors": {
       "failedToGetEncryptedDatabase": "Fout bij ophalen van versleutelde vault",
       "usernameNotFound": "Gebruikersnaam niet gevonden",
@@ -67,7 +69,11 @@
       "errorDuringPasswordChange": "Fout tijdens het wijzigen van het wachtwoord. Log opnieuw in om de vault te synchroniseren en probeer het opnieuw.",
       "failedToSyncVault": "Vault ophalen mislukt",
       "operationFailed": "Bewerking mislukt",
-      "unknownError": "Onbekende fout"
+      "unknownError": "Onbekende fout",
+      "versionNotSupported": "Deze versie van de mobiele app van AliasVault wordt niet meer ondersteund door de server. Update de app naar de nieuwste versie.",
+      "serverNeedsUpdate": "De AliasVault server moet bijgewerkt worden naar een nieuwere versie om deze mobiele app te kunnen gebruiken. Neem contact op met support als je hulp nodig hebt.",
+      "vaultDecryptFailed": "Vault kon niet worden gedecrypt, probeer uit- en opnieuw in te loggen.",
+      "unknownErrorDuringSync": "Onbekende fout tijdens synchroniseren van vault"
     }
   },
   "credentials": {
@@ -370,12 +376,20 @@
     },
     "navigation": {
       "login": "Login",
-      "loginSettings": "Login Settings",
+      "loginSettings": "Login instellingen",
       "notFound": "Niet gevonden"
     },
     "reinitialize": {
       "vaultAutoLockedMessage": "Vault automatisch vergrendeld na time-out.",
       "attemptingToUnlockMessage": "Bezig met ontgrendelen."
+    },
+    "loginSettings": {
+      "title": "API-verbinding",
+      "aliasvaultNet": "Aliasvault.net",
+      "selfHosted": "Self-hosted",
+      "customApiUrl": "Aangepaste API URL",
+      "customApiUrlPlaceholder": "https://jouw-aliasvault-instantie.nl/api",
+      "version": "Versie: {{version}}"
     }
   },
   "upgrade": {
