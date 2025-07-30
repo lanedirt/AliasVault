@@ -126,6 +126,7 @@ Core features that are being worked on:
 - [x] iOS native app
 - [x] Android native app
 - [x] Editing in browser extension
+- [x] Multi-language support across all client applications
 - [ ] Data model and usability improvements (more flexible aliases and credential types, folder support, bulk selecting etc.)
 - [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
 - [ ] Adding support for family/team sharing (organization features)
