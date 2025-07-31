@@ -1,0 +1,1 @@
+- Fix bug where extension could crash on startup in certain browsers on Windows due to new translations
