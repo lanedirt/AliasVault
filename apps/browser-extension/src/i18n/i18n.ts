@@ -52,7 +52,11 @@ const initI18n = async (): Promise<void> => {
     });
 };
 
-// Initialize immediately
-initI18n();
+// Initialize immediately and handle potential errors
+initI18n().catch((error) => {
+  console.error('Failed to initialize i18n:', error);
+  // Even if initialization fails, emit initialized event to prevent app from hanging
+  i18n.emit('initialized');
+});
 
 export default i18n;

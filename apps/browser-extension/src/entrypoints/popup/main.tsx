@@ -1,7 +1,5 @@
 import ReactDOM from 'react-dom/client';
 
-import '@/i18n/i18n';
-
 import App from '@/entrypoints/popup/App';
 import { AuthProvider } from '@/entrypoints/popup/context/AuthContext';
 import { DbProvider } from '@/entrypoints/popup/context/DbContext';
@@ -10,19 +8,33 @@ import { LoadingProvider } from '@/entrypoints/popup/context/LoadingContext';
 import { ThemeProvider } from '@/entrypoints/popup/context/ThemeContext';
 import { WebApiProvider } from '@/entrypoints/popup/context/WebApiContext';
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(
-  <DbProvider>
-    <AuthProvider>
-      <WebApiProvider>
-        <LoadingProvider>
-          <HeaderButtonsProvider>
-            <ThemeProvider>
-              <App />
-            </ThemeProvider>
-          </HeaderButtonsProvider>
-        </LoadingProvider>
-      </WebApiProvider>
-    </AuthProvider>
-  </DbProvider>
-);
+import i18n from '@/i18n/i18n';
+
+/**
+ * Renders the main application.
+ */
+const renderApp = (): void => {
+  const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+  root.render(
+    <DbProvider>
+      <AuthProvider>
+        <WebApiProvider>
+          <LoadingProvider>
+            <HeaderButtonsProvider>
+              <ThemeProvider>
+                <App />
+              </ThemeProvider>
+            </HeaderButtonsProvider>
+          </LoadingProvider>
+        </WebApiProvider>
+      </AuthProvider>
+    </DbProvider>
+  );
+};
+
+// Wait for i18n to be ready before rendering React. Not waiting can cause issues on some browsers, Firefox on Windows specifically.
+if (i18n.isInitialized) {
+  renderApp();
+} else {
+  i18n.on('initialized', renderApp);
+}
