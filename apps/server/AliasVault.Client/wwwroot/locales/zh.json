@@ -7,19 +7,19 @@
   },
   "errors": {
     "unhandledError": "遇到一个错误。请尝试刷新页面。如果问题仍然存在，请联系技术支持。",
-    "webAssemblyError": "AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.",
-    "reloadPageText": "Reload Page"
+    "webAssemblyError": "AliasVault需要WebAssembly支持，但当前浏览器不支持。请尝试使用支持WebAssembly的现代浏览器。",
+    "reloadPageText": "重新加载页面"
   },
   "quotes": {
     "security": [
-      "Your identity is your most valuable asset. Protect it like one.",
-      "In the digital world, a strong password is your first line of defense.",
-      "Security is not a product, but a process.",
-      "The weakest link in the security chain is the human element.",
-      "Security is always excessive until it's not enough.",
-      "Trust, but verify - especially online.",
-      "Your data is only as secure as your weakest password.",
-      "The most secure password is the one you can't remember."
+      "身份是你的立身之本，务必好好珍惜。",
+      "在数字世界中，强密码是守护你安全的第一道防线。",
+      "安全防护无法一蹴而就，而是一个累积的过程。",
+      "人为因素才是安全防护链中最脆弱的环节。",
+      "安全防护，无事时总嫌过度，有事时总嫌不够。",
+      "信任可先行，验证不可少——线上尤须谨记。",
+      "你数据的安全强度，取决于你最弱的密码强度。",
+      "最安全的密码，莫过于连你自己都记不住的那个。"
     ]
   }
 }
