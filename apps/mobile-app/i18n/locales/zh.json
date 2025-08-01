@@ -45,10 +45,10 @@
       "enterPassword": "请输入密码",
       "serverError": "无法连接AliasVault服务器。请稍后重试，若问题依旧，请联系支持团队。"
     },
-    "confirmLogout": "Are you sure you want to logout? You need to login again with your master password to access your vault.",
-    "noAccountYet": "No account yet?",
-    "createNewVault": "Create new vault",
-    "connectingTo": "Connecting to",
+    "confirmLogout": "确定要退出登录吗？否则需要重新输入主密码才能访问保险库内容。",
+    "noAccountYet": "还没有账号？",
+    "createNewVault": "创建新保险库",
+    "connectingTo": "正在连接",
     "loggedInAs": "Logged in as"
   },
   "vault": {
