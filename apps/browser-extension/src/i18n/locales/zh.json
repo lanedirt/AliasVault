@@ -364,7 +364,7 @@
       "error": "Error",
       "unableToGetVersionInfo": "Unable to get version information. Please try again.",
       "selfHostedServer": "Self-Hosted Server",
-      "selfHostedWarning": "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
+      "selfHostedWarning": "如果你使用的是自托管服务器，请确保同时更新你的自托管实例，否则将无法登录网页客户端。",
       "cancel": "Cancel",
       "continueUpgrade": "Continue Upgrade",
       "upgradeFailed": "Upgrade Failed",
