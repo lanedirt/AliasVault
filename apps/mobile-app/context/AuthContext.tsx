@@ -322,8 +322,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App coming to foreground
-        if (!pathname?.includes('unlock') && !pathname?.includes('login')) {
+        /**
+         * App coming to foreground
+         * Skip vault re-initialization checks during unlock, login, initialize, and reinitialize flows to prevent race conditions
+         * where the AppState listener fires during app initialization, especially on iOS release builds.
+         */
+        if (!pathname?.includes('unlock') && !pathname?.includes('login') && !pathname?.includes('initialize') && !pathname?.includes('reinitialize')) {
           try {
             // Check if vault is unlocked.
             const isUnlocked = await isVaultUnlocked();
