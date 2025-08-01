@@ -49,14 +49,14 @@
     "noAccountYet": "还没有账号？",
     "createNewVault": "创建新保险库",
     "connectingTo": "正在连接",
-    "loggedInAs": "Logged in as"
+    "loggedInAs": "当前登陆账号"
   },
   "vault": {
-    "syncingVault": "Syncing vault",
-    "uploadingVaultToServer": "Uploading vault to server",
-    "savingChangesToVault": "Saving changes to vault",
+    "syncingVault": "正在同步保险库",
+    "uploadingVaultToServer": "正在向服务器上传保险库",
+    "savingChangesToVault": "正在保存至保险库",
     "checkingForVaultUpdates": "Checking for vault updates",
-    "executingOperation": "Executing operation...",
+    "executingOperation": "正在执行操作……",
     "checkingVaultUpdates": "Checking vault updates",
     "syncingUpdatedVault": "Syncing updated vault",
     "errors": {
