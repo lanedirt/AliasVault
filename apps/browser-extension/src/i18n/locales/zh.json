@@ -1,7 +1,7 @@
 {
   "auth": {
-    "loginTitle": "Log in to AliasVault",
-    "username": "Username or email",
+    "loginTitle": "登陆 AliasVault",
+    "username": "用户名或电子邮箱",
     "usernamePlaceholder": "name / name@company.com",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
