@@ -22,7 +22,7 @@
     "logout": "Logout",
     "logoutConfirm": "Are you sure you want to logout?",
     "sessionExpired": "Your session has expired. Please log in again.",
-    "unlockSuccess": "Vault unlocked successfully!",
+    "unlockSuccess": "Cassaforte sbloccata con successo!",
     "unlockSuccessTitle": "Your vault is successfully unlocked",
     "unlockSuccessDescription": "You can now use autofill in login forms in your browser.",
     "closePopup": "Close this popup",
