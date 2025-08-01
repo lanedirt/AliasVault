@@ -66,7 +66,7 @@
       "vaultOutdated": "您的保险库版本过低，请登录 AliasVault 官网并执行更新流程。",
       "failedToUploadVault": "保险库上传失败，请重启应用并重试。",
       "usernameNotFoundLoginAgain": "用户不存在，请重新登陆。",
-      "errorDuringPasswordChange": "Error during password change operation. Please log in again to retrieve your latest vault.",
+      "errorDuringPasswordChange": "密码修改操作出错，请重新登录以获取最新保险库数据。",
       "failedToSyncVault": "Failed to sync vault",
       "operationFailed": "Operation failed",
       "unknownError": "Unknown error",
