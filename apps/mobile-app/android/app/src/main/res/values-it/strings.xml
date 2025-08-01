@@ -7,5 +7,5 @@
   <string name="autofill_failed_to_retrieve">Failed to retrieve, open app</string>
   <string name="autofill_no_match_found">No match found, create new?</string>
   <string name="autofill_open_app">Open app</string>
-  <string name="autofill_vault_locked">Vault locked</string>
+  <string name="autofill_vault_locked">Cassaforte bloccata</string>
 </resources>
