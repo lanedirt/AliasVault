@@ -60,48 +60,48 @@
   </resheader>
   <!-- Page title and breadcrumbs -->
   <data name="PageTitle" xml:space="preserve">
-    <value>Disable two-factor authentication</value>
+    <value>禁用双因素认证</value>
     <comment>Page title for the disable 2FA page</comment>
   </data>
   <data name="BreadcrumbSecuritySettings" xml:space="preserve">
-    <value>Security settings</value>
+    <value>安全设置</value>
     <comment>Breadcrumb text for security settings</comment>
   </data>
   <data name="BreadcrumbDisable2Fa" xml:space="preserve">
-    <value>Disable two-factor authentication</value>
+    <value>禁用双因素认证</value>
     <comment>Breadcrumb text for disable 2FA</comment>
   </data>
   <!-- Page description -->
   <data name="PageDescription" xml:space="preserve">
-    <value>Disabling two-factor authentication means you will be able to login with only your password.</value>
+    <value>禁用双因素认证意味着你只需密码即可登录。</value>
     <comment>Description text explaining what disabling 2FA means</comment>
   </data>
   <!-- Warning message -->
   <data name="WarningMessage" xml:space="preserve">
-    <value>Please note: after disabling two-factor authentication any configured authenticator app(s) will stop working. When you want to re-enable two-factor authentication you will have to configure the authenticator app(s) again.</value>
+    <value>请注意：禁用双因素认证后，所有已配置的认证器应用都将停止工作。如果想重新启用双因素认证，你需要重新配置认证器应用。</value>
     <comment>Warning message about the consequences of disabling 2FA</comment>
   </data>
   <!-- Status message -->
   <data name="StatusMessage" xml:space="preserve">
-    <value>Two factor authentication is currently enabled. Disable it in order to be able to access your vault with your password only.</value>
+    <value>当前已启用双因素认证。禁用后，你只需密码即可访问保险库。</value>
     <comment>Status message explaining current 2FA state</comment>
   </data>
   <!-- Button text -->
   <data name="ConfirmDisableButton" xml:space="preserve">
-    <value>Confirm Disable Two-Factor Authentication</value>
+    <value>确认禁用双因素认证</value>
     <comment>Button text to confirm disabling 2FA</comment>
   </data>
   <!-- Success and error messages -->
   <data name="TwoFactorDisabledSuccess" xml:space="preserve">
-    <value>Two-factor authentication is now successfully disabled.</value>
+    <value>双因素认证已成功禁用。</value>
     <comment>Success message when 2FA is disabled</comment>
   </data>
   <data name="FailedToDisable2Fa" xml:space="preserve">
-    <value>Failed to disable two-factor authentication.</value>
+    <value>禁用双因素认证失败。</value>
     <comment>Error message when 2FA disable fails</comment>
   </data>
   <data name="TwoFactorNotEnabled" xml:space="preserve">
-    <value>Two-factor authentication is not enabled.</value>
+    <value>尚未启用双因素认证。</value>
     <comment>Error message when 2FA is not enabled</comment>
   </data>
 </root>
