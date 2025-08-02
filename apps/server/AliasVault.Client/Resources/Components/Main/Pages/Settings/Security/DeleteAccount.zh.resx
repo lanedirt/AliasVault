@@ -60,80 +60,80 @@
   </resheader>
   <!-- Page title and breadcrumbs -->
   <data name="PageTitle" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>删除账户</value>
     <comment>Page title for the delete account page</comment>
   </data>
   <data name="BreadcrumbSecuritySettings" xml:space="preserve">
-    <value>Security settings</value>
+    <value>安全设置</value>
     <comment>Breadcrumb text for security settings</comment>
   </data>
   <data name="BreadcrumbDeleteAccount" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>删除账户</value>
     <comment>Breadcrumb text for delete account</comment>
   </data>
   <!-- Warning messages -->
   <data name="PermanentActionWarning" xml:space="preserve">
-    <value>Warning: This action is permanent and cannot be undone. All your data will be permanently deleted.</value>
+    <value>警告：此操作不可撤销且为永久性操作。你所有的数据都将被永久删除。</value>
     <comment>Warning message about permanent deletion</comment>
   </data>
   <data name="FinalWarning" xml:space="preserve">
-    <value>Final warning: Enter your password to permanently delete your account.</value>
+    <value>最终警告：输入你的密码以永久删除账户。</value>
     <comment>Final warning message before account deletion</comment>
   </data>
   <!-- Note sections -->
   <data name="PleaseNote" xml:space="preserve">
-    <value>Please note:</value>
+    <value>请注意：</value>
     <comment>Header for note section</comment>
   </data>
   <data name="VaultsDeletedNote" xml:space="preserve">
-    <value>All encrypted vaults which includes all of your credentials will be permanently deleted</value>
+    <value>所有加密的保险库（包括你所有的凭据）都将被永久删除</value>
     <comment>Note about vault deletion</comment>
   </data>
   <data name="EmailAliasesOrphanedNote" xml:space="preserve">
-    <value>Your email aliases will be orphaned and cannot be claimed by other users</value>
+    <value>你的电子邮件别名将成为无主状态，且不能被其他用户认领</value>
     <comment>Note about email aliases being orphaned</comment>
   </data>
   <data name="AccountCannotBeRecoveredNote" xml:space="preserve">
-    <value>Your account cannot be recovered after deletion</value>
+    <value>账户删除后无法恢复</value>
     <comment>Note about account recovery</comment>
   </data>
   <data name="DeletionIrreversibleNote" xml:space="preserve">
-    <value>Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently.</value>
+    <value>账户删除操作不可撤销且无法恢复。点击下方按钮将立即永久删除你的账户。</value>
     <comment>Note about deletion being irreversible</comment>
   </data>
   <!-- Form labels -->
   <data name="ConfirmUsernameLabel" xml:space="preserve">
-    <value>Confirm your username</value>
+    <value>确认你的用户名</value>
     <comment>Label for username confirmation input field</comment>
   </data>
   <data name="EnterPasswordLabel" xml:space="preserve">
-    <value>Enter your password</value>
+    <value>输入你的密码</value>
     <comment>Label for password input field</comment>
   </data>
   <!-- Button text -->
   <data name="ContinueWithAccountDeletion" xml:space="preserve">
-    <value>Continue with Account Deletion</value>
+    <value>继续删除账户</value>
     <comment>Button text to continue with account deletion</comment>
   </data>
   <data name="DeleteMyAccount" xml:space="preserve">
-    <value>Delete My Account</value>
+    <value>删除我的账户</value>
     <comment>Button text to delete account</comment>
   </data>
   <!-- Loading and status messages -->
   <data name="DeletingAccountMessage" xml:space="preserve">
-    <value>Deleting account...</value>
+    <value>正在删除账户……</value>
     <comment>Loading message displayed while deleting account</comment>
   </data>
   <data name="UsernameRequired" xml:space="preserve">
-    <value>Username is required</value>
+    <value>用户名是必填项</value>
     <comment>Error message when username is not provided</comment>
   </data>
   <data name="UsernameDoesNotMatch" xml:space="preserve">
-    <value>The username you entered does not match your current username. Please try again.</value>
+    <value>你输入的用户名与当前用户名不匹配。请重试。</value>
     <comment>Error message when username doesn't match</comment>
   </data>
   <data name="ErrorProcessingRequest" xml:space="preserve">
-    <value>An error occurred while processing the request.</value>
+    <value>处理请求时发生错误。</value>
     <comment>Generic error message for request processing</comment>
   </data>
 </root>
