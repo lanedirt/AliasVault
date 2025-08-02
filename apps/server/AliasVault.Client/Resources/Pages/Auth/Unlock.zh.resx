@@ -59,67 +59,67 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="LoggingInWithWebAuthn" xml:space="preserve">
-    <value>Logging in with WebAuthn...</value>
+    <value>正在使用 WebAuthn 登录……</value>
     <comment>Message shown while WebAuthn authentication is in progress</comment>
   </data>
   <data name="QuickUnlockDescription" xml:space="preserve">
-    <value>Quickly unlock your vault using your fingerprint, face ID, or security key. Or login with your password as a fallback.</value>
+    <value>使用指纹、面容 ID 或安全密钥快速解锁你的保险库。或者使用密码作为备用方式登录。</value>
     <comment>Description explaining WebAuthn unlock options</comment>
   </data>
   <data name="UnlockWithWebAuthn" xml:space="preserve">
-    <value>Unlock with WebAuthn</value>
+    <value>使用 WebAuthn 解锁</value>
     <comment>Button text for WebAuthn unlock</comment>
   </data>
   <data name="UnlockWithPassword" xml:space="preserve">
-    <value>Unlock with password</value>
+    <value>使用密码解锁</value>
     <comment>Button text for password unlock</comment>
   </data>
   <data name="EnterMasterPasswordDescription" xml:space="preserve">
-    <value>Enter your master password to unlock your vault.</value>
+    <value>输入你的主密码以解锁保险库。</value>
     <comment>Description for password unlock form</comment>
   </data>
   <data name="YourPasswordLabel" xml:space="preserve">
-    <value>Your password</value>
+    <value>你的密码</value>
     <comment>Label for password input field</comment>
   </data>
   <data name="UnlockButton" xml:space="preserve">
-    <value>Unlock</value>
+    <value>解锁</value>
     <comment>Button text for unlock submission</comment>
   </data>
   <data name="SwitchAccountsText" xml:space="preserve">
-    <value>Switch accounts?</value>
+    <value>切换账户？</value>
     <comment>Text before logout link</comment>
   </data>
   <data name="LogOutLink" xml:space="preserve">
-    <value>Log out</value>
+    <value>登出</value>
     <comment>Link text for logout</comment>
   </data>
   <data name="UnlockingVaultMessage" xml:space="preserve">
-    <value>Unlocking vault...</value>
+    <value>正在解锁保险库……</value>
     <comment>Loading message while unlocking vault</comment>
   </data>
   <data name="UnlockRequestError" xml:space="preserve">
-    <value>An error occurred while processing the unlock request.</value>
+    <value>处理解锁请求时发生错误。</value>
     <comment>Error message for unlock request processing</comment>
   </data>
   <data name="IncorrectPasswordError" xml:space="preserve">
-    <value>The password is incorrect. Please try entering your password again, or log out and log in again.</value>
+    <value>密码不正确。请尝试重新输入密码，或登出后重新登录。</value>
     <comment>Error message for incorrect password</comment>
   </data>
   <data name="SessionTimedOutError" xml:space="preserve">
-    <value>Your session has timed out. Please log in again.</value>
+    <value>你的会话已超时。请重新登录。</value>
     <comment>Error message for session timeout</comment>
   </data>
   <data name="ConnectionFailedError" xml:space="preserve">
-    <value>Connection with the AliasVault servers failed. Please try again (later).</value>
+    <value>与 AliasVault 服务器的连接失败。请（稍后）再试一次。</value>
     <comment>Error message for server connection failure</comment>
   </data>
   <data name="WebAuthnNotSupportedError" xml:space="preserve">
-    <value>Your current browser does not support the WebAuthn PRF extension. Please login with your password instead.</value>
+    <value>你当前的浏览器不支持 WebAuthn PRF 扩展。请改用密码登录。</value>
     <comment>Error message when WebAuthn is not supported</comment>
   </data>
   <data name="GenericUnlockError" xml:space="preserve">
-    <value>An error occurred while processing the login request. Try again (later).</value>
+    <value>处理登录请求时发生错误。（稍后）再试一次。</value>
     <comment>Generic error message for unlock failures</comment>
   </data>
 </root>
