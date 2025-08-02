@@ -60,37 +60,37 @@
   </resheader>
   <!-- Password validation messages -->
   <data name="PasswordMinLength" xml:space="preserve">
-    <value>The new password must be at least 10 characters long.</value>
+    <value>新密码长度至少为10个字符。</value>
     <comment>Error message for password minimum length validation</comment>
   </data>
   <data name="PasswordsDoNotMatch" xml:space="preserve">
-    <value>The new passwords do not match.</value>
+    <value>两次输入的新密码不一致。</value>
     <comment>Error message when password confirmation doesn't match</comment>
   </data>
   <data name="PasswordMinLengthGeneric" xml:space="preserve">
-    <value>Password must be at least 10 characters long.</value>
+    <value>密码长度至少为10个字符。</value>
     <comment>Generic error message for password minimum length validation</comment>
   </data>
   <data name="PasswordsDoNotMatchGeneric" xml:space="preserve">
-    <value>Passwords do not match.</value>
+    <value>密码不匹配。</value>
     <comment>Generic error message when passwords don't match</comment>
   </data>
   <!-- Required field validation messages -->
   <data name="UsernameRequired" xml:space="preserve">
-    <value>Username is required</value>
+    <value>用户名不能为空。</value>
     <comment>Error message when username is required</comment>
   </data>
   <data name="PasswordRequired" xml:space="preserve">
-    <value>Password is required</value>
+    <value>密码不能为空。</value>
     <comment>Error message when password is required</comment>
   </data>
   <data name="SecretKeyRequired" xml:space="preserve">
-    <value>Secret key is required</value>
+    <value>密钥不能为空。</value>
     <comment>Error message when secret key is required</comment>
   </data>
   <!-- Terms and conditions -->
   <data name="MustAcceptTerms" xml:space="preserve">
-    <value>You must accept the terms and conditions.</value>
+    <value>必须接受条款和条件。</value>
     <comment>Error message for terms and conditions acceptance</comment>
   </data>
 </root>
