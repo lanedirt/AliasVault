@@ -2,7 +2,7 @@
   "loading": {
     "title": "AliasVault is loading",
     "message": "Initializing secure environment. AliasVault prioritizes your privacy by running entirely in your browser. The first load might take a short while.",
-    "refreshText": "If loading seems stuck, you can click the button below to refresh the page.",
+    "refreshText": "",
     "refreshButtonText": "Refresh Page"
   },
   "errors": {
