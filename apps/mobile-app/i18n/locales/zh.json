@@ -63,7 +63,7 @@
       "failedToGetEncryptedDatabase": "获取加密数据库失败",
       "usernameNotFound": "用户不存在",
       "vaultMergeRequired": "保险库需合并变更，请登录网页版处理待合并更新。",
-      "vaultOutdated": "您的保险库版本过低，请登录 AliasVault 官网并执行更新流程。",
+      "vaultOutdated": "你的保险库版本过低，请登录 AliasVault 官网并执行更新流程。",
       "failedToUploadVault": "保险库上传失败，请重启应用并重试。",
       "usernameNotFoundLoginAgain": "用户不存在，请重新登录。",
       "errorDuringPasswordChange": "密码修改操作出错，请重新登录以获取最新保险库数据。",
