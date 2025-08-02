@@ -59,63 +59,63 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FromLabel" xml:space="preserve">
-    <value>From:</value>
+    <value>发件人：</value>
     <comment>Email sender field label</comment>
   </data>
   <data name="ToLabel" xml:space="preserve">
-    <value>To:</value>
+    <value>收件人：</value>
     <comment>Email recipient field label</comment>
   </data>
   <data name="DateLabel" xml:space="preserve">
-    <value>Date:</value>
+    <value>日期：</value>
     <comment>Email date field label</comment>
   </data>
   <data name="ActionsLabel" xml:space="preserve">
-    <value>Actions:</value>
+    <value>操作：</value>
     <comment>Email actions section label</comment>
   </data>
   <data name="DeleteButton" xml:space="preserve">
-    <value>Delete</value>
+    <value>删除</value>
     <comment>Delete email button text</comment>
   </data>
   <data name="AttachmentsLabel" xml:space="preserve">
-    <value>Attachments:</value>
+    <value>附件：</value>
     <comment>Email attachments section header</comment>
   </data>
   <data name="CloseButton" xml:space="preserve">
-    <value>Close</value>
+    <value>关闭</value>
     <comment>Close modal button text</comment>
   </data>
   <data name="DeleteEmailTitle" xml:space="preserve">
-    <value>Delete Email</value>
+    <value>删除邮件</value>
     <comment>Delete email confirmation dialog title</comment>
   </data>
   <data name="DeleteEmailConfirmation" xml:space="preserve">
-    <value>Are you sure you want to delete this email? This action cannot be undone.</value>
+    <value>你确定要删除此邮件吗？此操作无法撤销。</value>
     <comment>Delete email confirmation message</comment>
   </data>
   <data name="EmailDeletedSuccess" xml:space="preserve">
-    <value>Email deleted successfully</value>
+    <value>邮件删除成功</value>
     <comment>Success message when email is deleted</comment>
   </data>
   <data name="EmailDeleteFailed" xml:space="preserve">
-    <value>Failed to delete email</value>
+    <value>邮件删除失败</value>
     <comment>Error message when email deletion fails</comment>
   </data>
   <data name="GenericError" xml:space="preserve">
-    <value>An error occurred</value>
+    <value>发生错误</value>
     <comment>Generic error message</comment>
   </data>
   <data name="NoEmailBody" xml:space="preserve">
-    <value>[This email has no body.]</value>
+    <value>[此邮件无正文。]</value>
     <comment>Message shown when email has no content</comment>
   </data>
   <data name="AttachmentDownloadFailed" xml:space="preserve">
-    <value>Failed to download attachment</value>
+    <value>附件下载失败</value>
     <comment>Error message when attachment download fails</comment>
   </data>
   <data name="AttachmentDownloadError" xml:space="preserve">
-    <value>Error downloading attachment</value>
+    <value>附件下载错误</value>
     <comment>Error message for attachment download error</comment>
   </data>
 </root>
