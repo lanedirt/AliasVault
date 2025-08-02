@@ -63,7 +63,7 @@
     <comment>Reset vault section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>This option allows you to completely empty your vault while keeping your account and email aliases. Use this if you want to start fresh after importing data from another password manager or if you want to clear all existing credentials to start over.</value>
+    <value>这个选项可以让你完全清空保险库，同时保留你的账户和电子邮件别名。如果你想从其他密码管理器导入数据后重新开始，或者想清除所有现有凭据重新来过，可以使用此功能。</value>
     <comment>Reset vault section description</comment>
   </data>
   <data name="ResetVaultButton" xml:space="preserve">
