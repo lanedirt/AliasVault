@@ -49,7 +49,7 @@
     "noAccountYet": "No account yet?",
     "createNewVault": "Create new vault",
     "connectingTo": "Connecting to",
-    "loggedInAs": "Logged in as"
+    "loggedInAs": "Kirjautuneena tilillä"
   },
   "vault": {
     "syncingVault": "Syncing vault",
@@ -106,7 +106,7 @@
     "noCredentialsFound": "No credentials found. Create one to get started. Tip: you can also login to the AliasVault web app to import credentials from other password managers.",
     "recentEmails": "Recent emails",
     "loadingEmails": "Loading emails...",
-    "noEmailsYet": "No emails received yet.",
+    "noEmailsYet": "Sähköposteja ei ole vielä vastaanotettu.",
     "offlineEmailsMessage": "You are offline. Please connect to the internet to load your emails.",
     "emailLoadError": "An error occurred while loading emails. Please try again later.",
     "emailUnexpectedError": "An unexpected error occurred while loading emails. Please try again later.",
