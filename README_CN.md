@@ -9,7 +9,7 @@ AliasVault是一款隐私优先的密码和电子邮件别名管理器。为你�
 
 [English](README.md) | 简体中文
 
-<a href="https://app.aliasvault.net">试用云端版本 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">官方网站 </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">文档 </a> | <a href="#self-hosting">自托管说明</a>
+<a href="https://app.aliasvault.net">试用云端版本 🔥</a> | <a href="https://aliasvault.net?utm_source=gh-readme">官方网站 </a> | <a href="https://docs.aliasvault.net?utm_source=gh-readme">文档 </a> | <a href="#自托管">自托管说明</a>
 
 ⭐ 请在 GitHub 上给我们点星支持，这对我们来说很重要！
 
@@ -140,5 +140,6 @@ AliasVault 正在积极开发中，重点关注可用性、安全性和跨平台
 
 ### 支持我们
 你的捐赠有助于我们投入更多时间和资源来改进 AliasVault，让互联网对每个人来说都更安全！
+
 
 <a href="https://www.buymeacoffee.com/lanedirt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;" ></a>
