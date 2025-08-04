@@ -8,15 +8,8 @@ nav_order: 6
 
 # Upgrade the AliasServerDb EF model
 
-The AliasServerDb EF model has migrations for both the SQLite and PostgreSQL databases. This means
-that when you make changes to the EF model, you need to create migrations for both databases.
+The below command allows you to create a new EF migration based on the existing database structure as defined in the EF mode classes.
 
-1. Make migration for PostgreSQL database:
 ```bash
-dotnet ef migrations add InitialMigration --context AliasServerDbContextPostgresql --output-dir Migrations/PostgresqlMigrations
-```
-
-2. Make migration for SQLite database:
-```bash
-dotnet ef migrations add InitialMigration --context AliasServerDbContextSqlite --output-dir Migrations/SqliteMigrations
+dotnet ef migrations add InitialMigration --output-dir Migrations/PostgresqlMigrations
 ```
