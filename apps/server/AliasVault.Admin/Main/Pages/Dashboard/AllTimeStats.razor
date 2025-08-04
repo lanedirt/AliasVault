@@ -3,6 +3,7 @@
 @using AliasVault.Admin.Services
 @using AliasVault.Admin.Main.Pages.Dashboard.Components
 @using AliasVault.RazorComponents.Tables
+@using AliasVault.RazorComponents
 @inherits MainBase
 @inject StatisticsService StatisticsService
 
@@ -86,7 +87,7 @@
     </div>
 
     <!-- Top Users Analysis -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="space-y-6">
         <!-- Top Users by Storage -->
         <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
             <div class="flex items-center justify-between mb-4">
@@ -112,6 +113,7 @@
                         }
                     </SortableTable>
                 </div>
+                <Paginator CurrentPage="_storageCurrentPage" PageSize="_pageSize" TotalRecords="_storageTotalRecords" OnPageChanged="HandleStoragePageChanged" />
             }
             else
             {
@@ -146,6 +148,42 @@
                         }
                     </SortableTable>
                 </div>
+                <Paginator CurrentPage="_aliasCurrentPage" PageSize="_pageSize" TotalRecords="_aliasTotalRecords" OnPageChanged="HandleAliasPageChanged" />
+            }
+            else
+            {
+                <div class="px-6 py-8 flex justify-center">
+                    <LoadingIndicator />
+                </div>
+            }
+        </div>
+
+        <!-- Top Users by Emails -->
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Users by Emails</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Users with the most emails stored in their aliases</p>
+                </div>
+            </div>
+            @if (_topUsersByEmails != null)
+            {
+                <div class="overflow-x-auto">
+                    <SortableTable Columns="@_emailTableColumns">
+                        @foreach (var user in _topUsersByEmails)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <a href="users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                                        @user.Username
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@user.EmailCount.ToString("N0")</td>
+                            </tr>
+                        }
+                    </SortableTable>
+                </div>
+                <Paginator CurrentPage="_emailCurrentPage" PageSize="_pageSize" TotalRecords="_emailTotalRecords" OnPageChanged="HandleEmailPageChanged" />
             }
             else
             {
@@ -239,9 +277,19 @@
     // Detailed statistics (loaded separately)
     private List<TopUserByStorage>? _topUsersByStorage;
     private List<TopUserByAliases>? _topUsersByAliases;
+    private List<TopUserByEmails>? _topUsersByEmails;
     private List<TopIpAddress>? _topIpAddresses;
     private bool _ipAddressesLoading = true;
     private bool _loadingError = false;
+
+    // Pagination variables
+    private const int _pageSize = 10;
+    private int _storageCurrentPage = 1;
+    private int _aliasCurrentPage = 1;
+    private int _emailCurrentPage = 1;
+    private int _storageTotalRecords = 0;
+    private int _aliasTotalRecords = 0;
+    private int _emailTotalRecords = 0;
 
     private readonly List<TableColumn> _storageTableColumns = new()
     {
@@ -253,6 +301,12 @@
     {
         new() { Title = "User", PropertyName = "Username", Sortable = false },
         new() { Title = "Aliases", PropertyName = "AliasCount", Sortable = false }
+    };
+
+    private readonly List<TableColumn> _emailTableColumns = new()
+    {
+        new() { Title = "User", PropertyName = "Username", Sortable = false },
+        new() { Title = "Emails", PropertyName = "EmailCount", Sortable = false }
     };
 
     private readonly List<TableColumn> _ipTableColumns = new()
@@ -282,9 +336,18 @@
         _totalEmailAttachments = null;
         _topUsersByStorage = null;
         _topUsersByAliases = null;
+        _topUsersByEmails = null;
         _topIpAddresses = null;
         _ipAddressesLoading = true;
         _loadingError = false;
+
+        // Reset pagination
+        _storageCurrentPage = 1;
+        _aliasCurrentPage = 1;
+        _emailCurrentPage = 1;
+        _storageTotalRecords = 0;
+        _aliasTotalRecords = 0;
+        _emailTotalRecords = 0;
 
         StateHasChanged();
 
@@ -318,10 +381,28 @@
     {
         try
         {
-            var stats = await StatisticsService.GetServerStatisticsAsync();
+            // Load paginated data for all three tables
+            var storageTask = StatisticsService.GetTopUsersByStoragePaginatedAsync(_storageCurrentPage, _pageSize);
+            var aliasTask = StatisticsService.GetTopUsersByAliasesPaginatedAsync(_aliasCurrentPage, _pageSize);
+            var emailTask = StatisticsService.GetTopUsersByEmailsPaginatedAsync(_emailCurrentPage, _pageSize);
+            var ipTask = StatisticsService.GetServerStatisticsAsync();
 
-            _topUsersByStorage = stats.TopUsersByStorage;
-            _topUsersByAliases = stats.TopUsersByAliases;
+            await Task.WhenAll(storageTask, aliasTask, emailTask, ipTask);
+
+            var (storageUsers, storageTotalCount) = await storageTask;
+            var (aliasUsers, aliasTotalCount) = await aliasTask;
+            var (emailUsers, emailTotalCount) = await emailTask;
+            var stats = await ipTask;
+
+            _topUsersByStorage = storageUsers;
+            _storageTotalRecords = storageTotalCount;
+
+            _topUsersByAliases = aliasUsers;
+            _aliasTotalRecords = aliasTotalCount;
+
+            _topUsersByEmails = emailUsers;
+            _emailTotalRecords = emailTotalCount;
+
             _topIpAddresses = stats.TopIpAddresses;
             _ipAddressesLoading = false;
 
@@ -333,6 +414,81 @@
             _loadingError = true;
             _ipAddressesLoading = false;
             StateHasChanged();
+        }
+    }
+
+    private async Task HandleStoragePageChanged(int newPage)
+    {
+        _storageCurrentPage = newPage;
+        await LoadStoragePageData();
+    }
+
+    private async Task HandleAliasPageChanged(int newPage)
+    {
+        _aliasCurrentPage = newPage;
+        await LoadAliasPageData();
+    }
+
+    private async Task HandleEmailPageChanged(int newPage)
+    {
+        _emailCurrentPage = newPage;
+        await LoadEmailPageData();
+    }
+
+    private async Task LoadStoragePageData()
+    {
+        try
+        {
+            _topUsersByStorage = null;
+            StateHasChanged();
+
+            var (users, totalCount) = await StatisticsService.GetTopUsersByStoragePaginatedAsync(_storageCurrentPage, _pageSize);
+            _topUsersByStorage = users;
+            _storageTotalRecords = totalCount;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading storage statistics: {ex.Message}");
+        }
+    }
+
+    private async Task LoadAliasPageData()
+    {
+        try
+        {
+            _topUsersByAliases = null;
+            StateHasChanged();
+
+            var (users, totalCount) = await StatisticsService.GetTopUsersByAliasesPaginatedAsync(_aliasCurrentPage, _pageSize);
+            _topUsersByAliases = users;
+            _aliasTotalRecords = totalCount;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading alias statistics: {ex.Message}");
+        }
+    }
+
+    private async Task LoadEmailPageData()
+    {
+        try
+        {
+            _topUsersByEmails = null;
+            StateHasChanged();
+
+            var (users, totalCount) = await StatisticsService.GetTopUsersByEmailsPaginatedAsync(_emailCurrentPage, _pageSize);
+            _topUsersByEmails = users;
+            _emailTotalRecords = totalCount;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading email statistics: {ex.Message}");
         }
     }
 }
