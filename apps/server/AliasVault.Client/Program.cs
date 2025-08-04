@@ -112,10 +112,9 @@ builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();
 
 // Load all supported cultures for dynamic switching
-await app.LoadSatelliteCultureAssembliesCultureAsync([
-    new CultureInfo("en"),
-    new CultureInfo("nl"),
-]);
+var supportedLanguages = LanguageService.GetSupportedLanguages();
+var cultures = supportedLanguages.Keys.Select(langCode => new CultureInfo(langCode)).ToArray();
+await app.LoadSatelliteCultureAssembliesCultureAsync(cultures);
 
 // Initialize language service
 var languageService = app.Services.GetRequiredService<LanguageService>();
