@@ -241,51 +241,109 @@ public class TaskRunnerTests
         Assert.That(currentEmailCount, Is.EqualTo(initialEmailCount), "Email count changed despite current day being excluded from maintenance days. Check if TaskRunner is respecting the task runner days setting.");
     }
 
-    /// <summary>
-    /// Initializes the test with test data.
+     /// <summary>
+    /// Test that per-user email limits are enforced when specified.
     /// </summary>
     /// <returns>Task.</returns>
-    protected async Task InitializeWithTestData()
+    [Test]
+    public async Task PerUserEmailLimits_EnforcesUserSpecificLimits()
     {
         await using var dbContext = await _testHostBuilder.GetDbContextAsync();
-        await SeedData.SeedDatabase(dbContext);
-        await _testHost.StartAsync();
 
-        // Wait for the maintenance job to complete instead of using a fixed delay
+        // Create two users with different email limits
+        await SetupPerUserEmailLimitsTest();
+
+        await _testHost.StartAsync();
         await WaitForMaintenanceJobCompletion();
+
+        // Check that user1 (limit: 5) has exactly 5 emails
+        var user1EmailCount = await dbContext.Emails
+            .Where(e => e.To == "user1@test.com")
+            .CountAsync();
+        Assert.That(user1EmailCount, Is.EqualTo(5), "User1 should have exactly 5 emails after cleanup");
+
+        // Check that user2 (limit: 10) has exactly 10 emails
+        var user2EmailCount = await dbContext.Emails
+            .Where(e => e.To == "user2@test.com")
+            .CountAsync();
+        Assert.That(user2EmailCount, Is.EqualTo(10), "User2 should have exactly 10 emails after cleanup");
+
+        // Check that user3 (no limit) has all 15 emails
+        var user3EmailCount = await dbContext.Emails
+            .Where(e => e.To == "user3@test.com")
+            .CountAsync();
+        Assert.That(user3EmailCount, Is.EqualTo(15), "User3 should have all 15 emails (no limit)");
     }
 
     /// <summary>
-    /// Waits for the maintenance job to complete.
+    /// Test that per-user email age limits are enforced when specified.
     /// </summary>
-    /// <param name="timeoutSeconds">The timeout in seconds.</param>
     /// <returns>Task.</returns>
-    protected async Task WaitForMaintenanceJobCompletion(int timeoutSeconds = 10)
+    [Test]
+    public async Task PerUserEmailAgeLimits_EnforcesUserSpecificAgeLimits()
     {
-        var startTime = DateTime.Now;
-        var timeout = startTime.AddSeconds(timeoutSeconds);
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
 
-        while (DateTime.Now < timeout)
+        // Create users with different email age limits
+        await SetupPerUserEmailAgeLimitsTest();
+
+        await _testHost.StartAsync();
+        await WaitForMaintenanceJobCompletion();
+
+        // Check that user1 (7 days limit) has no emails older than 7 days
+        var user1OldEmails = await dbContext.Emails
+            .Where(e => e.To == "user1@test.com" && e.DateSystem < DateTime.UtcNow.AddDays(-7))
+            .CountAsync();
+        Assert.That(user1OldEmails, Is.EqualTo(0), "User1 should have no emails older than 7 days");
+
+        // Check that user2 (30 days limit) has no emails older than 30 days
+        var user2OldEmails = await dbContext.Emails
+            .Where(e => e.To == "user2@test.com" && e.DateSystem < DateTime.UtcNow.AddDays(-30))
+            .CountAsync();
+        Assert.That(user2OldEmails, Is.EqualTo(0), "User2 should have no emails older than 30 days");
+
+        // Check that user3 (no age limit) has all emails including old ones
+        var user3OldEmails = await dbContext.Emails
+            .Where(e => e.To == "user3@test.com" && e.DateSystem < DateTime.UtcNow.AddDays(-50))
+            .CountAsync();
+        Assert.That(user3OldEmails, Is.GreaterThan(0), "User3 should have old emails (no age limit)");
+    }
+
+    /// <summary>
+    /// Test that user-specific limits take priority over global limits.
+    /// </summary>
+    /// <returns>Task.</returns>
+    [Test]
+    public async Task PerUserLimits_TakePriorityOverGlobalLimits()
+    {
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+
+        // Set global email limit to 20
+        var globalSetting = new ServerSetting
         {
-            await using var dbContext = await _testHostBuilder.GetDbContextAsync();
-            var job = await dbContext.TaskRunnerJobs
-                .OrderByDescending(j => j.Id)
-                .FirstOrDefaultAsync();
+            Key = "MaxEmailsPerUser",
+            Value = "20",
+        };
+        dbContext.ServerSettings.Add(globalSetting);
+        await dbContext.SaveChangesAsync();
 
-            if (job != null && (job.Status == TaskRunnerJobStatus.Finished || job.Status == TaskRunnerJobStatus.Error))
-            {
-                if (job.Status == TaskRunnerJobStatus.Error)
-                {
-                    Assert.Fail($"Maintenance job failed with error: {job.ErrorMessage}");
-                }
+        // Create user with specific limit that overrides global
+        await SetupUserSpecificVsGlobalLimitsTest();
 
-                return;
-            }
+        await _testHost.StartAsync();
+        await WaitForMaintenanceJobCompletion();
 
-            await Task.Delay(500); // Poll every 500ms
-        }
+        // User with specific limit (5) should have 5 emails, not 20
+        var userWithLimitCount = await dbContext.Emails
+            .Where(e => e.To == "userwithLimit@test.com")
+            .CountAsync();
+        Assert.That(userWithLimitCount, Is.EqualTo(5), "User with specific limit should have 5 emails, not global limit");
 
-        Assert.Fail($"Maintenance job did not complete within {timeoutSeconds} seconds");
+        // User without specific limit should use global limit (20)
+        var userWithoutLimitCount = await dbContext.Emails
+            .Where(e => e.To == "userwithoutLimit@test.com")
+            .CountAsync();
+        Assert.That(userWithoutLimitCount, Is.EqualTo(20), "User without specific limit should use global limit");
     }
 
     /// <summary>
@@ -316,6 +374,53 @@ public class TaskRunnerTests
             Date = date,
             DateSystem = date,
         };
+    }
+
+    /// <summary>
+    /// Initializes the test with test data.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task InitializeWithTestData()
+    {
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+        await SeedData.SeedDatabase(dbContext);
+        await _testHost.StartAsync();
+
+        // Wait for the maintenance job to complete instead of using a fixed delay
+        await WaitForMaintenanceJobCompletion();
+    }
+
+    /// <summary>
+    /// Waits for the maintenance job to complete.
+    /// </summary>
+    /// <param name="timeoutSeconds">The timeout in seconds.</param>
+    /// <returns>Task.</returns>
+    private async Task WaitForMaintenanceJobCompletion(int timeoutSeconds = 10)
+    {
+        var startTime = DateTime.Now;
+        var timeout = startTime.AddSeconds(timeoutSeconds);
+
+        while (DateTime.Now < timeout)
+        {
+            await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+            var job = await dbContext.TaskRunnerJobs
+                .OrderByDescending(j => j.Id)
+                .FirstOrDefaultAsync();
+
+            if (job != null && (job.Status == TaskRunnerJobStatus.Finished || job.Status == TaskRunnerJobStatus.Error))
+            {
+                if (job.Status == TaskRunnerJobStatus.Error)
+                {
+                    Assert.Fail($"Maintenance job failed with error: {job.ErrorMessage}");
+                }
+
+                return;
+            }
+
+            await Task.Delay(500); // Poll every 500ms
+        }
+
+        Assert.Fail($"Maintenance job did not complete within {timeoutSeconds} seconds");
     }
 
     /// <summary>
@@ -417,6 +522,203 @@ public class TaskRunnerTests
                     dbContext.Emails.Add(CreateTestEmail(alias.Address, encryptionKey, $"Recent Email {i}", date10DaysAgo));
                 }
             }
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Sets up test data for per-user email limits testing.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task SetupPerUserEmailLimitsTest()
+    {
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+
+        // Create user1 with 5 email limit
+        var user1 = new AliasVaultUser
+        {
+            UserName = "user1",
+            Email = "user1@test.com",
+            MaxEmails = 5,
+        };
+        dbContext.AliasVaultUsers.Add(user1);
+
+        // Create user2 with 10 email limit
+        var user2 = new AliasVaultUser
+        {
+            UserName = "user2",
+            Email = "user2@test.com",
+            MaxEmails = 10,
+        };
+        dbContext.AliasVaultUsers.Add(user2);
+
+        // Create user3 with no limit (0 = unlimited)
+        var user3 = new AliasVaultUser
+        {
+            UserName = "user3",
+            Email = "user3@test.com",
+            MaxEmails = 0,
+        };
+        dbContext.AliasVaultUsers.Add(user3);
+
+        await dbContext.SaveChangesAsync();
+
+        // Create encryption key
+        var encryptionKey = new UserEncryptionKey
+        {
+            Id = Guid.NewGuid(),
+            UserId = user1.Id,
+            PublicKey = "test-encryption-key",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        dbContext.UserEncryptionKeys.Add(encryptionKey);
+
+        // Create email claims for each user
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = user1.Id, Address = "user1@test.com", AddressLocal = "user1", AddressDomain = "test.com" });
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = user2.Id, Address = "user2@test.com", AddressLocal = "user2", AddressDomain = "test.com" });
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = user3.Id, Address = "user3@test.com", AddressLocal = "user3", AddressDomain = "test.com" });
+
+        // Create 15 emails for each user (all will exceed user1 and user2 limits)
+        for (int i = 0; i < 15; i++)
+        {
+            var dateCreated = DateTime.UtcNow.AddDays(-i); // Different ages for realistic testing
+
+            dbContext.Emails.Add(CreateTestEmail("user1@test.com", encryptionKey, $"User1 Email {i}", dateCreated));
+            dbContext.Emails.Add(CreateTestEmail("user2@test.com", encryptionKey, $"User2 Email {i}", dateCreated));
+            dbContext.Emails.Add(CreateTestEmail("user3@test.com", encryptionKey, $"User3 Email {i}", dateCreated));
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Sets up test data for per-user email age limits testing.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task SetupPerUserEmailAgeLimitsTest()
+    {
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+
+        // Create user1 with 7 days age limit
+        var user1 = new AliasVaultUser
+        {
+            UserName = "user1",
+            Email = "user1@test.com",
+            MaxEmailAgeDays = 7,
+        };
+        dbContext.AliasVaultUsers.Add(user1);
+
+        // Create user2 with 30 days age limit
+        var user2 = new AliasVaultUser
+        {
+            UserName = "user2",
+            Email = "user2@test.com",
+            MaxEmailAgeDays = 30,
+        };
+        dbContext.AliasVaultUsers.Add(user2);
+
+        // Create user3 with no age limit (0 = unlimited)
+        var user3 = new AliasVaultUser
+        {
+            UserName = "user3",
+            Email = "user3@test.com",
+            MaxEmailAgeDays = 0,
+        };
+        dbContext.AliasVaultUsers.Add(user3);
+
+        await dbContext.SaveChangesAsync();
+
+        // Create encryption key
+        var encryptionKey = new UserEncryptionKey
+        {
+            Id = Guid.NewGuid(),
+            UserId = user1.Id,
+            PublicKey = "test-encryption-key",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        dbContext.UserEncryptionKeys.Add(encryptionKey);
+
+        // Create email claims for each user
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = user1.Id, Address = "user1@test.com", AddressLocal = "user1", AddressDomain = "test.com" });
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = user2.Id, Address = "user2@test.com", AddressLocal = "user2", AddressDomain = "test.com" });
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = user3.Id, Address = "user3@test.com", AddressLocal = "user3", AddressDomain = "test.com" });
+
+        // Create emails with various ages for each user
+        var testDates = new[]
+        {
+            DateTime.UtcNow.AddDays(-1),   // 1 day old
+            DateTime.UtcNow.AddDays(-5),   // 5 days old
+            DateTime.UtcNow.AddDays(-10),  // 10 days old (should be deleted for user1)
+            DateTime.UtcNow.AddDays(-15),  // 15 days old (should be deleted for user1)
+            DateTime.UtcNow.AddDays(-25),  // 25 days old (should be deleted for user1)
+            DateTime.UtcNow.AddDays(-35),  // 35 days old (should be deleted for user1 and user2)
+            DateTime.UtcNow.AddDays(-45),  // 45 days old (should be deleted for user1 and user2)
+            DateTime.UtcNow.AddDays(-60),  // 60 days old (should be deleted for user1 and user2)
+        };
+
+        foreach (var date in testDates)
+        {
+            dbContext.Emails.Add(CreateTestEmail("user1@test.com", encryptionKey, $"User1 Email {date:yyyy-MM-dd}", date));
+            dbContext.Emails.Add(CreateTestEmail("user2@test.com", encryptionKey, $"User2 Email {date:yyyy-MM-dd}", date));
+            dbContext.Emails.Add(CreateTestEmail("user3@test.com", encryptionKey, $"User3 Email {date:yyyy-MM-dd}", date));
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Sets up test data for testing user-specific vs global limits.
+    /// </summary>
+    /// <returns>Task.</returns>
+    private async Task SetupUserSpecificVsGlobalLimitsTest()
+    {
+        await using var dbContext = await _testHostBuilder.GetDbContextAsync();
+
+        // Create user with specific limit that overrides global
+        var userWithLimit = new AliasVaultUser
+        {
+            UserName = "userwithLimit",
+            Email = "userwithLimit@test.com",
+            MaxEmails = 5, // Lower than global limit
+        };
+        dbContext.AliasVaultUsers.Add(userWithLimit);
+
+        // Create user without specific limit (should use global)
+        var userWithoutLimit = new AliasVaultUser
+        {
+            UserName = "userwithoutLimit",
+            Email = "userwithoutLimit@test.com",
+            MaxEmails = 0, // Use global limit
+        };
+        dbContext.AliasVaultUsers.Add(userWithoutLimit);
+
+        await dbContext.SaveChangesAsync();
+
+        // Create encryption key
+        var encryptionKey = new UserEncryptionKey
+        {
+            Id = Guid.NewGuid(),
+            UserId = userWithLimit.Id,
+            PublicKey = "test-encryption-key",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        dbContext.UserEncryptionKeys.Add(encryptionKey);
+
+        // Create email claims
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = userWithLimit.Id, Address = "userwithLimit@test.com", AddressLocal = "userwithLimit", AddressDomain = "test.com" });
+        dbContext.UserEmailClaims.Add(new UserEmailClaim { UserId = userWithoutLimit.Id, Address = "userwithoutLimit@test.com", AddressLocal = "userwithoutLimit", AddressDomain = "test.com" });
+
+        // Create 25 emails for each user (both exceed their limits)
+        for (int i = 0; i < 25; i++)
+        {
+            var dateCreated = DateTime.UtcNow.AddDays(-i);
+
+            dbContext.Emails.Add(CreateTestEmail("userwithLimit@test.com", encryptionKey, $"Limited User Email {i}", dateCreated));
+            dbContext.Emails.Add(CreateTestEmail("userwithoutLimit@test.com", encryptionKey, $"Unlimited User Email {i}", dateCreated));
         }
 
         await dbContext.SaveChangesAsync();
