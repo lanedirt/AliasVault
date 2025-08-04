@@ -122,8 +122,7 @@ public class LanguageService(
             var browserLanguage = await _jsRuntime.InvokeAsync<string>("navigator.language");
             var cultureName = browserLanguage.Split('-')[0];
 
-            var supportedLanguages = GetSupportedLanguages();
-            return supportedLanguages.ContainsKey(cultureName) ? cultureName : "en";
+            return GetSupportedLanguages().ContainsKey(cultureName) ? cultureName : "en";
         }
         catch
         {
@@ -204,8 +203,7 @@ public class LanguageService(
             return;
         }
 
-        var supportedLanguages = GetSupportedLanguages();
-        if (!supportedLanguages.ContainsKey(languageCode))
+        if (!GetSupportedLanguages().ContainsKey(languageCode))
         {
             return;
         }
@@ -271,8 +269,7 @@ public class LanguageService(
             {
                 var browserLang = await _jsRuntime.InvokeAsync<string>("eval", "navigator.language");
                 var cultureName = browserLang.Split('-')[0];
-                var supportedLanguages = GetSupportedLanguages();
-                if (supportedLanguages.ContainsKey(cultureName))
+                if (GetSupportedLanguages().ContainsKey(cultureName))
                 {
                     initialLanguage = cultureName;
                 }
@@ -284,8 +281,7 @@ public class LanguageService(
         }
 
         // Validate the language
-        var supportedLanguages = GetSupportedLanguages();
-        if (!supportedLanguages.ContainsKey(initialLanguage))
+        if (!GetSupportedLanguages().ContainsKey(initialLanguage))
         {
             initialLanguage = "en";
         }
