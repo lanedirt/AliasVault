@@ -83,7 +83,7 @@ public class EmailCleanupTask : IMaintenanceTask
                 .Select(c => c.Address)
                 .ToListAsync(cancellationToken);
 
-            if (userAddresses.Any())
+            if (userAddresses.Count > 0)
             {
                 // Delete emails older than user's limit
                 var userEmailsDeleted = await dbContext.Emails
