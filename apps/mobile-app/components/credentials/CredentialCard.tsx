@@ -1,9 +1,9 @@
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } from 'react-native';
 import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
 
