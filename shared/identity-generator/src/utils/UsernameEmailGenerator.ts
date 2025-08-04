@@ -56,19 +56,16 @@ export class UsernameEmailGenerator {
         break;
     }
 
-    // Add birth year variations
-    if (this.getSecureRandom(3) !== 0) {
-      switch (this.getSecureRandom(2)) {
-        case 0:
-          parts.push(identity.birthDate.getFullYear().toString().substring(2));
-          break;
-        case 1:
-          parts.push(identity.birthDate.getFullYear().toString());
-          break;
-      }
-    } else if (this.getSecureRandom(2) === 0) {
-      // Add random numbers for more uniqueness
-      parts.push((this.getSecureRandom(990) + 10).toString());
+    // Always add birth year variations for uniqueness
+    switch (this.getSecureRandom(2)) {
+      case 0:
+        // Full year (e.g., 1990)
+        parts.push(identity.birthDate.getFullYear().toString());
+        break;
+      case 1:
+        // Last two digits of year (e.g., 90)
+        parts.push(identity.birthDate.getFullYear().toString().substring(2));
+        break;
     }
 
     // Join parts with random symbols, possibly multiple
