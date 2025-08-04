@@ -50,8 +50,9 @@ To add a new language to AliasVault, follow these steps in order:
 
 2. **Add language in Xcode**:
    - Open workspace in Xcode
-   - Go to "AliasVault" > Project settings "Info" > Localizations
+   - Go to target "AliasVault" > Project settings "Info" > Localizations
    - Add the desired language
+   - Repeat the two steps above for target "Autofill" as well.
 
 3. **Translation files to create (optional, Crowdin should make a PR for this automatically)**:
    - `AliasVault/{language-code}.lproj/Localizable.strings`
