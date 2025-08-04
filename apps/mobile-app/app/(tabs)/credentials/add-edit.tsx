@@ -567,11 +567,11 @@ export default function AddEditCredentialScreen() : React.ReactNode {
          */
         headerRight: () => (
           <Pressable
-            onPress={handleSubmit(onSubmit)}
-            style={[styles.headerRightButton, isSaveDisabled && styles.headerRightButtonDisabled]}
+            onPressIn={handleSubmit(onSubmit)}
             android_ripple={{ color: 'lightgray' }}
             pressRetentionOffset={100}
             hitSlop={100}
+            style={[styles.headerRightButton, isSaveDisabled && styles.headerRightButtonDisabled]}
             disabled={isSaveDisabled}
           >
             <MaterialIcons name="save" size={24} color={colors.primary} />
