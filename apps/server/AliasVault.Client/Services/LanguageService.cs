@@ -268,9 +268,10 @@ public class LanguageService(
             {
                 var browserLang = await _jsRuntime.InvokeAsync<string>("eval", "navigator.language");
                 var cultureName = browserLang.Split('-')[0];
-                if (cultureName == "nl")
+                var supportedLanguages = GetSupportedLanguages();
+                if (supportedLanguages.ContainsKey(cultureName))
                 {
-                    initialLanguage = "nl";
+                    initialLanguage = cultureName;
                 }
             }
             catch
