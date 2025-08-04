@@ -59,57 +59,57 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>Import / Export</value>
+    <value>Importa / Esporta</value>
     <comment>Page title</comment>
   </data>
   <data name="PageDescription" xml:space="preserve">
-    <value>On this page you can import and export your vault.</value>
+    <value>In questa pagina puoi importare ed esportare la tua cassaforte.</value>
     <comment>Page description</comment>
   </data>
   <data name="ImportSectionTitle" xml:space="preserve">
-    <value>Import passwords</value>
+    <value>Importa le password</value>
     <comment>Import section title</comment>
   </data>
   <data name="ImportSectionDescription" xml:space="preserve">
-    <value>Select a service to import from. If you are using a service that is not listed here and would like to see it supported, please raise an issue on &lt;a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700"&gt;GitHub&lt;/a&gt; or contact us.</value>
+    <value>Seleziona un servizio da cui importare. Se si utilizza un servizio che non è elencato qui e si desidera vederlo supportato, si prega di sollevare un problema su &lt;a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700"&gt;GitHub&lt;/a&gt; o contattarci.</value>
     <comment>Import section description with HTML link</comment>
   </data>
   <data name="ExportSectionTitle" xml:space="preserve">
-    <value>Export vault</value>
+    <value>Esporta cassaforte</value>
     <comment>Export section title</comment>
   </data>
   <data name="ExportSectionDescription" xml:space="preserve">
-    <value>If you want to export your AliasVault credentials to another AliasVault server (e.g. from cloud to self-hosted or vice-versa) or to another service altogether, you can export it here. Note that all exports are unencrypted so store it in a safe place and delete it when you no longer need it.</value>
+    <value>Se si desidera esportare le proprie credenziali AliasVault su un altro server AliasVault (ad es. dal cloud al self-hosted o viceversa) o ad un altro servizio, è possibile esportarlo qui. Nota che tutte le esportazioni non sono cifrate in modo da memorizzarlo in un luogo sicuro ed eliminarlo quando non ne hai più bisogno.</value>
     <comment>Export section description</comment>
   </data>
   <data name="ExportCsvButton" xml:space="preserve">
-    <value>Export vault to unencrypted CSV file</value>
+    <value>Esporta la cassaforte in un file CSV non cifrato</value>
     <comment>Button to export as CSV</comment>
   </data>
   <data name="ExportSqliteButton" xml:space="preserve">
-    <value>Export vault to unencrypted SQLite file</value>
+    <value>Esporta la cassaforte in un file SQLite non cifrato</value>
     <comment>Button to export as SQLite</comment>
   </data>
   <data name="ExportConfirmTitle" xml:space="preserve">
-    <value>Export vault</value>
+    <value>Esporta cassaforte</value>
     <comment>Export confirmation dialog title</comment>
   </data>
   <data name="ExportWarningMessage" xml:space="preserve">
-    <value>Warning: Exporting your vault to an unencrypted file will expose all of your passwords and sensitive information in plain text. Only do this on trusted computers and ensure you:
+    <value>Attenzione: Esportare la cassaforte in un file non cifrato esporrà tutte le password e le informazioni sensibili in testo semplice. Farlo solo su computer affidabili e assicurarti:
 
-• Store the exported file in a secure location
-• Delete the file when you no longer need it
-• Never share the exported file with others
+• Conservare il file esportato in una posizione sicura
+• Eliminare il file quando non ne hai più bisogno
+• Non condividere mai il file esportato con altri
 
-Are you sure you want to continue with the export?</value>
+Sei sicuro di voler continuare con l'esportazione?</value>
     <comment>Export warning confirmation message</comment>
   </data>
   <data name="ResetVaultSectionTitle" xml:space="preserve">
-    <value>Reset Vault</value>
+    <value>Reimposta Cassaforte</value>
     <comment>Reset vault section title</comment>
   </data>
   <data name="ResetVaultSectionDescription" xml:space="preserve">
-    <value>This option allows you to completely empty your vault while keeping your account and email aliases. Use this if you want to start fresh after importing data from another password manager or if you want to clear all existing credentials to start over.</value>
+    <value>Questa opzione ti permette di svuotare completamente la tua cassaforte mantenendo il tuo account e gli alias e-mail. Usare questo se si desidera avviare fresco dopo aver importato i dati da un altro gestore di password o se si desidera cancellare tutte le credenziali esistenti per ricominciare.</value>
     <comment>Reset vault section description</comment>
   </data>
 </root>
