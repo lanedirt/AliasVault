@@ -21,32 +21,32 @@
   </xsd:schema>
   <!-- Step titles -->
   <data name="TermsAndConditionsStepTitle">
-    <value>Using AliasVault</value>
+    <value>Uso Di Aliasvault</value>
     <comment>Title for the terms and conditions step</comment>
   </data>
   <data name="UsernameStepTitle">
-    <value>Choose Username</value>
+    <value>Scegli nome utente</value>
     <comment>Title for the username selection step</comment>
   </data>
   <data name="PasswordStepTitle">
-    <value>Set Password</value>
+    <value>Imposta password</value>
     <comment>Title for the password creation step</comment>
   </data>
   <data name="CreatingStepTitle">
-    <value>Creating Vault</value>
+    <value>Creazione cassaforte</value>
     <comment>Title for the vault creation step</comment>
   </data>
   <data name="SetupStepTitle">
-    <value>Setup</value>
+    <value>Configurazione</value>
     <comment>Default setup step title</comment>
   </data>
   <!-- Button text -->
   <data name="CreateAccountButton">
-    <value>Create Account</value>
+    <value>Crea Account</value>
     <comment>Button text for creating account</comment>
   </data>
   <data name="ContinueButton">
-    <value>Continue</value>
+    <value>Continua</value>
     <comment>Continue button text</comment>
   </data>
 </root>
