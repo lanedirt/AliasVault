@@ -43,6 +43,11 @@ public class ServerStatistics
     public List<TopUserByAliases> TopUsersByAliases { get; set; } = new();
 
     /// <summary>
+    /// Gets or sets the list of top users by number of emails.
+    /// </summary>
+    public List<TopUserByEmails> TopUsersByEmails { get; set; } = new();
+
+    /// <summary>
     /// Gets or sets the list of top IP addresses by user activity.
     /// </summary>
     public List<TopIpAddress> TopIpAddresses { get; set; } = new();
