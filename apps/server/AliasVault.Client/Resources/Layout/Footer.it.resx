@@ -59,23 +59,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CopyrightText" xml:space="preserve">
-    <value>All rights reserved.</value>
+    <value>Tutti i diritti riservati.</value>
     <comment>Copyright text in footer</comment>
   </data>
   <data name="TipCreateShortcut" xml:space="preserve">
-    <value>Tip: Use the g+c (go create) keyboard shortcut to quickly create a new alias.</value>
+    <value>Suggerimento: Usa la scorciatoia da tastiera g+c (vai a creare) per creare rapidamente un nuovo alias.</value>
     <comment>Tip about keyboard shortcut for creating aliases</comment>
   </data>
   <data name="TipFindShortcut" xml:space="preserve">
-    <value>Tip: Use the g+f (go find) keyboard shortcut to focus the search field.</value>
+    <value>Suggerimento: Usa la scorciatoia da tastiera g+f (vai a trovare) per mettere a fuoco il campo di ricerca.</value>
     <comment>Tip about keyboard shortcut for search</comment>
   </data>
   <data name="TipHomeShortcut" xml:space="preserve">
-    <value>Tip: Use the g+h (go home) keyboard shortcut to go to the homepage.</value>
+    <value>Suggerimento: usa la scorciatoia da tastiera g+h (vai a casa) per andare alla homepage.</value>
     <comment>Tip about keyboard shortcut for home</comment>
   </data>
   <data name="TipLockShortcut" xml:space="preserve">
-    <value>Tip: Use the g+l (go lock) keyboard shortcut to lock the vault.</value>
+    <value>Suggerimento: usa la scorciatoia da tastiera g+l (vai a bloccare) per bloccare la cassaforte.</value>
     <comment>Tip about keyboard shortcut for locking vault</comment>
   </data>
 </root>
