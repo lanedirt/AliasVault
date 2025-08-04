@@ -3,10 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleLocalizations</key>
-    <array>
-      <string>en</string>
-      <string>nl</string>
-    </array>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+		<string>it</string>
+		<string>zh</string>
+		<string>nl</string>
+	</array>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>

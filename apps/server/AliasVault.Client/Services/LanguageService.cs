@@ -32,6 +32,9 @@ public class LanguageService(
     {
         new LanguageConfig("en", "English", "🇺🇸"),
         new LanguageConfig("nl", "Nederlands", "🇳🇱"),
+        new LanguageConfig("it", "Italiano", "🇮🇹"),
+        new LanguageConfig("zh", "简体中文", "🇨🇳"),
+        new LanguageConfig("ru", "Русский", "🇷🇺"),
 
         // Add new languages here:
         // new LanguageConfig("de", "Deutsch", "🇩🇪"),

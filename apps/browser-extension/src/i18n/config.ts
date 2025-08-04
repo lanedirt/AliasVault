@@ -4,7 +4,10 @@
  */
 
 import enTranslations from './locales/en.json';
+import itTranslations from './locales/it.json';
 import nlTranslations from './locales/nl.json';
+import ruTranslations from './locales/ru.json';
+import zhTranslations from './locales/zh.json';
 
 /**
  * Create a map of all available languages and their resources for i18n.
@@ -16,6 +19,15 @@ export const LANGUAGE_RESOURCES = {
   },
   nl: {
     translation: nlTranslations
+  },
+  it: {
+    translation: itTranslations
+  },
+  zh: {
+    translation: zhTranslations
+  },
+  ru: {
+    translation: ruTranslations
   }
 };
 
@@ -35,6 +47,24 @@ export const AVAILABLE_LANGUAGES: ILanguageConfig[] = [
     name: 'Dutch',
     nativeName: 'Nederlands',
     flag: '🇳🇱'
+  },
+  {
+    code: 'it',
+    name: 'Italian',
+    nativeName: 'Italiano',
+    flag: '🇮🇹'
+  },
+  {
+    code: 'zh',
+    name: 'Chinese',
+    nativeName: '简体中文',
+    flag: '🇨🇳'
+  },
+  {
+    code: 'ru',
+    name: 'Russian',
+    nativeName: 'Русский',
+    flag: '🇷🇺'
   },
   /*
    * {

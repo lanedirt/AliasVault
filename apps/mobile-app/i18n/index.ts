@@ -3,11 +3,17 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import en from './locales/en.json';
+import it from './locales/it.json';
 import nl from './locales/nl.json';
+import ru from './locales/ru.json';
+import zh from './locales/zh.json';
 
 const resources = {
   en: { translation: en },
   nl: { translation: nl },
+  it: { translation: it },
+  zh: { translation: zh },
+  ru: { translation: ru },
 };
 
 /**
