@@ -60,80 +60,80 @@
   </resheader>
   <!-- Page title and breadcrumbs -->
   <data name="PageTitle" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>Elimina account</value>
     <comment>Page title for the delete account page</comment>
   </data>
   <data name="BreadcrumbSecuritySettings" xml:space="preserve">
-    <value>Security settings</value>
+    <value>Impostazioni di sicurezza</value>
     <comment>Breadcrumb text for security settings</comment>
   </data>
   <data name="BreadcrumbDeleteAccount" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>Elimina Account</value>
     <comment>Breadcrumb text for delete account</comment>
   </data>
   <!-- Warning messages -->
   <data name="PermanentActionWarning" xml:space="preserve">
-    <value>Warning: This action is permanent and cannot be undone. All your data will be permanently deleted.</value>
+    <value>Attenzione: questa azione è irreversibile. Tutti i tuoi dati saranno cancellati definitivamente.</value>
     <comment>Warning message about permanent deletion</comment>
   </data>
   <data name="FinalWarning" xml:space="preserve">
-    <value>Final warning: Enter your password to permanently delete your account.</value>
+    <value>Avviso finale: Inserisci la tua password per eliminare definitivamente il tuo account.</value>
     <comment>Final warning message before account deletion</comment>
   </data>
   <!-- Note sections -->
   <data name="PleaseNote" xml:space="preserve">
-    <value>Please note:</value>
+    <value>Attenzione:</value>
     <comment>Header for note section</comment>
   </data>
   <data name="VaultsDeletedNote" xml:space="preserve">
-    <value>All encrypted vaults which includes all of your credentials will be permanently deleted</value>
+    <value>Tutte le cassaforti criptate, inclusi i dati delle tue credenziali, saranno cancellate definitivamente</value>
     <comment>Note about vault deletion</comment>
   </data>
   <data name="EmailAliasesOrphanedNote" xml:space="preserve">
-    <value>Your email aliases will be orphaned and cannot be claimed by other users</value>
+    <value>I tuoi alias email saranno abbandonati e non potranno essere reclamati da altri utenti</value>
     <comment>Note about email aliases being orphaned</comment>
   </data>
   <data name="AccountCannotBeRecoveredNote" xml:space="preserve">
-    <value>Your account cannot be recovered after deletion</value>
+    <value>Il tuo account non potrà essere recuperato dopo l'eliminazione</value>
     <comment>Note about account recovery</comment>
   </data>
   <data name="DeletionIrreversibleNote" xml:space="preserve">
-    <value>Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently.</value>
+    <value>La cancellazione dell'account è irreversibile e non può essere annullata. Premendo il pulsante seguente cancellerai il tuo account immediatamente e definitivamente.</value>
     <comment>Note about deletion being irreversible</comment>
   </data>
   <!-- Form labels -->
   <data name="ConfirmUsernameLabel" xml:space="preserve">
-    <value>Confirm your username</value>
+    <value>Conferma il tuo nome utente</value>
     <comment>Label for username confirmation input field</comment>
   </data>
   <data name="EnterPasswordLabel" xml:space="preserve">
-    <value>Enter your password</value>
+    <value>Inserisci la tua password</value>
     <comment>Label for password input field</comment>
   </data>
   <!-- Button text -->
   <data name="ContinueWithAccountDeletion" xml:space="preserve">
-    <value>Continue with Account Deletion</value>
+    <value>Continua con Eliminazione Account</value>
     <comment>Button text to continue with account deletion</comment>
   </data>
   <data name="DeleteMyAccount" xml:space="preserve">
-    <value>Delete My Account</value>
+    <value>Elimina il Mio Account</value>
     <comment>Button text to delete account</comment>
   </data>
   <!-- Loading and status messages -->
   <data name="DeletingAccountMessage" xml:space="preserve">
-    <value>Deleting account...</value>
+    <value>Eliminazione account...</value>
     <comment>Loading message displayed while deleting account</comment>
   </data>
   <data name="UsernameRequired" xml:space="preserve">
-    <value>Username is required</value>
+    <value>Il nome utente è obbligatorio</value>
     <comment>Error message when username is not provided</comment>
   </data>
   <data name="UsernameDoesNotMatch" xml:space="preserve">
-    <value>The username you entered does not match your current username. Please try again.</value>
+    <value>Il nome utente che hai inserito non corrisponde al tuo nome utente corrente. Riprova.</value>
     <comment>Error message when username doesn't match</comment>
   </data>
   <data name="ErrorProcessingRequest" xml:space="preserve">
-    <value>An error occurred while processing the request.</value>
+    <value>Si è verificato un errore elaborando la richiesta.</value>
     <comment>Generic error message for request processing</comment>
   </data>
 </root>
