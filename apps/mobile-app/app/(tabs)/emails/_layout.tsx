@@ -22,7 +22,7 @@ export default function EmailsLayout(): React.ReactNode {
            * On iOS, we don't show the header as a custom collapsible header is used.
            * @returns {React.ReactNode} The header component
            */
-          headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title="Emails" /> : <Text>Emails</Text>,
+          headerTitle: (): React.ReactNode => Platform.OS === 'android' ? <AndroidHeader title={t('emails.title')} /> : <Text>{t('emails.title')}</Text>,
           ...defaultHeaderOptions,
         }}
       />

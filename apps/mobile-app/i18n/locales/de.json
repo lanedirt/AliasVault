@@ -43,7 +43,8 @@
       "invalidAuthCode": "Please enter a valid 6-digit authentication code",
       "incorrectPassword": "Incorrect password. Please try again.",
       "enterPassword": "Please enter your password",
-      "serverError": "Could not reach AliasVault server. Please try again later or contact support if the problem persists."
+      "serverError": "Could not reach AliasVault server. Please try again later or contact support if the problem persists.",
+      "incorrectPasswordFallback": "Incorrect password. Please try again."
     },
     "confirmLogout": "Are you sure you want to logout? You need to login again with your master password to access your vault.",
     "noAccountYet": "No account yet?",
@@ -142,7 +143,16 @@
     "errors": {
       "loadFailed": "Failed to load credential",
       "generateUsernameFailed": "Failed to generate username",
-      "generatePasswordFailed": "Failed to generate password"
+      "generatePasswordFailed": "Failed to generate password",
+      "generic": "Error"
+    },
+    "contextMenu": {
+      "title": "Credential Options",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copyUsername": "Copy Username",
+      "copyEmail": "Copy Email",
+      "copyPassword": "Copy Password"
     }
   },
   "settings": {
@@ -161,6 +171,18 @@
       "warningText": "Note: You'll need to authenticate with Face ID/Touch ID or your device passcode when using autofill."
     },
     "androidAutofill": "Android Autofill",
+    "androidAutofillSettings": {
+      "warningTitle": "⚠️ Experimental Feature",
+      "warningDescription": "Autofill support for Android is currently in an experimental state.",
+      "warningLink": "Read more about it here",
+      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
+      "howToEnable": "How to enable:",
+      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
+      "openAutofillSettings": "Open Autofill Settings",
+      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
+      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
+      "alreadyConfigured": "I already configured it"
+    },
     "vaultUnlock": "Vault Unlock Method",
     "autoLock": "Auto-lock Timeout",
     "identityGenerator": "Identity Generator",
@@ -379,6 +401,12 @@
       "loginSettings": "Login Settings",
       "notFound": "Not Found"
     },
+    "notFound": {
+      "title": "Oops!",
+      "message": "This page doesn't exist.",
+      "goHome": "Go back to the home page"
+    },
+    "appName": "AliasVault",
     "reinitialize": {
       "vaultAutoLockedMessage": "Vault auto-locked after timeout.",
       "attemptingToUnlockMessage": "Attempting to unlock."

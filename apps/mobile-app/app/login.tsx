@@ -522,7 +522,7 @@ export default function LoginScreen() : React.ReactNode {
           <Animated.View style={[styles.headerSection, { opacity: fadeAnim }]}>
             <View style={styles.logoContainer}>
               <Logo width={80} height={80} />
-              <Text style={styles.appName}>AliasVault</Text>
+              <Text style={styles.appName}>{t('app.appName')}</Text>
             </View>
           </Animated.View>
         </SafeAreaView>

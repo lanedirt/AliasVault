@@ -115,7 +115,7 @@ export default function UnlockScreen() : React.ReactNode {
         Alert.alert(t('common.error'), t('auth.errors.incorrectPassword'));
       }
     } catch {
-      Alert.alert('Error', 'Incorrect password. Please try again.');
+      Alert.alert(t('common.error'), t('auth.errors.incorrectPasswordFallback'));
     } finally {
       setIsLoading(false);
     }
