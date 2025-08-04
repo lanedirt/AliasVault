@@ -75,7 +75,7 @@ else
                         <div class="w-full mb-4 overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                 <tbody>
-                                    <tr class="border-b dark:border-gray-700">
+                                    <tr class="">
                                         <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Registered at</th>
                                         <td class="px-4 py-3">@User.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                                     </tr>
@@ -115,6 +115,52 @@ else
                                             </div>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">Email Limits</th>
+                                        <td class="px-4 py-3">
+                                            @if (!IsEditingEmailLimits)
+                                            {
+                                                <div class="flex flex-col space-y-2">
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="text-gray-700 dark:text-gray-300">
+                                                            <strong>Max Emails:</strong> @(User.MaxEmails == 0 ? "Unlimited" : User.MaxEmails.ToString("N0"))
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="text-gray-700 dark:text-gray-300">
+                                                            <strong>Max Age:</strong> @(User.MaxEmailAgeDays == 0 ? "Unlimited" : User.MaxEmailAgeDays + " days")
+                                                        </span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <Button Color="primary" OnClick="@(() => StartEditingEmailLimits())">Edit Limits</Button>
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="space-y-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                                    <div>
+                                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Max Emails</label>
+                                                        <div class="flex items-center space-x-2">
+                                                            <input type="number" min="0" @bind="EditMaxEmails" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-32 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                                                            <span class="text-sm text-gray-500 dark:text-gray-400">(0 = unlimited)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Max Email Age</label>
+                                                        <div class="flex items-center space-x-2">
+                                                            <input type="number" min="0" @bind="EditMaxEmailAgeDays" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-32 p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                                                            <span class="text-sm text-gray-500 dark:text-gray-400">days (0 = unlimited)</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex space-x-2 pt-2">
+                                                        <Button Color="success" OnClick="SaveEmailLimits">Save</Button>
+                                                        <Button Color="secondary" OnClick="CancelEditingEmailLimits">Cancel</Button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -135,7 +181,7 @@ else
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                 <div class="items-center">
                     <div>
-                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">UserRefreshTokens (Logged in devices)</h3>
+                        <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Logged in devices</h3>
 
                         <RefreshTokenTable RefreshTokenList="@RefreshTokenList" OnRevokeToken="@RevokeRefreshToken" OnRevokeAllTokens="@RevokeAllTokens" />
                     </div>
@@ -185,6 +231,9 @@ else
     private List<Vault> VaultList { get; set; } = [];
     private List<AuthLog> AuthLogList { get; set; } = [];
     private UserUsageStatistics? UserUsageStats { get; set; }
+    private bool IsEditingEmailLimits { get; set; }
+    private int EditMaxEmails { get; set; }
+    private int EditMaxEmailAgeDays { get; set; }
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -425,6 +474,45 @@ Do you want to proceed with the restoration?")) {
             dbContext.AliasVaultUserRefreshTokens.RemoveRange(tokens);
             await dbContext.SaveChangesAsync();
             await RefreshData();
+        }
+    }
+
+    /// <summary>
+    /// Starts editing email limits for the user.
+    /// </summary>
+    private void StartEditingEmailLimits()
+    {
+        IsEditingEmailLimits = true;
+        EditMaxEmails = User!.MaxEmails;
+        EditMaxEmailAgeDays = User.MaxEmailAgeDays;
+    }
+
+    /// <summary>
+    /// Cancels editing email limits.
+    /// </summary>
+    private void CancelEditingEmailLimits()
+    {
+        IsEditingEmailLimits = false;
+        EditMaxEmails = 0;
+        EditMaxEmailAgeDays = 0;
+    }
+
+    /// <summary>
+    /// Saves the email limits for the user.
+    /// </summary>
+    private async Task SaveEmailLimits()
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
+
+        if (User != null)
+        {
+            User.MaxEmails = EditMaxEmails;
+            User.MaxEmailAgeDays = EditMaxEmailAgeDays;
+            await dbContext.SaveChangesAsync();
+            IsEditingEmailLimits = false;
+            await RefreshData();
+            GlobalNotificationService.AddSuccessMessage("Email limits updated successfully.", true);
         }
     }
 }
