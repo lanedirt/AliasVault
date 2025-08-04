@@ -59,83 +59,83 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>Reset Vault</value>
+    <value>Reimposta cassaforte</value>
     <comment>Page title</comment>
   </data>
   <data name="BreadcrumbImportExport" xml:space="preserve">
-    <value>Import / Export</value>
+    <value>Importa / Esporta</value>
     <comment>Breadcrumb for import export</comment>
   </data>
   <data name="BreadcrumbResetVault" xml:space="preserve">
-    <value>Reset Vault</value>
+    <value>Reimposta cassaforte</value>
     <comment>Breadcrumb for reset vault</comment>
   </data>
   <data name="ResetVaultPleaseNote" xml:space="preserve">
-    <value>Please note:</value>
+    <value>Si prega di notare:</value>
     <comment>Reset vault please note prefix</comment>
   </data>
   <data name="ResetVaultCredentialsDeletedNote" xml:space="preserve">
-    <value>All encrypted credentials in your vault will be permanently deleted</value>
+    <value>Tutte le credenziali crittografate nella cassaforte verranno eliminate in modo permanente</value>
     <comment>Reset vault note about credentials being deleted</comment>
   </data>
   <data name="ResetVaultEmailAliasesKeptNote" xml:space="preserve">
-    <value>Your email aliases will be preserved and can be re-used after resetting your vault</value>
+    <value>I tuoi alias email saranno conservati e potranno essere riutilizzati dopo aver resettato la tua cassaforte</value>
     <comment>Reset vault note about email aliases being kept</comment>
   </data>
   <data name="ResetVaultSettingsKeptNote" xml:space="preserve">
-    <value>Your account settings and preferences will be preserved</value>
+    <value>Le impostazioni e le preferenze del tuo account saranno mantenute</value>
     <comment>Reset vault note about settings being kept</comment>
   </data>
   <data name="ResetVaultIrreversibleNote" xml:space="preserve">
-    <value>This action cannot be undone</value>
+    <value>Questa azione non può essere annullata</value>
     <comment>Reset vault note about action being irreversible</comment>
   </data>
   <data name="ResetVaultConfirmUsernameLabel" xml:space="preserve">
-    <value>To continue, please type your username to confirm</value>
+    <value>Per continuare, digita il tuo nome utente per confermare</value>
     <comment>Reset vault username confirmation label</comment>
   </data>
   <data name="ResetVaultContinueButton" xml:space="preserve">
-    <value>Continue with vault reset</value>
+    <value>Continua con il ripristino della cassaforte</value>
     <comment>Reset vault continue button</comment>
   </data>
   <data name="ResetVaultFinalWarning" xml:space="preserve">
-    <value>Final warning: You are about to permanently delete all your credentials!</value>
+    <value>Avviso finale: Stai per eliminare definitivamente tutte le tue credenziali!</value>
     <comment>Reset vault final warning message</comment>
   </data>
   <data name="ResetVaultDeletionIrreversibleNote" xml:space="preserve">
-    <value>This deletion is irreversible and cannot be undone</value>
+    <value>Questa cancellazione è irreversibile e non può essere annullata</value>
     <comment>Reset vault final step irreversible note</comment>
   </data>
   <data name="ResetVaultEnterPasswordLabel" xml:space="preserve">
-    <value>Enter your password to confirm</value>
+    <value>Inserisci la tua password per confermare</value>
     <comment>Reset vault password confirmation label</comment>
   </data>
   <data name="ResetVaultConfirmButton" xml:space="preserve">
-    <value>Reset my vault</value>
+    <value>Reimposta la mia cassaforte</value>
     <comment>Reset vault final confirmation button</comment>
   </data>
   <data name="ResetVaultUsernameRequired" xml:space="preserve">
-    <value>Username is required.</value>
+    <value>Il nome utente è obbligatorio.</value>
     <comment>Reset vault username required error</comment>
   </data>
   <data name="ResetVaultUsernameDoesNotMatch" xml:space="preserve">
-    <value>The username you entered does not match your account username.</value>
+    <value>Il nome utente inserito non corrisponde al nome utente del tuo account.</value>
     <comment>Reset vault username mismatch error</comment>
   </data>
   <data name="ResetVaultPasswordIncorrect" xml:space="preserve">
-    <value>The password you entered is incorrect.</value>
+    <value>La password inserita non è corretta.</value>
     <comment>Reset vault password incorrect error</comment>
   </data>
   <data name="ResetVaultProgressMessage" xml:space="preserve">
-    <value>Resetting vault...</value>
+    <value>Ripristino cassaforte ...</value>
     <comment>Reset vault progress message</comment>
   </data>
   <data name="ResetVaultSuccessMessage" xml:space="preserve">
-    <value>Your vault has been successfully reset. All credentials have been deleted and you can now start fresh.</value>
+    <value>La tua cassaforte è stata resettata con successo. Tutte le credenziali sono state eliminate e ora puoi ricominciare da capo.</value>
     <comment>Reset vault success message</comment>
   </data>
   <data name="ResetVaultErrorMessage" xml:space="preserve">
-    <value>An error occurred while resetting your vault. Please try again.</value>
+    <value>Si è verificato un errore durante il ripristino della cassaforte. Riprova.</value>
     <comment>Reset vault error message</comment>
   </data>
 </root>
