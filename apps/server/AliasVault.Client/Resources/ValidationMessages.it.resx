@@ -60,37 +60,37 @@
   </resheader>
   <!-- Password validation messages -->
   <data name="PasswordMinLength" xml:space="preserve">
-    <value>The new password must be at least 10 characters long.</value>
+    <value>La nuova password deve essere lunga almeno 10 caratteri.</value>
     <comment>Error message for password minimum length validation</comment>
   </data>
   <data name="PasswordsDoNotMatch" xml:space="preserve">
-    <value>The new passwords do not match.</value>
+    <value>Le nuove password non corrispondono.</value>
     <comment>Error message when password confirmation doesn't match</comment>
   </data>
   <data name="PasswordMinLengthGeneric" xml:space="preserve">
-    <value>Password must be at least 10 characters long.</value>
+    <value>La password deve essere lunga almeno 10 caratteri.</value>
     <comment>Generic error message for password minimum length validation</comment>
   </data>
   <data name="PasswordsDoNotMatchGeneric" xml:space="preserve">
-    <value>Passwords do not match.</value>
+    <value>Le password non corrispondono</value>
     <comment>Generic error message when passwords don't match</comment>
   </data>
   <!-- Required field validation messages -->
   <data name="UsernameRequired" xml:space="preserve">
-    <value>Username is required</value>
+    <value>Il nome utente è obbligatorio</value>
     <comment>Error message when username is required</comment>
   </data>
   <data name="PasswordRequired" xml:space="preserve">
-    <value>Password is required</value>
+    <value>La password è obbligatoria</value>
     <comment>Error message when password is required</comment>
   </data>
   <data name="SecretKeyRequired" xml:space="preserve">
-    <value>Secret key is required</value>
+    <value>La chiave segreta è obbligatoria</value>
     <comment>Error message when secret key is required</comment>
   </data>
   <!-- Terms and conditions -->
   <data name="MustAcceptTerms" xml:space="preserve">
-    <value>You must accept the terms and conditions.</value>
+    <value>È necessario accettare i termini e condizioni.</value>
     <comment>Error message for terms and conditions acceptance</comment>
   </data>
 </root>
