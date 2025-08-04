@@ -59,19 +59,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="MainTitle" xml:space="preserve">
-    <value>Password &amp; (Email) Alias Manager</value>
+    <value>Gestore di Alias Password &amp; (Email)</value>
     <comment>Main title of the application</comment>
   </data>
   <data name="TaglineText" xml:space="preserve">
-    <value>Your Privacy. Protected.</value>
+    <value>La Tua Privacy. Protetta.</value>
     <comment>Tagline emphasizing privacy protection</comment>
   </data>
   <data name="CreateNewVaultButton" xml:space="preserve">
-    <value>Create new vault</value>
+    <value>Crea nuova cassaforte</value>
     <comment>Button text for creating a new vault</comment>
   </data>
   <data name="LoginExistingAccountButton" xml:space="preserve">
-    <value>Log in with existing account</value>
+    <value>Accedi con un account esistente</value>
     <comment>Button text for logging in with existing account</comment>
   </data>
 </root>
