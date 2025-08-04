@@ -1,7 +1,7 @@
 ﻿@using AliasVault.RazorComponents.Tables
 
 <div class="mb-4">
-    <Button Color="danger" OnClick="RevokeAllTokens">Revoke All Tokens</Button>
+    <Button Color="danger" OnClick="RevokeAllTokens">Revoke all sessions</Button>
 </div>
 
 <SortableTable Columns="@_refreshTokenTableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
