@@ -165,7 +165,7 @@
     "autoLock": "Auto-lock Timeout",
     "identityGenerator": "Identity Generator",
     "security": "Security",
-    "appVersion": "App version {{version}} ({{url}})",
+    "appVersion": "Sovelluksen versio {{version}} ({{url}})",
     "autoLockOptions": {
       "never": "Never",
       "5seconds": "5 seconds",
@@ -186,8 +186,8 @@
       "biometricNotAvailable": "{{biometric}} Not Available",
       "biometricDisabledMessage": "{{biometric}} is disabled for AliasVault. In order to use it, please enable it in your device settings first.",
       "biometricHelp": "Your vault decryption key will be securely stored on your local device in the {{keystore}} and can be accessed securely with {{biometric}}.",
-      "biometricUnavailableHelp": "{{biometric}} is not available. Tap to open settings and/or go to your device settings to enable and configure it.",
-      "passwordHelp": "Re-enter your full master password to unlock your vault. This is always enabled as fallback option.",
+      "biometricUnavailableHelp": "{{biometric}} ei ole käytettävissä. Avaa asetukset napauttamalla ja/tai siirtymällä laiteasetuksiin aktivoidaksesi ja määrittääksesi sen.",
+      "passwordHelp": "Syötä koko pääsalasanasi uudelleen avataksesi holvisi. Tämä on aina käytössä varamenettelynä.",
       "keystoreIOS": "iOS Keychain",
       "keystoreAndroid": "Android Keystore"
     },
@@ -233,7 +233,7 @@
         "fillAllFields": "Please fill in all fields",
         "passwordsDoNotMatch": "New passwords do not match",
         "userNotAuthenticated": "User not authenticated",
-        "initiatingChange": "Initiating password change...",
+        "initiatingChange": "Suoritetaan salasanan muutosta...",
         "currentPasswordIncorrect": "Current password is not correct",
         "passwordChangedSuccessfully": "Password changed successfully",
         "failedToChange": "Failed to change password. Please try again."
