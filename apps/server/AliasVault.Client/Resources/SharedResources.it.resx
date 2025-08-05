@@ -229,7 +229,7 @@
     <comment>Invalid email validation error</comment>
   </data>
   <data name="ErrorPasswordMismatch" xml:space="preserve">
-    <value>Le password non corrispondono</value>
+    <value>Le password non corrispondono.</value>
     <comment>Password confirmation mismatch error</comment>
   </data>
   <!-- Common status messages -->
