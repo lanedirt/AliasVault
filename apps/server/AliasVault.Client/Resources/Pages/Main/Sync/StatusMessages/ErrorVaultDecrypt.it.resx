@@ -59,11 +59,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ErrorTitle" xml:space="preserve">
-    <value>Errore di decrittazione cassaforte.</value>
+    <value>Errore di decriptazione della cassaforte.</value>
     <comment>Title for vault decryption error</comment>
   </data>
   <data name="ErrorDescription" xml:space="preserve">
-    <value>Si è verificato un errore durante la decifrazione locale della cassaforte. I tuoi dati non sono accessibili in questo momento. Riprova (più tardi) o contatta l'assistenza.</value>
+    <value>Si è verificato un errore durante la decriptazione locale della cassaforte. I tuoi dati non sono accessibili in questo momento. Riprova (più tardi) o contatta l'assistenza.</value>
     <comment>Description for vault decryption error</comment>
   </data>
 </root>
