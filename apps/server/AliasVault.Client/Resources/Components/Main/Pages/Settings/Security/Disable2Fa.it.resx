@@ -78,7 +78,7 @@
   </data>
   <!-- Warning message -->
   <data name="WarningMessage" xml:space="preserve">
-    <value>Attenzione: dopo aver disabilitato l'autenticazione a due fattori, qualsiasi app di autenticazione configurata non funzionerà. Quando si desidera riabilitare l'autenticazione a due fattori si dovrà configurare nuovamente l'app di autenticazione.</value>
+    <value>Attenzione: dopo aver disabilitato l'autenticazione a due fattori, qualsiasi app di autenticazione configurata non funzionerà. Quando si desidera riabilitare l'autenticazione a due fattori si dovrà configurare nuovamente le app di autenticazione.</value>
     <comment>Warning message about the consequences of disabling 2FA</comment>
   </data>
   <!-- Status message -->
