@@ -71,7 +71,7 @@
     <comment>Email date field label</comment>
   </data>
   <data name="ActionsLabel" xml:space="preserve">
-    <value>Azioni</value>
+    <value>Azioni:</value>
     <comment>Email actions section label</comment>
   </data>
   <data name="DeleteButton" xml:space="preserve">
