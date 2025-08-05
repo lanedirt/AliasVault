@@ -95,11 +95,11 @@
     <comment>Loading message while creating alias</comment>
   </data>
   <data name="CreateCredentialErrorMessage" xml:space="preserve">
-    <value>Errore nella creazione di una nuova credenziale. Per favore riprova (più tardi) o disconnettiti e riprova.</value>
+    <value>Errore nella creazione delle nuove credenziali. Per favore riprova (più tardi) o disconnettiti e riprova.</value>
     <comment>Error message when credential creation fails</comment>
   </data>
   <data name="CredentialCreatedSuccessMessage" xml:space="preserve">
-    <value>Credenziale creata con successo.</value>
+    <value>Credenziali create con successo.</value>
     <comment>Success message when credential is created</comment>
   </data>
 </root>
