@@ -1,13 +1,13 @@
 {
   "loading": {
-    "title": "AliasVault is loading",
-    "message": "Initializing secure environment. AliasVault prioritizes your privacy by running entirely in your browser. The first load might take a short while.",
-    "refreshText": "If loading seems stuck, you can click the button below to refresh the page.",
+    "title": "AliasVault завантажується",
+    "message": "Ініціалізація безпечного середовища. AliasVault надає пріоритет вашій конфіденційності, працюючи повністю у вашому браузері. Перше завантаження може зайняти деякий час.",
+    "refreshText": "Якщо завантаження зупинилося, натисніть кнопку нижче, щоб оновити сторінку.",
     "refreshButtonText": "Refresh Page"
   },
   "errors": {
-    "unhandledError": "An unhandled error has occurred. Please try reloading the page. If the issue persists, please contact support.",
-    "webAssemblyError": "AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.",
+    "unhandledError": "Сталася невідома помилка. Спробуйте перезавантажити сторінку. Якщо проблема не зникає, зверніться до служби підтримки.",
+    "webAssemblyError": "Для роботи AliasVault потрібна технологія WebAssembly, яку цей браузер не підтримує. Спробуйте скористатися більш сучасним браузером, який підтримує WebAssembly.",
     "reloadPageText": "Reload Page"
   },
   "quotes": {
