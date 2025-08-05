@@ -128,7 +128,7 @@
     <comment>Description for 2FA step</comment>
   </data>
   <data name="RecoveryCodeDescription" xml:space="preserve">
-    <value>你已请求使用恢复码登录。恢复码是一次性代码，可用于登录你的账户。请注意，如果你在登录后不手动禁用双因素认证（2），下次登录时仍会要求你输入认证器代码。</value>
+    <value>你已请求使用恢复码登录。恢复码是一次性代码，可用于登录你的账户。请注意，如果你在登录后不手动禁用双因素认证（2FA），下次登录时仍会要求你输入双因素认证（2FA）动态验证码。</value>
     <comment>Description for recovery code step</comment>
   </data>
   <data name="NoAccountYetText" xml:space="preserve">
@@ -149,7 +149,7 @@
     <comment>Loading message during login process</comment>
   </data>
   <data name="VerifyingTwoFactorCodeMessage" xml:space="preserve">
-    <value>验证双因素认证代码中……</value>
+    <value>正在验证双因素认证（2FA）……</value>
     <comment>Loading message during 2FA verification</comment>
   </data>
   <data name="VerifyingRecoveryCodeMessage" xml:space="preserve">
