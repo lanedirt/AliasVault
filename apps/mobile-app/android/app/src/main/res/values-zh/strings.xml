@@ -9,8 +9,8 @@
   <string name="autofill_open_app">打开应用</string>
   <string name="autofill_vault_locked">保险库已锁定</string>
   <!-- Biometric prompts -->
-  <string name="biometric_store_key_title">Store Encryption Key</string>
-  <string name="biometric_store_key_subtitle">Authenticate to securely store your encryption key in the Android Keystore. This enables secure access to your vault.</string>
-  <string name="biometric_unlock_vault_title">Unlock Vault</string>
-  <string name="biometric_unlock_vault_subtitle">Authenticate to access your vault</string>
+  <string name="biometric_store_key_title">存储加密密钥</string>
+  <string name="biometric_store_key_subtitle">请进行身份验证，以便将你的加密密钥安全存储至 Android 密钥库中，这将确保你能安全访问保险库。</string>
+  <string name="biometric_unlock_vault_title">解锁保险库</string>
+  <string name="biometric_unlock_vault_subtitle">验证身份以访问你的保险库</string>
 </resources>
