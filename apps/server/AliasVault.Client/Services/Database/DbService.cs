@@ -800,42 +800,25 @@ public sealed class DbService : IDisposable
     /// <returns>Task.</returns>
     private async Task VaultCleanupSoftDeletedRecords()
     {
+        var cutoffDate = DateTime.UtcNow.AddDays(-7);
         var deleteCount = 0;
 
-        var cutoffDate = DateTime.UtcNow.AddDays(-7);
-        var softDeletedCredentials = await _dbContext.Credentials
+        // Hard delete soft-deleted Credentials older than 7 days
+        deleteCount += await _dbContext.Credentials
             .Where(c => c.IsDeleted && c.UpdatedAt <= cutoffDate)
-            .ToListAsync();
+            .ExecuteDeleteAsync();
 
-        // Hard delete all soft-deleted credentials that are older than 7 days.
-        foreach (var credential in softDeletedCredentials)
-        {
-            var login = await _dbContext.Credentials
-                .Where(x => x.Id == credential.Id)
-                .FirstAsync();
-            _dbContext.Credentials.Remove(login);
-
-            deleteCount++;
-        }
-
-        // Attachments
-        var softDeletedAttachments = await _dbContext.Attachments
+        // Hard delete soft-deleted Attachments older than 7 days
+        deleteCount += await _dbContext.Attachments
             .Where(a => a.IsDeleted && a.UpdatedAt <= cutoffDate)
-            .ToListAsync();
-
-        foreach (var attachment in softDeletedAttachments)
-        {
-            _dbContext.Attachments.Remove(attachment);
-            deleteCount++;
-        }
+            .ExecuteDeleteAsync();
 
         if (deleteCount > 0)
         {
-            // Save the database to the server to persist the cleanup.
             var success = await SaveDatabaseAsync();
             if (!success)
             {
-                throw new DataException("Error saving database to server after attachment deletion.");
+                throw new DataException("Error saving database to server after record deletion.");
             }
         }
     }
