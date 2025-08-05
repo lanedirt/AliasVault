@@ -43,7 +43,8 @@
       "invalidAuthCode": "Inserisci un codice di autenticazione valido a 6 cifre",
       "incorrectPassword": "Password errata. Riprova.",
       "enterPassword": "Inserisci la password",
-      "serverError": "Impossibile raggiungere il server AliasVault. Riprova più tardi o contatta il supporto se il problema persiste."
+      "serverError": "Impossibile raggiungere il server AliasVault. Riprova più tardi o contatta il supporto se il problema persiste.",
+      "incorrectPasswordFallback": "Incorrect password. Please try again."
     },
     "confirmLogout": "Sei sicuro di voler uscire? Dovrai accedere nuovamente con la password principale per accedere alla cassaforte.",
     "noAccountYet": "Non hai ancora un account?",
@@ -139,10 +140,20 @@
       "credentialUpdated": "Credenziale aggiornata con successo",
       "credentialCreated": "Credenziale creata con successo"
     },
+    "createNewAliasFor": "Create new alias for",
     "errors": {
       "loadFailed": "Caricamento credenziale non riuscito",
       "generateUsernameFailed": "Generazione nome utente non riuscita",
-      "generatePasswordFailed": "Generazione password non riuscita"
+      "generatePasswordFailed": "Generazione password non riuscita",
+      "generic": "Error"
+    },
+    "contextMenu": {
+      "title": "Credential Options",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copyUsername": "Copy Username",
+      "copyEmail": "Copy Email",
+      "copyPassword": "Copy Password"
     }
   },
   "settings": {
@@ -161,6 +172,18 @@
       "warningText": "Nota: sarà necessario autenticarsi con Face ID/Touch ID o codice dispositivo per utilizzare la compilazione."
     },
     "androidAutofill": "Compilazione automatica Android",
+    "androidAutofillSettings": {
+      "warningTitle": "⚠️ Experimental Feature",
+      "warningDescription": "Autofill support for Android is currently in an experimental state.",
+      "warningLink": "Read more about it here",
+      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
+      "howToEnable": "How to enable:",
+      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
+      "openAutofillSettings": "Open Autofill Settings",
+      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
+      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
+      "alreadyConfigured": "I already configured it"
+    },
     "vaultUnlock": "Metodo di sblocco cassaforte",
     "autoLock": "Blocco automatico per Timeout",
     "identityGenerator": "Generatore di identità",
@@ -182,6 +205,10 @@
     "openSettings": "Apri Impostazioni",
     "vaultUnlockSettings": {
       "description": "Scegli come vuoi sbloccare la cassaforte.",
+      "biometrics": "Biometrics",
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "faceIdTouchId": "Face ID / Touch ID",
       "biometricEnabled": "{{biometric}} abilitato con successo",
       "biometricNotAvailable": "{{biometric}} non disponibile",
       "biometricDisabledMessage": "{{biometric}} è disabilitato per AliasVault. Per usarlo, abilitalo prima nelle impostazioni del dispositivo.",
@@ -379,6 +406,12 @@
       "loginSettings": "Impostazioni di accesso",
       "notFound": "Non trovato"
     },
+    "notFound": {
+      "title": "Page not found",
+      "message": "This page has been moved or deleted.",
+      "goHome": "Go back to the start"
+    },
+    "appName": "AliasVault",
     "reinitialize": {
       "vaultAutoLockedMessage": "Cassaforte bloccata automaticamente dopo timeout.",
       "attemptingToUnlockMessage": "Tentativo di sblocco in corso."
