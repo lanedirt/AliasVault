@@ -1,0 +1,2 @@
+- Gegenereerde e-mailaliassen unieker gemaakt
+- Probleem opgelost waarbij app soms twee keer de unlock procedure toonde
