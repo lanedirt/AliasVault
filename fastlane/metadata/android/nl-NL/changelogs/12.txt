@@ -1,0 +1,3 @@
+- Gegenereerde e-mailaliassen unieker gemaakt
+- Probleem opgelost waarbij app soms twee keer de unlock procedure toonde
+- Probleem opgelost waarbij "opslaan" knop op Android soms niet goed werkte

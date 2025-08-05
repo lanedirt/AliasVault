@@ -1,0 +1,1 @@
+- Fix bug where plain text emails would not be properly readable in dark mode
