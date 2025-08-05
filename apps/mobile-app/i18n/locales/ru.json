@@ -43,7 +43,8 @@
       "invalidAuthCode": "Пожалуйста, введите правильный 6-значный код аутентификации",
       "incorrectPassword": "Неверный пароль. Пожалуйста, повторите попытку.",
       "enterPassword": "Пожалуйста, введите ваш пароль",
-      "serverError": "Не удалось подключиться к серверу AliasVault. Пожалуйста, повторите попытку позже или обратитесь в службу поддержки, если проблема не устранится."
+      "serverError": "Не удалось подключиться к серверу AliasVault. Пожалуйста, повторите попытку позже или обратитесь в службу поддержки, если проблема не устранится.",
+      "incorrectPasswordFallback": "Incorrect password. Please try again."
     },
     "confirmLogout": "Вы уверены, что хотите выйти? Вам необходимо повторно войти в систему, используя свой мастер-пароль, чтобы получить доступ к своему хранилищу.",
     "noAccountYet": "Нет аккаунта?",
@@ -139,10 +140,20 @@
       "credentialUpdated": "Учетные данные успешно обновлены",
       "credentialCreated": "Учетные данные успешно созданы"
     },
+    "createNewAliasFor": "Create new alias for",
     "errors": {
       "loadFailed": "Не удалось загрузить учетные данные",
       "generateUsernameFailed": "Не удалось сгенерировать имя пользователя",
-      "generatePasswordFailed": "Не удалось сгенерировать пароль"
+      "generatePasswordFailed": "Не удалось сгенерировать пароль",
+      "generic": "Error"
+    },
+    "contextMenu": {
+      "title": "Credential Options",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copyUsername": "Copy Username",
+      "copyEmail": "Copy Email",
+      "copyPassword": "Copy Password"
     }
   },
   "settings": {
@@ -161,6 +172,18 @@
       "warningText": "Примечание: При использовании автозаполнения вам потребуется пройти аутентификацию с помощью Face ID / Touch ID или пароля вашего устройства."
     },
     "androidAutofill": "Автозаполнение Android",
+    "androidAutofillSettings": {
+      "warningTitle": "⚠️ Experimental Feature",
+      "warningDescription": "Autofill support for Android is currently in an experimental state.",
+      "warningLink": "Read more about it here",
+      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
+      "howToEnable": "How to enable:",
+      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
+      "openAutofillSettings": "Open Autofill Settings",
+      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
+      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
+      "alreadyConfigured": "I already configured it"
+    },
     "vaultUnlock": "Способ разблокировки хранилища",
     "autoLock": "Тайм-аут автоматической блокировки",
     "identityGenerator": "Генератор личности",
@@ -182,6 +205,10 @@
     "openSettings": "Открыть настройки",
     "vaultUnlockSettings": {
       "description": "Выберите способ, которым вы хотите разблокировать свое хранилище.",
+      "biometrics": "Biometrics",
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "faceIdTouchId": "Face ID / Touch ID",
       "biometricEnabled": "{{biometric}} теперь успешно включен",
       "biometricNotAvailable": "{{biometric}} недоступен",
       "biometricDisabledMessage": "{{biometric}} отключен для AliasVault. Чтобы использовать его, пожалуйста, сначала включите его в настройках вашего устройства.",
@@ -379,6 +406,12 @@
       "loginSettings": "Настройки входа",
       "notFound": "Не найдено"
     },
+    "notFound": {
+      "title": "Page not found",
+      "message": "This page has been moved or deleted.",
+      "goHome": "Go back to the start"
+    },
+    "appName": "AliasVault",
     "reinitialize": {
       "vaultAutoLockedMessage": "Хранилище автоматически блокируется по истечении таймаута.",
       "attemptingToUnlockMessage": "Попытка разблокировки."
