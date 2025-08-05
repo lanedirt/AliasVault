@@ -3,23 +3,23 @@
     "title": "AliasVault завантажується",
     "message": "Ініціалізація безпечного середовища. AliasVault надає пріоритет вашій конфіденційності, працюючи повністю у вашому браузері. Перше завантаження може зайняти деякий час.",
     "refreshText": "Якщо завантаження зупинилося, натисніть кнопку нижче, щоб оновити сторінку.",
-    "refreshButtonText": "Refresh Page"
+    "refreshButtonText": "Оновити сторінку"
   },
   "errors": {
     "unhandledError": "Сталася невідома помилка. Спробуйте перезавантажити сторінку. Якщо проблема не зникає, зверніться до служби підтримки.",
     "webAssemblyError": "Для роботи AliasVault потрібна технологія WebAssembly, яку цей браузер не підтримує. Спробуйте скористатися більш сучасним браузером, який підтримує WebAssembly.",
-    "reloadPageText": "Reload Page"
+    "reloadPageText": "Перезавантажити сторінку"
   },
   "quotes": {
     "security": [
-      "Your identity is your most valuable asset. Protect it like one.",
-      "In the digital world, a strong password is your first line of defense.",
-      "Security is not a product, but a process.",
-      "The weakest link in the security chain is the human element.",
-      "Security is always excessive until it's not enough.",
-      "Trust, but verify - especially online.",
-      "Your data is only as secure as your weakest password.",
-      "The most secure password is the one you can't remember."
+      "Ваша ідентичність – ваш найцінніший актив. Захищайте її як таку.",
+      "У цифровому світі надійний пароль – це ваша перша лінія захисту.",
+      "Безпека – це не продукт, а процес.",
+      "Найслабшою ланкою в ланцюжку безпеки є людський фактор.",
+      "Безпека завжди здається надмірною, допоки її не вистачає.",
+      "Довіряйте, але перевіряйте – особливо в Інтернеті.",
+      "Ваші дані захищені лише настільки, наскільки захищений ваш найслабший пароль.",
+      "Найнадійніший пароль – той, який ви не можете запам’ятати."
     ]
   }
 }
