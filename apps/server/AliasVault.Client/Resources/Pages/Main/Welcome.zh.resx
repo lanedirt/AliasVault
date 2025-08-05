@@ -80,7 +80,7 @@
     <comment>Title for two-factor authentication tip</comment>
   </data>
   <data name="TwoFactorTipContent">
-    <value>双因素认证（2FA）为你的账户增加了额外的安全层。在访问加密的保险库之前，你需要输入来自认证器应用的代码或提供恢复代码。</value>
+    <value>双因素认证（2FA）为你的账户增加了额外的安全层。在访问加密的保险库之前，你需要输入认证器的验证码或提供恢复代码。</value>
     <comment>Content for two-factor authentication tip</comment>
   </data>
   <data name="ExtensionsAppsTipTitle">
@@ -88,7 +88,7 @@
     <comment>Title for browser extensions and mobile apps tip</comment>
   </data>
   <data name="ExtensionsAppsTipContent">
-    <value>安装AliasVault浏览器扩展和移动应用，可直接从浏览器和智能手机创建别名并自动填充表单。</value>
+    <value>安装AliasVault浏览器扩展和移动应用，可直接从浏览器和手机创建别名并自动填充表单。</value>
     <comment>Content for browser extensions and mobile apps tip</comment>
   </data>
   <!-- Create first identity step content -->
