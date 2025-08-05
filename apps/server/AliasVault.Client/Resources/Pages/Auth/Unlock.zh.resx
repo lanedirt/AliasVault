@@ -63,7 +63,7 @@
     <comment>Message shown while WebAuthn authentication is in progress</comment>
   </data>
   <data name="QuickUnlockDescription" xml:space="preserve">
-    <value>使用指纹、面容 ID 或安全密钥快速解锁你的保险库。或者使用密码作为备用方式登录。</value>
+    <value>使用指纹、Face ID 或安全密钥快速解锁你的保险库。或者使用密码作为备用方式登录。</value>
     <comment>Description explaining WebAuthn unlock options</comment>
   </data>
   <data name="UnlockWithWebAuthn" xml:space="preserve">
