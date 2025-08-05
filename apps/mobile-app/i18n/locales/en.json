@@ -205,6 +205,10 @@
     "openSettings": "Open Settings",
     "vaultUnlockSettings": {
       "description": "Choose how you want to unlock your vault.",
+      "biometrics": "Biometrics",
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "faceIdTouchId": "Face ID / Touch ID",
       "biometricEnabled": "{{biometric}} is now successfully enabled",
       "biometricNotAvailable": "{{biometric}} Not Available",
       "biometricDisabledMessage": "{{biometric}} is disabled for AliasVault. In order to use it, please enable it in your device settings first.",
