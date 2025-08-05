@@ -87,19 +87,19 @@
     <comment>Table column header</comment>
   </data>
   <data name="RevokeButton" xml:space="preserve">
-    <value>撤销</value>
+    <value>注销</value>
     <comment>Button to revoke session</comment>
   </data>
   <data name="RevokeSuccessMessage" xml:space="preserve">
-    <value>会话已成功撤销。</value>
+    <value>会话已成功注销。</value>
     <comment>Success message when session is revoked</comment>
   </data>
   <data name="RevokeErrorMessage" xml:space="preserve">
-    <value>撤销会话失败。</value>
+    <value>注销会话失败。</value>
     <comment>Error message when session revocation fails</comment>
   </data>
   <data name="RevokeExceptionMessage" xml:space="preserve">
-    <value>撤销会话失败: {0}。</value>
+    <value>注销会话失败: {0}。</value>
     <comment>Exception message when session revocation fails. {0} is placeholder for error details</comment>
   </data>
 </root>
