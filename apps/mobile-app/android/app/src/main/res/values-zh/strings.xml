@@ -8,4 +8,9 @@
   <string name="autofill_no_match_found">未找到匹配项，是否新建？</string>
   <string name="autofill_open_app">打开应用</string>
   <string name="autofill_vault_locked">保险库已锁定</string>
+  <!-- Biometric prompts -->
+  <string name="biometric_store_key_title">Store Encryption Key</string>
+  <string name="biometric_store_key_subtitle">Authenticate to securely store your encryption key in the Android Keystore. This enables secure access to your vault.</string>
+  <string name="biometric_unlock_vault_title">Unlock Vault</string>
+  <string name="biometric_unlock_vault_subtitle">Authenticate to access your vault</string>
 </resources>
