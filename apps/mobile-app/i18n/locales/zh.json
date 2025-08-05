@@ -89,7 +89,7 @@
     "username": "用户名",
     "email": "电子邮箱",
     "alias": "别名",
-    "metadata": "元数据",
+    "metadata": "备注",
     "firstName": "名",
     "lastName": "姓",
     "nickName": "昵称",
@@ -129,7 +129,7 @@
     "credentialDetails": "凭证详情",
     "emailPreview": "邮件预览",
     "switchBackToBrowser": "切换回浏览器继续操作。",
-    "twoFactorAuth": "双因素认证",
+    "twoFactorAuth": "双因素认证（2FA）",
     "totpCode": "TOTP验证码",
     "attachments": "附件",
     "loadingAttachments": "加载附件中……",
@@ -192,7 +192,7 @@
       "keystoreAndroid": "Android密钥库"
     },
     "autoLockSettings": {
-      "description": "选择应用在需要重新验证前可在后台停留的时间。你需要使用Face ID或输入密码再次解锁保险库。"
+      "description": "选择应用在需要重新验证前可在后台停留的时间。你需要使用Face ID/Touch ID或输入密码再次解锁保险库。"
     },
     "identityGeneratorSettings": {
       "description": "配置生成新身份时的默认语言和性别偏好。",
@@ -241,11 +241,11 @@
       "activeSessions": {
         "headerText": "以下是你的账户当前登录或有活跃会话的设备列表。你可以在此处从任意会话中登出。",
         "noSessions": "无活跃会话",
-        "revoke": "撤销",
-        "revokeSession": "撤销会话",
-        "revokeConfirmation": "确定要撤销此会话吗？这将使你从所选设备中登出。",
-        "sessionRevoked": "会话已成功撤销",
-        "failedToRevoke": "撤销会话失败",
+        "revoke": "注销",
+        "revokeSession": "注销会话",
+        "revokeConfirmation": "确定要注销此会话吗？这将使你从所选设备中登出。",
+        "sessionRevoked": "会话已成功注销",
+        "failedToRevoke": "注销会话失败",
         "failedToLoad": "加载活跃会话失败",
         "lastActive": "最后活跃时间",
         "expires": "过期时间"
