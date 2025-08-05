@@ -1,7 +1,7 @@
 {
   "loading": {
     "title": "AliasVault in caricamento",
-    "message": "Inizializzazione dell'ambiente sicuro. AliasVault dà la priorità alla tua privacy eseguendo interamente nel tuo browser. Il primo caricamento potrebbe richiedere un breve periodo.",
+    "message": "Inizializzazione dell'ambiente sicuro. AliasVault dà la priorità alla tua privacy funzionando interamente nel tuo browser. Il primo caricamento potrebbe richiedere un più tempo.",
     "refreshText": "Se il caricamento sembra bloccato, puoi cliccare sul pulsante qui sotto per aggiornare la pagina.",
     "refreshButtonText": "Aggiornare pagina"
   },
