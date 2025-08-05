@@ -2,7 +2,7 @@
   "auth": {
     "loginTitle": "登录AliasVault",
     "username": "用户名或电子邮箱",
-    "usernamePlaceholder": "姓名 / name@company.com",
+    "usernamePlaceholder": "name / name@company.com",
     "password": "密码",
     "passwordPlaceholder": "请输入密码",
     "rememberMe": "记住我",
@@ -354,7 +354,7 @@
     "okay": "确定",
     "status": {
       "preparingUpgrade": "准备升级中……",
-      "vaultAlreadyUpToDate": "保险库已是最新版本",
+      "vaultAlreadyUpToDate": "当前保险库数据已是最新",
       "startingDatabaseTransaction": "开始数据库事务……",
       "applyingDatabaseMigrations": "应用数据库迁移……",
       "applyingMigration": "应用迁移 {{current}} / {{total}}……",
