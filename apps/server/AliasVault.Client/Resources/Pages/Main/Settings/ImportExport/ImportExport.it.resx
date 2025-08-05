@@ -63,7 +63,7 @@
     <comment>Page title</comment>
   </data>
   <data name="PageDescription" xml:space="preserve">
-    <value>In questa pagina puoi importare ed esportare la tua cassaforte.</value>
+    <value>In questa pagina puoi importare ed esportare la tua casseforte.</value>
     <comment>Page description</comment>
   </data>
   <data name="ImportSectionTitle" xml:space="preserve">
@@ -79,7 +79,7 @@
     <comment>Export section title</comment>
   </data>
   <data name="ExportSectionDescription" xml:space="preserve">
-    <value>Se si desidera esportare le proprie credenziali AliasVault su un altro server AliasVault (ad es. dal cloud al self-hosted o viceversa) o ad un altro servizio, è possibile esportarlo qui. Nota che tutte le esportazioni non sono cifrate in modo da memorizzarlo in un luogo sicuro ed eliminarlo quando non ne hai più bisogno.</value>
+    <value>Se si desidera esportare le proprie credenziali AliasVault su un altro server AliasVault (ad es. dal cloud al self-hosted o viceversa) o ad un altro servizio, è possibile farlo qui. Nota che tutte le esportazioni non sono cifrate per cui memorizzale in un luogo sicuro ed eliminale quando non ne hai più bisogno.</value>
     <comment>Export section description</comment>
   </data>
   <data name="ExportCsvButton" xml:space="preserve">
@@ -95,7 +95,7 @@
     <comment>Export confirmation dialog title</comment>
   </data>
   <data name="ExportWarningMessage" xml:space="preserve">
-    <value>Attenzione: Esportare la cassaforte in un file non cifrato esporrà tutte le password e le informazioni sensibili in testo semplice. Farlo solo su computer affidabili e assicurarti:
+    <value>Attenzione: Esportare la cassaforte in un file non cifrato esporrà tutte le password e le informazioni sensibili in testo semplice. Fallo solo su computer affidabili e assicurarti di:
 
 • Conservare il file esportato in una posizione sicura
 • Eliminare il file quando non ne hai più bisogno
@@ -109,7 +109,7 @@ Sei sicuro di voler continuare con l'esportazione?</value>
     <comment>Reset vault section title</comment>
   </data>
   <data name="ResetVaultSectionDescription" xml:space="preserve">
-    <value>Questa opzione ti permette di svuotare completamente la tua cassaforte mantenendo il tuo account e gli alias e-mail. Usare questo se si desidera avviare fresco dopo aver importato i dati da un altro gestore di password o se si desidera cancellare tutte le credenziali esistenti per ricominciare.</value>
+    <value>Questa opzione ti permette di svuotare completamente la tua cassaforte mantenendo il tuo account e gli alias e-mail. Usa questa funzione se desideri  ricominciare da capo dopo aver importato i dati da un altro gestore di password o se desideri cancellare tutte le credenziali esistenti per ricominciare.</value>
     <comment>Reset vault section description</comment>
   </data>
 </root>
