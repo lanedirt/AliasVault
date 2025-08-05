@@ -79,11 +79,11 @@
     <comment>Message when no emails are available</comment>
   </data>
   <data name="EmailAddressInUseError" xml:space="preserve">
-    <value>L'indirizzo email scelto è già in uso. Cambia l'indirizzo modificando questa credenziale.</value>
+    <value>L'indirizzo email scelto è già in uso. Cambia l'indirizzo modificando queste credenziali.</value>
     <comment>Error message when email address is already in use</comment>
   </data>
   <data name="EmailLoadError" xml:space="preserve">
-    <value>Si è verificato un errore durante il caricamento delle email. Modifica e salva la credenziale per sincronizzare il database, poi riprova.</value>
+    <value>Si è verificato un errore durante il caricamento delle email. Modifica e salva le credenziali per sincronizzare il database, poi riprova.</value>
     <comment>Error message when email loading fails</comment>
   </data>
   <data name="LoadMoreButton" xml:space="preserve">
