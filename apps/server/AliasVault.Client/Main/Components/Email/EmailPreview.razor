@@ -270,7 +270,9 @@
             else if (Email.MessagePlain is not null)
             {
                 // No HTML but plain text is available
-                EmailBody = Email.MessagePlain;
+                // Escape HTML entities and wrap in pre tag to preserve formatting
+                var escapedText = System.Net.WebUtility.HtmlEncode(Email.MessagePlain);
+                EmailBody = $"<pre style='font-family: system-ui, -apple-system, sans-serif; white-space: pre-wrap; word-wrap: break-word; margin: 0;'>{escapedText}</pre>";
             }
             else
             {
