@@ -124,7 +124,7 @@
     "vaultSyncedSuccessfully": "Vault synced successfully",
     "vaultUpToDate": "Vault is up-to-date",
     "offlineMessage": "You are offline. Please connect to the internet to sync your vault.",
-    "credentialCreated": "Credential Created!",
+    "credentialCreated": "Käyttäjätunnus luotu!",
     "credentialCreatedMessage": "Your new credential has been added to your vault and is ready to use.",
     "credentialDetails": "Credential Details",
     "emailPreview": "Email Preview",
