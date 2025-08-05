@@ -44,7 +44,7 @@
       "incorrectPassword": "Password errata. Riprova.",
       "enterPassword": "Inserisci la password",
       "serverError": "Impossibile raggiungere il server AliasVault. Riprova più tardi o contatta il supporto se il problema persiste.",
-      "incorrectPasswordFallback": "Incorrect password. Please try again."
+      "incorrectPasswordFallback": "Password errata. Riprovare."
     },
     "confirmLogout": "Sei sicuro di voler uscire? Dovrai accedere nuovamente con la password principale per accedere alla cassaforte.",
     "noAccountYet": "Non hai ancora un account?",
@@ -140,20 +140,20 @@
       "credentialUpdated": "Credenziale aggiornata con successo",
       "credentialCreated": "Credenziale creata con successo"
     },
-    "createNewAliasFor": "Create new alias for",
+    "createNewAliasFor": "Crea un nuovo alias per",
     "errors": {
       "loadFailed": "Caricamento credenziale non riuscito",
       "generateUsernameFailed": "Generazione nome utente non riuscita",
       "generatePasswordFailed": "Generazione password non riuscita",
-      "generic": "Error"
+      "generic": "Errore"
     },
     "contextMenu": {
-      "title": "Credential Options",
-      "edit": "Edit",
-      "delete": "Delete",
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
+      "title": "Opzioni Credenziali",
+      "edit": "Modifica",
+      "delete": "Elimina",
+      "copyUsername": "Copia Nome Utente",
+      "copyEmail": "Copia E-mail",
+      "copyPassword": "Copia Password"
     }
   },
   "settings": {
@@ -173,16 +173,16 @@
     },
     "androidAutofill": "Compilazione automatica Android",
     "androidAutofillSettings": {
-      "warningTitle": "⚠️ Experimental Feature",
-      "warningDescription": "Autofill support for Android is currently in an experimental state.",
-      "warningLink": "Read more about it here",
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
-      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
-      "openAutofillSettings": "Open Autofill Settings",
-      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
-      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
-      "alreadyConfigured": "I already configured it"
+      "warningTitle": "⚠️ Funzione Sperimentale",
+      "warningDescription": "Il supporto di riempimento automatico per Android è attualmente in stato sperimentale.",
+      "warningLink": "Per saperne di più clicca qui",
+      "headerText": "È possibile configurare AliasVault per fornire la funzionalità di riempimento automatico della password nativa in Android. Seguire le istruzioni qui sotto per attivarlo.",
+      "howToEnable": "Come abilitare:",
+      "step1": "1. Apri le impostazioni di Android tramite il pulsante qui sotto, e modifica il \"servizio preferito di riempimento automatico\" in \"AliasVault\"",
+      "openAutofillSettings": "Apri Impostazioni Di Riempimento Automatico",
+      "buttonTip": "Se il pulsante qui sopra non funziona, potrebbe essere bloccato a causa delle impostazioni di sicurezza. È possibile andare manualmente in Impostazioni Android → Gestione generale → Password e riempimento automatico.",
+      "step2": "2. Alcune applicazioni, ad esempio Google Chrome, potrebbero richiedere la configurazione manuale nelle loro impostazioni per consentire applicazioni di riempimento automatico di terze parti. Tuttavia, la maggior parte delle app dovrebbe funzionare con il riempimento automatico di default.",
+      "alreadyConfigured": "L'ho già configurato"
     },
     "vaultUnlock": "Metodo di sblocco cassaforte",
     "autoLock": "Blocco automatico per Timeout",
@@ -205,7 +205,7 @@
     "openSettings": "Apri Impostazioni",
     "vaultUnlockSettings": {
       "description": "Scegli come vuoi sbloccare la cassaforte.",
-      "biometrics": "Biometrics",
+      "biometrics": "Dati biometrici",
       "faceId": "Face ID",
       "touchId": "Touch ID",
       "faceIdTouchId": "Face ID / Touch ID",
@@ -407,9 +407,9 @@
       "notFound": "Non trovato"
     },
     "notFound": {
-      "title": "Page not found",
-      "message": "This page has been moved or deleted.",
-      "goHome": "Go back to the start"
+      "title": "Pagina non trovata",
+      "message": "Questa pagina è stata spostata o cancellata.",
+      "goHome": "Torna all'inizio"
     },
     "appName": "AliasVault",
     "reinitialize": {
