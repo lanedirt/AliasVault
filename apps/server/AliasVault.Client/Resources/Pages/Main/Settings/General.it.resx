@@ -54,7 +54,7 @@
     <comment>Label for public domains group</comment>
   </data>
   <data name="AutoEmailRefreshLabel">
-    <value>Aggiorna automaticamente i contenuti delle email quando ne arrivano di nuovi</value>
+    <value>Aggiorna automaticamente i contenuti delle email quando ne arrivano di nuove</value>
     <comment>Label for auto email refresh setting</comment>
   </data>
   <!-- Alias Settings Section -->
