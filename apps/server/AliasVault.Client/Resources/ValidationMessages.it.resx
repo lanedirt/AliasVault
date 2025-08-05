@@ -72,7 +72,7 @@
     <comment>Generic error message for password minimum length validation</comment>
   </data>
   <data name="PasswordsDoNotMatchGeneric" xml:space="preserve">
-    <value>Le password non corrispondono</value>
+    <value>Le password non corrispondono.</value>
     <comment>Generic error message when passwords don't match</comment>
   </data>
   <!-- Required field validation messages -->
