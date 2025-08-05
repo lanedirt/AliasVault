@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, TouchableOpacity, Linking } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -14,6 +15,7 @@ import NativeVaultManager from '@/specs/NativeVaultManager';
  */
 export default function AndroidAutofillScreen() : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
   const { markAutofillConfigured, shouldShowAutofillReminder } = useAuth();
 
   /**
@@ -123,25 +125,25 @@ export default function AndroidAutofillScreen() : React.ReactNode {
     <ThemedContainer>
       <ThemedScrollView>
         <View style={styles.warningContainer}>
-          <ThemedText style={styles.warningTitle}>⚠️ Experimental Feature</ThemedText>
+          <ThemedText style={styles.warningTitle}>{t('settings.androidAutofillSettings.warningTitle')}</ThemedText>
           <ThemedText style={styles.warningDescription}>
-            Autofill support for Android is currently in an experimental state.{' '}
+            {t('settings.androidAutofillSettings.warningDescription')}{' '}
             <ThemedText style={styles.warningLink} onPress={handleOpenDocs}>
-              Read more about it here
+              {t('settings.androidAutofillSettings.warningLink')}
             </ThemedText>
           </ThemedText>
         </View>
 
         <View>
           <ThemedText style={styles.headerText}>
-            You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.
+            {t('settings.androidAutofillSettings.headerText')}
           </ThemedText>
         </View>
 
         <View style={styles.instructionContainer}>
-          <ThemedText style={styles.instructionTitle}>How to enable:</ThemedText>
+          <ThemedText style={styles.instructionTitle}>{t('settings.androidAutofillSettings.howToEnable')}</ThemedText>
           <ThemedText style={styles.instructionStep}>
-            1. Open Android Settings via the button below, and change the &quot;autofill preferred service&quot; to &quot;AliasVault&quot;
+            {t('settings.androidAutofillSettings.step1')}
           </ThemedText>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -149,15 +151,15 @@ export default function AndroidAutofillScreen() : React.ReactNode {
               onPress={handleConfigurePress}
             >
               <ThemedText style={styles.configureButtonText}>
-                Open Autofill Settings
+                {t('settings.androidAutofillSettings.openAutofillSettings')}
               </ThemedText>
             </TouchableOpacity>
             <ThemedText style={styles.tipStep}>
-              If the button above doesn&apos;t work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.
+              {t('settings.androidAutofillSettings.buttonTip')}
             </ThemedText>
           </View>
           <ThemedText style={styles.instructionStep}>
-            2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.
+            {t('settings.androidAutofillSettings.step2')}
           </ThemedText>
           <View style={styles.buttonContainer}>
             {shouldShowAutofillReminder && (
@@ -166,7 +168,7 @@ export default function AndroidAutofillScreen() : React.ReactNode {
                 onPress={handleAlreadyConfigured}
               >
                 <ThemedText style={styles.secondaryButtonText}>
-                  I already configured it
+                  {t('settings.androidAutofillSettings.alreadyConfigured')}
                 </ThemedText>
               </TouchableOpacity>
             )}

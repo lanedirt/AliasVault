@@ -3,6 +3,7 @@ import { NavigationContainerRef, ParamListBase } from '@react-navigation/native'
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router, useGlobalSearchParams, usePathname } from 'expo-router';
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppState, Platform } from 'react-native';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
@@ -55,6 +56,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * AuthProvider to provide the authentication state to the app that components can use.
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
@@ -208,12 +210,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // For Android, we use the term "Biometrics" for facial recognition and fingerprint.
       if (Platform.OS === 'android') {
-        return 'Biometrics';
+        return t('settings.vaultUnlockSettings.biometrics');
       }
 
       // For iOS, we check if the device has explicit Face ID or Touch ID support.
       if (!hasBiometrics || !enrolled) {
-        return 'Face ID / Touch ID';
+        return t('settings.vaultUnlockSettings.faceIdTouchId');
       }
 
       const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
@@ -221,17 +223,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const hasTouchIDSupport = types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT);
 
       if (hasFaceIDSupport) {
-        return 'Face ID';
+        return t('settings.vaultUnlockSettings.faceId');
       } else if (hasTouchIDSupport) {
-        return 'Touch ID';
+        return t('settings.vaultUnlockSettings.touchId');
       }
 
-      return 'Face ID / Touch ID';
+      return t('settings.vaultUnlockSettings.faceIdTouchId');
     } catch (error) {
       console.error('Failed to get biometric display name:', error);
-      return 'Face ID / Touch ID';
+      return t('settings.vaultUnlockSettings.faceIdTouchId');
     }
-  }, []);
+  }, [t]);
 
   /**
    * Get the display label for the current auth method
@@ -248,8 +250,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Failed to check Face ID enrollment:', error);
       }
     }
-    return 'Password';
-  }, [getEnabledAuthMethods, getBiometricDisplayName, isBiometricsEnabledOnDevice]);
+    return t('credentials.password');
+  }, [getEnabledAuthMethods, getBiometricDisplayName, isBiometricsEnabledOnDevice, t]);
 
   /**
    * Get the auto-lock timeout from the iOS credentials manager
@@ -322,8 +324,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App coming to foreground
-        if (!pathname?.includes('unlock') && !pathname?.includes('login')) {
+        /**
+         * App coming to foreground
+         * Skip vault re-initialization checks during unlock, login, initialize, and reinitialize flows to prevent race conditions
+         * where the AppState listener fires during app initialization, especially on iOS release builds.
+         */
+        if (!pathname?.includes('unlock') && !pathname?.includes('login') && !pathname?.includes('initialize') && !pathname?.includes('reinitialize')) {
           try {
             // Check if vault is unlocked.
             const isUnlocked = await isVaultUnlocked();

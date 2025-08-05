@@ -294,14 +294,23 @@ update_version "../apps/browser-extension/safari-xcode/AliasVault/AliasVault.xco
     "CURRENT_PROJECT_VERSION = $new_safari_build;" \
     "Safari Extension"
 
-# Update install.sh version if it exists
-if [ -f "../install.sh" ]; then
-    echo -e "\n"
-    echo "--------------------------------"
-    echo "Reminder: if you've made changes to install.sh since the last release, remember to update its @version in the header to match this release version ($version)."
-    echo "--------------------------------"
-    read -p "Press Enter to continue..."
-fi
+# Show reminders
+echo -e "\n"
+echo "--------------------------------"
+echo "IMPORTANT REMINDERS:"
+echo "--------------------------------"
+
+# Install.sh reminder
+echo "• If you've made changes to install.sh since the last release, remember to update its @version in the header to match this release version ($version)."
+
+# Changelog reminder
+echo "• Add changelogs for new version $version to the /fastlane directory:"
+echo "  - iOS: fastlane/metadata/ios/[lang]/changelogs/$(echo $new_ios_build | cut -d. -f1-2).txt"
+echo "  - Android: fastlane/metadata/android/[lang]/changelogs/$(echo $new_android_build | cut -d. -f1-2).txt"
+echo "  - Browser Extension: fastlane/metadata/browser-extension/[lang]/changelogs/$version.txt"
+
+echo "--------------------------------"
+read -p "Press Enter to continue..."
 
 echo -e "\nAll build numbers have been updated successfully!"
 echo "New version: $version"

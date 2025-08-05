@@ -35,6 +35,16 @@ public class AliasVaultUser : IdentityUser
     public DateTime UpdatedAt { get; set; }
 
     /// <summary>
+    /// Gets or sets the maximum number of emails for all of user's aliases. 0 means unlimited.
+    /// </summary>
+    public int MaxEmails { get; set; } = 0;
+
+    /// <summary>
+    /// Gets or sets the maximum age of emails in days. Emails older than this will be deleted. 0 means unlimited.
+    /// </summary>
+    public int MaxEmailAgeDays { get; set; } = 0;
+
+    /// <summary>
     /// Gets or sets the collection of vaults.
     /// </summary>
     public virtual ICollection<Vault> Vaults { get; set; } = [];

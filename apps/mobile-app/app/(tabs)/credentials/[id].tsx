@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, Pressable } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, Linking, Pressable, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
@@ -49,19 +49,32 @@ export default function CredentialDetailsScreen() : React.ReactNode {
        */
       headerRight: () => (
         <View style={styles.headerRightContainer}>
-          <Pressable
-            onPressIn={handleEdit}
-            android_ripple={{ color: 'lightgray' }}
-            pressRetentionOffset={100}
-            hitSlop={100}
-            style={styles.headerRightButton}
-          >
-            <MaterialIcons
-              name="edit"
-              size={24}
-              color={colors.primary}
-            />
-          </Pressable>
+          {Platform.OS === 'android' ? (
+            <Pressable
+              onPressIn={handleEdit}
+              android_ripple={{ color: 'lightgray' }}
+              pressRetentionOffset={100}
+              hitSlop={100}
+              style={styles.headerRightButton}
+            >
+              <MaterialIcons
+                name="edit"
+                size={24}
+                color={colors.primary}
+              />
+            </Pressable>
+          ) : (
+            <TouchableOpacity
+              onPress={handleEdit}
+              style={styles.headerRightButton}
+            >
+              <MaterialIcons
+                name="edit"
+                size={22}
+                color={colors.primary}
+              />
+            </TouchableOpacity>
+          )}
         </View>
       ),
     });

@@ -5,6 +5,7 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 import { extractServiceNameFromUrl } from '@/utils/UrlUtility';
 
 import { useColors } from '@/hooks/useColorScheme';
+import { useTranslation } from '@/hooks/useTranslation';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
@@ -21,6 +22,7 @@ interface IServiceUrlNoticeProps {
 export function ServiceUrlNotice({ serviceUrl, onDismiss }: IServiceUrlNoticeProps): React.ReactNode {
   const router = useRouter();
   const colors = useColors();
+  const { t } = useTranslation();
   const serviceName = extractServiceNameFromUrl(serviceUrl);
 
   /**
@@ -65,7 +67,7 @@ export function ServiceUrlNotice({ serviceUrl, onDismiss }: IServiceUrlNoticePro
       >
         <MaterialIcons name="add-circle" size={20} color={colors.primary} />
         <ThemedText style={styles.text}>
-          Create new alias for &ldquo;{serviceName}&rdquo;?
+          {t('credentials.createNewAliasFor')} &ldquo;{serviceName}&rdquo;?
         </ThemedText>
       </TouchableOpacity>
       <TouchableOpacity

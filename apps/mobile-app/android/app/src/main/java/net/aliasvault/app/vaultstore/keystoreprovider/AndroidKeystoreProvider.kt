@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
+import net.aliasvault.app.R
 import java.io.File
 import java.nio.ByteBuffer
 import java.security.KeyStore
@@ -117,10 +118,8 @@ class AndroidKeystoreProvider(
 
                 // Create BiometricPrompt
                 val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Store Encryption Key")
-                    .setSubtitle(
-                        "Authenticate to securely store your encryption key in the Android Keystore. This enables secure access to your vault.",
-                    )
+                    .setTitle(context.getString(R.string.biometric_store_key_title))
+                    .setSubtitle(context.getString(R.string.biometric_store_key_subtitle))
                     .setAllowedAuthenticators(
                         BiometricManager.Authenticators.BIOMETRIC_STRONG or
                             BiometricManager.Authenticators.DEVICE_CREDENTIAL,
@@ -233,8 +232,8 @@ class AndroidKeystoreProvider(
 
                 // Create BiometricPrompt
                 val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("Unlock Vault")
-                    .setSubtitle("Authenticate to access your vault")
+                    .setTitle(context.getString(R.string.biometric_unlock_vault_title))
+                    .setSubtitle(context.getString(R.string.biometric_unlock_vault_subtitle))
                     .setAllowedAuthenticators(
                         BiometricManager.Authenticators.BIOMETRIC_STRONG or
                             BiometricManager.Authenticators.DEVICE_CREDENTIAL,

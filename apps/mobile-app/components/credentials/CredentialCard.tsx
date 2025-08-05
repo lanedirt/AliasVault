@@ -1,5 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } from 'react-native';
 import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import Toast from 'react-native-toast-message';
@@ -20,6 +21,7 @@ type CredentialCardProps = {
  */
 export function CredentialCard({ credential, onCredentialDelete }: CredentialCardProps) : React.ReactNode {
   const colors = useColors();
+  const { t } = useTranslation();
 
   /**
    * Get the display text for a credential, showing username by default,
@@ -74,15 +76,15 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
       case 'Delete':
         Keyboard.dismiss();
         Alert.alert(
-          "Delete Credential",
-          "Are you sure you want to delete this credential? This action cannot be undone.",
+          t('credentials.deleteCredential'),
+          t('credentials.deleteConfirm'),
           [
             {
-              text: "Cancel",
+              text: t('common.cancel'),
               style: "cancel"
             },
             {
-              text: "Delete",
+              text: t('common.delete'),
               style: "destructive",
               /**
                * Handles the delete credential action.
@@ -146,14 +148,14 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
   }[] => {
     const actions = [
       {
-        title: 'Edit',
+        title: t('credentials.contextMenu.edit'),
         systemIcon: Platform.select({
           ios: 'pencil',
           android: 'baseline_edit',
         }),
       },
       {
-        title: 'Delete',
+        title: t('credentials.contextMenu.delete'),
         systemIcon: Platform.select({
           ios: 'trash',
           android: 'baseline_delete',
@@ -164,7 +166,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
 
     if (credential.Username) {
       actions.push({
-        title: 'Copy Username',
+        title: t('credentials.contextMenu.copyUsername'),
         systemIcon: Platform.select({
           ios: 'person',
           android: 'baseline_person',
@@ -174,7 +176,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
 
     if (credential.Alias?.Email) {
       actions.push({
-        title: 'Copy Email',
+        title: t('credentials.contextMenu.copyEmail'),
         systemIcon: Platform.select({
           ios: 'envelope',
           android: 'baseline_email',
@@ -184,7 +186,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
 
     if (credential.Password) {
       actions.push({
-        title: 'Copy Password',
+        title: t('credentials.contextMenu.copyPassword'),
         systemIcon: Platform.select({
           ios: 'key',
           android: 'baseline_key',
@@ -229,7 +231,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
 
   return (
     <ContextMenu
-      title="Credential Options"
+      title={t('credentials.contextMenu.title')}
       actions={getMenuActions()}
       onPress={handleContextMenuAction}
       previewBackgroundColor={colors.accentBackground}

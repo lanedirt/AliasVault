@@ -2,7 +2,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View, TouchableOpacity, AppState } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, AppState, Platform, Pressable } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 
@@ -80,14 +80,25 @@ export default function AutofillCredentialCreatedScreen() : React.ReactNode {
       /**
        * Header right button.
        */
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={handleStayInApp}
-          style={styles.headerRightButton}
-        >
-          <ThemedText style={{ color: colors.primary }}>{t('common.cancel')}</ThemedText>
-        </TouchableOpacity>
-      ),
+      headerRight: () => 
+        Platform.OS === 'android' ? (
+          <Pressable
+            onPressIn={handleStayInApp}
+            android_ripple={{ color: 'lightgray' }}
+            pressRetentionOffset={100}
+            hitSlop={100}
+            style={styles.headerRightButton}
+          >
+            <ThemedText style={{ color: colors.primary }}>{t('common.cancel')}</ThemedText>
+          </Pressable>
+        ) : (
+          <TouchableOpacity
+            onPress={handleStayInApp}
+            style={styles.headerRightButton}
+          >
+            <ThemedText style={{ color: colors.primary }}>{t('common.cancel')}</ThemedText>
+          </TouchableOpacity>
+        ),
     });
   }, [navigation, colors.primary, styles.headerRightButton, handleStayInApp, t]);
 

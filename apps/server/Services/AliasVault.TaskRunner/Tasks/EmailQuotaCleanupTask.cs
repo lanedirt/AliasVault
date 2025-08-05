@@ -43,35 +43,53 @@ public class EmailQuotaCleanupTask : IMaintenanceTask
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsService.GetAllSettingsAsync();
-        if (settings.MaxEmailsPerUser <= 0)
-        {
-            return;
-        }
-
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        // Get all users with their email claims
-        var userEmailClaims = await dbContext.UserEmailClaims
-            .Select(c => new { c.UserId, c.Address })
+        // Get all users with their email claims and limits
+        var usersWithClaims = await (from u in dbContext.AliasVaultUsers
+                                     join c in dbContext.UserEmailClaims on u.Id equals c.UserId
+                                     select new { u.Id, u.UserName, u.MaxEmails, c.Address })
             .ToListAsync(cancellationToken);
 
         var totalEmailsDeleted = 0;
         var usersProcessed = 0;
 
-        // Group email claims by user
-        foreach (var userGroup in userEmailClaims.GroupBy(c => c.UserId))
+        // Group by user
+        foreach (var userGroup in usersWithClaims.GroupBy(x => new { x.Id, x.UserName, x.MaxEmails }))
         {
-            var userAddresses = userGroup.Select(c => c.Address).ToList();
+            // Determine the effective limit for this user
+            int effectiveLimit;
+            string limitSource;
+
+            if (userGroup.Key.MaxEmails > 0)
+            {
+                // User has a specific limit
+                effectiveLimit = userGroup.Key.MaxEmails;
+                limitSource = "user-specific";
+            }
+            else if (settings.MaxEmailsPerUser > 0)
+            {
+                // Use global limit
+                effectiveLimit = settings.MaxEmailsPerUser;
+                limitSource = "global";
+            }
+            else
+            {
+                // No limits apply
+                continue;
+            }
+
+            var userAddresses = userGroup.Select(x => x.Address).ToList();
 
             // Get total email count for this user
             var emailCount = await dbContext.Emails
                 .Where(e => userAddresses.Contains(e.To))
                 .CountAsync(cancellationToken);
 
-            if (emailCount > settings.MaxEmailsPerUser)
+            if (emailCount > effectiveLimit)
             {
                 // Calculate how many emails need to be deleted
-                var deleteCount = emailCount - settings.MaxEmailsPerUser;
+                var deleteCount = emailCount - effectiveLimit;
 
                 // Delete the oldest emails - attachments will be cascade deleted
                 var emailsDeleted = await dbContext.Emails
@@ -85,18 +103,21 @@ public class EmailQuotaCleanupTask : IMaintenanceTask
                     totalEmailsDeleted += emailsDeleted;
                     usersProcessed++;
                     _logger.LogWarning(
-                        "Deleted {EmailCount} emails for user {UserId} to maintain quota of {MaxEmails}",
+                        "Deleted {EmailCount} emails for user {Username} to maintain quota of {MaxEmails} ({LimitSource} setting)",
                         emailsDeleted,
-                        userGroup.Key,
-                        settings.MaxEmailsPerUser);
+                        userGroup.Key.UserName,
+                        effectiveLimit,
+                        limitSource);
                 }
             }
         }
 
-        _logger.LogWarning(
-            "Deleted {TotalEmails} emails across {UserCount} users to maintain quota of {MaxEmails} max emails per user",
-            totalEmailsDeleted,
-            usersProcessed,
-            settings.MaxEmailsPerUser);
+        if (totalEmailsDeleted > 0)
+        {
+            _logger.LogWarning(
+                "Total emails deleted by quota cleanup: {TotalEmails} across {UserCount} users",
+                totalEmailsDeleted,
+                usersProcessed);
+        }
     }
 }
