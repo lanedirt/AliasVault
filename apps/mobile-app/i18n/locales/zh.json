@@ -44,7 +44,7 @@
       "incorrectPassword": "密码错误，请重试。",
       "enterPassword": "请输入密码",
       "serverError": "无法连接AliasVault服务器。请稍后重试，若问题依旧，请联系支持团队。",
-      "incorrectPasswordFallback": "Incorrect password. Please try again."
+      "incorrectPasswordFallback": "密码错误，请重试。"
     },
     "confirmLogout": "确定要退出登录吗？否则需要重新输入主密码才能访问保险库内容。",
     "noAccountYet": "还没有账号？",
@@ -140,20 +140,20 @@
       "credentialUpdated": "凭证更新成功",
       "credentialCreated": "凭证创建成功"
     },
-    "createNewAliasFor": "Create new alias for",
+    "createNewAliasFor": "创建新别名",
     "errors": {
       "loadFailed": "加载凭证失败",
       "generateUsernameFailed": "生成用户名失败",
       "generatePasswordFailed": "生成密码失败",
-      "generic": "Error"
+      "generic": "错误"
     },
     "contextMenu": {
-      "title": "Credential Options",
-      "edit": "Edit",
-      "delete": "Delete",
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
+      "title": "凭证选项",
+      "edit": "编辑",
+      "delete": "删除",
+      "copyUsername": "复制用户名",
+      "copyEmail": "复制电子邮箱",
+      "copyPassword": "复制密码"
     }
   },
   "settings": {
@@ -173,16 +173,16 @@
     },
     "androidAutofill": "Android自动填充",
     "androidAutofillSettings": {
-      "warningTitle": "⚠️ Experimental Feature",
-      "warningDescription": "Autofill support for Android is currently in an experimental state.",
-      "warningLink": "Read more about it here",
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
-      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
-      "openAutofillSettings": "Open Autofill Settings",
-      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
-      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
-      "alreadyConfigured": "I already configured it"
+      "warningTitle": "⚠️ 实验性功能",
+      "warningDescription": "Android 自动填充功能目前处于实验性阶段。",
+      "warningLink": "点击此处了解更多",
+      "headerText": "你可以为 AliasVault 配置 Android 原生密码自动填充功能，请依照下文说明操作。",
+      "howToEnable": "如何启用：",
+      "step1": "1.点击下方按钮进入 Android 设置，将「自动填充首选服务」更改为「AliasVault」",
+      "openAutofillSettings": "打开自动填充设置",
+      "buttonTip": "如果上方按钮无效，可能是安全设置阻止了操作。你可手动前往：\nAndroid 设置 → 通用管理 → 密码与自动填充",
+      "step2": "部分应用（比如Chrome浏览器）可能需在设置中手动配置，以允许第三方自动填充应用。但大多数应用默认应支持自动填充功能。",
+      "alreadyConfigured": "我已经配置好了"
     },
     "vaultUnlock": "保险库解锁方式",
     "autoLock": "自动锁定超时时间",
@@ -205,7 +205,7 @@
     "openSettings": "打开设置",
     "vaultUnlockSettings": {
       "description": "选择你想要的保险库解锁方式。",
-      "biometrics": "Biometrics",
+      "biometrics": "生物识别",
       "faceId": "Face ID",
       "touchId": "Touch ID",
       "faceIdTouchId": "Face ID / Touch ID",
@@ -407,9 +407,9 @@
       "notFound": "未找到"
     },
     "notFound": {
-      "title": "Page not found",
-      "message": "This page has been moved or deleted.",
-      "goHome": "Go back to the start"
+      "title": "页面未找到",
+      "message": "该页面已被移除或不存在。",
+      "goHome": "返回首页"
     },
     "appName": "AliasVault",
     "reinitialize": {
