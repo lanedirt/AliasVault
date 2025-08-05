@@ -43,7 +43,8 @@
       "invalidAuthCode": "请输入6位动态验证码",
       "incorrectPassword": "密码错误，请重试。",
       "enterPassword": "请输入密码",
-      "serverError": "无法连接AliasVault服务器。请稍后重试，若问题依旧，请联系支持团队。"
+      "serverError": "无法连接AliasVault服务器。请稍后重试，若问题依旧，请联系支持团队。",
+      "incorrectPasswordFallback": "Incorrect password. Please try again."
     },
     "confirmLogout": "确定要退出登录吗？否则需要重新输入主密码才能访问保险库内容。",
     "noAccountYet": "还没有账号？",
@@ -139,10 +140,20 @@
       "credentialUpdated": "凭证更新成功",
       "credentialCreated": "凭证创建成功"
     },
+    "createNewAliasFor": "Create new alias for",
     "errors": {
       "loadFailed": "加载凭证失败",
       "generateUsernameFailed": "生成用户名失败",
-      "generatePasswordFailed": "生成密码失败"
+      "generatePasswordFailed": "生成密码失败",
+      "generic": "Error"
+    },
+    "contextMenu": {
+      "title": "Credential Options",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copyUsername": "Copy Username",
+      "copyEmail": "Copy Email",
+      "copyPassword": "Copy Password"
     }
   },
   "settings": {
@@ -161,6 +172,18 @@
       "warningText": "注意：使用自动填充时，你需要通过Face ID/Touch ID或设备密码进行身份验证。"
     },
     "androidAutofill": "Android自动填充",
+    "androidAutofillSettings": {
+      "warningTitle": "⚠️ Experimental Feature",
+      "warningDescription": "Autofill support for Android is currently in an experimental state.",
+      "warningLink": "Read more about it here",
+      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
+      "howToEnable": "How to enable:",
+      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
+      "openAutofillSettings": "Open Autofill Settings",
+      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
+      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
+      "alreadyConfigured": "I already configured it"
+    },
     "vaultUnlock": "保险库解锁方式",
     "autoLock": "自动锁定超时时间",
     "identityGenerator": "身份生成器",
@@ -182,6 +205,10 @@
     "openSettings": "打开设置",
     "vaultUnlockSettings": {
       "description": "选择你想要的保险库解锁方式。",
+      "biometrics": "Biometrics",
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "faceIdTouchId": "Face ID / Touch ID",
       "biometricEnabled": "{{biometric}}已成功启用",
       "biometricNotAvailable": "{{biometric}}不可用",
       "biometricDisabledMessage": "AliasVault的{{biometric}}已禁用。如需使用，请先在设备设置中启用它。",
@@ -379,6 +406,12 @@
       "loginSettings": "登录设置",
       "notFound": "未找到"
     },
+    "notFound": {
+      "title": "Page not found",
+      "message": "This page has been moved or deleted.",
+      "goHome": "Go back to the start"
+    },
+    "appName": "AliasVault",
     "reinitialize": {
       "vaultAutoLockedMessage": "超时后保险库已自动锁定。",
       "attemptingToUnlockMessage": "正在尝试解锁。"
