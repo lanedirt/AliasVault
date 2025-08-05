@@ -63,7 +63,7 @@
     <comment>Welcome title for new vault creation</comment>
   </data>
   <data name="CreatingDescription" xml:space="preserve">
-    <value>La tua nuova cassaforte cifrata è in fase di inizializzazione. Questo processo potrebbe richiedere un momento. Attendere prego.</value>
+    <value>La tua nuova cassaforte crittografata è in fase d'inizializzazione. Questo processo potrebbe richiedere un momento. Attendere prego.</value>
     <comment>Description for vault creation process</comment>
   </data>
   <data name="SaveFailedError" xml:space="preserve">
