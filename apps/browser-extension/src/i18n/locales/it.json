@@ -1,8 +1,8 @@
 {
   "auth": {
-    "loginTitle": "Accedi ad AliasVault",
+    "loginTitle": "Accedi ad AliasVaultriem",
     "username": "Nome utente o mail",
-    "usernamePlaceholder": "nome / nome@società.com",
+    "usernamePlaceholder": "nome / nome@azienda.com",
     "password": "Password",
     "passwordPlaceholder": "Inserisci la tua password",
     "rememberMe": "Ricordati di me",
@@ -117,13 +117,13 @@
       "USER_NOT_FOUND": "Nome utente o password non validi. Riprova.",
       "INVALID_AUTHENTICATOR_CODE": "Codice di autenticazione non valido. Riprova.",
       "INVALID_RECOVERY_CODE": "Codice di recupero non valido. Riprova.",
-      "REFRESH_TOKEN_REQUIRED": "È necessario aggiornare il token",
+      "REFRESH_TOKEN_REQUIRED": "È necessario aggiornare il token.",
       "USER_NOT_FOUND_IN_TOKEN": "Utente non trovato nel token",
       "USER_NOT_FOUND_IN_DATABASE": "Utente non trovato nel database.",
       "INVALID_REFRESH_TOKEN": "Token di aggiornamento non valido",
       "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Aggiornamento token revocato con successo.",
       "PUBLIC_REGISTRATION_DISABLED": "La registrazione di nuovi account è attualmente disabilitata su questo server. Contatta l'amministratore.",
-      "USERNAME_REQUIRED": "È richiesto il nome utente",
+      "USERNAME_REQUIRED": "È richiesto il nome utente.",
       "USERNAME_ALREADY_IN_USE": "Il nome utente è già in uso.",
       "USERNAME_AVAILABLE": "Il nome utente è disponibile.",
       "USERNAME_MISMATCH": "Il nome utente non corrisponde all'utente corrente.",
@@ -181,9 +181,9 @@
   },
   "credentials": {
     "title": "Credenziali",
-    "addCredential": "Aggiungi credenziale",
-    "editCredential": "Modifica credenziale",
-    "deleteCredential": "Elimina credenziale",
+    "addCredential": "Aggiungi credenziali",
+    "editCredential": "Modifica credenziali",
+    "deleteCredential": "Elimina credenziali",
     "credentialDetails": "Dettagli credenziali",
     "serviceName": "Nome servizio",
     "serviceNamePlaceholder": "es. Gmail, Facebook, Banca",
@@ -204,8 +204,8 @@
     "copyTotp": "Copia TOTP",
     "totpSecret": "Segreto TOTP",
     "totpSecretPlaceholder": "Inserisci chiave segreta TOTP",
-    "noCredentials": "Nessuna credenziale trovata",
-    "noCredentialsDescription": "Aggiungi la prima credenziale per iniziare",
+    "noCredentials": "Credenziali non trovate",
+    "noCredentialsDescription": "Aggiungi le tue prime credenziali per iniziare",
     "searchCredentials": "Cerca credenziali...",
     "searchPlaceholder": "Cerca credenziali...",
     "welcomeTitle": "Benvenuto in AliasVault!",
@@ -220,8 +220,8 @@
     "favorite": "Aggiungi ai preferiti",
     "unfavorite": "Rimuovi dai preferiti",
     "deleteConfirm": "Sei sicuro di voler eliminare questa credenziale?",
-    "deleteSuccess": "Credenziale eliminata con successo",
-    "saveSuccess": "Credenziale salvata con successo",
+    "deleteSuccess": "Credenziali eliminate con successo",
+    "saveSuccess": "Credenziali salvate con successo",
     "copySuccess": "Copiato negli appunti",
     "tags": "Tag",
     "addTag": "Aggiungi tag",
@@ -231,7 +231,7 @@
     "createFolder": "Crea cartella",
     "saveCredential": "Salva credenziale",
     "deleteCredentialTitle": "Elimina credenziale",
-    "deleteCredentialConfirm": "Sei sicuro di voler eliminare questa credenziale? Questa azione non può essere annullata.",
+    "deleteCredentialConfirm": "Sei sicuro di voler eliminare queste credenziali? Questa azione non può essere annullata.",
     "randomAlias": "Alias casuale",
     "manual": "Manuale",
     "service": "Servizio",
@@ -258,9 +258,9 @@
     "metadata": "Metadati",
     "errors": {
       "invalidUrl": "Inserisci un URL valido",
-      "saveError": "Salvataggio credenziale non riuscito",
-      "loadError": "Caricamento della credenziale non riuscito",
-      "deleteError": "Eliminazione della credenziale non riuscita",
+      "saveError": "Salvataggio credenziali non riuscito",
+      "loadError": "Caricamento delle credenziali non riuscito",
+      "deleteError": "Eliminazione delle credenziali non riuscita",
       "copyError": "Copia negli appunti non riuscita"
     },
     "validation": {
@@ -296,8 +296,8 @@
       "emailUnexpectedError": "Si è verificato un errore imprevisto durante il caricamento delle email. Riprova più tardi."
     },
     "apiErrors": {
-      "CLAIM_DOES_NOT_MATCH_USER": "L'indirizzo email attualmente scelto è già in uso. Cambia l'indirizzo modificando questa credenziale.",
-      "CLAIM_DOES_NOT_EXIST": "Si è verificato un errore durante il caricamento delle email. Prova a modificare e salvare la voce di credenziale per sincronizzare il database, poi riprova."
+      "CLAIM_DOES_NOT_MATCH_USER": "L'indirizzo email attualmente scelto è già in uso. Cambia l'indirizzo modificando queste credenziali.",
+      "CLAIM_DOES_NOT_EXIST": "Si è verificato un errore durante il caricamento delle email. Prova a modificare e salvare le credenziali per sincronizzare il database, poi riprova."
     }
   },
   "settings": {
