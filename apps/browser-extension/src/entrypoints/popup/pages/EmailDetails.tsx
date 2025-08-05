@@ -229,7 +229,7 @@ const EmailDetails: React.FC = (): React.ReactElement => {
               title={t('emails.emailContent')}
             />
           ) : (
-            <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+            <pre className="whitespace-pre-wrap text-gray-800 p-3">
               {email.messagePlain}
             </pre>
           )}
