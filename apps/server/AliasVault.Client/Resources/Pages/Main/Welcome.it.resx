@@ -72,7 +72,7 @@
     <comment>Title for master password tip</comment>
   </data>
   <data name="MasterPasswordTipContent">
-    <value>La tua password principale è necessaria per decifrare la tua cassaforte. Non condividerla mai con nessuno e memorizzarla in una posizione sicura. Attenzione: Se perdi la tua password principale, i tuoi dati non possono essere recuperati - nemmeno dal nostro team.</value>
+    <value>La tua password principale è necessaria per decriptare la tua cassaforte. Non condividerla mai con nessuno e conservala in un posto sicuro. Attenzione: Se perdi la tua password principale, i tuoi dati non possono essere recuperati - nemmeno dal nostro team.</value>
     <comment>Content for master password tip</comment>
   </data>
   <data name="TwoFactorTipTitle">
@@ -80,7 +80,7 @@
     <comment>Title for two-factor authentication tip</comment>
   </data>
   <data name="TwoFactorTipContent">
-    <value>L'autenticazione a due fattori aggiunge un ulteriore livello di sicurezza al tuo account. Richiede di inserire un codice dalla tua app di autenticazione o di fornire un codice di recupero prima di poter accedere alla cassaforte crittografata.</value>
+    <value>L'autenticazione a due fattori aggiunge un ulteriore livello di sicurezza al tuo account. Richiede d'inserire un codice dalla tua app di autenticazione o di fornire un codice di recupero prima di poter accedere alla cassaforte crittografata.</value>
     <comment>Content for two-factor authentication tip</comment>
   </data>
   <data name="ExtensionsAppsTipTitle">
