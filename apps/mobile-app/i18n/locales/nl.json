@@ -140,20 +140,20 @@
       "credentialUpdated": "Credential succesvol bijgewerkt",
       "credentialCreated": "Credential succesvol aangemaakt"
     },
-    "createNewAliasFor": "Create new alias for",
+    "createNewAliasFor": "Nieuwe alias maken voor",
     "errors": {
       "loadFailed": "Laden van credential mislukt",
       "generateUsernameFailed": "Genereren van gebruikersnaam mislukt",
       "generatePasswordFailed": "Genereren van wachtwoord mislukt",
-      "generic": "Error"
+      "generic": "Fout"
     },
     "contextMenu": {
-      "title": "Credential Options",
-      "edit": "Edit",
-      "delete": "Delete",
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
+      "title": "Credential opties",
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "copyUsername": "Kopieer gebruikersnaam",
+      "copyEmail": "Kopieer e-mail",
+      "copyPassword": "Kopieer wachtwoord"
     }
   },
   "settings": {
@@ -173,16 +173,16 @@
     },
     "androidAutofill": "Android autofill",
     "androidAutofillSettings": {
-      "warningTitle": "⚠️ Experimental Feature",
-      "warningDescription": "Autofill support for Android is currently in an experimental state.",
-      "warningLink": "Read more about it here",
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
-      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
-      "openAutofillSettings": "Open Autofill Settings",
-      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
-      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
-      "alreadyConfigured": "I already configured it"
+      "warningTitle": "⚠️ Experimentele functie",
+      "warningDescription": "Autofill support voor Android is momenteel in een experimentele staat.",
+      "warningLink": "Lees er hier meer over",
+      "headerText": "Je kunt AliasVault instellen als autofill provider in Android. Volg de instructies hieronder om deze in te schakelen.",
+      "howToEnable": "Hoe in te schakelen:",
+      "step1": "1. Open Android Instellingen via de onderstaande knop en verander de \"Autofill preferred service\" naar \"AliasVault\"",
+      "openAutofillSettings": "Open Autofill Instellingen",
+      "buttonTip": "Als bovenstaande knop niet werkt, dan zou deze geblokkeerd kunnen worden vanwege beveiligingsinstellingen. Open in dit geval handmatig Android Instellingen → Algemeen → Wachtwoorden en Automatisch invullen.",
+      "step2": "2. Sommige apps, bijvoorbeeld Google Chrome, vereisen handmatige configuratie om third-party apps toe te staan voor autofill. De meeste apps zouden echter standaard met autofill moeten werken.",
+      "alreadyConfigured": "Al geconfigureerd"
     },
     "vaultUnlock": "Vault ontgrendelmethode",
     "autoLock": "Automatisch vergrendelen",
@@ -205,7 +205,7 @@
     "openSettings": "Open Instellingen",
     "vaultUnlockSettings": {
       "description": "Kies hoe je je vault wilt ontgrendelen.",
-      "biometrics": "Biometrics",
+      "biometrics": "Biometrie",
       "faceId": "Face ID",
       "touchId": "Touch ID",
       "faceIdTouchId": "Face ID / Touch ID",
@@ -407,9 +407,9 @@
       "notFound": "Niet gevonden"
     },
     "notFound": {
-      "title": "Page not found",
-      "message": "This page has been moved or deleted.",
-      "goHome": "Go back to the start"
+      "title": "Pagina niet gevonden",
+      "message": "Deze pagina is verplaatst of verwijderd.",
+      "goHome": "Ga terug naar het begin"
     },
     "appName": "AliasVault",
     "reinitialize": {
