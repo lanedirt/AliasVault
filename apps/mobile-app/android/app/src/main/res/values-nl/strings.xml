@@ -8,4 +8,9 @@
   <string name="autofill_no_match_found">Geen match gevonden, nieuwe maken?</string>
   <string name="autofill_open_app">Open de app</string>
   <string name="autofill_vault_locked">Vault vergrendeld</string>
+  <!-- Biometric prompts -->
+  <string name="biometric_store_key_title">Encryption key opslaan</string>
+  <string name="biometric_store_key_subtitle">Authenticeer om je encryptiesleutel veilig op te slaan in de Android Keystore. Hiermee kun je vervolgens veilig inloggen op je kluis.</string>
+  <string name="biometric_unlock_vault_title">Vault ontgrendelen</string>
+  <string name="biometric_unlock_vault_subtitle">Verifieer om toegang te krijgen tot je vault</string>
 </resources>
