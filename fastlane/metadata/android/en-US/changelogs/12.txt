@@ -1,0 +1,3 @@
+- Generated email aliases are now more unique
+- Fixed problem where app sometimes showed unlock sequence twice
+- Fix issue with save button on Android not always detecting presses
