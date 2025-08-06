@@ -183,6 +183,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
       echo 'cd /app/api'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3001"'; \
+      echo 'export ASPNETCORE_PATHBASE="/api"'; \
       echo 'exec dotnet AliasVault.Api.dll'; \
     } > /etc/s6-overlay/s6-rc.d/api/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/api/run && \
@@ -230,6 +231,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/admin && \
       echo 'cd /app/admin'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3002"'; \
+      echo 'export ASPNETCORE_PATHBASE="/admin"'; \
       echo 'exec dotnet AliasVault.Admin.dll'; \
     } > /etc/s6-overlay/s6-rc.d/admin/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/admin/run && \
