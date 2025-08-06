@@ -173,11 +173,119 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready && \
     mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready/dependencies.d && \
     touch /etc/s6-overlay/s6-rc.d/postgres-ready/dependencies.d/postgres
 
+# API service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
+    { echo '#!/command/with-contenv bash'; \
+      echo 'cd /app/api'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'export ASPNETCORE_URLS="http://0.0.0.0:3001"'; \
+      echo 'exec dotnet AliasVault.Api.dll'; \
+    } > /etc/s6-overlay/s6-rc.d/api/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/api/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/api/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/api/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/api/dependencies.d/postgres-ready
+
+# Client service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
+    { echo '#!/command/with-contenv bash'; \
+      echo 'cd /app/client'; \
+      echo 'export ASPNETCORE_URLS="http://0.0.0.0:3000"'; \
+      echo 'exec dotnet AliasVault.Client.dll'; \
+    } > /etc/s6-overlay/s6-rc.d/client/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/client/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/client/type
+
+# Admin service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/admin && \
+    { echo '#!/command/with-contenv bash'; \
+      echo 'cd /app/admin'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'export ASPNETCORE_URLS="http://0.0.0.0:3002"'; \
+      echo 'exec dotnet AliasVault.Admin.dll'; \
+    } > /etc/s6-overlay/s6-rc.d/admin/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/admin/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/admin/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/admin/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/admin/dependencies.d/postgres-ready
+
+# SMTP service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/smtp && \
+    { echo '#!/command/with-contenv bash'; \
+      echo 'cd /app/smtp'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'exec dotnet AliasVault.SmtpService.dll'; \
+    } > /etc/s6-overlay/s6-rc.d/smtp/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/smtp/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/smtp/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/smtp/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/smtp/dependencies.d/postgres-ready
+
+# Task Runner service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/taskrunner && \
+    { echo '#!/command/with-contenv bash'; \
+      echo 'cd /app/taskrunner'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'exec dotnet AliasVault.TaskRunner.dll'; \
+    } > /etc/s6-overlay/s6-rc.d/taskrunner/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/taskrunner/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/taskrunner/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/taskrunner/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/taskrunner/dependencies.d/postgres-ready
+
+# Nginx service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
+    { echo '#!/command/with-contenv bash'; \
+      echo '# Generate SSL certificate if not exists'; \
+      echo 'if [ ! -f /data/certificates/ssl/cert.pem ]; then'; \
+      echo '    echo "Generating self-signed SSL certificate..."'; \
+      echo '    mkdir -p /data/certificates/ssl'; \
+      echo '    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\'; \
+      echo '        -keyout /data/certificates/ssl/key.pem \\'; \
+      echo '        -out /data/certificates/ssl/cert.pem \\'; \
+      echo '        -subj "/C=US/ST=State/L=City/O=Organization/CN=${HOSTNAME:-localhost}"'; \
+      echo 'fi'; \
+      echo ''; \
+      echo '# Copy certificates to nginx directory'; \
+      echo 'cp /data/certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true'; \
+      echo ''; \
+      echo '# Process nginx config template'; \
+      echo 'envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf'; \
+      echo ''; \
+      echo '# Wait for all services to be ready'; \
+      echo 'echo "Waiting for services to be ready..."'; \
+      echo 'for i in {1..60}; do'; \
+      echo '    if nc -z localhost 3000 && nc -z localhost 3001 && nc -z localhost 3002; then'; \
+      echo '        echo "All services ready, starting nginx..."'; \
+      echo '        break'; \
+      echo '    fi'; \
+      echo '    if [ $i -eq 60 ]; then'; \
+      echo '        echo "Timeout waiting for services"'; \
+      echo '        exit 1'; \
+      echo '    fi'; \
+      echo '    sleep 1'; \
+      echo 'done'; \
+      echo ''; \
+      echo 'exec nginx -g "daemon off;"'; \
+    } > /etc/s6-overlay/s6-rc.d/nginx/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/nginx/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/nginx/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/nginx/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/nginx/dependencies.d/api && \
+    touch /etc/s6-overlay/s6-rc.d/nginx/dependencies.d/client && \
+    touch /etc/s6-overlay/s6-rc.d/nginx/dependencies.d/admin
+
 # Enable all services in the default bundle
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/init-container && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres && \
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres-ready
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres-ready && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/api && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/client && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/admin && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/smtp && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/taskrunner && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/nginx
 
 # Set environment variables for s6-overlay
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
