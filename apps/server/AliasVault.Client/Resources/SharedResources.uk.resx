@@ -204,7 +204,7 @@
     <comment>Label for notes input field</comment>
   </data>
   <data name="Website" xml:space="preserve">
-    <value>Веб-сайт</value>
+    <value>Вебсайт</value>
     <comment>Label for website input field</comment>
   </data>
   <data name="Search" xml:space="preserve">
@@ -264,27 +264,27 @@
     <comment>Error message when password confirmation doesn't match</comment>
   </data>
   <data name="ErrorPasswordMinLengthGeneric" xml:space="preserve">
-    <value>Password must be at least 10 characters long.</value>
+    <value>Пароль має містити щонайменше 10 символів.</value>
     <comment>Generic error message for password minimum length validation</comment>
   </data>
   <data name="ErrorPasswordsDoNotMatchGeneric" xml:space="preserve">
-    <value>Passwords do not match.</value>
+    <value>Паролі не збігаються.</value>
     <comment>Generic error message when passwords don't match</comment>
   </data>
   <data name="ErrorMustAcceptTerms" xml:space="preserve">
-    <value>You must accept the terms and conditions.</value>
+    <value>Ви повинні прийняти Умови використання та положення.</value>
     <comment>Error message for terms and conditions acceptance</comment>
   </data>
   <data name="ErrorSecretKeyRequired" xml:space="preserve">
-    <value>Secret key is required</value>
+    <value>Потрібен секретний ключ</value>
     <comment>Error message when secret key is required</comment>
   </data>
   <data name="ErrorUsernameRequired" xml:space="preserve">
-    <value>Username is required</value>
+    <value>Потрібне ім'я користувача</value>
     <comment>Error message when username is required</comment>
   </data>
   <data name="ErrorPasswordRequired" xml:space="preserve">
-    <value>Password is required</value>
+    <value>Потрібен пароль</value>
     <comment>Error message when password is required</comment>
   </data>
 </root>
