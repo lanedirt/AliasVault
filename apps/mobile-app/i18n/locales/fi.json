@@ -429,7 +429,7 @@
     "title": "Upgrade Vault",
     "subtitle": "AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.",
     "versionInformation": "Version Information",
-    "yourVault": "Your vault:",
+    "yourVault": "Sinun holvisi:",
     "newVersion": "New version:",
     "upgrade": "Upgrade",
     "upgrading": "Upgrading...",
@@ -449,7 +449,7 @@
     "alerts": {
       "error": "Error",
       "unableToGetVersionInfo": "Unable to get version information. Please try again.",
-      "selfHostedServer": "Self-Hosted Server",
+      "selfHostedServer": "Itse",
       "selfHostedWarning": "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
       "cancel": "Cancel",
       "continueUpgrade": "Continue Upgrade",
