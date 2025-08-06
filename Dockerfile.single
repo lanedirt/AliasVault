@@ -190,39 +190,37 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
     mkdir -p /etc/s6-overlay/s6-rc.d/api/dependencies.d && \
     touch /etc/s6-overlay/s6-rc.d/api/dependencies.d/postgres-ready
 
-# Client service (nginx for WASM app) - using printf to avoid escaping issues
+# Client service (nginx for WASM app) - using echo approach
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
-    printf '#!/command/with-contenv bash\n\
-# Client service entrypoint\n\
-DEFAULT_PRIVATE_EMAIL_DOMAINS="localmail.tld"\n\
-DEFAULT_SUPPORT_EMAIL=""\n\
-PRIVATE_EMAIL_DOMAINS=${PRIVATE_EMAIL_DOMAINS:-$DEFAULT_PRIVATE_EMAIL_DOMAINS}\n\
-SUPPORT_EMAIL=${SUPPORT_EMAIL:-$DEFAULT_SUPPORT_EMAIL}\n\
-\n\
-mkdir -p /etc/nginx/ssl\n\
-\n\
-if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then\n\
-    echo "Generating SSL certificate..."\n\
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"\n\
-    chmod 644 /etc/nginx/ssl/nginx.crt\n\
-    chmod 600 /etc/nginx/ssl/nginx.key\n\
-fi\n\
-\n\
-sed -i "s|\"ApiUrl\": \"http://localhost:5092\",||g" /app/client/wwwroot/appsettings.json\n\
-\n\
-json_array=$(echo $PRIVATE_EMAIL_DOMAINS | tr "," " " | awk "{printf \"[\"; for(i=1;i<=NF;i++) {printf \"\\\"%s\\\"\", \$i; if(i<NF) printf \",\"} printf \"]\"}")\n\
-sed -i.bak "s|\"PrivateEmailDomains\": \\[.*\\]|\"PrivateEmailDomains\": $json_array|" /app/client/wwwroot/appsettings.json\n\
-\n\
-if [ ! -z "$SUPPORT_EMAIL" ]; then\n\
-    sed -i "s|\"SupportEmail\": \".*\"|\"SupportEmail\": \"$SUPPORT_EMAIL\"|g" /app/client/wwwroot/appsettings.json\n\
-else\n\
-    sed -i "s|\"SupportEmail\": \".*\"|\"SupportEmail\": \"\"|g" /app/client/wwwroot/appsettings.json\n\
-fi\n\
-\n\
-sed -i "s|\"PublicRegistrationEnabled\": \".*\"|\"PublicRegistrationEnabled\": \"$PUBLIC_REGISTRATION_ENABLED\"|g" /app/client/wwwroot/appsettings.json\n\
-sed -i "s|/usr/share/nginx/html|/app/client/wwwroot|g" /app/client/nginx.conf\n\
-\n\
-exec nginx -c /app/client/nginx.conf -g "daemon off;"\n' > /etc/s6-overlay/s6-rc.d/client/run && \
+    { echo '#!/command/with-contenv bash'; \
+      echo '# Client service entrypoint'; \
+      echo 'DEFAULT_PRIVATE_EMAIL_DOMAINS="localmail.tld"'; \
+      echo 'DEFAULT_SUPPORT_EMAIL=""'; \
+      echo 'PRIVATE_EMAIL_DOMAINS=${PRIVATE_EMAIL_DOMAINS:-$DEFAULT_PRIVATE_EMAIL_DOMAINS}'; \
+      echo 'SUPPORT_EMAIL=${SUPPORT_EMAIL:-$DEFAULT_SUPPORT_EMAIL}'; \
+      echo ''; \
+      echo 'mkdir -p /etc/nginx/ssl'; \
+      echo ''; \
+      echo 'if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then'; \
+      echo '    echo "Generating SSL certificate..."'; \
+      echo '    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"'; \
+      echo '    chmod 644 /etc/nginx/ssl/nginx.crt'; \
+      echo '    chmod 600 /etc/nginx/ssl/nginx.key'; \
+      echo 'fi'; \
+      echo ''; \
+      echo '# Create simple JSON with environment variables'; \
+      echo 'cat > /app/client/wwwroot/appsettings.json << EOF'; \
+      echo '{'; \
+      echo '    "PrivateEmailDomains": ["$PRIVATE_EMAIL_DOMAINS"],'; \
+      echo '    "SupportEmail": "$SUPPORT_EMAIL",'; \
+      echo '    "PublicRegistrationEnabled": "$PUBLIC_REGISTRATION_ENABLED"'; \
+      echo '}'; \
+      echo 'EOF'; \
+      echo ''; \
+      echo 'sed -i "s|/usr/share/nginx/html|/app/client/wwwroot|g" /app/client/nginx.conf'; \
+      echo ''; \
+      echo 'exec nginx -c /app/client/nginx.conf -g "daemon off;"'; \
+    } > /etc/s6-overlay/s6-rc.d/client/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/client/run && \
     echo "longrun" > /etc/s6-overlay/s6-rc.d/client/type
 
