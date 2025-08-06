@@ -68,7 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const params = useGlobalSearchParams();
   const lastRouteRef = useRef<{ path: string, params?: object }>({ path: pathname, params });
 
-
   useEffect(() => {
     lastRouteRef.current = { path: pathname, params };
   }, [pathname, params]);
