@@ -26,7 +26,7 @@ export default function SettingsScreen() : React.ReactNode {
   const webApi = useWebApi();
   const colors = useColors();
   const { t } = useTranslation();
-  const { getAuthMethodDisplay, shouldShowAutofillReminder } = useAuth();
+  const { getAuthMethodDisplayKey, shouldShowAutofillReminder } = useAuth();
   const { getAutoLockTimeout } = useAuth();
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -69,8 +69,8 @@ export default function SettingsScreen() : React.ReactNode {
        * Load the auth method display.
        */
       const loadAuthMethodDisplay = async () : Promise<void> => {
-        const authMethod = await getAuthMethodDisplay();
-        setAuthMethodDisplay(authMethod);
+        const authMethodKey = await getAuthMethodDisplayKey();
+        setAuthMethodDisplay(t(authMethodKey));
       };
 
       /**
@@ -82,7 +82,7 @@ export default function SettingsScreen() : React.ReactNode {
       };
 
       loadData();
-    }, [getAutoLockTimeout, getAuthMethodDisplay, setIsFirstLoad, loadApiUrl, t])
+    }, [getAutoLockTimeout, getAuthMethodDisplayKey, setIsFirstLoad, loadApiUrl, t])
   );
 
   /**

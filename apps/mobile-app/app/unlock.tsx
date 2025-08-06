@@ -31,7 +31,7 @@ export default function UnlockScreen() : React.ReactNode {
   const colors = useColors();
   const { t } = useTranslation();
   const webApi = useWebApi();
-  const { getBiometricDisplayName } = useAuth();
+  const { getBiometricDisplayNameKey } = useAuth();
   const [biometricDisplayName, setBiometricDisplayName] = useState('');
 
   /**
@@ -58,12 +58,12 @@ export default function UnlockScreen() : React.ReactNode {
       const enabled = await isBiometricsEnabled();
       setIsBiometricsAvailable(enabled);
 
-      const displayName = await getBiometricDisplayName();
-      setBiometricDisplayName(displayName);
+      const displayNameKey = await getBiometricDisplayNameKey();
+      setBiometricDisplayName(t(displayNameKey));
     };
     fetchBiometricConfig();
 
-  }, [isBiometricsEnabled, getKeyDerivationParams, getBiometricDisplayName]);
+  }, [isBiometricsEnabled, getKeyDerivationParams, getBiometricDisplayNameKey, t]);
 
   /**
    * Handle the unlock.

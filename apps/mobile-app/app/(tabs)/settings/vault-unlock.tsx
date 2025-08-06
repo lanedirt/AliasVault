@@ -18,10 +18,10 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
   const colors = useColors();
   const { t } = useTranslation();
   const [initialized, setInitialized] = useState(false);
-  const { setAuthMethods, getEnabledAuthMethods, getBiometricDisplayName } = useAuth();
+  const { setAuthMethods, getEnabledAuthMethods, getBiometricDisplayNameKey } = useAuth();
   const [hasBiometrics, setHasBiometrics] = useState(false);
   const [isBiometricsEnabled, setIsBiometricsEnabled] = useState(false);
-  const [biometricDisplayName, setBiometricDisplayName] = useState(Platform.OS === 'ios' ? t('settings.vaultUnlockSettings.faceIdTouchId') : t('settings.vaultUnlockSettings.biometrics'));
+  const [biometricDisplayName, setBiometricDisplayName] = useState('');
   const [_, setEnabledAuthMethods] = useState<AuthMethod[]>([]);
 
   useEffect(() => {
@@ -40,8 +40,10 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
         const isBiometricAvailable = compatible && enrolled;
         setHasBiometrics(isBiometricAvailable);
 
-        // Get appropriate display name
-        const displayName = Platform.OS === 'ios' ? await getBiometricDisplayName() : t('settings.vaultUnlockSettings.biometrics');
+        // Get appropriate display name key from auth context
+        const displayNameKey = await getBiometricDisplayNameKey();
+        // Translate the key
+        const displayName = t(displayNameKey);
         setBiometricDisplayName(displayName);
 
         const methods = await getEnabledAuthMethods();
@@ -60,7 +62,7 @@ export default function VaultUnlockSettingsScreen() : React.ReactNode {
     };
 
     initializeAuth();
-  }, [getEnabledAuthMethods, getBiometricDisplayName, t]);
+  }, [getEnabledAuthMethods, getBiometricDisplayNameKey, t]);
 
   useEffect(() => {
     if (!initialized) {
