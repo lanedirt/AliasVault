@@ -1,0 +1,199 @@
+# Multi-stage build for AliasVault single container deployment
+# This creates a single container with all services for NAS/home server deployments
+
+# ============================================
+# Stage 1: Build .NET applications
+# ============================================
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS dotnet-builder
+
+# Install Python (required for WASM compilation)
+RUN apt-get update && apt-get install -y python3 python3-pip && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+# Copy all source files
+COPY apps/server/ ./apps/server/
+COPY shared/ ./shared/
+
+# Install required .NET workloads
+RUN dotnet workload install wasm-tools
+
+# Build all .NET applications
+WORKDIR /src/apps/server
+
+# Build API
+RUN dotnet publish AliasVault.Api/AliasVault.Api.csproj -c Release -o /app/api
+
+# Build Client (requires wasm-tools workload)
+RUN dotnet publish AliasVault.Client/AliasVault.Client.csproj -c Release -o /app/client
+
+# Build Admin
+RUN dotnet publish AliasVault.Admin/AliasVault.Admin.csproj -c Release -o /app/admin
+
+# Build SMTP Service
+RUN dotnet publish Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj -c Release -o /app/smtp
+
+# Build Task Runner
+RUN dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj -c Release -o /app/taskrunner
+
+# ============================================
+# Stage 2: Final runtime image with s6-overlay
+# ============================================
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    nginx \
+    postgresql-15 \
+    postgresql-client-15 \
+    openssl \
+    curl \
+    xz-utils \
+    netcat-openbsd \
+    gettext-base \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -r -s /bin/bash -d /var/lib/postgresql postgres 2>/dev/null || true
+
+# Install s6-overlay v3
+ARG S6_OVERLAY_VERSION=3.2.0.2
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz \
+    && rm /tmp/s6-overlay-*.tar.xz
+
+# Create necessary directories
+RUN mkdir -p \
+    /app/api \
+    /app/client \
+    /app/admin \
+    /app/smtp \
+    /app/taskrunner \
+    /data/postgres \
+    /data/database \
+    /data/certificates/ssl \
+    /data/certificates/app \
+    /data/certificates/letsencrypt \
+    /data/logs \
+    /etc/nginx/ssl \
+    /var/run/postgresql
+
+# Copy built applications from builder stage
+COPY --from=dotnet-builder /app/api /app/api
+COPY --from=dotnet-builder /app/client /app/client
+COPY --from=dotnet-builder /app/admin /app/admin
+COPY --from=dotnet-builder /app/smtp /app/smtp
+COPY --from=dotnet-builder /app/taskrunner /app/taskrunner
+
+# Copy nginx configuration
+COPY apps/server/nginx.conf /etc/nginx/nginx.conf.template
+
+# ============================================
+# S6 Service Definitions
+# ============================================
+
+# Container initialization
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/init-container && \
+    echo '#!/bin/sh' > /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'echo "[init-container] Initializing AliasVault single container..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'echo "[init-container] Creating data directories..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'mkdir -p /data/database /data/logs /data/certificates /data/postgres' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'echo "[init-container] Creating symbolic links for persistent data..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'ln -sf /data/database /database' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'ln -sf /data/logs /logs' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'ln -sf /data/certificates /certificates' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'echo "[init-container] Setting database permissions..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'chown -R postgres:postgres /data/postgres 2>/dev/null || true' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'chmod 700 /data/postgres 2>/dev/null || true' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'echo "[init-container] Container initialization complete" >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    chmod +x /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo "oneshot" > /etc/s6-overlay/s6-rc.d/init-container/type
+
+# PostgreSQL service
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres && \
+    { echo '#!/bin/sh'; \
+      echo ''; \
+      echo '# Set PostgreSQL paths'; \
+      echo 'export PATH="/usr/lib/postgresql/15/bin:$PATH"'; \
+      echo 'export PGDATA="/data/postgres"'; \
+      echo ''; \
+      echo '# Initialize PostgreSQL if needed'; \
+      echo 'if [ ! -d "$PGDATA/base" ]; then'; \
+      echo '    echo "Initializing PostgreSQL database..."'; \
+      echo '    mkdir -p "$PGDATA" /data/logs'; \
+      echo '    chown -R postgres:postgres "$PGDATA" /data/logs'; \
+      echo '    chmod 700 "$PGDATA"'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/initdb -D $PGDATA"'; \
+      echo '    '; \
+      echo '    # Configure PostgreSQL'; \
+      echo '    echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"'; \
+      echo '    echo "listen_addresses = '\''127.0.0.1'\''" >> "$PGDATA/postgresql.conf"'; \
+      echo '    '; \
+      echo '    # Start PostgreSQL temporarily to create database and user'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/pg_ctl -D $PGDATA -l /data/logs/postgres.log start"'; \
+      echo '    sleep 5'; \
+      echo '    '; \
+      echo '    # Create database and user'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/psql -c \\"CREATE USER aliasvault WITH PASSWORD '\''${POSTGRES_PASSWORD:-defaultpassword}'\''\\""'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/psql -c \\"CREATE DATABASE aliasvault OWNER aliasvault;\\""'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/psql -c \\"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\\""'; \
+      echo '    '; \
+      echo '    # Stop PostgreSQL'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/pg_ctl -D $PGDATA stop"'; \
+      echo '    sleep 2'; \
+      echo 'fi'; \
+      echo ''; \
+      echo '# Run PostgreSQL'; \
+      echo 'exec s6-setuidgid postgres /usr/lib/postgresql/15/bin/postgres -D "$PGDATA"'; \
+    } > /etc/s6-overlay/s6-rc.d/postgres/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/postgres/run && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/postgres/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/postgres/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/postgres/dependencies.d/init-container
+
+# Wait for PostgreSQL to be ready
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready && \
+    { echo '#!/bin/sh'; \
+      echo 'echo "Waiting for PostgreSQL to be ready..."'; \
+      echo 'for i in {1..30}; do'; \
+      echo '    if su - postgres -c "/usr/lib/postgresql/15/bin/pg_isready -h localhost" > /dev/null 2>&1; then'; \
+      echo '        echo "PostgreSQL is ready"'; \
+      echo '        exit 0'; \
+      echo '    fi'; \
+      echo '    sleep 1'; \
+      echo 'done'; \
+      echo 'echo "PostgreSQL failed to start"'; \
+      echo 'exit 1'; \
+    } > /etc/s6-overlay/s6-rc.d/postgres-ready/up && \
+    chmod +x /etc/s6-overlay/s6-rc.d/postgres-ready/up && \
+    echo "oneshot" > /etc/s6-overlay/s6-rc.d/postgres-ready/type && \
+    mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready/dependencies.d && \
+    touch /etc/s6-overlay/s6-rc.d/postgres-ready/dependencies.d/postgres
+
+# Enable all services in the default bundle
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/init-container && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres-ready
+
+# Set environment variables for s6-overlay
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
+    S6_VERBOSITY=1 \
+    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+    S6_KILL_GRACETIME=30000
+
+# Expose ports
+EXPOSE 80 443 25 587
+
+# Volume for persistent data
+VOLUME ["/data"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD curl -f -k https://localhost/api || exit 1
+
+# Set s6-overlay as entrypoint
+ENTRYPOINT ["/init"]
