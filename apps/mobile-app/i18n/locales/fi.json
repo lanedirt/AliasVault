@@ -361,7 +361,7 @@
     "CLAIM_DOES_NOT_MATCH_USER": "The current chosen email address is already in use. Please change the email address by editing this credential.",
     "CLAIM_DOES_NOT_EXIST": "An error occurred while trying to load the emails. Please try to edit and save the credential entry to synchronize the database, then try again.",
     "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",
-    "ACCOUNT_LOCKED": "Account temporarily locked due to too many failed attempts. Please try again later.",
+    "ACCOUNT_LOCKED": "Tili on tilapäisesti lukittu liian monen epäonnistuneen yrityksen vuoksi. Yritä myöhemmin uudelleen.",
     "ACCOUNT_BLOCKED": "Your account has been disabled. If you believe this is a mistake, please contact support.",
     "USER_NOT_FOUND": "Invalid username or password. Please try again.",
     "INVALID_AUTHENTICATOR_CODE": "Invalid authenticator code. Please try again.",
