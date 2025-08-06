@@ -126,38 +126,38 @@
     "vaultUpToDate": "Tresor ist auf dem neuesten Stand",
     "offlineMessage": "Keine Verbindung. Bitte verbinde Dich mit dem Internet, um Deinen Tresor zu synchronisieren.",
     "credentialCreated": "Zugang erstellt!",
-    "credentialCreatedMessage": "Your new credential has been added to your vault and is ready to use.",
-    "credentialDetails": "Credential Details",
-    "emailPreview": "Email Preview",
-    "switchBackToBrowser": "Switch back to your browser to continue.",
-    "twoFactorAuth": "Two-factor authentication",
-    "totpCode": "TOTP Code",
-    "attachments": "Attachments",
-    "loadingAttachments": "Loading attachments...",
-    "addAttachments": "Add Attachments",
-    "deleteAttachment": "Delete",
+    "credentialCreatedMessage": "Dein neuer Zugang wurde zum Tresor hinzugefügt und ist einsatzbereit.",
+    "credentialDetails": "Details zum Zugang",
+    "emailPreview": "E-Mail-Vorschau",
+    "switchBackToBrowser": "Wechsle zurück zu Deinem Browser, um fortzufahren",
+    "twoFactorAuth": "Zwei-Faktor-Authentifizierung",
+    "totpCode": "TOTP-Code",
+    "attachments": "Anhänge",
+    "loadingAttachments": "Anhänge werden geladen...",
+    "addAttachments": "Anhänge hinzufügen",
+    "deleteAttachment": "Löschen",
     "toasts": {
-      "credentialUpdated": "Credential updated successfully",
-      "credentialCreated": "Credential created successfully"
+      "credentialUpdated": "Zugang erfolgreich aktualisiert",
+      "credentialCreated": "Zugang erfolgreich erstellt"
     },
-    "createNewAliasFor": "Create new alias for",
+    "createNewAliasFor": "Neuen Alias für",
     "errors": {
-      "loadFailed": "Failed to load credential",
-      "generateUsernameFailed": "Failed to generate username",
-      "generatePasswordFailed": "Failed to generate password",
-      "generic": "Error"
+      "loadFailed": "Laden des Zugangs fehlgeschlagen",
+      "generateUsernameFailed": "Benutzername konnte nicht generiert werden",
+      "generatePasswordFailed": "Passwort konnte nicht generiert werden",
+      "generic": "Fehler"
     },
     "contextMenu": {
-      "title": "Credential Options",
-      "edit": "Edit",
-      "delete": "Delete",
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
+      "title": "Zugangsoptionen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "copyUsername": "Benutzername kopieren",
+      "copyEmail": "E-Mail-Adresse kopieren",
+      "copyPassword": "Passwort kopieren"
     }
   },
   "settings": {
-    "title": "Settings",
+    "title": "Einstellungen",
     "iosAutofill": "iOS Autofill",
     "iosAutofillSettings": {
       "headerText": "You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.",
