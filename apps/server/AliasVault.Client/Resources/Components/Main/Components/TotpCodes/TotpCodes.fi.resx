@@ -103,7 +103,7 @@
     <comment>Message shown for unsaved TOTP codes</comment>
   </data>
   <data name="DeleteTotpCodeConfirmation" xml:space="preserve">
-    <value>Are you sure you want to delete this TOTP code?</value>
+    <value>Oletko varma, että haluat poistaa tämän TOTP-koodin?</value>
     <comment>Confirmation message for deleting TOTP code</comment>
   </data>
   <data name="DeleteTotpCodeTitle" xml:space="preserve">
