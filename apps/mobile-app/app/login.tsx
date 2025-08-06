@@ -85,8 +85,9 @@ export default function LoginScreen() : React.ReactNode {
     passwordHashBase64: string,
     initiateLoginResponse: LoginResponse
   ) : Promise<void> => {
-    // Get biometric display name
-    const biometricDisplayName = await authContext.getBiometricDisplayName();
+    // Get biometric display name key and translate it
+    const biometricDisplayNameKey = await authContext.getBiometricDisplayNameKey();
+    const biometricDisplayName = t(biometricDisplayNameKey);
     const isBiometricsEnabledOnDevice = await authContext.isBiometricsEnabledOnDevice();
 
     if (isBiometricsEnabledOnDevice) {

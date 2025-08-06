@@ -3,7 +3,6 @@ import { NavigationContainerRef, ParamListBase } from '@react-navigation/native'
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router, useGlobalSearchParams, usePathname } from 'expo-router';
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { AppState, Platform } from 'react-native';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
@@ -30,10 +29,10 @@ type AuthContextType = {
   globalMessage: string | null;
   clearGlobalMessage: () => void;
   setAuthMethods: (methods: AuthMethod[]) => Promise<void>;
-  getAuthMethodDisplay: () => Promise<string>;
+  getAuthMethodDisplayKey: () => Promise<string>;
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
-  getBiometricDisplayName: () => Promise<string>;
+  getBiometricDisplayNameKey: () => Promise<string>;
   isBiometricsEnabledOnDevice: () => Promise<boolean>;
   setOfflineMode: (isOffline: boolean) => void;
   verifyPassword: (password: string) => Promise<string | null>;
@@ -56,7 +55,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * AuthProvider to provide the authentication state to the app that components can use.
  */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { t } = useTranslation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
@@ -69,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
   const params = useGlobalSearchParams();
   const lastRouteRef = useRef<{ path: string, params?: object }>({ path: pathname, params });
+
 
   useEffect(() => {
     lastRouteRef.current = { path: pathname, params };
@@ -201,21 +200,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Get the appropriate biometric display name based on device capabilities
+   * Get the appropriate biometric display name translation key based on device capabilities
    */
-  const getBiometricDisplayName = useCallback(async (): Promise<string> => {
+  const getBiometricDisplayNameKey = useCallback(async (): Promise<string> => {
     try {
       const hasBiometrics = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
 
       // For Android, we use the term "Biometrics" for facial recognition and fingerprint.
       if (Platform.OS === 'android') {
-        return t('settings.vaultUnlockSettings.biometrics');
+        return 'settings.vaultUnlockSettings.biometrics';
       }
 
       // For iOS, we check if the device has explicit Face ID or Touch ID support.
       if (!hasBiometrics || !enrolled) {
-        return t('settings.vaultUnlockSettings.faceIdTouchId');
+        return 'settings.vaultUnlockSettings.faceIdTouchId';
       }
 
       const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
@@ -223,35 +222,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const hasTouchIDSupport = types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT);
 
       if (hasFaceIDSupport) {
-        return t('settings.vaultUnlockSettings.faceId');
+        return 'settings.vaultUnlockSettings.faceId';
       } else if (hasTouchIDSupport) {
-        return t('settings.vaultUnlockSettings.touchId');
+        return 'settings.vaultUnlockSettings.touchId';
       }
 
-      return t('settings.vaultUnlockSettings.faceIdTouchId');
+      return 'settings.vaultUnlockSettings.faceIdTouchId';
     } catch (error) {
       console.error('Failed to get biometric display name:', error);
-      return t('settings.vaultUnlockSettings.faceIdTouchId');
+      return 'settings.vaultUnlockSettings.faceIdTouchId';
     }
-  }, [t]);
+  }, []);
 
   /**
-   * Get the display label for the current auth method
+   * Get the display label translation key for the current auth method
    * Prefers Face ID if enabled, otherwise falls back to Password
    */
-  const getAuthMethodDisplay = useCallback(async (): Promise<string> => {
+  const getAuthMethodDisplayKey = useCallback(async (): Promise<string> => {
     const methods = await getEnabledAuthMethods();
     if (methods.includes('faceid')) {
       try {
         if (await isBiometricsEnabledOnDevice()) {
-          return await getBiometricDisplayName();
+          return await getBiometricDisplayNameKey();
         }
       } catch (error) {
         console.error('Failed to check Face ID enrollment:', error);
       }
     }
-    return t('credentials.password');
-  }, [getEnabledAuthMethods, getBiometricDisplayName, isBiometricsEnabledOnDevice, t]);
+    return 'credentials.password';
+  }, [getEnabledAuthMethods, getBiometricDisplayNameKey, isBiometricsEnabledOnDevice]);
 
   /**
    * Get the auto-lock timeout from the iOS credentials manager
@@ -397,11 +396,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     clearGlobalMessage,
     setAuthMethods,
-    getAuthMethodDisplay,
+    getAuthMethodDisplayKey,
     isBiometricsEnabledOnDevice,
     getAutoLockTimeout,
     setAutoLockTimeout,
-    getBiometricDisplayName,
+    getBiometricDisplayNameKey,
     markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
@@ -422,11 +421,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     clearGlobalMessage,
     setAuthMethods,
-    getAuthMethodDisplay,
+    getAuthMethodDisplayKey,
     isBiometricsEnabledOnDevice,
     getAutoLockTimeout,
     setAutoLockTimeout,
-    getBiometricDisplayName,
+    getBiometricDisplayNameKey,
     markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
