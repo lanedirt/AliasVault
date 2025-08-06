@@ -76,7 +76,8 @@ RUN mkdir -p \
     /data/certificates/letsencrypt \
     /data/logs \
     /etc/nginx/ssl \
-    /var/run/postgresql
+    /var/run/postgresql \
+    /var/www/certbot
 
 # Copy built applications from builder stage
 COPY --from=dotnet-builder /app/api /app/api
@@ -85,8 +86,11 @@ COPY --from=dotnet-builder /app/admin /app/admin
 COPY --from=dotnet-builder /app/smtp /app/smtp
 COPY --from=dotnet-builder /app/taskrunner /app/taskrunner
 
-# Copy nginx configuration
-COPY apps/server/nginx.conf /etc/nginx/nginx.conf.template
+# Copy client nginx configuration and ensure wwwroot is accessible
+COPY apps/server/AliasVault.Client/nginx.conf /app/client/nginx.conf
+
+# Copy nginx configuration for single container deployment
+COPY apps/server/nginx.single.conf /etc/nginx/nginx.single.conf
 
 # ============================================
 # S6 Service Definitions
@@ -186,13 +190,39 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
     mkdir -p /etc/s6-overlay/s6-rc.d/api/dependencies.d && \
     touch /etc/s6-overlay/s6-rc.d/api/dependencies.d/postgres-ready
 
-# Client service
+# Client service (nginx for WASM app) - using printf to avoid escaping issues
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
-    { echo '#!/command/with-contenv bash'; \
-      echo 'cd /app/client'; \
-      echo 'export ASPNETCORE_URLS="http://0.0.0.0:3000"'; \
-      echo 'exec dotnet AliasVault.Client.dll'; \
-    } > /etc/s6-overlay/s6-rc.d/client/run && \
+    printf '#!/command/with-contenv bash\n\
+# Client service entrypoint\n\
+DEFAULT_PRIVATE_EMAIL_DOMAINS="localmail.tld"\n\
+DEFAULT_SUPPORT_EMAIL=""\n\
+PRIVATE_EMAIL_DOMAINS=${PRIVATE_EMAIL_DOMAINS:-$DEFAULT_PRIVATE_EMAIL_DOMAINS}\n\
+SUPPORT_EMAIL=${SUPPORT_EMAIL:-$DEFAULT_SUPPORT_EMAIL}\n\
+\n\
+mkdir -p /etc/nginx/ssl\n\
+\n\
+if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then\n\
+    echo "Generating SSL certificate..."\n\
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"\n\
+    chmod 644 /etc/nginx/ssl/nginx.crt\n\
+    chmod 600 /etc/nginx/ssl/nginx.key\n\
+fi\n\
+\n\
+sed -i "s|\"ApiUrl\": \"http://localhost:5092\",||g" /app/client/wwwroot/appsettings.json\n\
+\n\
+json_array=$(echo $PRIVATE_EMAIL_DOMAINS | tr "," " " | awk "{printf \"[\"; for(i=1;i<=NF;i++) {printf \"\\\"%s\\\"\", \$i; if(i<NF) printf \",\"} printf \"]\"}")\n\
+sed -i.bak "s|\"PrivateEmailDomains\": \\[.*\\]|\"PrivateEmailDomains\": $json_array|" /app/client/wwwroot/appsettings.json\n\
+\n\
+if [ ! -z "$SUPPORT_EMAIL" ]; then\n\
+    sed -i "s|\"SupportEmail\": \".*\"|\"SupportEmail\": \"$SUPPORT_EMAIL\"|g" /app/client/wwwroot/appsettings.json\n\
+else\n\
+    sed -i "s|\"SupportEmail\": \".*\"|\"SupportEmail\": \"\"|g" /app/client/wwwroot/appsettings.json\n\
+fi\n\
+\n\
+sed -i "s|\"PublicRegistrationEnabled\": \".*\"|\"PublicRegistrationEnabled\": \"$PUBLIC_REGISTRATION_ENABLED\"|g" /app/client/wwwroot/appsettings.json\n\
+sed -i "s|/usr/share/nginx/html|/app/client/wwwroot|g" /app/client/nginx.conf\n\
+\n\
+exec nginx -c /app/client/nginx.conf -g "daemon off;"\n' > /etc/s6-overlay/s6-rc.d/client/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/client/run && \
     echo "longrun" > /etc/s6-overlay/s6-rc.d/client/type
 
@@ -249,8 +279,20 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
       echo '# Copy certificates to nginx directory'; \
       echo 'cp /data/certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true'; \
       echo ''; \
-      echo '# Process nginx config template'; \
-      echo 'envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf'; \
+      echo '# Create SSL configuration file'; \
+      echo 'cat > /etc/nginx/ssl.conf << "SSLEOF"'; \
+      echo 'ssl_certificate /etc/nginx/ssl/cert.pem;'; \
+      echo 'ssl_certificate_key /etc/nginx/ssl/key.pem;'; \
+      echo 'ssl_session_timeout 1d;'; \
+      echo 'ssl_session_cache shared:MozTLS:10m;'; \
+      echo 'ssl_session_tickets off;'; \
+      echo 'ssl_protocols TLSv1.2 TLSv1.3;'; \
+      echo 'ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;'; \
+      echo 'ssl_prefer_server_ciphers off;'; \
+      echo 'SSLEOF'; \
+      echo ''; \
+      echo '# Use single container nginx configuration'; \
+      echo 'cp /etc/nginx/nginx.single.conf /etc/nginx/nginx.conf'; \
       echo ''; \
       echo '# Wait for all services to be ready'; \
       echo 'echo "Waiting for services to be ready..."'; \
