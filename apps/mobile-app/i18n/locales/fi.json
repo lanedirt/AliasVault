@@ -234,7 +234,7 @@
       "genderOptions": {
         "random": "Random",
         "male": "Male",
-        "female": "Female"
+        "female": "Nainen"
       },
       "errors": {
         "loadFailed": "Failed to load identity generator settings.",
