@@ -87,7 +87,7 @@
     <comment>Close modal button text</comment>
   </data>
   <data name="DeleteEmailTitle" xml:space="preserve">
-    <value>Delete Email</value>
+    <value>Poista sähköposti</value>
     <comment>Delete email confirmation dialog title</comment>
   </data>
   <data name="DeleteEmailConfirmation" xml:space="preserve">
@@ -95,7 +95,7 @@
     <comment>Delete email confirmation message</comment>
   </data>
   <data name="EmailDeletedSuccess" xml:space="preserve">
-    <value>Email deleted successfully</value>
+    <value>Sähköposti poistettiin onnistuneesti</value>
     <comment>Success message when email is deleted</comment>
   </data>
   <data name="EmailDeleteFailed" xml:space="preserve">
@@ -107,7 +107,7 @@
     <comment>Generic error message</comment>
   </data>
   <data name="NoEmailBody" xml:space="preserve">
-    <value>[This email has no body.]</value>
+    <value>[Tällä sähköpostilla ei ole runkoa.]</value>
     <comment>Message shown when email has no content</comment>
   </data>
   <data name="AttachmentDownloadFailed" xml:space="preserve">
