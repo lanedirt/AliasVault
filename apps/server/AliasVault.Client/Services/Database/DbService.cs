@@ -505,11 +505,12 @@ public sealed class DbService : IDisposable
             .ToListAsync();
 
         // Filter the list of email addresses to only include those that are in the supported private email domains.
-        emailAddresses = emailAddresses
-            .Where(email => _config.PrivateEmailDomains.Exists(domain => email.EndsWith(domain)))
-            .ToList();
+        if (_config.PrivateEmailDomains.Count() > 0)
+        {
+            emailAddresses = emailAddresses.Where(email => _config.PrivateEmailDomains.Exists(domain => email.EndsWith(domain))).ToList();
+        }
 
-        return emailAddresses;
+        return [];
     }
 
     /// <summary>
