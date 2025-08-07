@@ -1317,7 +1317,7 @@ get_docker_compose_command() {
 
     # Check if using build configuration
     if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null; then
-        base_command="$base_command -f docker-compose.build.yml"
+        base_command="$base_command -f dockerfiles/docker-compose.build.yml"
     fi
 
     # Check if Let's Encrypt is enabled
@@ -1456,11 +1456,11 @@ handle_build() {
     initialize_workspace
 
     # Check for required build files
-    if [ ! -f "docker-compose.build.yml" ] || [ ! -d "apps/server" ]; then
+    if [ ! -f "dockerfiles/docker-compose.build.yml" ] || [ ! -d "apps/server" ]; then
         printf "${RED}Error: Required files for building from source are missing.${NC}\n"
         printf "\n"
         printf "To build AliasVault from source, you need:\n"
-        printf "1. docker-compose.build.yml file\n"
+        printf "1. dockerfiles/docker-compose.build.yml file\n"
         printf "2. apps/server/ directory with the complete source code\n"
         printf "\n"
         printf "Please clone the complete repository using:\n"
@@ -2273,8 +2273,8 @@ configure_dev_database() {
     printf "${YELLOW}+++ Development Database Configuration +++${NC}\n"
     printf "\n"
 
-    if [ ! -f "docker-compose.dev.yml" ]; then
-        printf "${RED}> The docker-compose.dev.yml file is missing. This file is required to start the development database. Please checkout the full GitHub repository and try again.${NC}\n"
+    if [ ! -f "dockerfiles/docker-compose.dev.yml" ]; then
+        printf "${RED}> The dockerfiles/docker-compose.dev.yml file is missing. This file is required to start the development database. Please checkout the full GitHub repository and try again.${NC}\n"
         return 1
     fi
 
@@ -2282,22 +2282,22 @@ configure_dev_database() {
     if [ -n "$COMMAND_ARG" ]; then
         case $COMMAND_ARG in
             1|start)
-                if docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+                if docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
                     printf "${YELLOW}> Development database is already running.${NC}\n"
                 else
                     printf "${CYAN}> Starting development database...${NC}\n"
-                    docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d --wait --wait-timeout 60
+                    docker compose -p aliasvault-dev -f dockerfiles/docker-compose.dev.yml up -d --wait --wait-timeout 60
                     printf "${GREEN}> Development database started successfully.${NC}\n"
                 fi
                 print_dev_db_details
                 return
                 ;;
             0|stop)
-                if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+                if ! docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
                     printf "${YELLOW}> Development database is already stopped.${NC}\n"
                 else
                     printf "${CYAN}> Stopping development database...${NC}\n"
-                    docker compose -p aliasvault-dev -f docker-compose.dev.yml down
+                    docker compose -p aliasvault-dev -f dockerfiles/docker-compose.dev.yml down
                     printf "${GREEN}> Development database stopped successfully.${NC}\n"
                 fi
                 return
@@ -2306,7 +2306,7 @@ configure_dev_database() {
     fi
 
     # Check current status
-    if docker compose -f docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
+    if docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev ps --status running 2>/dev/null | grep -q postgres-dev; then
         DEV_DB_STATUS="running"
     else
         DEV_DB_STATUS="stopped"
@@ -2340,7 +2340,7 @@ configure_dev_database() {
                 printf "${YELLOW}> Development database is already running.${NC}\n"
             else
                 printf "${CYAN}> Starting development database...${NC}\n"
-                docker compose -p aliasvault-dev -f docker-compose.dev.yml up -d --wait --wait-timeout 60
+                docker compose -p aliasvault-dev -f dockerfiles/docker-compose.dev.yml up -d --wait --wait-timeout 60
                 printf "${GREEN}> Development database started successfully.${NC}\n"
             fi
             print_dev_db_details
@@ -2350,7 +2350,7 @@ configure_dev_database() {
                 printf "${YELLOW}> Development database is already stopped.${NC}\n"
             else
                 printf "${CYAN}> Stopping development database...${NC}\n"
-                docker compose -p aliasvault-dev -f docker-compose.dev.yml down
+                docker compose -p aliasvault-dev -f dockerfiles/docker-compose.dev.yml down
                 printf "${GREEN}> Development database stopped successfully.${NC}\n"
             fi
             ;;
@@ -2415,19 +2415,19 @@ handle_db_export() {
 
     if [ "$DEV_DB" = true ]; then
         # Check if dev containers are running
-        if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps postgres-dev --quiet 2>/dev/null | grep -q .; then
+        if ! docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev ps postgres-dev --quiet 2>/dev/null | grep -q .; then
             printf "${RED}Error: Development database container is not running. Start it first with: ./install.sh configure-dev-db${NC}\n" >&2
             exit 1
         fi
 
         # Check if postgres-dev container is healthy
-        if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps postgres-dev | grep -q "healthy"; then
+        if ! docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev ps postgres-dev | grep -q "healthy"; then
             printf "${RED}Error: Development PostgreSQL container is not healthy. Please check the logs.${NC}\n" >&2
             exit 1
         fi
 
         printf "${CYAN}> Exporting development database...${NC}\n" >&2
-        docker compose -f docker-compose.dev.yml -p aliasvault-dev exec postgres-dev pg_dump -U aliasvault aliasvault | gzip
+        docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec postgres-dev pg_dump -U aliasvault aliasvault | gzip
     else
         # Production database export logic
         if ! docker compose ps --quiet 2>/dev/null | grep -q .; then
@@ -2458,7 +2458,7 @@ handle_db_import() {
 
     # Check if containers are running
     if [ "$DEV_DB" = true ]; then
-        if ! docker compose -f docker-compose.dev.yml -p aliasvault-dev ps postgres-dev | grep -q "healthy"; then
+        if ! docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev ps postgres-dev | grep -q "healthy"; then
             printf "${RED}Error: Development PostgreSQL container is not healthy.${NC}\n"
             exit 1
         fi
@@ -2533,15 +2533,15 @@ handle_db_import() {
 
     if [ "$DEV_DB" = true ]; then
         if [ "$VERBOSE" = true ]; then
-            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
-            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
-            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
-            gunzip -c "$temp_file" | docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault aliasvault
+            docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" && \
+            docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" && \
+            docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" && \
+            gunzip -c "$temp_file" | docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault aliasvault
         else
-            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
-            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
-            docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
-            gunzip -c "$temp_file" | docker compose -f docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault aliasvault > /dev/null 2>&1
+            docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'aliasvault' AND pid <> pg_backend_pid();" > /dev/null 2>&1 && \
+            docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "DROP DATABASE IF EXISTS aliasvault;" > /dev/null 2>&1 && \
+            docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault postgres -c "CREATE DATABASE aliasvault OWNER aliasvault;" > /dev/null 2>&1 && \
+            gunzip -c "$temp_file" | docker compose -f dockerfiles/docker-compose.dev.yml -p aliasvault-dev exec -T postgres-dev psql -U aliasvault aliasvault > /dev/null 2>&1
         fi
     else
         if [ "$VERBOSE" = true ]; then
@@ -2699,18 +2699,6 @@ check_and_populate_env() {
         any_missing=true
     fi
 
-    # POSTGRES_DB
-    if ! grep -q "^POSTGRES_DB=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_DB=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "POSTGRES_DB" "aliasvault"
-        printf "  Set POSTGRES_DB\n"
-        any_missing=true
-    fi
-    # POSTGRES_USER
-    if ! grep -q "^POSTGRES_USER=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_USER=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "POSTGRES_USER" "aliasvault"
-        printf "  Set POSTGRES_USER\n"
-        any_missing=true
-    fi
     # POSTGRES_PASSWORD
     if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         POSTGRES_PASS=$(openssl rand -base64 32)
