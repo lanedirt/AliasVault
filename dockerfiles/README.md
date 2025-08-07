@@ -10,11 +10,12 @@ Used to locally build Docker images from source instead of retrieving pre-built 
 ### `docker-compose.dev.yml`
 Contains containers for aiding in local development of AliasVault. Provides a separate PostgreSQL instance for development on port 5433, managed via `./install.sh configure-dev-db`.
 
-### `Dockerfile.single`
-Alternative all-in-one Dockerfile that wraps all AliasVault services (database, API, web, background services) in one container. Primarily used for hosting on limited platforms like NAS/Unraid and small home use scenarios.
+### `Dockerfile.server.singlecontainer`
+This is a standalone single-container build for easy self-hosting, using s6-overlay to run multiple services (database, API, web, smtp, task runner) inside one image.
 
-### `docker-compose.single.yml`
-Docker Compose configuration for the single-container deployment using the image built from `Dockerfile.single`. Includes security settings, resource limits, and health checks optimized for NAS environments.
+This build is primarily intended for **limited platforms** like NAS devices, Unraid, or other **small home-use scenarios** where simplicity is preferred over flexibility.
+
+> **Note:** For production or more advanced setups, we recommend using the default multi-container configuration available via [`../docker-compose.yml`](../docker-compose.yml).
 
 ## Usage
 
