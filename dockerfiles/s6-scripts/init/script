@@ -1,0 +1,139 @@
+#!/bin/sh -e
+
+# AliasVault Container Initialization Script
+# This script runs once at container startup and handles all initialization tasks
+
+# Print AliasVault header
+echo ""
+echo "=================================================="
+echo "    _    _ _           __      __         _ _   "
+echo "   / \\  | (_) __ _ ___ \\ \\    / /_ _ _   _| | |_"
+echo "  / _ \\ | | |/ _\` / __| \\ \\/\\/ / _\` | | | | | __|"
+echo " / ___ \\| | | (_| \\__ \\  \\  / / (_| | |_| | | |_ "
+echo "/_/   \\_\\_|_|\\__,_|___/   \\/  \\__,__|\\__,_|_|\\__|"
+echo ""
+echo "=================================================="
+echo ""
+
+echo "[init] Starting AliasVault container initialization..."
+echo ""
+
+# Create required directories
+echo "[init] Creating required directories..."
+mkdir -p /database/postgres /logs/postgres /certificates /secrets /var/run/postgresql
+
+# Initialize secrets if they don't exist
+echo "[init] Checking and initializing secrets..."
+
+if [ ! -f /secrets/postgres_password ]; then
+    echo "[init] → Generating PostgreSQL password..."
+    openssl rand -base64 32 | tr -d "\n" > /secrets/postgres_password
+    chmod 600 /secrets/postgres_password
+else
+    echo "[init] → PostgreSQL password already exists"
+fi
+
+if [ ! -f /secrets/data_protection_cert_pass ]; then
+    echo "[init] → Generating Data Protection Certificate password..."
+    openssl rand -base64 32 | tr -d "\n" > /secrets/data_protection_cert_pass
+    chmod 600 /secrets/data_protection_cert_pass
+else
+    echo "[init] → Data Protection Certificate password already exists"
+fi
+
+if [ ! -f /secrets/jwt_key ]; then
+    echo "[init] → Generating JWT key..."
+    openssl rand -base64 32 | tr -d "\n" > /secrets/jwt_key
+    chmod 600 /secrets/jwt_key
+else
+    echo "[init] → JWT key already exists"
+fi
+
+# Read PostgreSQL password for database initialization
+POSTGRES_PASSWORD=$(cat /secrets/postgres_password)
+export PGDATA="/database/postgres"
+
+# Initialize PostgreSQL if needed
+if [ ! -d "$PGDATA/base" ]; then
+    echo ""
+    echo "[init] PostgreSQL database not found, initializing..."
+    
+    # Set proper permissions
+    chown -R postgres:postgres /database/postgres /logs/postgres /var/run/postgresql
+    chmod 700 /database/postgres
+    
+    # Initialize database as postgres user
+    echo "[init] → Running initdb..."
+    su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" > /logs/postgres/initdb.log 2>&1
+    
+    # Configure PostgreSQL
+    echo "[init] → Configuring PostgreSQL..."
+    echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"
+    echo "listen_addresses = '127.0.0.1'" >> "$PGDATA/postgresql.conf"
+    
+    # Start PostgreSQL temporarily to create database and user
+    echo "[init] → Starting PostgreSQL temporarily for setup..."
+    su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -l /logs/postgres/postgres.log start"
+    
+    # Wait for PostgreSQL to be ready
+    echo "[init] → Waiting for PostgreSQL to be ready..."
+    i=1
+    while [ $i -le 30 ]; do
+        if su - postgres -c "/usr/lib/postgresql/16/bin/psql -c 'SELECT 1;'" >/dev/null 2>&1; then
+            break
+        fi
+        sleep 1
+        i=$((i + 1))
+    done
+    
+    # Create database and user
+    echo "[init] → Creating AliasVault database and user..."
+    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\""
+    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\""
+    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\""
+    
+    # Stop PostgreSQL
+    echo "[init] → Stopping PostgreSQL..."
+    su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA stop"
+    sleep 2
+    
+    echo "[init] → PostgreSQL initialization complete"
+else
+    echo "[init] PostgreSQL database already initialized"
+    
+    # Just ensure permissions are correct
+    chown -R postgres:postgres /database/postgres /logs/postgres /var/run/postgresql
+    chmod 700 /database/postgres
+fi
+
+# Future: Database migrations could go here
+# echo "[init] Checking for database migrations..."
+# if [ -f /app/migrations/pending ]; then
+#     echo "[init] → Running database migrations..."
+#     # Run migration logic here
+# fi
+
+# Generate SSL certificates if needed
+if [ ! -f /certificates/ssl/cert.pem ] || [ ! -f /certificates/ssl/key.pem ]; then
+    echo ""
+    echo "[init] Generating SSL certificates..."
+    mkdir -p /certificates/ssl
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+        -keyout /certificates/ssl/key.pem \
+        -out /certificates/ssl/cert.pem \
+        -subj "/C=US/ST=State/L=City/O=AliasVault/CN=${HOSTNAME:-localhost}" \
+        >/dev/null 2>&1
+    chmod 600 /certificates/ssl/key.pem
+    chmod 644 /certificates/ssl/cert.pem
+    echo "[init] → SSL certificates generated"
+else
+    echo "[init] SSL certificates already exist"
+fi
+
+echo ""
+echo "[init] ========================================="
+echo "[init] AliasVault initialization complete!"
+echo "[init] ========================================="
+echo ""
+
+# Oneshot service exits successfully, dependencies can now start

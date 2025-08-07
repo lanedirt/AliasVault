@@ -1,0 +1,33 @@
+#!/command/with-contenv bash
+
+# Client service entrypoint
+DEFAULT_PRIVATE_EMAIL_DOMAINS=""
+DEFAULT_SUPPORT_EMAIL=""
+PRIVATE_EMAIL_DOMAINS=${PRIVATE_EMAIL_DOMAINS:-$DEFAULT_PRIVATE_EMAIL_DOMAINS}
+SUPPORT_EMAIL=${SUPPORT_EMAIL:-$DEFAULT_SUPPORT_EMAIL}
+PUBLIC_REGISTRATION_ENABLED=${PUBLIC_REGISTRATION_ENABLED:-true}
+
+mkdir -p /etc/nginx/ssl
+
+if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/nginx.key \
+        -out /etc/nginx/ssl/nginx.crt \
+        -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost" >/dev/null 2>&1
+    chmod 644 /etc/nginx/ssl/nginx.crt
+    chmod 600 /etc/nginx/ssl/nginx.key
+fi
+
+# Create simple JSON with environment variables
+cat > /app/client/wwwroot/appsettings.json << EOF
+{
+    "PrivateEmailDomains": ["$PRIVATE_EMAIL_DOMAINS"],
+    "SupportEmail": "$SUPPORT_EMAIL",
+    "PublicRegistrationEnabled": "$PUBLIC_REGISTRATION_ENABLED"
+}
+EOF
+
+sed -i "s|/usr/share/nginx/html|/app/client/wwwroot|g" /app/client/nginx.conf
+
+echo "[client] Starting Client service (nginx)..."
+exec nginx -c /app/client/nginx.conf -g "daemon off;"

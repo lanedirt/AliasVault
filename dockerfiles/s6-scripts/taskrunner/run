@@ -1,0 +1,25 @@
+#!/command/with-contenv bash
+
+cd /app/taskrunner
+
+# Read PostgreSQL password from file
+POSTGRES_PASSWORD=$(cat /secrets/postgres_password)
+
+# Wait for PostgreSQL to be ready
+echo "[taskrunner] Waiting for PostgreSQL to be ready..."
+for i in {1..30}; do
+    if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then
+        echo "[taskrunner] PostgreSQL ready, starting TaskRunner..."
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "[taskrunner] Timeout waiting for PostgreSQL"
+        exit 1
+    fi
+    sleep 2
+done
+
+export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"
+
+echo "[taskrunner] Starting TaskRunner service..."
+exec dotnet AliasVault.TaskRunner.dll

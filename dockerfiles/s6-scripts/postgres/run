@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Set PostgreSQL paths
+export PATH="/usr/lib/postgresql/16/bin:$PATH"
+export PGDATA="/database/postgres"
+
+echo "[postgres] Starting PostgreSQL server..."
+
+# Run PostgreSQL as postgres user
+exec s6-setuidgid postgres /usr/lib/postgresql/16/bin/postgres -D "$PGDATA"
