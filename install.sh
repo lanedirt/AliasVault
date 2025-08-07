@@ -1672,7 +1672,7 @@ handle_email_configuration() {
     printf "\n"
     printf "${CYAN}Current Configuration:${NC}\n"
 
-    if [ "$CURRENT_DOMAINS" = "DISABLED.TLD" ]; then
+    if [ -z "$CURRENT_DOMAINS" ] || [ "$CURRENT_DOMAINS" = "DISABLED.TLD" ]; then
         printf "Email Server Status: ${RED}Disabled${NC}\n"
     else
         printf "Email Server Status: ${GREEN}Enabled${NC}\n"
@@ -1763,7 +1763,7 @@ handle_email_configuration() {
             fi
 
             # Disable email server
-            if ! update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"; then
+            if ! update_env_var "PRIVATE_EMAIL_DOMAINS" ""; then
                 printf "${RED}Failed to update configuration.${NC}\n"
                 exit 1
             fi
@@ -2673,14 +2673,14 @@ handle_ip_logging_configuration() {
 
 check_and_populate_env() {
     printf "${CYAN}ℹ Checking .env values...${NC} ${GREEN}✓${NC}\n"
-    local any_missing=false
+
+    # === Section 1: Initialize missing environment variables ===
 
     # SUPPORT_EMAIL
     if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
         read -p "Enter server admin support email address that is shown on contact page (optional, press Enter to skip): " SUPPORT_EMAIL
         update_env_var "SUPPORT_EMAIL" "$SUPPORT_EMAIL"
         printf "  Set SUPPORT_EMAIL\n"
-        any_missing=true
     fi
 
     # JWT_KEY
@@ -2688,7 +2688,6 @@ check_and_populate_env() {
         JWT_KEY=$(openssl rand -base64 32)
         update_env_var "JWT_KEY" "$JWT_KEY"
         printf "  Set JWT_KEY\n"
-        any_missing=true
     fi
 
     # DATA_PROTECTION_CERT_PASS
@@ -2696,7 +2695,6 @@ check_and_populate_env() {
         CERT_PASS=$(openssl rand -base64 32)
         update_env_var "DATA_PROTECTION_CERT_PASS" "$CERT_PASS"
         printf "  Set DATA_PROTECTION_CERT_PASS\n"
-        any_missing=true
     fi
 
     # POSTGRES_PASSWORD
@@ -2704,46 +2702,41 @@ check_and_populate_env() {
         POSTGRES_PASS=$(openssl rand -base64 32)
         update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
         printf "  Generated POSTGRES_PASSWORD\n"
-        any_missing=true
     fi
 
     # PRIVATE_EMAIL_DOMAINS
     if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
-        update_env_var "PRIVATE_EMAIL_DOMAINS" "DISABLED.TLD"
+        update_env_var "PRIVATE_EMAIL_DOMAINS" ""
         printf "  Set PRIVATE_EMAIL_DOMAINS\n"
-        any_missing=true
-    fi
-
-    # SMTP_TLS_ENABLED
-    if ! grep -q "^SMTP_TLS_ENABLED=" "$ENV_FILE"; then
-        update_env_var "SMTP_TLS_ENABLED" "false"
-        printf "  Set SMTP_TLS_ENABLED\n"
-        any_missing=true
     fi
 
     # HTTP_PORT
     if ! grep -q "^HTTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "HTTP_PORT" "80"
         printf "  Set HTTP_PORT\n"
-        any_missing=true
     fi
     # HTTPS_PORT
     if ! grep -q "^HTTPS_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTPS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "HTTPS_PORT" "443"
         printf "  Set HTTPS_PORT\n"
-        any_missing=true
     fi
     # SMTP_PORT
     if ! grep -q "^SMTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "SMTP_PORT" "25"
         printf "  Set SMTP_PORT\n"
-        any_missing=true
     fi
     # SMTP_TLS_PORT
     if ! grep -q "^SMTP_TLS_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "SMTP_TLS_PORT" "587"
         printf "  Set SMTP_TLS_PORT\n"
-        any_missing=true
+    fi
+
+    # === Section 2: Migrations and upgrades for existing environment variables ===
+
+    # Migrate PRIVATE_EMAIL_DOMAINS from DISABLED.TLD to empty string (v0.22.0+)
+    if grep -q "^PRIVATE_EMAIL_DOMAINS=DISABLED.TLD" "$ENV_FILE"; then
+        update_env_var "PRIVATE_EMAIL_DOMAINS" ""
+        printf "  Migrated PRIVATE_EMAIL_DOMAINS (DISABLED.TLD → empty string, v0.22.0+)\n"
     fi
 }
 
