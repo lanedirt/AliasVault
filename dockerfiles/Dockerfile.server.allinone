@@ -209,8 +209,8 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
       echo 'mkdir -p /etc/nginx/ssl'; \
       echo ''; \
       echo 'if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then'; \
-      echo '    echo "Generating SSL certificate..."'; \
-      echo '    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"'; \
+      echo '    echo "Generating SSL certificate (10 years validity)..."'; \
+      echo '    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"'; \
       echo '    chmod 644 /etc/nginx/ssl/nginx.crt'; \
       echo '    chmod 600 /etc/nginx/ssl/nginx.key'; \
       echo 'fi'; \
@@ -274,9 +274,9 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
     { echo '#!/command/with-contenv bash'; \
       echo '# Generate SSL certificate if not exists'; \
       echo 'if [ ! -f /data/certificates/ssl/cert.pem ]; then'; \
-      echo '    echo "Generating self-signed SSL certificate..."'; \
+      echo '    echo "Generating self-signed SSL certificate (10 years validity)..."'; \
       echo '    mkdir -p /data/certificates/ssl'; \
-      echo '    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\'; \
+      echo '    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \\'; \
       echo '        -keyout /data/certificates/ssl/key.pem \\'; \
       echo '        -out /data/certificates/ssl/cert.pem \\'; \
       echo '        -subj "/C=US/ST=State/L=City/O=Organization/CN=${HOSTNAME:-localhost}"'; \

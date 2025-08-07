@@ -5,8 +5,8 @@ mkdir -p /etc/nginx/ssl
 
 # Generate self-signed SSL certificate if not exists
 if [ ! -f /etc/nginx/ssl/cert.pem ] || [ ! -f /etc/nginx/ssl/key.pem ]; then
-    echo "Generating new SSL certificate..."
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    echo "Generating new SSL certificate (10 years validity)..."
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
         -keyout /etc/nginx/ssl/key.pem \
         -out /etc/nginx/ssl/cert.pem \
         -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
