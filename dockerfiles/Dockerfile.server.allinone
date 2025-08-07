@@ -41,18 +41,32 @@ RUN dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj -
 # ============================================
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 
-# Install required packages
+# Install PostgreSQL APT repository to get exact version matching postgres:16-alpine
 RUN apt-get update && apt-get install -y \
+    wget \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update
+
+# Install required packages and locales - pin PostgreSQL to version 16
+RUN apt-get install -y \
     nginx \
-    postgresql-15 \
-    postgresql-client-15 \
+    postgresql-16 \
+    postgresql-client-16 \
     openssl \
     curl \
     xz-utils \
     netcat-openbsd \
     gettext-base \
+    locales \
+    && apt-mark hold postgresql-16 postgresql-client-16 \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd -r -s /bin/bash -d /var/lib/postgresql postgres 2>/dev/null || true
+    && useradd -r -s /bin/bash -d /var/lib/postgresql postgres 2>/dev/null || true \
+    && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
+    && locale-gen
 
 # Install s6-overlay v3
 ARG S6_OVERLAY_VERSION=3.2.0.2
@@ -69,12 +83,11 @@ RUN mkdir -p \
     /app/admin \
     /app/smtp \
     /app/taskrunner \
-    /data/postgres \
-    /data/database \
-    /data/certificates/ssl \
-    /data/certificates/app \
-    /data/certificates/letsencrypt \
-    /data/logs \
+    /database \
+    /certificates/ssl \
+    /certificates/app \
+    /certificates/letsencrypt \
+    /logs/postgres \
     /etc/nginx/ssl \
     /var/run/postgresql \
     /var/www/certbot
@@ -107,16 +120,11 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/init-container && \
     echo '#!/bin/sh' > /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Initializing AliasVault single container..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Creating data directories..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'mkdir -p /data/database /data/logs /data/certificates /data/postgres' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'echo "[init-container] Creating symbolic links for persistent data..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'ln -sf /data/database /database' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'ln -sf /data/logs /logs' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'ln -sf /data/certificates /certificates' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'mkdir -p /database/postgres /logs/postgres /certificates' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Setting database permissions..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'chown -R postgres:postgres /data/postgres 2>/dev/null || true' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'chmod 700 /data/postgres 2>/dev/null || true' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'chown -R postgres:postgres /database/postgres' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'chmod 700 /database/postgres' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Container initialization complete" >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     chmod +x /etc/s6-overlay/s6-rc.d/init-container/up && \
@@ -127,37 +135,37 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres && \
     { echo '#!/bin/sh'; \
       echo ''; \
       echo '# Set PostgreSQL paths'; \
-      echo 'export PATH="/usr/lib/postgresql/15/bin:$PATH"'; \
-      echo 'export PGDATA="/data/postgres"'; \
+      echo 'export PATH="/usr/lib/postgresql/16/bin:$PATH"'; \
+      echo 'export PGDATA="/database/postgres"'; \
       echo ''; \
       echo '# Initialize PostgreSQL if needed'; \
       echo 'if [ ! -d "$PGDATA/base" ]; then'; \
       echo '    echo "Initializing PostgreSQL database..."'; \
-      echo '    mkdir -p "$PGDATA" /data/logs'; \
-      echo '    chown -R postgres:postgres "$PGDATA" /data/logs'; \
+      echo '    mkdir -p "$PGDATA" /logs/postgres'; \
+      echo '    chown -R postgres:postgres "$PGDATA" /logs/postgres'; \
       echo '    chmod 700 "$PGDATA"'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/initdb -D $PGDATA"'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8"'; \
       echo '    '; \
       echo '    # Configure PostgreSQL'; \
       echo '    echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"'; \
       echo '    echo "listen_addresses = '\''127.0.0.1'\''" >> "$PGDATA/postgresql.conf"'; \
       echo '    '; \
       echo '    # Start PostgreSQL temporarily to create database and user'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/pg_ctl -D $PGDATA -l /data/logs/postgres.log start"'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -l /logs/postgres/postgres.log start"'; \
       echo '    sleep 5'; \
       echo '    '; \
       echo '    # Create database and user'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/psql -c \\"CREATE USER aliasvault WITH PASSWORD '\''${POSTGRES_PASSWORD:-defaultpassword}'\''\\""'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/psql -c \\"CREATE DATABASE aliasvault OWNER aliasvault;\\""'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/psql -c \\"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\\""'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"CREATE USER aliasvault WITH PASSWORD '\''${POSTGRES_PASSWORD:-defaultpassword}'\''\\""'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"CREATE DATABASE aliasvault OWNER aliasvault;\\""'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\\""'; \
       echo '    '; \
       echo '    # Stop PostgreSQL'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/15/bin/pg_ctl -D $PGDATA stop"'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA stop"'; \
       echo '    sleep 2'; \
       echo 'fi'; \
       echo ''; \
       echo '# Run PostgreSQL'; \
-      echo 'exec s6-setuidgid postgres /usr/lib/postgresql/15/bin/postgres -D "$PGDATA"'; \
+      echo 'exec s6-setuidgid postgres /usr/lib/postgresql/16/bin/postgres -D "$PGDATA"'; \
     } > /etc/s6-overlay/s6-rc.d/postgres/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/postgres/run && \
     echo "longrun" > /etc/s6-overlay/s6-rc.d/postgres/type && \
@@ -169,7 +177,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready && \
     { echo '#!/bin/sh'; \
       echo 'echo "Waiting for PostgreSQL to be ready..."'; \
       echo 'for i in {1..30}; do'; \
-      echo '    if su - postgres -c "/usr/lib/postgresql/15/bin/pg_isready -h localhost" > /dev/null 2>&1; then'; \
+      echo '    if su - postgres -c "/usr/lib/postgresql/16/bin/pg_isready -h localhost" > /dev/null 2>&1; then'; \
       echo '        echo "PostgreSQL is ready"'; \
       echo '        exit 0'; \
       echo '    fi'; \
@@ -280,17 +288,17 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/taskrunner && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
     { echo '#!/command/with-contenv bash'; \
       echo '# Generate SSL certificate if not exists'; \
-      echo 'if [ ! -f /data/certificates/ssl/cert.pem ]; then'; \
+      echo 'if [ ! -f /certificates/ssl/cert.pem ]; then'; \
       echo '    echo "Generating self-signed SSL certificate (10 years validity)..."'; \
-      echo '    mkdir -p /data/certificates/ssl'; \
+      echo '    mkdir -p /certificates/ssl'; \
       echo '    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \\'; \
-      echo '        -keyout /data/certificates/ssl/key.pem \\'; \
-      echo '        -out /data/certificates/ssl/cert.pem \\'; \
+      echo '        -keyout /certificates/ssl/key.pem \\'; \
+      echo '        -out /certificates/ssl/cert.pem \\'; \
       echo '        -subj "/C=US/ST=State/L=City/O=Organization/CN=${HOSTNAME:-localhost}"'; \
       echo 'fi'; \
       echo ''; \
       echo '# Copy certificates to nginx directory'; \
-      echo 'cp /data/certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true'; \
+      echo 'cp /certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true'; \
       echo ''; \
       echo '# Create SSL configuration file'; \
       echo 'cat > /etc/nginx/ssl.conf << "SSLEOF"'; \
