@@ -29,7 +29,7 @@ public class TaskRunnerWorker(
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogWarning("TaskRunnerWorker started at: {Time}", DateTimeOffset.Now);
+        logger.LogWarning("AliasVault.TaskRunner started at: {Time}", DateTimeOffset.Now);
 
         while (!stoppingToken.IsCancellationRequested)
         {
