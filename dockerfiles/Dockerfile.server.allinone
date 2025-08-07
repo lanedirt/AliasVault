@@ -172,29 +172,18 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres && \
     mkdir -p /etc/s6-overlay/s6-rc.d/postgres/dependencies.d && \
     touch /etc/s6-overlay/s6-rc.d/postgres/dependencies.d/init-container
 
-# Wait for PostgreSQL to be ready
-RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready && \
-    { echo '#!/bin/sh'; \
-      echo 'echo "Waiting for PostgreSQL to be ready..."'; \
-      echo 'for i in {1..30}; do'; \
-      echo '    if su - postgres -c "/usr/lib/postgresql/16/bin/pg_isready -h localhost" > /dev/null 2>&1; then'; \
-      echo '        echo "PostgreSQL is ready"'; \
-      echo '        exit 0'; \
-      echo '    fi'; \
-      echo '    sleep 1'; \
-      echo 'done'; \
-      echo 'echo "PostgreSQL failed to start"'; \
-      echo 'exit 1'; \
-    } > /etc/s6-overlay/s6-rc.d/postgres-ready/up && \
-    chmod +x /etc/s6-overlay/s6-rc.d/postgres-ready/up && \
-    echo "oneshot" > /etc/s6-overlay/s6-rc.d/postgres-ready/type && \
-    mkdir -p /etc/s6-overlay/s6-rc.d/postgres-ready/dependencies.d && \
-    touch /etc/s6-overlay/s6-rc.d/postgres-ready/dependencies.d/postgres
 
 # API service
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/api'; \
+      echo '# Wait for PostgreSQL to be ready'; \
+      echo 'i=1; while [ $i -le 30 ]; do'; \
+      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '    echo "[api] PostgreSQL ready, starting API..." >&2; break'; \
+      echo '  fi'; \
+      echo '  echo "[api] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
+      echo 'done'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3001"'; \
       echo 'export ASPNETCORE_PATHBASE="/api"'; \
@@ -204,9 +193,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
       echo 'exec dotnet AliasVault.Api.dll'; \
     } > /etc/s6-overlay/s6-rc.d/api/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/api/run && \
-    echo "longrun" > /etc/s6-overlay/s6-rc.d/api/type && \
-    mkdir -p /etc/s6-overlay/s6-rc.d/api/dependencies.d && \
-    touch /etc/s6-overlay/s6-rc.d/api/dependencies.d/postgres-ready
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/api/type
 
 # Client service (nginx for WASM app) - using echo approach
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
@@ -247,6 +234,13 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/admin && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/admin'; \
+      echo '# Wait for PostgreSQL to be ready'; \
+      echo 'i=1; while [ $i -le 30 ]; do'; \
+      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '    echo "[admin] PostgreSQL ready, starting Admin..." >&2; break'; \
+      echo '  fi'; \
+      echo '  echo "[admin] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
+      echo 'done'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3002"'; \
       echo 'export ASPNETCORE_PATHBASE="/admin"'; \
@@ -254,35 +248,43 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/admin && \
       echo 'exec dotnet AliasVault.Admin.dll'; \
     } > /etc/s6-overlay/s6-rc.d/admin/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/admin/run && \
-    echo "longrun" > /etc/s6-overlay/s6-rc.d/admin/type && \
-    mkdir -p /etc/s6-overlay/s6-rc.d/admin/dependencies.d && \
-    touch /etc/s6-overlay/s6-rc.d/admin/dependencies.d/postgres-ready
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/admin/type
 
 # SMTP service
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/smtp && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/smtp'; \
+      echo '# Wait for PostgreSQL to be ready'; \
+      echo 'i=1; while [ $i -le 30 ]; do'; \
+      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '    echo "[smtp] PostgreSQL ready, starting SMTP..." >&2; break'; \
+      echo '  fi'; \
+      echo '  echo "[smtp] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
+      echo 'done'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-}"'; \
       echo 'export SMTP_TLS_ENABLED="${SMTP_TLS_ENABLED:-false}"'; \
       echo 'exec dotnet AliasVault.SmtpService.dll'; \
     } > /etc/s6-overlay/s6-rc.d/smtp/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/smtp/run && \
-    echo "longrun" > /etc/s6-overlay/s6-rc.d/smtp/type && \
-    mkdir -p /etc/s6-overlay/s6-rc.d/smtp/dependencies.d && \
-    touch /etc/s6-overlay/s6-rc.d/smtp/dependencies.d/postgres-ready
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/smtp/type
 
 # Task Runner service
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/taskrunner && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/taskrunner'; \
+      echo '# Wait for PostgreSQL to be ready'; \
+      echo 'i=1; while [ $i -le 30 ]; do'; \
+      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '    echo "[taskrunner] PostgreSQL ready, starting TaskRunner..." >&2; break'; \
+      echo '  fi'; \
+      echo '  echo "[taskrunner] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
+      echo 'done'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'exec dotnet AliasVault.TaskRunner.dll'; \
     } > /etc/s6-overlay/s6-rc.d/taskrunner/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/taskrunner/run && \
-    echo "longrun" > /etc/s6-overlay/s6-rc.d/taskrunner/type && \
-    mkdir -p /etc/s6-overlay/s6-rc.d/taskrunner/dependencies.d && \
-    touch /etc/s6-overlay/s6-rc.d/taskrunner/dependencies.d/postgres-ready
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/taskrunner/type
 
 # Nginx service
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
@@ -316,17 +318,20 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
       echo 'cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf'; \
       echo ''; \
       echo '# Wait for all services to be ready'; \
-      echo 'echo "Waiting for services to be ready..."'; \
-      echo 'for i in {1..60}; do'; \
+      echo 'echo "[nginx] Waiting for services to be ready..."'; \
+      echo 'i=1'; \
+      echo 'while [ $i -le 60 ]; do'; \
       echo '    if nc -z localhost 3000 && nc -z localhost 3001 && nc -z localhost 3002; then'; \
-      echo '        echo "All services ready, starting nginx..."'; \
+      echo '        echo "[nginx] All services ready, starting nginx..."'; \
       echo '        break'; \
       echo '    fi'; \
       echo '    if [ $i -eq 60 ]; then'; \
-      echo '        echo "Timeout waiting for services"'; \
+      echo '        echo "[nginx] Timeout waiting for services"'; \
       echo '        exit 1'; \
       echo '    fi'; \
+      echo '    echo "[nginx] Waiting for services ($i/60)..."'; \
       echo '    sleep 1'; \
+      echo '    i=$(($i + 1))'; \
       echo 'done'; \
       echo ''; \
       echo 'exec nginx -g "daemon off;"'; \
@@ -342,7 +347,6 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/nginx && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/init-container && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres && \
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres-ready && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/api && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/client && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/admin && \
