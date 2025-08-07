@@ -20,23 +20,23 @@ services:
     admin:
         image: aliasvault-admin
         build:
-            context: ../
-            dockerfile: ../apps/server/AliasVault.Admin/Dockerfile
+            context: .
+            dockerfile: apps/server/AliasVault.Admin/Dockerfile
 
     reverse-proxy:
         image: aliasvault-reverse-proxy
         build:
-            context: ../
-            dockerfile: ../apps/server/Dockerfile
+            context: .
+            dockerfile: apps/server/Dockerfile
 
     smtp:
         image: aliasvault-smtp
         build:
-            context: ../
-            dockerfile: ../apps/server/Services/AliasVault.SmtpService/Dockerfile
+            context: .
+            dockerfile: apps/server/Services/AliasVault.SmtpService/Dockerfile
 
     task-runner:
         image: aliasvault-task-runner
         build:
-            context: ../
-            dockerfile: ../apps/server/Services/AliasVault.TaskRunner/Dockerfile
+            context: .
+            dockerfile: apps/server/Services/AliasVault.TaskRunner/Dockerfile
