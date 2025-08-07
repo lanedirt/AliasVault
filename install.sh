@@ -2705,7 +2705,7 @@ check_and_populate_env() {
     fi
 
     # PRIVATE_EMAIL_DOMAINS
-    if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" || [ -z "$(grep "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    if ! grep -q "^PRIVATE_EMAIL_DOMAINS=" "$ENV_FILE"; then
         update_env_var "PRIVATE_EMAIL_DOMAINS" ""
         printf "  Set PRIVATE_EMAIL_DOMAINS\n"
     fi

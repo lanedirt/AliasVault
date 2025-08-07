@@ -41,7 +41,10 @@ var config = new Config();
 var publicRegistrationEnabled = Environment.GetEnvironmentVariable("PUBLIC_REGISTRATION_ENABLED") ?? "false";
 config.PublicRegistrationEnabled = bool.Parse(publicRegistrationEnabled);
 
-var privateEmailDomains = Environment.GetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS")?.Split(",").Select(d => d.Trim());
+var privateEmailDomains = Environment.GetEnvironmentVariable("PRIVATE_EMAIL_DOMAINS")?
+    .Split(",", StringSplitOptions.RemoveEmptyEntries)
+    .Select(d => d.Trim())
+    .Where(d => !string.IsNullOrWhiteSpace(d));
 config.PrivateEmailDomains = privateEmailDomains?.ToList() ?? new List<string>();
 
 var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") ?? "false";

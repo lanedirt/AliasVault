@@ -29,8 +29,13 @@ fi
 # The app will use a relative URL instead (base url + "/api/" which is the default for the Docker setup).
 sed -i "s|\"ApiUrl\": \"http://localhost:5092\",||g" /usr/share/nginx/html/appsettings.json
 
-# Convert comma-separated list to JSON array
-json_array=$(echo $PRIVATE_EMAIL_DOMAINS | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')
+# Handle empty PRIVATE_EMAIL_DOMAINS by defaulting to empty array
+if [ -z "$PRIVATE_EMAIL_DOMAINS" ]; then
+    json_array="[]"
+else
+    # Convert comma-separated list to JSON array
+    json_array=$(echo $PRIVATE_EMAIL_DOMAINS | awk '{split($0,a,","); printf "["; for(i=1;i<=length(a);i++) {printf "\"%s\"", a[i]; if(i<length(a)) printf ","} printf "]"}')
+fi
 
 # Use sed to update the PrivateEmailDomains field in appsettings.json
 sed -i.bak "s|\"PrivateEmailDomains\": \[.*\]|\"PrivateEmailDomains\": $json_array|" /usr/share/nginx/html/appsettings.json

@@ -24,12 +24,6 @@ builder.Configuration.AddJsonFile($"appsettings.{builder.HostEnvironment.Environ
 
 var config = new Config();
 builder.Configuration.Bind(config);
-
-if (config.PrivateEmailDomains == null || config.PrivateEmailDomains.Count == 0)
-{
-    throw new KeyNotFoundException("PrivateEmailDomains is not set in the configuration.");
-}
-
 builder.Services.AddSingleton(config);
 
 // Add localization services
