@@ -107,7 +107,7 @@
     <comment>Generic error message</comment>
   </data>
   <data name="NoEmailBody" xml:space="preserve">
-    <value>[This email has no body.]</value>
+    <value>[Tällä sähköpostilla ei ole runkoa.]</value>
     <comment>Message shown when email has no content</comment>
   </data>
   <data name="AttachmentDownloadFailed" xml:space="preserve">
