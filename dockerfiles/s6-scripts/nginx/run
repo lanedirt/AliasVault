@@ -1,0 +1,34 @@
+#!/command/with-contenv bash
+
+# Copy certificates to nginx directory (they were created during init)
+mkdir -p /etc/nginx/ssl
+cp /certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true
+
+# Create SSL configuration file
+cat > /etc/nginx/ssl.conf << "SSLEOF"
+ssl_certificate /etc/nginx/ssl/cert.pem;
+ssl_certificate_key /etc/nginx/ssl/key.pem;
+ssl_session_timeout 1d;
+ssl_session_cache shared:MozTLS:10m;
+ssl_session_tickets off;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+ssl_prefer_server_ciphers off;
+SSLEOF
+
+# Wait for all services to be ready
+echo "[nginx] Waiting for services to be ready..."
+for i in {1..60}; do
+    if nc -z localhost 3000 && nc -z localhost 3001 && nc -z localhost 3002; then
+        echo "[nginx] All services ready, starting reverse proxy..."
+        break
+    fi
+    if [ $i -eq 60 ]; then
+        echo "[nginx] Timeout waiting for services"
+        exit 1
+    fi
+    sleep 1
+done
+
+echo "[nginx] Starting reverse proxy..."
+exec nginx -g "daemon off;"
