@@ -406,6 +406,9 @@ certificates/**/*.pfx
 certificates/**/*.pem
 certificates/letsencrypt/**
 
+# Secrets
+secrets/**
+
 # Docs
 docs/_site
 docs/vendor
