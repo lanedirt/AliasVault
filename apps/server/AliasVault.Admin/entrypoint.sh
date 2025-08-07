@@ -5,8 +5,8 @@ mkdir -p /app/ssl
 
 # Generate self-signed SSL certificate if not exists
 if [ ! -f /app/ssl/admin.crt ] || [ ! -f /app/ssl/admin.key ]; then
-    echo "Generating new SSL certificate..."
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    echo "Generating new SSL certificate (10 years validity)..."
+    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
         -keyout /app/ssl/admin.key \
         -out /app/ssl/admin.crt \
         -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
