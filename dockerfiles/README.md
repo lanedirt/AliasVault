@@ -10,8 +10,8 @@ Used to locally build Docker images from source instead of retrieving pre-built 
 ### `docker-compose.dev.yml`
 Contains containers for aiding in local development of AliasVault. Provides a separate PostgreSQL instance for development on port 5433, managed via `./install.sh configure-dev-db`.
 
-### `Dockerfile.server.singlecontainer`
-This is a standalone single-container build for easy self-hosting, using s6-overlay to run multiple services (database, API, web, smtp, task runner) inside one image.
+### `Dockerfile.server.allinone`
+This is a all-in-one single-container build of the full AliasVault server stack for easy self-hosting, using s6-overlay to run multiple services (database, API, web, smtp, task runner) in one image.
 
 This build is primarily intended for **limited platforms** like NAS devices, Unraid, or other **small home-use scenarios** where simplicity is preferred over flexibility.
 
