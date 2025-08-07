@@ -69,7 +69,7 @@
     <comment>Label for username/email input field</comment>
   </data>
   <data name="PasswordLabel" xml:space="preserve">
-    <value>Your password</value>
+    <value>Salasanasi</value>
     <comment>Label for password input field</comment>
   </data>
   <data name="ConfirmPasswordLabel" xml:space="preserve">
