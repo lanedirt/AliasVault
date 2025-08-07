@@ -105,10 +105,10 @@ If successful, you'll see a connection establishment message. Press Ctrl+C to ex
 AliasVault can be configured under:
 
 - **A primary (top-level) domain**
-  Example: `your-aliasvault.com`. This allows you to receive email on `%alias%@your-aliasvault.com`.
+  Example: `your-aliasvault.net`. This allows you to receive email on `%alias%@your-aliasvault.net`.
 
 - **A subdomain of your existing domain**
-  Example: `aliasvault.example.com`. This allows you to receive email on `%alias%@aliasvault.example.com`. Email sent to your main domain remains unaffected and will continue arriving in your usual inbox.
+  Example: `aliasvault.example.net`. This allows you to receive email on `%alias%@aliasvault.example.net`. Email sent to your main domain remains unaffected and will continue arriving in your usual inbox.
 
 ---
 
@@ -116,19 +116,19 @@ AliasVault can be configured under:
 
 ##### DNS Configuration
 
-Configure the following DNS records **on your primary domain** (e.g. `your-aliasvault.com`):
+Configure the following DNS records **on your primary domain** (e.g. `your-aliasvault.net`):
 
 | Name | Type | Priority | Content                   | TTL |
 |------|------|----------|---------------------------|-----|
 | mail | A    |          | `<your-server-public-ip>` | 3600 |
-| @    | MX   | 10       | `mail.your-aliasvault.com`| 3600 |
+| @    | MX   | 10       | `mail.your-aliasvault.net`| 3600 |
 
 > Replace `<your-server-public-ip>` with your actual server IP.
 
 ##### Example
 
-- `mail.your-aliasvault.com` points to your server IP.
-- Email to `@your-aliasvault.com` will be handled by your AliasVault server.
+- `mail.your-aliasvault.net` points to your server IP.
+- Email to `@your-aliasvault.net` will be handled by your AliasVault server.
 
 ---
 
