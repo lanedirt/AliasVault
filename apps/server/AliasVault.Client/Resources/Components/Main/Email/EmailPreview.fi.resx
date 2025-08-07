@@ -79,7 +79,7 @@
     <comment>No credential assigned value</comment>
   </data>
   <data name="AttachmentsLabel" xml:space="preserve">
-    <value>Attachments:</value>
+    <value>Liitteet:</value>
     <comment>Email attachments section header</comment>
   </data>
   <data name="SelectEmailMessage" xml:space="preserve">
