@@ -115,12 +115,36 @@ RUN sed -i 's/client:3000/localhost:3000/g' /etc/nginx/nginx.conf && \
 # S6 Service Definitions
 # ============================================
 
-# Container initialization
+# Container initialization with secrets management
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/init-container && \
     echo '#!/bin/sh' > /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Initializing AliasVault single container..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Creating data directories..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
-    echo 'mkdir -p /database/postgres /logs/postgres /certificates' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'mkdir -p /database/postgres /logs/postgres /certificates /secrets' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '# Initialize secrets files if they dont exist' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'echo "[init-container] Initializing secrets..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '# Generate random 32 character password for PostgreSQL if not exists' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'if [ ! -f /secrets/postgres_password ]; then' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    echo "[init-container] Generating PostgreSQL password..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    openssl rand -base64 32 | tr -d "\\n" > /secrets/postgres_password' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    chmod 600 /secrets/postgres_password' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'fi' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '# Generate random 32 character password for Data Protection Certificate if not exists' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'if [ ! -f /secrets/data_protection_cert_pass ]; then' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    echo "[init-container] Generating Data Protection Certificate password..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    openssl rand -base64 32 | tr -d "\\n" > /secrets/data_protection_cert_pass' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    chmod 600 /secrets/data_protection_cert_pass' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'fi' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '# Generate JWT key if not exists' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'if [ ! -f /secrets/jwt_key ]; then' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    echo "[init-container] Generating JWT key..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    openssl rand -base64 32 | tr -d "\\n" > /secrets/jwt_key' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo '    chmod 600 /secrets/jwt_key' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
+    echo 'fi' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo '' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'echo "[init-container] Setting database permissions..." >&2' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
     echo 'chown -R postgres:postgres /database/postgres' >> /etc/s6-overlay/s6-rc.d/init-container/up && \
@@ -137,6 +161,14 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres && \
       echo '# Set PostgreSQL paths'; \
       echo 'export PATH="/usr/lib/postgresql/16/bin:$PATH"'; \
       echo 'export PGDATA="/database/postgres"'; \
+      echo ''; \
+      echo '# Read PostgreSQL password from file'; \
+      echo 'if [ -f /secrets/postgres_password ]; then'; \
+      echo '    POSTGRES_PASSWORD=$(cat /secrets/postgres_password)'; \
+      echo 'else'; \
+      echo '    # Fallback to environment variable or default'; \
+      echo '    POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'fi'; \
       echo ''; \
       echo '# Initialize PostgreSQL if needed'; \
       echo 'if [ ! -d "$PGDATA/base" ]; then'; \
@@ -155,7 +187,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres && \
       echo '    sleep 5'; \
       echo '    '; \
       echo '    # Create database and user'; \
-      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"CREATE USER aliasvault WITH PASSWORD '\''${POSTGRES_PASSWORD:-defaultpassword}'\''\\""'; \
+      echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"CREATE USER aliasvault WITH PASSWORD '\''$POSTGRES_PASSWORD'\''\\""'; \
       echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"CREATE DATABASE aliasvault OWNER aliasvault;\\""'; \
       echo '    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \\"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\\""'; \
       echo '    '; \
@@ -177,14 +209,20 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/postgres && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/api'; \
+      echo '# Read PostgreSQL password from file'; \
+      echo 'if [ -f /secrets/postgres_password ]; then'; \
+      echo '    POSTGRES_PASSWORD=$(cat /secrets/postgres_password)'; \
+      echo 'else'; \
+      echo '    POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'fi'; \
       echo '# Wait for PostgreSQL to be ready'; \
       echo 'i=1; while [ $i -le 30 ]; do'; \
-      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '  if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
       echo '    echo "[api] PostgreSQL ready, starting API..." >&2; break'; \
       echo '  fi'; \
       echo '  echo "[api] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
       echo 'done'; \
-      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3001"'; \
       echo 'export ASPNETCORE_PATHBASE="/api"'; \
       echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-}"'; \
@@ -234,14 +272,20 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/admin && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/admin'; \
+      echo '# Read PostgreSQL password from file'; \
+      echo 'if [ -f /secrets/postgres_password ]; then'; \
+      echo '    POSTGRES_PASSWORD=$(cat /secrets/postgres_password)'; \
+      echo 'else'; \
+      echo '    POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'fi'; \
       echo '# Wait for PostgreSQL to be ready'; \
       echo 'i=1; while [ $i -le 30 ]; do'; \
-      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '  if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
       echo '    echo "[admin] PostgreSQL ready, starting Admin..." >&2; break'; \
       echo '  fi'; \
       echo '  echo "[admin] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
       echo 'done'; \
-      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3002"'; \
       echo 'export ASPNETCORE_PATHBASE="/admin"'; \
       echo 'export IP_LOGGING_ENABLED="${IP_LOGGING_ENABLED:-true}"'; \
@@ -254,14 +298,20 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/admin && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/smtp && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/smtp'; \
+      echo '# Read PostgreSQL password from file'; \
+      echo 'if [ -f /secrets/postgres_password ]; then'; \
+      echo '    POSTGRES_PASSWORD=$(cat /secrets/postgres_password)'; \
+      echo 'else'; \
+      echo '    POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'fi'; \
       echo '# Wait for PostgreSQL to be ready'; \
       echo 'i=1; while [ $i -le 30 ]; do'; \
-      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '  if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
       echo '    echo "[smtp] PostgreSQL ready, starting SMTP..." >&2; break'; \
       echo '  fi'; \
       echo '  echo "[smtp] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
       echo 'done'; \
-      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"'; \
       echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-}"'; \
       echo 'export SMTP_TLS_ENABLED="${SMTP_TLS_ENABLED:-false}"'; \
       echo 'exec dotnet AliasVault.SmtpService.dll'; \
@@ -273,14 +323,20 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/smtp && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/taskrunner && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/taskrunner'; \
+      echo '# Read PostgreSQL password from file'; \
+      echo 'if [ -f /secrets/postgres_password ]; then'; \
+      echo '    POSTGRES_PASSWORD=$(cat /secrets/postgres_password)'; \
+      echo 'else'; \
+      echo '    POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'fi'; \
       echo '# Wait for PostgreSQL to be ready'; \
       echo 'i=1; while [ $i -le 30 ]; do'; \
-      echo '  if PGPASSWORD="${POSTGRES_PASSWORD:-defaultpassword}" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
+      echo '  if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then'; \
       echo '    echo "[taskrunner] PostgreSQL ready, starting TaskRunner..." >&2; break'; \
       echo '  fi'; \
       echo '  echo "[taskrunner] Waiting for PostgreSQL ($i/30)..." >&2; sleep 2; i=$((i+1))'; \
       echo 'done'; \
-      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
+      echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"'; \
       echo 'exec dotnet AliasVault.TaskRunner.dll'; \
     } > /etc/s6-overlay/s6-rc.d/taskrunner/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/taskrunner/run && \
