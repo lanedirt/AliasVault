@@ -67,11 +67,11 @@
     <comment>Button to switch to custom domain entry</comment>
   </data>
   <data name="SelectEmailDomainTitle" xml:space="preserve">
-    <value>Select Email Domain</value>
+    <value>Valitse sähköpostiverkkotunnus</value>
     <comment>Title of domain selection popup</comment>
   </data>
   <data name="PrivateEmailTitle" xml:space="preserve">
-    <value>Private Email (AliasVault server)</value>
+    <value></value>
     <comment>Title for private email domains section</comment>
   </data>
   <data name="PrivateEmailDescription" xml:space="preserve">
@@ -79,7 +79,7 @@
     <comment>Description of private email domains</comment>
   </data>
   <data name="PublicEmailTitle" xml:space="preserve">
-    <value>Public Temp Email Providers</value>
+    <value>Julkiset Temp -sähköpostin tarjoajat</value>
     <comment>Title for public email domains section</comment>
   </data>
   <data name="PublicEmailDescription" xml:space="preserve">
