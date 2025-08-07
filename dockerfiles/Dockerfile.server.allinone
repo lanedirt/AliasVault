@@ -190,7 +190,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
       echo 'export ASPNETCORE_URLS="http://0.0.0.0:3001"'; \
       echo 'export ASPNETCORE_PATHBASE="/api"'; \
-      echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-DISABLED.TLD}"'; \
+      echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-}"'; \
       echo 'export PUBLIC_REGISTRATION_ENABLED="${PUBLIC_REGISTRATION_ENABLED:-true}"'; \
       echo 'export IP_LOGGING_ENABLED="${IP_LOGGING_ENABLED:-true}"'; \
       echo 'exec dotnet AliasVault.Api.dll'; \
@@ -204,7 +204,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/api && \
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/client && \
     { echo '#!/command/with-contenv bash'; \
       echo '# Client service entrypoint'; \
-      echo 'DEFAULT_PRIVATE_EMAIL_DOMAINS="DISABLED.TLD"'; \
+      echo 'DEFAULT_PRIVATE_EMAIL_DOMAINS=""'; \
       echo 'DEFAULT_SUPPORT_EMAIL=""'; \
       echo 'PRIVATE_EMAIL_DOMAINS=${PRIVATE_EMAIL_DOMAINS:-$DEFAULT_PRIVATE_EMAIL_DOMAINS}'; \
       echo 'SUPPORT_EMAIL=${SUPPORT_EMAIL:-$DEFAULT_SUPPORT_EMAIL}'; \
@@ -255,7 +255,7 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/smtp && \
     { echo '#!/command/with-contenv bash'; \
       echo 'cd /app/smtp'; \
       echo 'export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD:-defaultpassword}"'; \
-      echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-DISABLED.TLD}"'; \
+      echo 'export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-}"'; \
       echo 'export SMTP_TLS_ENABLED="${SMTP_TLS_ENABLED:-false}"'; \
       echo 'exec dotnet AliasVault.SmtpService.dll'; \
     } > /etc/s6-overlay/s6-rc.d/smtp/run && \
