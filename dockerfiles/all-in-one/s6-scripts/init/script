@@ -67,8 +67,14 @@ if [ ! -f /secrets/admin_password_hash ]; then
     # Generate a random admin password if not provided
     if [ -z "$ADMIN_PASSWORD" ]; then
         ADMIN_PASSWORD=$(openssl rand -base64 16 | tr -d "\n")
-        echo "[init]   ⚠️  Generated random admin password: $ADMIN_PASSWORD"
-        echo "[init]   ⚠️  Please save this password securely and/or optionally change it after first login!"
+        # Only show password in verbose mode during init
+        if [ "$VERBOSITY" -ge 2 ]; then
+            echo "[init]   ⚠️  Generated random admin password: $ADMIN_PASSWORD"
+            echo "[init]   ⚠️  Please save this password securely and/or optionally change it after first login!"
+        fi
+        # Save the password temporarily for the final notification (only if newly generated)
+        echo "$ADMIN_PASSWORD" > /secrets/admin_password_temp
+        chmod 600 /secrets/admin_password_temp
     fi
     # Use the InstallCLI to hash the password and append generation timestamp
     if [ "$VERBOSITY" -ge 2 ]; then
@@ -192,7 +198,7 @@ else
 fi
 
 echo ""
-echo "[init] Waiting for all services to be ready... this can take up to 2 minutes..."
+echo "[init] Waiting for all services to be ready... this can take a short while..."
 echo ""
 
 # Oneshot service exits successfully, dependencies can now start
