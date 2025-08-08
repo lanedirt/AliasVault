@@ -5,7 +5,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System.Globalization;
 using System.Reflection;
 using AliasServerDb;
 using AliasServerDb.Configuration;
@@ -19,6 +18,7 @@ using AliasVault.Logging;
 using AliasVault.RazorComponents.Services;
 using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Server.Services;
+using AliasVault.Shared.Server.Utilities;
 using ApexCharts;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -30,13 +30,13 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
-// Create global config object, get values from environment variables.
+// Create global config object, get values from environment variables or container secrets.
 var config = new Config();
-var adminPasswordHash = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_HASH") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_HASH environment variable is not set.");
-config.AdminPasswordHash = adminPasswordHash;
 
-var lastPasswordChanged = Environment.GetEnvironmentVariable("ADMIN_PASSWORD_GENERATED") ?? throw new KeyNotFoundException("ADMIN_PASSWORD_GENERATED environment variable is not set.");
-config.LastPasswordChanged = DateTime.Parse(lastPasswordChanged, CultureInfo.InvariantCulture);
+// Get admin password hash and generation timestamp using SecretReader
+var (adminPasswordHash, lastPasswordChanged) = SecretReader.GetAdminPasswordHash();
+config.AdminPasswordHash = adminPasswordHash;
+config.LastPasswordChanged = lastPasswordChanged;
 
 var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") ?? "false";
 config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);

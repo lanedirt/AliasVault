@@ -9,6 +9,7 @@ namespace AliasVault.Cryptography.Server;
 
 using System.Security.Cryptography.X509Certificates;
 using AliasServerDb;
+using AliasVault.Shared.Server.Utilities;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,14 +29,11 @@ public static class DataProtectionExtensions
         this IServiceCollection services,
         string applicationName)
     {
-        // Determine if running in a container
-        var isContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
-
         var dataProtectionBuilder = services.AddDataProtection()
             .PersistKeysToDbContext<AliasServerDbContext>()
             .SetApplicationName(applicationName);
 
-        if (isContainer)
+        if (SecretReader.IsRunningInContainer())
         {
             ConfigureContainerDataProtection(dataProtectionBuilder);
         }
@@ -53,19 +51,6 @@ public static class DataProtectionExtensions
     /// <param name="dataProtectionBuilder">The data protection builder.</param>
     private static void ConfigureContainerDataProtection(IDataProtectionBuilder dataProtectionBuilder)
     {
-        // In container, load password from file
-        var certPassPath = "/secrets/data_protection_cert_pass";
-        if (!File.Exists(certPassPath))
-        {
-            throw new KeyNotFoundException($"Certificate password file not found at {certPassPath}.");
-        }
-
-        var certPassword = File.ReadAllText(certPassPath).Trim();
-        if (string.IsNullOrEmpty(certPassword))
-        {
-            throw new KeyNotFoundException($"Certificate password file at {certPassPath} is empty.");
-        }
-
         // When running in containers, don't use certificate-based key protection due to Linux keystore limitations
         // Keys are protected by database access controls, TLS, and container isolation
         dataProtectionBuilder
@@ -84,9 +69,8 @@ public static class DataProtectionExtensions
     /// <param name="applicationName">The application name.</param>
     private static void ConfigureDevelopmentDataProtection(IDataProtectionBuilder dataProtectionBuilder, string applicationName)
     {
-        // Not in container, require environment variable
-        var certPassword = Environment.GetEnvironmentVariable("DATA_PROTECTION_CERT_PASS")
-            ?? throw new KeyNotFoundException("DATA_PROTECTION_CERT_PASS is not set in configuration or environment variables.");
+        // Not in container, get certificate password using SecretReader
+        var certPassword = SecretReader.GetDataProtectionCertPassword();
 
         var certPath = $"../../certificates/app/{applicationName}.DataProtection.pfx";
         if (certPassword == "Development")
