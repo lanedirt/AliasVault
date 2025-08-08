@@ -39,16 +39,14 @@ EOF
 
 sed -i "s|/usr/share/nginx/html|/app/client/wwwroot|g" /app/client/nginx.conf
 
-if [ "$VERBOSITY" -ge 1 ]; then
-    echo "[client] Starting Client service (nginx)..."
-fi
+echo "Starting Client service..."
 
 # Set nginx error log level based on verbosity
 if [ "$VERBOSITY" -ge 2 ]; then
     # Verbose: info level
     exec nginx -c /app/client/nginx.conf -g "daemon off; error_log /dev/stderr info;"
 elif [ "$VERBOSITY" -ge 1 ]; then
-    # Normal: warn level  
+    # Normal: warn level
     exec nginx -c /app/client/nginx.conf -g "daemon off; error_log /dev/stderr warn;"
 else
     # Minimal: error level only

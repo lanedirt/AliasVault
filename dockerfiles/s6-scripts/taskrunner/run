@@ -41,8 +41,6 @@ else
     export Logging__LogLevel__Microsoft="Error"
 fi
 
-if [ "$VERBOSITY" -ge 1 ]; then
-    echo "[taskrunner] Starting TaskRunner service..."
-fi
+echo "Starting TaskRunner service..."
 
 exec dotnet AliasVault.TaskRunner.dll

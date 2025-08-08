@@ -31,11 +31,12 @@ echo "[init] Starting AliasVault..."
 echo ""
 
 # Create required directories
-log 0 "[init] Creating required directories..."
-mkdir -p /database/postgres /logs/postgres /certificates /secrets /var/run/postgresql
-
-# Initialize secrets if they don't exist
-log 0 "[init] Checking and initializing secrets..."
+if [ ! -d /database/postgres ] || [ ! -d /logs/postgres ] || [ ! -d /certificates ] || [ ! -d /secrets ] || [ ! -d /var/run/postgresql ]; then
+    mkdir -p /database/postgres /logs/postgres /certificates /secrets /var/run/postgresql
+    log 0 "[init] ✅ Required directories created"
+else
+    log 0 "[init] ✅ Required directories already exist"
+fi
 
 if [ ! -f /secrets/postgres_password ]; then
     log 0 "[init] → Generating PostgreSQL password..."
@@ -81,7 +82,7 @@ if [ ! -f /secrets/admin_password_hash ]; then
     log 0 "[init] ✅ Admin password hash saved to /secrets/admin_password_hash"
 else
     log 0 "[init] ✅ Admin password hash already exists"
-    log 0 "[init]    (to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
+    log 0 "[init]    → (to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
 fi
 
 # Read PostgreSQL password for database initialization
