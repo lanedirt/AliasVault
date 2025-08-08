@@ -2,7 +2,7 @@
   "auth": {
     "loginTitle": "Log in to AliasVault",
     "username": "Username or email",
-    "usernamePlaceholder": "name / name@company.com",
+    "usernamePlaceholder": "Name / name@unternehmen.com",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
     "rememberMe": "Remember me",
@@ -50,7 +50,7 @@
     "appName": "AliasVault",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success",
+    "success": "Aktion erfolgreich",
     "cancel": "Cancel",
     "use": "Use",
     "delete": "Delete",
