@@ -113,8 +113,21 @@ if [ ! -d "$PGDATA/base" ]; then
 
     # Configure PostgreSQL
     log 0 "[init] → Configuring PostgreSQL..."
-    echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"
-    echo "listen_addresses = '127.0.0.1'" >> "$PGDATA/postgresql.conf"
+
+    # Listen on all container interfaces (covers localhost & Docker networks)
+    echo "listen_addresses = '*'" >> "$PGDATA/postgresql.conf"
+    # Store SCRAM hashes instead of MD5
+    echo "password_encryption = scram-sha-256" >> "$PGDATA/postgresql.conf"
+    # Allow local Unix-socket connections (processes inside the same container)
+    echo "local   all   all                                   trust" >> "$PGDATA/pg_hba.conf"
+    # Allow any client on the same subnet(s) as this container (bridge/overlay)
+    # Prefer SCRAM if enabled above; otherwise MD5
+    if grep -qi '^password_encryption *= *scram-sha-256' "$PGDATA/postgresql.conf"; then
+        AUTH_METHOD="scram-sha-256"
+    else
+        AUTH_METHOD="md5"
+    fi
+    echo "host    all   all           samenet                  ${AUTH_METHOD}" >> "$PGDATA/pg_hba.conf"
 
     # Start PostgreSQL temporarily to create database and user
     log 0 "[init] → Starting PostgreSQL temporarily for setup..."
