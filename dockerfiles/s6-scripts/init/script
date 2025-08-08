@@ -49,6 +49,24 @@ else
     echo "[init] → JWT key already exists"
 fi
 
+if [ ! -f /secrets/admin_password_hash ]; then
+    echo "[init] → Generating admin password hash..."
+    # Generate a random admin password if not provided
+    if [ -z "$ADMIN_PASSWORD" ]; then
+        ADMIN_PASSWORD=$(openssl rand -base64 16 | tr -d "\n")
+        echo "[init]   ⚠️  Generated random admin password: $ADMIN_PASSWORD"
+        echo "[init]   ⚠️  Please save this password securely and/or optionally change it after first login!"
+    fi
+    # Use the InstallCLI to hash the password and append generation timestamp
+    HASH=$(/usr/local/bin/aliasvault-cli/AliasVault.InstallCli hash-password "$ADMIN_PASSWORD")
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "${HASH}|${TIMESTAMP}" > /secrets/admin_password_hash
+    chmod 600 /secrets/admin_password_hash
+    echo "[init] → Admin password hash saved to /secrets/admin_password_hash"
+else
+    echo "[init] → Admin password hash already exists"
+fi
+
 # Read PostgreSQL password for database initialization
 POSTGRES_PASSWORD=$(cat /secrets/postgres_password)
 export PGDATA="/database/postgres"
@@ -57,24 +75,24 @@ export PGDATA="/database/postgres"
 if [ ! -d "$PGDATA/base" ]; then
     echo ""
     echo "[init] PostgreSQL database not found, initializing..."
-    
+
     # Set proper permissions
     chown -R postgres:postgres /database/postgres /logs/postgres /var/run/postgresql
     chmod 700 /database/postgres
-    
+
     # Initialize database as postgres user
     echo "[init] → Running initdb..."
     su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" > /logs/postgres/initdb.log 2>&1
-    
+
     # Configure PostgreSQL
     echo "[init] → Configuring PostgreSQL..."
     echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"
     echo "listen_addresses = '127.0.0.1'" >> "$PGDATA/postgresql.conf"
-    
+
     # Start PostgreSQL temporarily to create database and user
     echo "[init] → Starting PostgreSQL temporarily for setup..."
     su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -l /logs/postgres/postgres.log start"
-    
+
     # Wait for PostgreSQL to be ready
     echo "[init] → Waiting for PostgreSQL to be ready..."
     i=1
@@ -85,22 +103,22 @@ if [ ! -d "$PGDATA/base" ]; then
         sleep 1
         i=$((i + 1))
     done
-    
+
     # Create database and user
     echo "[init] → Creating AliasVault database and user..."
     su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\""
     su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\""
     su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\""
-    
+
     # Stop PostgreSQL
     echo "[init] → Stopping PostgreSQL..."
     su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA stop"
     sleep 2
-    
+
     echo "[init] → PostgreSQL initialization complete"
 else
     echo "[init] PostgreSQL database already initialized"
-    
+
     # Just ensure permissions are correct
     chown -R postgres:postgres /database/postgres /logs/postgres /var/run/postgresql
     chmod 700 /database/postgres
