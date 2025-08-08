@@ -17,6 +17,7 @@ REQUIRED_DIRS=(
     "database/postgres"
     "logs"
     "logs/msbuild"
+    "secrets"
 )
 
 # Color codes for output
@@ -33,6 +34,7 @@ NC='\033[0m'
 # File paths
 ENV_FILE=".env"
 ENV_EXAMPLE_FILE=".env.example"
+SECRETS_DIR="./secrets"
 
 # Minimum required versions
 MIN_DOCKER_VERSION="20.10.0"
@@ -779,7 +781,7 @@ enhanced_docker_pull() {
         (
             docker pull "$image" > /tmp/docker_pull_${image_name//[:\/]/_}.log 2>&1 &
             local pull_pid=$!
-            show_spinner $pull_pid "Pulling $image_name"
+            show_spinner $pull_pid "Pulling $image_name "
             wait $pull_pid
             local exit_code=$?
 
@@ -834,6 +836,14 @@ main() {
             # Full dependency check for operations that require Docker
             if ! check_dependencies; then
                 exit 1
+            fi
+
+            # Check for and migrate secrets from .env to files if needed
+            if [ -f "$ENV_FILE" ]; then
+                if grep -q "^JWT_KEY=\|^DATA_PROTECTION_CERT_PASS=\|^POSTGRES_PASSWORD=\|^ADMIN_PASSWORD_HASH=" "$ENV_FILE" 2>/dev/null; then
+                    printf "${CYAN}ℹ Migrating secrets from .env to secret files...${NC}\n"
+                    migrate_secrets_to_files
+                fi
             fi
 
             # Additional checks for installation/build operations
@@ -1116,6 +1126,21 @@ create_env_file() {
 
         cp "$ENV_EXAMPLE_FILE" "$ENV_FILE"
         printf "  ${GREEN}> New .env file created from .env.example.${NC}\n"
+    else
+        # Check if .env file contains POSTGRES_DB or POSTGRES_USER, remove if present and show confirmation
+        local removed_vars=()
+        if grep -q "^POSTGRES_DB=" "$ENV_FILE"; then
+            sed -i.bak "/^POSTGRES_DB=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+            removed_vars+=("POSTGRES_DB")
+        fi
+        if grep -q "^POSTGRES_USER=" "$ENV_FILE"; then
+            sed -i.bak "/^POSTGRES_USER=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+            removed_vars+=("POSTGRES_USER")
+        fi
+        if [ ${#removed_vars[@]} -gt 0 ]; then
+            printf "  ${GREEN}> Removed obsolete variable(s) from .env: %s${NC}\n" "${removed_vars[*]}"
+        fi
+
     fi
 }
 
@@ -1153,7 +1178,7 @@ generate_admin_password() {
             (
                 docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile . > install_build_output.log 2>&1 &
                 BUILD_PID=$!
-                show_spinner $BUILD_PID "Building InstallCli image"
+                show_spinner $BUILD_PID "Building InstallCli image "
                 wait $BUILD_PID
                 BUILD_EXIT_CODE=$?
 
@@ -1176,8 +1201,9 @@ generate_admin_password() {
         exit 1
     fi
 
-    update_env_var "ADMIN_PASSWORD_HASH" "$HASH"
-    update_env_var "ADMIN_PASSWORD_GENERATED" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    # Write admin password hash to secret file with timestamp
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    write_secret_to_file "admin_password_hash" "${HASH}|${TIMESTAMP}"
 }
 
 # Helper function to update environment variables
@@ -1200,6 +1226,180 @@ update_env_var() {
     fi
 
     printf "  ${GREEN}> $key has been set in $ENV_FILE.${NC}\n"
+}
+
+# Helper function to write secrets to files instead of .env
+write_secret_to_file() {
+    local secret_name=$1
+    local secret_value=$2
+    local secret_file="${SECRETS_DIR}/${secret_name}"
+
+    # Create secrets directory if it doesn't exist
+    if [ ! -d "$SECRETS_DIR" ]; then
+        mkdir -p "$SECRETS_DIR"
+        chmod 700 "$SECRETS_DIR"
+    fi
+
+    # Write secret to file
+    echo -n "$secret_value" > "$secret_file"
+    chmod 600 "$secret_file"
+
+    printf "  ${GREEN}> Secret $secret_name has been written to $secret_file${NC}\n"
+}
+
+# Helper function to read secret from file
+read_secret_from_file() {
+    local secret_name=$1
+    local secret_file="${SECRETS_DIR}/${secret_name}"
+
+    if [ -f "$secret_file" ]; then
+        cat "$secret_file"
+    else
+        echo ""
+    fi
+}
+
+# Function to migrate secrets from .env to files
+migrate_secrets_to_files() {
+    local migrated=false
+    local confirm_overwrite=false
+
+    # Check if any secret files already exist
+    if [ -f "${SECRETS_DIR}/jwt_key" ] || [ -f "${SECRETS_DIR}/data_protection_cert_pass" ] ||
+       [ -f "${SECRETS_DIR}/postgres_password" ] || [ -f "${SECRETS_DIR}/admin_password_hash" ]; then
+        printf "${YELLOW}⚠ Some secret files already exist. Do you want to overwrite them with values from .env? (y/n):${NC} "
+        read -r response
+        if [ "$response" != "y" ] && [ "$response" != "Y" ]; then
+            printf "${CYAN}ℹ Skipping secret migration (keeping existing secret files)${NC}\n"
+            # Still remove secrets from .env if they exist there
+            remove_secrets_from_env
+            return 0
+        fi
+        confirm_overwrite=true
+    fi
+
+    # Create secrets directory if it doesn't exist
+    if [ ! -d "$SECRETS_DIR" ]; then
+        mkdir -p "$SECRETS_DIR"
+        chmod 700 "$SECRETS_DIR"
+    fi
+
+    # Migrate JWT_KEY
+    if grep -q "^JWT_KEY=" "$ENV_FILE" 2>/dev/null; then
+        JWT_KEY=$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2-)
+        if [ -n "$JWT_KEY" ]; then
+            write_secret_to_file "jwt_key" "$JWT_KEY"
+            migrated=true
+        fi
+    fi
+
+    # Migrate DATA_PROTECTION_CERT_PASS
+    if grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" 2>/dev/null; then
+        CERT_PASS=$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2-)
+        if [ -n "$CERT_PASS" ]; then
+            write_secret_to_file "data_protection_cert_pass" "$CERT_PASS"
+            migrated=true
+        fi
+    fi
+
+    # Migrate POSTGRES_PASSWORD
+    if grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" 2>/dev/null; then
+        POSTGRES_PASS=$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2-)
+        if [ -n "$POSTGRES_PASS" ]; then
+            write_secret_to_file "postgres_password" "$POSTGRES_PASS"
+            migrated=true
+        fi
+    fi
+
+    # Migrate ADMIN_PASSWORD_HASH (with timestamp)
+    if grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" 2>/dev/null; then
+        ADMIN_HASH=$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2-)
+        if [ -n "$ADMIN_HASH" ]; then
+            # Get the timestamp if it exists
+            TIMESTAMP=""
+            if grep -q "^ADMIN_PASSWORD_GENERATED=" "$ENV_FILE" 2>/dev/null; then
+                TIMESTAMP=$(grep "^ADMIN_PASSWORD_GENERATED=" "$ENV_FILE" | cut -d '=' -f2-)
+            else
+                TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            fi
+            # Write hash with timestamp appended
+            write_secret_to_file "admin_password_hash" "${ADMIN_HASH}|${TIMESTAMP}"
+            migrated=true
+        fi
+    fi
+
+    if [ "$migrated" = true ]; then
+        printf "${GREEN}✓ Secrets have been migrated from .env to secret files${NC}\n"
+        # Remove secrets from .env after successful migration
+        remove_secrets_from_env
+    elif [ "$confirm_overwrite" = false ]; then
+        printf "${CYAN}ℹ No secrets found in .env to migrate${NC}\n"
+    fi
+}
+
+# Function to remove secrets from .env file. This is used to migrate pre-0.22.0 .env files to the new secret file format.
+# Can be removed later when v1.0 is launched.
+remove_secrets_from_env() {
+    local removed=false
+
+    # Only proceed if .env file exists
+    if [ ! -f "$ENV_FILE" ]; then
+        return 0
+    fi
+
+    # Verify that secret files exist before removing from .env
+    local all_secrets_migrated=true
+
+    if grep -q "^JWT_KEY=" "$ENV_FILE" 2>/dev/null && [ ! -f "${SECRETS_DIR}/jwt_key" ]; then
+        all_secrets_migrated=false
+    fi
+
+    if grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" 2>/dev/null && [ ! -f "${SECRETS_DIR}/data_protection_cert_pass" ]; then
+        all_secrets_migrated=false
+    fi
+
+    if grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" 2>/dev/null && [ ! -f "${SECRETS_DIR}/postgres_password" ]; then
+        all_secrets_migrated=false
+    fi
+
+    if grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" 2>/dev/null && [ ! -f "${SECRETS_DIR}/admin_password_hash" ]; then
+        all_secrets_migrated=false
+    fi
+
+    if [ "$all_secrets_migrated" = false ]; then
+        printf "${YELLOW}⚠ Not all secrets have been migrated to files. Keeping secrets in .env${NC}\n"
+        return 1
+    fi
+
+    # Remove secrets from .env
+    if grep -q "^JWT_KEY=" "$ENV_FILE"; then
+        sed -i.bak "/^JWT_KEY=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        removed=true
+    fi
+
+    if grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE"; then
+        sed -i.bak "/^DATA_PROTECTION_CERT_PASS=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        removed=true
+    fi
+
+    if grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE"; then
+        sed -i.bak "/^POSTGRES_PASSWORD=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        removed=true
+    fi
+
+    if grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE"; then
+        sed -i.bak "/^ADMIN_PASSWORD_HASH=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        removed=true
+    fi
+
+    if grep -q "^ADMIN_PASSWORD_GENERATED=" "$ENV_FILE"; then
+        sed -i.bak "/^ADMIN_PASSWORD_GENERATED=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
+        removed=true
+    fi
+
+    if [ "$removed" = true ]; then
+        printf "${GREEN}✓ Secrets have been removed from .env file${NC}\n"
+    fi
 }
 
 
@@ -1281,7 +1481,7 @@ recreate_docker_containers() {
         (
             $(get_docker_compose_command) up -d --force-recreate > /tmp/docker_recreate.log 2>&1 &
             RECREATE_PID=$!
-            show_spinner $RECREATE_PID "Recreating containers"
+            show_spinner $RECREATE_PID "Recreating containers "
             wait $RECREATE_PID
             RECREATE_EXIT_CODE=$?
 
@@ -1474,7 +1674,7 @@ handle_build() {
     check_and_populate_env
 
     # Only generate admin password if not already set
-    if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    if [ ! -f "${SECRETS_DIR}/admin_password_hash" ] || [ -z "$(cat "${SECRETS_DIR}/admin_password_hash" 2>/dev/null)" ]; then
         generate_admin_password || { printf "${RED}> Failed to generate admin password${NC}\n"; exit 1; }
     fi
 
@@ -1491,7 +1691,7 @@ handle_build() {
         (
             $(get_docker_compose_command) build > install_compose_build_output.log 2>&1 &
             BUILD_PID=$!
-            show_spinner $BUILD_PID "Building Docker images"
+            show_spinner $BUILD_PID "Building Docker images "
             wait $BUILD_PID
             BUILD_EXIT_CODE=$?
 
@@ -2206,7 +2406,7 @@ handle_install_version() {
     set_deployment_mode "install"
 
     # Only generate admin password if not already set
-    if ! grep -q "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" || [ -z "$(grep "^ADMIN_PASSWORD_HASH=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    if [ ! -f "${SECRETS_DIR}/admin_password_hash" ] || [ -z "$(cat "${SECRETS_DIR}/admin_password_hash" 2>/dev/null)" ]; then
         generate_admin_password || { printf "${RED}> Failed to generate admin password${NC}\n"; exit 1; }
     fi
 
@@ -2249,7 +2449,7 @@ handle_install_version() {
         (
             docker compose up -d --force-recreate > /tmp/docker_start.log 2>&1 &
             START_PID=$!
-            show_spinner $START_PID "Starting Docker containers"
+            show_spinner $START_PID "Starting Docker containers "
             wait $START_PID
             START_EXIT_CODE=$?
 
@@ -2393,7 +2593,7 @@ set_deployment_mode() {
         printf "${RED}Invalid deployment mode: $mode${NC}\n"
         exit 1
     fi
-    update_env_var "DEPLOYMENT_MODE" "$mode"
+    update_env_var "DEPLOYMENT_MODE" "$mode" &>/dev/null
 }
 
 # Function to handle database export
@@ -2683,24 +2883,24 @@ check_and_populate_env() {
         printf "  Set SUPPORT_EMAIL\n"
     fi
 
-    # JWT_KEY
-    if ! grep -q "^JWT_KEY=" "$ENV_FILE" || [ -z "$(grep "^JWT_KEY=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    # JWT_KEY - now stored in secret file
+    if [ ! -f "${SECRETS_DIR}/jwt_key" ] || [ -z "$(cat "${SECRETS_DIR}/jwt_key" 2>/dev/null)" ]; then
         JWT_KEY=$(openssl rand -base64 32)
-        update_env_var "JWT_KEY" "$JWT_KEY"
-        printf "  Set JWT_KEY\n"
+        write_secret_to_file "jwt_key" "$JWT_KEY"
+        printf "  Generated JWT_KEY\n"
     fi
 
-    # DATA_PROTECTION_CERT_PASS
-    if ! grep -q "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" || [ -z "$(grep "^DATA_PROTECTION_CERT_PASS=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    # DATA_PROTECTION_CERT_PASS - now stored in secret file
+    if [ ! -f "${SECRETS_DIR}/data_protection_cert_pass" ] || [ -z "$(cat "${SECRETS_DIR}/data_protection_cert_pass" 2>/dev/null)" ]; then
         CERT_PASS=$(openssl rand -base64 32)
-        update_env_var "DATA_PROTECTION_CERT_PASS" "$CERT_PASS"
-        printf "  Set DATA_PROTECTION_CERT_PASS\n"
+        write_secret_to_file "data_protection_cert_pass" "$CERT_PASS"
+        printf "  Generated DATA_PROTECTION_CERT_PASS\n"
     fi
 
-    # POSTGRES_PASSWORD
-    if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE" || [ -z "$(grep "^POSTGRES_PASSWORD=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
+    # POSTGRES_PASSWORD - now stored in secret file
+    if [ ! -f "${SECRETS_DIR}/postgres_password" ] || [ -z "$(cat "${SECRETS_DIR}/postgres_password" 2>/dev/null)" ]; then
         POSTGRES_PASS=$(openssl rand -base64 32)
-        update_env_var "POSTGRES_PASSWORD" "$POSTGRES_PASS"
+        write_secret_to_file "postgres_password" "$POSTGRES_PASS"
         printf "  Generated POSTGRES_PASSWORD\n"
     fi
 
