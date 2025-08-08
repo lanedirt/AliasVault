@@ -20,7 +20,7 @@
     </xsd:element>
   </xsd:schema>
   <data name="CopiedMessage">
-    <value>Copied!</value>
+    <value>Kopiert!</value>
     <comment>Confirmation message shown when text is copied to clipboard</comment>
   </data>
 </root>
