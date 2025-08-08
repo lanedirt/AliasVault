@@ -106,9 +106,9 @@ if [ ! -d "$PGDATA/base" ]; then
     # Initialize database as postgres user
     log 1 "[init] → Running initdb..."
     if [ "$VERBOSITY" -ge 2 ]; then
-        su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" 2>&1 | tee /logs/postgres/initdb.log
+        su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=C.UTF-8 --encoding=UTF8" 2>&1 | tee /logs/postgres/initdb.log
     else
-        su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" > /logs/postgres/initdb.log 2>&1
+        su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=C.UTF-8 --encoding=UTF8" > /logs/postgres/initdb.log 2>&1
     fi
 
     # Configure PostgreSQL
@@ -152,11 +152,11 @@ if [ ! -d "$PGDATA/base" ]; then
     log 0 "[init] → Creating AliasVault database and user..."
     if [ "$VERBOSITY" -ge 2 ]; then
         su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\""
-        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\""
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault LOCALE 'C.UTF-8';\""
         su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\""
     else
         su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\"" >/dev/null 2>&1
-        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\"" >/dev/null 2>&1
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault LOCALE 'C.UTF-8';\"" >/dev/null 2>&1
         su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\"" >/dev/null 2>&1
     fi
 

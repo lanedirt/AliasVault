@@ -9,6 +9,7 @@ namespace AliasServerDb;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 /// <summary>
 /// The PostgreSQL DbContext factory.
@@ -55,8 +56,65 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
             connectionString = _configuration.GetConnectionString("AliasServerDbContext");
         }
 
+        // If running in container override the connection string with the one from the secret file
+        if (IsRunningInContainer())
+        {
+            try
+            {
+                // Parse the existing connection string
+                var builder = new NpgsqlConnectionStringBuilder();
+
+                // Override the password with the one from the secret file
+                builder.Host = "postgres";
+                builder.Database = "aliasvault";
+                builder.Username = "aliasvault";
+                builder.Port = 5432;
+                builder.Password = GetPostgresPasswordFromSecretFile();
+
+                // Build the connection string with the new password
+                connectionString = builder.ConnectionString;
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail - use the original connection string
+                Console.WriteLine($"Warning: Failed to override PostgreSQL password from secret file: {ex.Message}");
+            }
+        }
+
         optionsBuilder
             .UseNpgsql(connectionString, options => options.CommandTimeout(60))
             .UseLazyLoadingProxies();
+    }
+
+    /// <summary>
+    /// Determines if the application is running in a container.
+    /// </summary>
+    /// <returns>True if running in a container, false otherwise.</returns>
+    private static bool IsRunningInContainer()
+    {
+        return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+    }
+
+    /// <summary>
+    /// Gets the PostgreSQL password from the secret file.
+    /// </summary>
+    /// <returns>The PostgreSQL password.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the PostgreSQL password cannot be found.</exception>
+    private static string GetPostgresPasswordFromSecretFile()
+    {
+        const string secretsFilePath = "/secrets/postgres_password";
+
+        if (!File.Exists(secretsFilePath))
+        {
+            throw new KeyNotFoundException($"PostgreSQL password file not found at {secretsFilePath}. Container initialization may have failed.");
+        }
+
+        var secretValue = File.ReadAllText(secretsFilePath).Trim();
+        if (string.IsNullOrEmpty(secretValue))
+        {
+            throw new KeyNotFoundException($"PostgreSQL password file at {secretsFilePath} is empty.");
+        }
+
+        return secretValue;
     }
 }

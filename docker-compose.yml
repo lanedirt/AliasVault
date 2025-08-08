@@ -3,12 +3,14 @@ services:
         image: ghcr.io/lanedirt/aliasvault-postgres:latest
         volumes:
             - ./database/postgres:/var/lib/postgresql/data:rw
+            - ./secrets:/secrets:ro
         env_file:
             - .env
         restart: always
         environment:
             POSTGRES_DB: aliasvault
             POSTGRES_USER: aliasvault
+            POSTGRES_PASSWORD_FILE: /secrets/postgres_password
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U aliasvault"]
             interval: 5s
@@ -34,14 +36,13 @@ services:
             - ./database:/database:rw
             - ./certificates/app:/certificates/app:rw
             - ./logs:/logs:rw
+            - ./secrets:/secrets:ro
         restart: always
         env_file:
             - .env
         depends_on:
             postgres:
                 condition: service_healthy
-        environment:
-            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     admin:
         image: ghcr.io/lanedirt/aliasvault-admin:latest
@@ -51,14 +52,13 @@ services:
             - ./database:/database:rw
             - ./certificates/app:/certificates/app:rw
             - ./logs:/logs:rw
+            - ./secrets:/secrets:ro
         restart: always
         env_file:
             - .env
         depends_on:
             postgres:
                 condition: service_healthy
-        environment:
-            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     reverse-proxy:
         image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
@@ -86,25 +86,23 @@ services:
         volumes:
             - ./database:/database:rw
             - ./logs:/logs:rw
+            - ./secrets:/secrets:ro
         restart: always
         env_file:
             - .env
         depends_on:
             postgres:
                 condition: service_healthy
-        environment:
-            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
 
     task-runner:
         image: ghcr.io/lanedirt/aliasvault-task-runner:latest
         volumes:
             - ./database:/database:rw
             - ./logs:/logs:rw
+            - ./secrets:/secrets:ro
         restart: always
         env_file:
             - .env
         depends_on:
             postgres:
                 condition: service_healthy
-        environment:
-            ConnectionStrings__AliasServerDbContext: "Host=postgres;Database=aliasvault;Username=aliasvault;Password=${POSTGRES_PASSWORD}"
