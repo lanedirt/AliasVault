@@ -65,6 +65,7 @@ if [ ! -f /secrets/admin_password_hash ]; then
     echo "[init] → Admin password hash saved to /secrets/admin_password_hash"
 else
     echo "[init] → Admin password hash already exists"
+    echo "[init]    (to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
 fi
 
 # Read PostgreSQL password for database initialization
