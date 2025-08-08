@@ -36,6 +36,9 @@ RUN dotnet publish Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj
 # Build Task Runner
 RUN dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj -c Release -o /app/taskrunner
 
+# Build InstallCLI (for admin password hash generation)
+RUN dotnet publish Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj -c Release -o /app/installcli
+
 # ============================================
 # Stage 2: Final runtime image with s6-overlay
 # ============================================
@@ -99,6 +102,11 @@ COPY --from=dotnet-builder /app/admin /app/admin
 COPY --from=dotnet-builder /app/smtp /app/smtp
 COPY --from=dotnet-builder /app/taskrunner /app/taskrunner
 
+# Copy InstallCLI to /usr/local/bin and make it executable
+COPY --from=dotnet-builder /app/installcli /usr/local/bin/aliasvault-cli
+RUN chmod +x /usr/local/bin/aliasvault-cli/AliasVault.InstallCli && \
+    ln -s /usr/local/bin/aliasvault-cli/AliasVault.InstallCli /usr/local/bin/aliasvault-cli.sh
+
 # Copy client nginx configuration and ensure wwwroot is accessible
 COPY apps/server/AliasVault.Client/nginx.conf /app/client/nginx.conf
 
@@ -127,7 +135,7 @@ RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" -o -name "
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/init && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres && \
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/api && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/api \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/client && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/admin && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/smtp && \
