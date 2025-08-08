@@ -46,8 +46,6 @@ else
     export Logging__LogLevel__Microsoft="Error"
 fi
 
-if [ "$VERBOSITY" -ge 1 ]; then
-    echo "[api] Starting API service..."
-fi
+echo "Starting API service..."
 
 exec dotnet AliasVault.Api.dll

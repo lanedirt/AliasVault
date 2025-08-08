@@ -8,9 +8,7 @@ export PGDATA="/database/postgres"
 VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
 
 # Only show startup message at verbosity level 1+
-if [ "$VERBOSITY" -ge 1 ]; then
-    echo "[postgres] Starting PostgreSQL server..."
-fi
+echo "Starting PostgreSQL server..."
 
 # Run PostgreSQL as postgres user with appropriate logging
 if [ "$VERBOSITY" -ge 2 ]; then
