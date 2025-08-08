@@ -20,6 +20,7 @@ using AliasVault.Logging;
 using AliasVault.Shared.Models.Configuration;
 using AliasVault.Shared.Providers.Time;
 using AliasVault.Shared.Server.Services;
+using AliasVault.Shared.Server.Utilities;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -94,11 +95,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-    if (jwtKey is null)
-    {
-        throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
-    }
+    var jwtKey = SecretReader.GetJwtKey();
 
     options.IncludeErrorDetails = true;
     options.TokenValidationParameters = new TokenValidationParameters

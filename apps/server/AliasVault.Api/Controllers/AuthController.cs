@@ -22,6 +22,7 @@ using AliasVault.Shared.Models.WebApi.Auth;
 using AliasVault.Shared.Models.WebApi.PasswordChange;
 using AliasVault.Shared.Providers.Time;
 using AliasVault.Shared.Server.Services;
+using AliasVault.Shared.Server.Utilities;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -615,19 +616,13 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     }
 
     /// <summary>
-    /// Get the JWT key from the environment variables.
+    /// Get the JWT key from the environment variables or container secrets.
     /// </summary>
     /// <returns>JWT key as string.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown if environment variable does not exist.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown if JWT key cannot be found.</exception>
     private static string GetJwtKey()
     {
-        var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-        if (jwtKey is null)
-        {
-            throw new KeyNotFoundException("JWT_KEY environment variable is not set.");
-        }
-
-        return jwtKey;
+        return SecretReader.GetJwtKey();
     }
 
     /// <summary>
