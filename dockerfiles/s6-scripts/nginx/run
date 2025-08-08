@@ -1,5 +1,8 @@
 #!/command/with-contenv bash
 
+# Get verbosity level (0=minimal, 1=normal, 2=verbose)
+VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
+
 # Copy certificates to nginx directory (they were created during init)
 mkdir -p /etc/nginx/ssl
 cp /certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true
@@ -17,10 +20,15 @@ ssl_prefer_server_ciphers off;
 SSLEOF
 
 # Wait for all services to be ready
-echo "[nginx] Waiting for services to be ready..."
+if [ "$VERBOSITY" -ge 1 ]; then
+    echo "[nginx] Waiting for services to be ready..."
+fi
+
 for i in {1..60}; do
     if nc -z localhost 3000 && nc -z localhost 3001 && nc -z localhost 3002; then
-        echo "[nginx] All services ready, starting reverse proxy..."
+        if [ "$VERBOSITY" -ge 1 ]; then
+            echo "[nginx] All services ready, starting reverse proxy..."
+        fi
         break
     fi
     if [ $i -eq 60 ]; then
@@ -30,5 +38,34 @@ for i in {1..60}; do
     sleep 1
 done
 
-echo "[nginx] Starting reverse proxy..."
-exec nginx -g "daemon off;"
+if [ "$VERBOSITY" -ge 0 ]; then
+    echo "[nginx] ========================================="
+    echo "[nginx] AliasVault is now ready and accessible!"
+    echo "[nginx] ========================================="
+    echo "[nginx]"
+    echo "[nginx] 🌐 Web Access:"
+    echo "[nginx]   • HTTPS: https://localhost:443 (or your custom mapped port)"
+    echo "[nginx]   • Admin: https://localhost:443/admin (or your custom mapped port)"
+    echo "[nginx]"
+    echo "[nginx] 🔑 Admin Password:"
+    echo "[nginx]   • The admin password is stored in the /secrets/admin_password_hash file"
+    echo "[nginx]   • To reset the admin password, delete the file and restart the container"
+    echo "[nginx]   • The password is also displayed in the admin panel after first login"
+    echo "[nginx]"
+    echo "[nginx] 📧 Email Ports (if email server enabled):"
+    echo "[nginx]   • SMTP:     port 25 (or your custom mapped port)"
+    echo "[nginx]   • SMTP TLS: port 587 (or your custom mapped port)"
+    echo "[nginx]"
+fi
+
+# Set nginx error log level based on verbosity
+if [ "$VERBOSITY" -ge 2 ]; then
+    # Verbose: info level
+    exec nginx -g "daemon off; error_log /dev/stderr info;"
+elif [ "$VERBOSITY" -ge 1 ]; then
+    # Normal: warn level
+    exec nginx -g "daemon off; error_log /dev/stderr warn;"
+else
+    # Minimal: error level only
+    exec nginx -g "daemon off; error_log /dev/stderr error;"
+fi

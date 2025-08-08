@@ -143,10 +143,12 @@ RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/nginx
 
 # Set environment variables for s6-overlay
+# ALIASVAULT_VERBOSITY: 0=minimal (default), 1=normal, 2=verbose
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_VERBOSITY=0 \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
-    S6_KILL_GRACETIME=30000
+    S6_KILL_GRACETIME=30000 \
+    ALIASVAULT_VERBOSITY=0
 
 # Expose ports
 EXPOSE 80 443 25 587

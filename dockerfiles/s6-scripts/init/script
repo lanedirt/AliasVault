@@ -3,7 +3,19 @@
 # AliasVault Container Initialization Script
 # This script runs once at container startup and handles all initialization tasks
 
-# Print AliasVault header
+# Get verbosity level (0=minimal, 1=normal, 2=verbose)
+VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
+
+# Helper function for logging based on verbosity
+log() {
+    level=$1
+    shift
+    if [ "$VERBOSITY" -ge "$level" ]; then
+        echo "$@"
+    fi
+}
+
+# Always show header and critical messages (level 0)
 echo ""
 echo "=================================================="
 echo "    _    _ _           __      __         _ _   "
@@ -15,42 +27,42 @@ echo ""
 echo "=================================================="
 echo ""
 
-echo "[init] Starting AliasVault container initialization..."
+echo "[init] Starting AliasVault..."
 echo ""
 
 # Create required directories
-echo "[init] Creating required directories..."
+log 0 "[init] Creating required directories..."
 mkdir -p /database/postgres /logs/postgres /certificates /secrets /var/run/postgresql
 
 # Initialize secrets if they don't exist
-echo "[init] Checking and initializing secrets..."
+log 0 "[init] Checking and initializing secrets..."
 
 if [ ! -f /secrets/postgres_password ]; then
-    echo "[init] → Generating PostgreSQL password..."
+    log 0 "[init] → Generating PostgreSQL password..."
     openssl rand -base64 32 | tr -d "\n" > /secrets/postgres_password
     chmod 600 /secrets/postgres_password
 else
-    echo "[init] → PostgreSQL password already exists"
+    log 0 "[init] ✅ PostgreSQL password already exists "
 fi
 
 if [ ! -f /secrets/data_protection_cert_pass ]; then
-    echo "[init] → Generating Data Protection Certificate password..."
+    log 0 "[init] → Generating Data Protection Certificate password..."
     openssl rand -base64 32 | tr -d "\n" > /secrets/data_protection_cert_pass
     chmod 600 /secrets/data_protection_cert_pass
 else
-    echo "[init] → Data Protection Certificate password already exists"
+    log 0 "[init] ✅ Data Protection Certificate password already exists"
 fi
 
 if [ ! -f /secrets/jwt_key ]; then
-    echo "[init] → Generating JWT key..."
+    log 0 "[init] → Generating JWT key..."
     openssl rand -base64 32 | tr -d "\n" > /secrets/jwt_key
     chmod 600 /secrets/jwt_key
 else
-    echo "[init] → JWT key already exists"
+    log 0 "[init] ✅ JWT key already exists"
 fi
 
 if [ ! -f /secrets/admin_password_hash ]; then
-    echo "[init] → Generating admin password hash..."
+    log 0 "[init] → Generating admin password hash..."
     # Generate a random admin password if not provided
     if [ -z "$ADMIN_PASSWORD" ]; then
         ADMIN_PASSWORD=$(openssl rand -base64 16 | tr -d "\n")
@@ -58,14 +70,18 @@ if [ ! -f /secrets/admin_password_hash ]; then
         echo "[init]   ⚠️  Please save this password securely and/or optionally change it after first login!"
     fi
     # Use the InstallCLI to hash the password and append generation timestamp
-    HASH=$(/usr/local/bin/aliasvault-cli/AliasVault.InstallCli hash-password "$ADMIN_PASSWORD")
+    if [ "$VERBOSITY" -ge 2 ]; then
+        HASH=$(/usr/local/bin/aliasvault-cli/AliasVault.InstallCli hash-password "$ADMIN_PASSWORD")
+    else
+        HASH=$(/usr/local/bin/aliasvault-cli/AliasVault.InstallCli hash-password "$ADMIN_PASSWORD" 2>/dev/null)
+    fi
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     echo "${HASH}|${TIMESTAMP}" > /secrets/admin_password_hash
     chmod 600 /secrets/admin_password_hash
-    echo "[init] → Admin password hash saved to /secrets/admin_password_hash"
+    log 0 "[init] ✅ Admin password hash saved to /secrets/admin_password_hash"
 else
-    echo "[init] → Admin password hash already exists"
-    echo "[init]    (to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
+    log 0 "[init] ✅ Admin password hash already exists"
+    log 0 "[init]    (to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
 fi
 
 # Read PostgreSQL password for database initialization
@@ -74,28 +90,36 @@ export PGDATA="/database/postgres"
 
 # Initialize PostgreSQL if needed
 if [ ! -d "$PGDATA/base" ]; then
-    echo ""
-    echo "[init] PostgreSQL database not found, initializing..."
+    log 0 ""
+    log 0 "[init] PostgreSQL database not found, initializing..."
 
     # Set proper permissions
     chown -R postgres:postgres /database/postgres /logs/postgres /var/run/postgresql
     chmod 700 /database/postgres
 
     # Initialize database as postgres user
-    echo "[init] → Running initdb..."
-    su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" > /logs/postgres/initdb.log 2>&1
+    log 1 "[init] → Running initdb..."
+    if [ "$VERBOSITY" -ge 2 ]; then
+        su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" 2>&1 | tee /logs/postgres/initdb.log
+    else
+        su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA --locale=en_US.UTF-8 --encoding=UTF8" > /logs/postgres/initdb.log 2>&1
+    fi
 
     # Configure PostgreSQL
-    echo "[init] → Configuring PostgreSQL..."
+    log 0 "[init] → Configuring PostgreSQL..."
     echo "host all all 127.0.0.1/32 md5" >> "$PGDATA/pg_hba.conf"
     echo "listen_addresses = '127.0.0.1'" >> "$PGDATA/postgresql.conf"
 
     # Start PostgreSQL temporarily to create database and user
-    echo "[init] → Starting PostgreSQL temporarily for setup..."
-    su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -l /logs/postgres/postgres.log start"
+    log 0 "[init] → Starting PostgreSQL temporarily for setup..."
+    if [ "$VERBOSITY" -ge 2 ]; then
+        su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -l /logs/postgres/postgres.log start"
+    else
+        su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -l /logs/postgres/postgres.log start" >/dev/null 2>&1
+    fi
 
     # Wait for PostgreSQL to be ready
-    echo "[init] → Waiting for PostgreSQL to be ready..."
+    log 0 "[init] → Waiting for PostgreSQL to be ready..."
     i=1
     while [ $i -le 30 ]; do
         if su - postgres -c "/usr/lib/postgresql/16/bin/psql -c 'SELECT 1;'" >/dev/null 2>&1; then
@@ -106,19 +130,29 @@ if [ ! -d "$PGDATA/base" ]; then
     done
 
     # Create database and user
-    echo "[init] → Creating AliasVault database and user..."
-    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\""
-    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\""
-    su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\""
+    log 0 "[init] → Creating AliasVault database and user..."
+    if [ "$VERBOSITY" -ge 2 ]; then
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\""
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\""
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\""
+    else
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE USER aliasvault WITH PASSWORD '$POSTGRES_PASSWORD'\"" >/dev/null 2>&1
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"CREATE DATABASE aliasvault OWNER aliasvault;\"" >/dev/null 2>&1
+        su - postgres -c "/usr/lib/postgresql/16/bin/psql -c \"GRANT ALL PRIVILEGES ON DATABASE aliasvault TO aliasvault;\"" >/dev/null 2>&1
+    fi
 
     # Stop PostgreSQL
-    echo "[init] → Stopping PostgreSQL..."
-    su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA stop"
+    log 0 "[init] → Stopping PostgreSQL..."
+    if [ "$VERBOSITY" -ge 2 ]; then
+        su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA stop"
+    else
+        su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA stop" >/dev/null 2>&1
+    fi
     sleep 2
 
-    echo "[init] → PostgreSQL initialization complete"
+    log 0 "[init] ✅ PostgreSQL initialization complete"
 else
-    echo "[init] PostgreSQL database already initialized"
+    log 0 "[init] ✅ PostgreSQL database already initialized"
 
     # Just ensure permissions are correct
     chown -R postgres:postgres /database/postgres /logs/postgres /var/run/postgresql
@@ -126,33 +160,38 @@ else
 fi
 
 # Future: Database migrations could go here
-# echo "[init] Checking for database migrations..."
+# log 1 "[init] Checking for database migrations..."
 # if [ -f /app/migrations/pending ]; then
-#     echo "[init] → Running database migrations..."
+#     log 1 "[init] → Running database migrations..."
 #     # Run migration logic here
 # fi
 
 # Generate SSL certificates if needed
 if [ ! -f /certificates/ssl/cert.pem ] || [ ! -f /certificates/ssl/key.pem ]; then
-    echo ""
-    echo "[init] Generating SSL certificates..."
+    log 0 ""
+    log 0 "[init] Generating SSL certificates..."
     mkdir -p /certificates/ssl
-    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-        -keyout /certificates/ssl/key.pem \
-        -out /certificates/ssl/cert.pem \
-        -subj "/C=US/ST=State/L=City/O=AliasVault/CN=${HOSTNAME:-localhost}" \
-        >/dev/null 2>&1
+    if [ "$VERBOSITY" -ge 2 ]; then
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout /certificates/ssl/key.pem \
+            -out /certificates/ssl/cert.pem \
+            -subj "/C=US/ST=State/L=City/O=AliasVault/CN=${HOSTNAME:-localhost}"
+    else
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout /certificates/ssl/key.pem \
+            -out /certificates/ssl/cert.pem \
+            -subj "/C=US/ST=State/L=City/O=AliasVault/CN=${HOSTNAME:-localhost}" \
+            >/dev/null 2>&1
+    fi
     chmod 600 /certificates/ssl/key.pem
     chmod 644 /certificates/ssl/cert.pem
-    echo "[init] → SSL certificates generated"
+    log 0 "[init] ✅ SSL certificates generated"
 else
-    echo "[init] SSL certificates already exist"
+    log 0 "[init] ✅ SSL certificates already exist"
 fi
 
 echo ""
-echo "[init] ========================================="
-echo "[init] AliasVault initialization complete!"
-echo "[init] ========================================="
+echo "[init] Waiting for all services to be ready... this can take up to 2 minutes..."
 echo ""
 
 # Oneshot service exits successfully, dependencies can now start

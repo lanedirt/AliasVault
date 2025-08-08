@@ -2,14 +2,22 @@
 
 cd /app/taskrunner
 
+# Get verbosity level (0=minimal, 1=normal, 2=verbose)
+VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
+
 # Read PostgreSQL password from file
 POSTGRES_PASSWORD=$(cat /secrets/postgres_password)
 
 # Wait for PostgreSQL to be ready
-echo "[taskrunner] Waiting for PostgreSQL to be ready..."
+if [ "$VERBOSITY" -ge 1 ]; then
+    echo "[taskrunner] Waiting for PostgreSQL to be ready..."
+fi
+
 for i in {1..30}; do
     if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then
-        echo "[taskrunner] PostgreSQL ready, starting TaskRunner..."
+        if [ "$VERBOSITY" -ge 1 ]; then
+            echo "[taskrunner] PostgreSQL ready, starting TaskRunner..."
+        fi
         break
     fi
     if [ $i -eq 30 ]; then
@@ -21,5 +29,20 @@ done
 
 export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"
 
-echo "[taskrunner] Starting TaskRunner service..."
+# Set .NET logging level based on verbosity
+if [ "$VERBOSITY" -ge 2 ]; then
+    export Logging__LogLevel__Default="Information"
+elif [ "$VERBOSITY" -ge 1 ]; then
+    export Logging__LogLevel__Default="Warning"
+    export Logging__LogLevel__Microsoft__Hosting__Lifetime="Warning"
+else
+    export Logging__LogLevel__Default="Error"
+    export Logging__LogLevel__Microsoft__Hosting__Lifetime="Error"
+    export Logging__LogLevel__Microsoft="Error"
+fi
+
+if [ "$VERBOSITY" -ge 1 ]; then
+    echo "[taskrunner] Starting TaskRunner service..."
+fi
+
 exec dotnet AliasVault.TaskRunner.dll
