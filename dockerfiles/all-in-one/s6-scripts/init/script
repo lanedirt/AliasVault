@@ -33,7 +33,7 @@ echo ""
 # Create required directories
 if [ ! -d /database/postgres ] || [ ! -d /logs/postgres ] || [ ! -d /certificates ] || [ ! -d /secrets ] || [ ! -d /var/run/postgresql ]; then
     mkdir -p /database/postgres /logs/postgres /certificates /secrets /var/run/postgresql
-    log 0 "[init] ✅ Required directories created"
+    log 0 "[init] Required directories created"
 else
     log 0 "[init] ✅ Required directories already exist"
 fi
@@ -85,10 +85,9 @@ if [ ! -f /secrets/admin_password_hash ]; then
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     echo "${HASH}|${TIMESTAMP}" > /secrets/admin_password_hash
     chmod 600 /secrets/admin_password_hash
-    log 0 "[init] ✅ Admin password hash saved to /secrets/admin_password_hash"
+    log 0 "[init] Admin password hash saved to /secrets/admin_password_hash"
 else
     log 0 "[init] ✅ Admin password hash already exists"
-    log 0 "[init]    → (to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
 fi
 
 # Read PostgreSQL password for database initialization
@@ -157,7 +156,7 @@ if [ ! -d "$PGDATA/base" ]; then
     fi
     sleep 2
 
-    log 0 "[init] ✅ PostgreSQL initialization complete"
+    log 0 "[init] PostgreSQL initialization complete"
 else
     log 0 "[init] ✅ PostgreSQL database already initialized"
 
@@ -192,9 +191,9 @@ if [ ! -f /certificates/ssl/cert.pem ] || [ ! -f /certificates/ssl/key.pem ]; th
     fi
     chmod 600 /certificates/ssl/key.pem
     chmod 644 /certificates/ssl/cert.pem
-    log 0 "[init] ✅ SSL certificates generated"
+    log 0 "[init] Self-signed SSL certificates generated"
 else
-    log 0 "[init] ✅ SSL certificates already exist"
+    log 0 "[init] ✅ Self-signed SSL certificates already exist"
 fi
 
 echo ""
