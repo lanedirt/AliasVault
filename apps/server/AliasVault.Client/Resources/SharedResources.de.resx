@@ -234,7 +234,7 @@
   </data>
   <!-- Common status messages -->
   <data name="Success" xml:space="preserve">
-    <value>Success</value>
+    <value>Aktion erfolgreich</value>
     <comment>Success status message</comment>
   </data>
   <data name="Warning" xml:space="preserve">
