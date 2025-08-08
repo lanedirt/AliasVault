@@ -273,8 +273,8 @@
   },
   "emails": {
     "title": "Emails",
-    "deleteEmailTitle": "Delete Email",
-    "deleteEmailConfirm": "Are you sure you want to permanently delete this email?",
+    "deleteEmailTitle": "E-Mail löschen",
+    "deleteEmailConfirm": "Bist Du sicher, dass Du diese E-Mail unwiderruflich löschen möchtest?",
     "from": "From",
     "to": "To",
     "date": "Date",
