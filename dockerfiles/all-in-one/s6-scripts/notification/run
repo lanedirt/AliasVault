@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# Get verbosity level (0=minimal, 1=normal, 2=verbose)
+VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
+
+# Only show the final message at verbosity level 0 and 1 (not verbose)
+if [ "$VERBOSITY" -le 1 ]; then
+    # Wait for all service ports to be responsive with timeout
+    READY=false
+    for i in $(seq 1 180); do  # 3 minute timeout
+        if nc -z localhost 3000 && nc -z localhost 3001 && nc -z localhost 3002 && nc -z localhost 80 && nc -z localhost 443; then
+            READY=true
+            break
+        fi
+        if [ $i -eq 180 ]; then
+            echo "[notification] Warning: Timeout waiting for all services (180s), showing status anyway..."
+            break
+        fi
+        sleep 1
+    done
+
+    # If services are ready, show the message
+    if [ "$READY" = true ]; then
+        echo ""
+        echo "========================================="
+        echo "🎉 AliasVault is now ready and accessible!"
+        echo "========================================="
+        echo ""
+        echo "🌐 Web Access:"
+        echo "  • HTTP:  http://localhost:80"
+        echo "  • HTTPS: https://localhost:443"
+        echo "  • Admin: https://localhost:443/admin"
+        echo ""
+
+        # Show admin credentials if available
+        if [ -f /secrets/admin_password_temp ]; then
+            ADMIN_PASSWORD=$(cat /secrets/admin_password_temp)
+            echo "🔑 Admin Login:"
+            echo "  • Username: admin"
+            echo "  • Password: ${ADMIN_PASSWORD}"
+            echo ""
+            echo "⚠️  IMPORTANT: Save these credentials securely!"
+            echo "   This password won't be shown again."
+            echo ""
+            # Clean up the temporary password file
+            rm -f /secrets/admin_password_temp
+        else
+            echo "🔑 Admin Login:"
+            echo "  • Username: admin"
+            echo "  • Password: (previously set - to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
+            echo ""
+        fi
+
+        echo "📧 Email Ports (if email server enabled):"
+        echo "  • SMTP:     port 25"
+        echo "  • SMTP TLS: port 587"
+        echo ""
+    fi
+fi
+
+# Sleep forever to keep this as a longrun service
+exec sleep infinity

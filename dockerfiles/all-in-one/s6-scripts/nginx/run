@@ -38,25 +38,7 @@ for i in {1..60}; do
     sleep 1
 done
 
-echo "Starting main reverse proxy server..."
-echo ""
-echo "[nginx] ========================================="
-echo "[nginx] AliasVault is now ready and accessible!"
-echo "[nginx] ========================================="
-echo "[nginx]"
-echo "[nginx] 🌐 Web Access:"
-echo "[nginx]   • HTTPS: https://localhost:443 (or your custom mapped port)"
-echo "[nginx]   • Admin: https://localhost:443/admin (or your custom mapped port)"
-echo "[nginx]"
-echo "[nginx] 🔑 Admin Password:"
-echo "[nginx]   • The admin password is stored in the /secrets/admin_password_hash file"
-echo "[nginx]   • To reset the admin password, delete the file and restart the container"
-echo "[nginx]   • The password is also displayed in the admin panel after first login"
-echo "[nginx]"
-echo "[nginx] 📧 Email Ports (if email server enabled):"
-echo "[nginx]   • SMTP:     port 25 (or your custom mapped port)"
-echo "[nginx]   • SMTP TLS: port 587 (or your custom mapped port)"
-echo "[nginx]"
+echo "Starting Nginx reverse proxy..."
 
 # Set nginx error log level based on verbosity
 if [ "$VERBOSITY" -ge 2 ]; then
