@@ -1,5 +1,8 @@
 #!/command/with-contenv bash
 
+# Get verbosity level (0=minimal, 1=normal, 2=verbose)
+VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
+
 # Client service entrypoint
 DEFAULT_PRIVATE_EMAIL_DOMAINS=""
 DEFAULT_SUPPORT_EMAIL=""
@@ -10,10 +13,17 @@ PUBLIC_REGISTRATION_ENABLED=${PUBLIC_REGISTRATION_ENABLED:-true}
 mkdir -p /etc/nginx/ssl
 
 if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then
-    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-        -keyout /etc/nginx/ssl/nginx.key \
-        -out /etc/nginx/ssl/nginx.crt \
-        -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost" >/dev/null 2>&1
+    if [ "$VERBOSITY" -ge 2 ]; then
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/nginx.key \
+            -out /etc/nginx/ssl/nginx.crt \
+            -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+    else
+        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/nginx.key \
+            -out /etc/nginx/ssl/nginx.crt \
+            -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost" >/dev/null 2>&1
+    fi
     chmod 644 /etc/nginx/ssl/nginx.crt
     chmod 600 /etc/nginx/ssl/nginx.key
 fi
@@ -29,5 +39,18 @@ EOF
 
 sed -i "s|/usr/share/nginx/html|/app/client/wwwroot|g" /app/client/nginx.conf
 
-echo "[client] Starting Client service (nginx)..."
-exec nginx -c /app/client/nginx.conf -g "daemon off;"
+if [ "$VERBOSITY" -ge 1 ]; then
+    echo "[client] Starting Client service (nginx)..."
+fi
+
+# Set nginx error log level based on verbosity
+if [ "$VERBOSITY" -ge 2 ]; then
+    # Verbose: info level
+    exec nginx -c /app/client/nginx.conf -g "daemon off; error_log /dev/stderr info;"
+elif [ "$VERBOSITY" -ge 1 ]; then
+    # Normal: warn level  
+    exec nginx -c /app/client/nginx.conf -g "daemon off; error_log /dev/stderr warn;"
+else
+    # Minimal: error level only
+    exec nginx -c /app/client/nginx.conf -g "daemon off; error_log /dev/stderr error;"
+fi

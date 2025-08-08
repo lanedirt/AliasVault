@@ -4,7 +4,19 @@
 export PATH="/usr/lib/postgresql/16/bin:$PATH"
 export PGDATA="/database/postgres"
 
-echo "[postgres] Starting PostgreSQL server..."
+# Get verbosity level (0=minimal, 1=normal, 2=verbose)
+VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
 
-# Run PostgreSQL as postgres user
-exec s6-setuidgid postgres /usr/lib/postgresql/16/bin/postgres -D "$PGDATA"
+# Only show startup message at verbosity level 1+
+if [ "$VERBOSITY" -ge 1 ]; then
+    echo "[postgres] Starting PostgreSQL server..."
+fi
+
+# Run PostgreSQL as postgres user with appropriate logging
+if [ "$VERBOSITY" -ge 2 ]; then
+    # Verbose: Show all PostgreSQL logs
+    exec s6-setuidgid postgres /usr/lib/postgresql/16/bin/postgres -D "$PGDATA"
+else
+    # Minimal/Normal: Redirect logs to file
+    exec s6-setuidgid postgres /usr/lib/postgresql/16/bin/postgres -D "$PGDATA" 2>/logs/postgres/postgres.log
+fi
