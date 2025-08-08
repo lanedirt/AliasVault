@@ -89,7 +89,6 @@ RUN mkdir -p \
     /database \
     /certificates/ssl \
     /certificates/app \
-    /certificates/letsencrypt \
     /logs/postgres \
     /etc/nginx/ssl \
     /var/run/postgresql \
@@ -124,12 +123,10 @@ RUN sed -i 's/client:3000/localhost:3000/g' /etc/nginx/nginx.conf && \
 # ============================================
 
 # Copy s6 service definitions
-COPY dockerfiles/s6-scripts /etc/s6-overlay/s6-rc.d/
+COPY dockerfiles/all-in-one/s6-scripts /etc/s6-overlay/s6-rc.d/
 
 # Make all scripts executable (run for longrun services, up for oneshot services, and script files)
 RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" -o -name "script" \) -exec chmod +x {} \;
-
-# Service dependencies are now defined in the s6-scripts directory structure
 
 # Enable all services in the default bundle
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
@@ -153,8 +150,8 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
 # Expose ports
 EXPOSE 80 443 25 587
 
-# Volume for persistent data
-VOLUME ["/data"]
+# Volumes for persistent data
+VOLUME ["/database", "/certificates", "/logs"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
