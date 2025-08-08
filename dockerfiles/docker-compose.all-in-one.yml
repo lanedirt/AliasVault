@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  aliasvault:
+    image: cr.xivi.nl/aliasvault/aliasvault-all-in-one:latest
+    container_name: aliasvault
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "25:25"
+      - "587:587"
+
+    volumes:
+      - ./database:/database
+      - ./certificates:/certificates
+      - ./logs:/logs
+      - ./secrets:/secrets
+
+    environment:
+      PUBLIC_REGISTRATION_ENABLED: "true"
+      IP_LOGGING_ENABLED: "true"
+      SUPPORT_EMAIL: ""
+      PRIVATE_EMAIL_DOMAINS: ""
