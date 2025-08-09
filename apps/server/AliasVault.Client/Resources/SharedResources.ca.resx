@@ -176,7 +176,7 @@
   </data>
   <!-- Common form elements -->
   <data name="Email" xml:space="preserve">
-    <value>Email</value>
+    <value>Correu electrònic</value>
     <comment>Label for email input field</comment>
   </data>
   <data name="Password" xml:space="preserve">
@@ -192,11 +192,11 @@
     <comment>Label for name input field</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Description</value>
+    <value>Descripció</value>
     <comment>Label for description input field</comment>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>Title</value>
+    <value>Títol</value>
     <comment>Label for title input field</comment>
   </data>
   <data name="Notes" xml:space="preserve">
@@ -246,7 +246,7 @@
     <comment>Error status message</comment>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>Info</value>
+    <value>Informació</value>
     <comment>Information status message</comment>
   </data>
   <!-- Loading screen messages -->
