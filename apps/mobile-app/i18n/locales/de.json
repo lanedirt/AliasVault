@@ -307,7 +307,7 @@
         "initiatingDeletion": "Löschung des Kontos wird gestartet",
         "verifyingWithServer": "Server-Verifizierung läuft",
         "deletingAccount": "Konto wird gelöscht",
-        "accountDeleted": "Konto wurde erfolgreich gelöscht",
+        "accountDeleted": "Konto wurde erfolgreich gelöscht.",
         "failedToDelete": "Kontolöschung fehlgeschlagen. Bitte versuche es erneut.",
         "usernameNotFound": "Benutzername konnte nicht gefunden werden. Bitte melde Dich erneut an."
       }
@@ -377,7 +377,7 @@
     "USERNAME_AVAILABLE": "Benutzername ist verfügbar.",
     "USERNAME_MISMATCH": "Der Benutzername stimmt nicht mit dem aktuellen Benutzer überein.",
     "PASSWORD_MISMATCH": "Das angegebene Passwort stimmt nicht mit Deinem aktuellen Passwort überein.",
-    "ACCOUNT_SUCCESSFULLY_DELETED": "Konto erfolgreich gelöscht.",
+    "ACCOUNT_SUCCESSFULLY_DELETED": "Konto wurde erfolgreich gelöscht.",
     "USERNAME_EMPTY_OR_WHITESPACE": "Der Benutzername darf nicht leer sein.",
     "USERNAME_TOO_SHORT": "Der Benutzername ist zu kurz. Er muss mindestens 3 Zeichen lang sein.",
     "USERNAME_TOO_LONG": "Der Benutzername ist zu lang. Er darf höchstens 40 Zeichen lang sein.",
