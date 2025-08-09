@@ -60,7 +60,7 @@
   </resheader>
   <!-- Page title and breadcrumbs -->
   <data name="PageTitle" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>Konto löschen</value>
     <comment>Page title for the delete account page</comment>
   </data>
   <data name="BreadcrumbSecuritySettings" xml:space="preserve">
@@ -68,16 +68,16 @@
     <comment>Breadcrumb text for security settings</comment>
   </data>
   <data name="BreadcrumbDeleteAccount" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>Konto löschen</value>
     <comment>Breadcrumb text for delete account</comment>
   </data>
   <!-- Warning messages -->
   <data name="PermanentActionWarning" xml:space="preserve">
-    <value>Warning: This action is permanent and cannot be undone. All your data will be permanently deleted.</value>
+    <value>Achtung: Diese Aktion kann nicht rückgängig gemacht werden. Alle Deine Daten werden unwiderruflich gelöscht.</value>
     <comment>Warning message about permanent deletion</comment>
   </data>
   <data name="FinalWarning" xml:space="preserve">
-    <value>Final warning: Enter your password to permanently delete your account.</value>
+    <value>Letzte Warnung: Gib Dein Passwort ein, um Dein Konto endgültig zu löschen.</value>
     <comment>Final warning message before account deletion</comment>
   </data>
   <!-- Note sections -->
@@ -86,7 +86,7 @@
     <comment>Header for note section</comment>
   </data>
   <data name="VaultsDeletedNote" xml:space="preserve">
-    <value>All encrypted vaults which includes all of your credentials will be permanently deleted</value>
+    <value>Alle verschlüsselten Tresore mit allen Zugangsdaten werden dauerhaft gelöscht</value>
     <comment>Note about vault deletion</comment>
   </data>
   <data name="EmailAliasesOrphanedNote" xml:space="preserve">
@@ -98,7 +98,7 @@
     <comment>Note about account recovery</comment>
   </data>
   <data name="DeletionIrreversibleNote" xml:space="preserve">
-    <value>Account deletion is irreversible and cannot be undone. Pressing the button below will delete your account immmediately and permanently.</value>
+    <value>Das Löschen Deines Kontos ist unwiderruflich und kann nicht rückgängig gemacht werden. Durch das Drücken der folgenden Schaltfläche wird Dein Konto sofort und dauerhaft gelöscht.</value>
     <comment>Note about deletion being irreversible</comment>
   </data>
   <!-- Form labels -->
@@ -116,7 +116,7 @@
     <comment>Button text to continue with account deletion</comment>
   </data>
   <data name="DeleteMyAccount" xml:space="preserve">
-    <value>Delete My Account</value>
+    <value>Mein Konto löschen</value>
     <comment>Button text to delete account</comment>
   </data>
   <!-- Loading and status messages -->
