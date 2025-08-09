@@ -63,11 +63,11 @@
     <comment>Text shown when service logo is not available</comment>
   </data>
   <data name="ImportFromServiceTitle" xml:space="preserve">
-    <value>Import from {0}</value>
+    <value>Aus {0} importieren</value>
     <comment>Modal title for importing from a service. {0} is placeholder for service name</comment>
   </data>
   <data name="UploadExportFileText" xml:space="preserve">
-    <value>Upload your {0} export file:</value>
+    <value>Lade Deine {0} Exportdatei hoch:</value>
     <comment>Text for file upload instruction. {0} is placeholder for service name</comment>
   </data>
   <data name="CancelButton" xml:space="preserve">
