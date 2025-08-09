@@ -2,7 +2,7 @@
   "auth": {
     "loginTitle": "Log in to AliasVault",
     "username": "Username or email",
-    "usernamePlaceholder": "name / name@company.com",
+    "usernamePlaceholder": "Name / name@unternehmen.com",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
     "rememberMe": "Remember me",
@@ -50,7 +50,7 @@
     "appName": "AliasVault",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success",
+    "success": "Aktion erfolgreich",
     "cancel": "Cancel",
     "use": "Use",
     "delete": "Delete",
@@ -273,8 +273,8 @@
   },
   "emails": {
     "title": "Emails",
-    "deleteEmailTitle": "Delete Email",
-    "deleteEmailConfirm": "Are you sure you want to permanently delete this email?",
+    "deleteEmailTitle": "E-Mail löschen",
+    "deleteEmailConfirm": "Bist Du sicher, dass Du diese E-Mail unwiderruflich löschen möchtest?",
     "from": "From",
     "to": "To",
     "date": "Date",

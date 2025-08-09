@@ -100,7 +100,7 @@
   </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
-    <value>Wachtwoord Instellingen</value>
+    <value>Wachtwoord instellingen</value>
     <comment>Title for password settings section</comment>
   </data>
   <!-- App Language Settings Section -->
