@@ -10,7 +10,7 @@
     "noAccount": "No account yet?",
     "createVault": "Create new vault",
     "twoFactorTitle": "Please enter the authentication code from your authenticator app.",
-    "authCode": "Authentication Code",
+    "authCode": "Codi d'autenticació",
     "authCodePlaceholder": "Introduïu el codi de 6 dígits",
     "verify": "Verify",
     "cancel": "Cancel",
@@ -27,7 +27,7 @@
     "unlockSuccessDescription": "You can now use autofill in login forms in your browser.",
     "closePopup": "Close this popup",
     "browseVault": "Browse vault contents",
-    "connectingTo": "Connecting to",
+    "connectingTo": "Connectant a",
     "switchAccounts": "Switch accounts?",
     "loggedIn": "Logged in",
     "errors": {
