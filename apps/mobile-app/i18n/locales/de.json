@@ -266,7 +266,7 @@
         "failedToChange": "Passwortänderung fehlgeschlagen. Bitte versuche es erneut."
       },
       "activeSessions": {
-        "headerText": "Unten findest Du eine Liste der Geräte, auf denen Du aktuell eingeloggt bist oder eine aktive Sitzung hast. Hier kannst Du Dich von jeder dieser Sitzungen abmelden",
+        "headerText": "Unten findest Du eine Liste der Geräte, auf denen Du aktuell eingeloggt bist oder eine aktive Sitzung hast. Hier kannst Du Dich von jeder dieser Sitzungen abmelden.",
         "noSessions": "Keine aktiven Sitzungen",
         "revoke": "Widerrufen",
         "revokeSession": "Sitzung widerrufen",
@@ -293,7 +293,7 @@
         "warningText": "Achtung: Diese Aktion kann nicht rückgängig gemacht werden. Alle Deine Daten werden unwiderruflich gelöscht.",
         "finalWarning": "Letzte Warnung: Gib Dein Passwort ein, um Dein Konto endgültig zu löschen.",
         "warningVaults": "Alle verschlüsselten Tresore mit allen Zugangsdaten werden dauerhaft gelöscht",
-        "warningAliases": "Deine E-Mail-Aliase bleiben ohne Besitzer und können von anderen nicht wiederverwendet werden.",
+        "warningAliases": "Deine E-Mail-Aliase bleiben ohne Besitzer und können von anderen nicht wiederverwendet werden",
         "warningRecovery": "Dein Konto kann nach dem Löschen nicht wiederhergestellt werden",
         "irreversibleWarning": "Das Löschen Deines Kontos ist unwiderruflich und kann nicht rückgängig gemacht werden. Durch das Drücken der folgenden Schaltfläche wird Dein Konto sofort und dauerhaft gelöscht.",
         "enterUsername": "Gib Deinen Benutzernamen ein, um fortzufahren",
