@@ -156,7 +156,7 @@
     <value>The provided password does not match your current password.</value>
   </data>
   <data name="ACCOUNT_SUCCESSFULLY_DELETED" xml:space="preserve">
-    <value>Account successfully deleted.</value>
+    <value>Konto erfolgreich gelöscht.</value>
   </data>
   <data name="USERNAME_EMPTY_OR_WHITESPACE" xml:space="preserve">
     <value>Username cannot be empty or whitespace.</value>
