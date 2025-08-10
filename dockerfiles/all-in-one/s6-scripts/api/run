@@ -27,7 +27,6 @@ for i in {1..30}; do
     sleep 2
 done
 
-export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"
 export ASPNETCORE_URLS="http://0.0.0.0:3001"
 export ASPNETCORE_PATHBASE="/api"
 export PRIVATE_EMAIL_DOMAINS="${PRIVATE_EMAIL_DOMAINS:-}"

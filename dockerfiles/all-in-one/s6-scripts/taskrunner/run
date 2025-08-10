@@ -27,8 +27,6 @@ for i in {1..30}; do
     sleep 2
 done
 
-export ConnectionStrings__AliasServerDbContext="Host=localhost;Database=aliasvault;Username=aliasvault;Password=$POSTGRES_PASSWORD"
-
 # Set .NET logging level based on verbosity
 if [ "$VERBOSITY" -ge 2 ]; then
     export Logging__LogLevel__Default="Information"
