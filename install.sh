@@ -1467,6 +1467,70 @@ print_install_success_message() {
     printf "  ${CYAN}Client Website:${NC} https://localhost/\n"
 }
 
+# Function to check if AliasVault is responding on configured ports
+check_aliasvault_health() {
+    printf "${CYAN}ℹ Verifying AliasVault is responding...${NC} "
+
+    local ports_config
+    ports_config=$(get_port_config)
+    read -r http_port https_port smtp_port <<< "$ports_config"
+
+    local max_attempts=30
+    local attempt=1
+    local spinstr='|/-\\'
+    local i=0
+    local all_healthy=false
+
+    while [ $attempt -le $max_attempts ]; do
+        printf "\b%c" "${spinstr:$i:1}"
+        ((i = (i + 1) % 4))
+
+        local http_ok=false
+        local https_ok=false
+
+        # Check HTTP port (should redirect to HTTPS)
+        if curl -s -o /dev/null -w "%{http_code}" "http://localhost:$http_port" 2>/dev/null | grep -q "301"; then
+            http_ok=true
+        fi
+
+        # Check HTTPS port (should return status page or main app)
+        local https_status
+        https_status=$(curl -s -k -o /dev/null -w "%{http_code}" "https://localhost:$https_port" 2>/dev/null)
+        if [ "$https_status" = "200" ] || [ "$https_status" = "503" ]; then
+            https_ok=true
+        fi
+
+        if [ "$http_ok" = true ] && [ "$https_ok" = true ]; then
+            all_healthy=true
+            break
+        fi
+
+        sleep 2
+        ((attempt++))
+    done
+
+    if [ "$all_healthy" = true ]; then
+        printf "\b ${GREEN}✓${NC}\n"
+        printf "  ${GREEN}✓ AliasVault is responding on HTTP:$http_port and HTTPS:$https_port${NC}\n"
+        return 0
+    else
+        printf "\b ${RED}✗${NC}\n"
+        printf "\n${RED}❌ Health Check Failed${NC}\n"
+        printf "AliasVault containers started but the service is not responding properly.\n"
+        printf "\n"
+        printf "${YELLOW}Troubleshooting steps:${NC}\n"
+        printf "1. Check container status: ${DIM}docker compose ps${NC}\n"
+        printf "2. Check container logs: ${DIM}docker compose logs${NC}\n"
+        printf "3. Verify ports are not blocked by firewall\n"
+        printf "4. Wait a few more minutes for services to fully initialize\n"
+        printf "\n"
+        printf "You can manually check if AliasVault is working by visiting:\n"
+        printf "  ${CYAN}https://localhost:$https_port${NC}\n"
+        printf "\n"
+        return 1
+    fi
+}
+
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
     printf "${CYAN}ℹ (Re)creating Docker containers...${NC}\n"
@@ -1712,7 +1776,14 @@ handle_build() {
 
     printf "${GREEN}✓ Docker Compose stack started successfully${NC}\n"
 
-    # Only show success message if we made it here without errors
+    # Check if AliasVault is actually responding before showing success
+    if ! check_aliasvault_health; then
+        printf "${YELLOW}Installation completed but AliasVault health check failed.${NC}\n"
+        printf "${YELLOW}Please check the troubleshooting steps above.${NC}\n"
+        exit 1
+    fi
+
+    # Only show success message if we made it here without errors and health check passed
     print_install_success_message
 }
 
@@ -2464,7 +2535,14 @@ handle_install_version() {
     fi
     printf "${GREEN}✓ Docker containers started successfully${NC}\n"
 
-    # Only show success message if we made it here without errors
+    # Check if AliasVault is actually responding before showing success
+    if ! check_aliasvault_health; then
+        printf "${YELLOW}Installation completed but AliasVault health check failed.${NC}\n"
+        printf "${YELLOW}Please check the troubleshooting steps above.${NC}\n"
+        exit 1
+    fi
+
+    # Only show success message if we made it here without errors and health check passed
     print_install_success_message
 }
 
