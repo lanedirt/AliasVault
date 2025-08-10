@@ -3,6 +3,28 @@
 # Get verbosity level (0=minimal, 1=normal, 2=verbose)
 VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
 
+# Read PostgreSQL password from file
+POSTGRES_PASSWORD=$(cat /secrets/postgres_password)
+
+# Wait for PostgreSQL to be ready
+if [ "$VERBOSITY" -ge 1 ]; then
+    echo "[client] Waiting for PostgreSQL to be ready..."
+fi
+
+for i in {1..30}; do
+    if PGPASSWORD="$POSTGRES_PASSWORD" /usr/lib/postgresql/16/bin/psql -h localhost -U aliasvault -d aliasvault -c "SELECT 1;" >/dev/null 2>&1; then
+        if [ "$VERBOSITY" -ge 1 ]; then
+            echo "[client] PostgreSQL ready, starting client..."
+        fi
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "[client] Timeout waiting for PostgreSQL"
+        exit 1
+    fi
+    sleep 2
+done
+
 # Client service entrypoint
 DEFAULT_PRIVATE_EMAIL_DOMAINS=""
 DEFAULT_SUPPORT_EMAIL=""
