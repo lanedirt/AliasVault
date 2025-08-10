@@ -1533,9 +1533,9 @@ check_aliasvault_health() {
 
 # Function to recreate (restart) Docker containers
 recreate_docker_containers() {
-    printf "${CYAN}ℹ (Re)creating Docker containers...${NC}\n"
 
     if [ "$VERBOSE" = true ]; then
+        printf "${CYAN}ℹ (Re)creating Docker containers...${NC}\n"
         printf "\b${NC}\n"
         if ! $(get_docker_compose_command) up -d --force-recreate; then
             log_error "Failed to recreate Docker containers"
@@ -1545,7 +1545,7 @@ recreate_docker_containers() {
         (
             $(get_docker_compose_command) up -d --force-recreate > /tmp/docker_recreate.log 2>&1 &
             RECREATE_PID=$!
-            show_spinner $RECREATE_PID "Recreating containers "
+            show_spinner $RECREATE_PID "Recreating Docker containers "
             wait $RECREATE_PID
             RECREATE_EXIT_CODE=$?
 
@@ -1744,8 +1744,8 @@ handle_build() {
 
     printf "\n${YELLOW}+++ Building and starting services +++${NC}\n"
 
-    printf "${CYAN}ℹ Building Docker Compose stack...${NC}\n"
     if [ "$VERBOSE" = true ]; then
+        printf "${CYAN}ℹ Building Docker Compose stack...${NC}\n"
         printf "\b${NC}\n"
         if ! $(get_docker_compose_command) build; then
             log_error "Failed to build Docker Compose stack"
@@ -1755,7 +1755,7 @@ handle_build() {
         (
             $(get_docker_compose_command) build > install_compose_build_output.log 2>&1 &
             BUILD_PID=$!
-            show_spinner $BUILD_PID "Building Docker images "
+            show_spinner $BUILD_PID "Building Docker Compose stack "
             wait $BUILD_PID
             BUILD_EXIT_CODE=$?
 
@@ -1770,11 +1770,7 @@ handle_build() {
     fi
     printf "${GREEN}✓ Docker Compose stack built successfully${NC}\n"
 
-    printf "${CYAN}ℹ Starting Docker Compose stack...${NC}\n"
-
     recreate_docker_containers
-
-    printf "${GREEN}✓ Docker Compose stack started successfully${NC}\n"
 
     # Check if AliasVault is actually responding before showing success
     if ! check_aliasvault_health; then
