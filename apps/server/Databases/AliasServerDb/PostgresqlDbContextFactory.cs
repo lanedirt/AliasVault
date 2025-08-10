@@ -64,11 +64,14 @@ public class PostgresqlDbContextFactory : IAliasServerDbContextFactory
                 // Parse the existing connection string
                 var builder = new NpgsqlConnectionStringBuilder();
 
-                // Override the password with the one from the secret file
-                builder.Host = "postgres";
-                builder.Database = "aliasvault";
-                builder.Username = "aliasvault";
-                builder.Port = 5432;
+                // Check for environment variables first, fall back to defaults if not set
+                builder.Host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "postgres";
+                builder.Database = Environment.GetEnvironmentVariable("POSTGRES_DATABASE") ?? "aliasvault";
+                builder.Username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "aliasvault";
+
+                var portEnvString = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+                builder.Port = int.TryParse(portEnvString, out var port) ? port : 5432;
+
                 builder.Password = GetPostgresPasswordFromSecretFile();
 
                 // Build the connection string with the new password
