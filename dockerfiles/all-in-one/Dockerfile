@@ -111,12 +111,14 @@ COPY apps/server/AliasVault.Client/nginx.conf /app/client/nginx.conf
 
 # Copy nginx configuration for single container deployment
 COPY apps/server/nginx.conf /etc/nginx/nginx.conf
+COPY apps/server/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY apps/server/status.html /usr/share/nginx/html/status.html
 
-# Replace "client", "api" and "admin" hostnames with "localhost" in nginx.conf
-# to accommodate for the single-container setup
-RUN sed -i 's/client:3000/localhost:3000/g' /etc/nginx/nginx.conf && \
-    sed -i 's/api:3001/localhost:3001/g' /etc/nginx/nginx.conf && \
-    sed -i 's/admin:3002/localhost:3002/g' /etc/nginx/nginx.conf
+# Replace upstream server hostnames with "localhost" in nginx.conf
+# to accommodate for the single-container setup (for default nginx.conf)
+RUN sed -i 's/server client:3000/server localhost:3000/g' /etc/nginx/nginx.conf && \
+    sed -i 's/server api:3001/server localhost:3001/g' /etc/nginx/nginx.conf && \
+    sed -i 's/server admin:3002/server localhost:3002/g' /etc/nginx/nginx.conf
 
 # ============================================
 # S6 Service Configuration
@@ -147,6 +149,10 @@ ENV ALIASVAULT_VERBOSITY=0 \
     IP_LOGGING_ENABLED=true \
     SUPPORT_EMAIL="" \
     PRIVATE_EMAIL_DOMAINS="" \
+    POSTGRES_HOST=localhost \
+    POSTGRES_PORT=5432 \
+    POSTGRES_USER=aliasvault \
+    POSTGRES_DATABASE=aliasvault \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_VERBOSITY=0
 
