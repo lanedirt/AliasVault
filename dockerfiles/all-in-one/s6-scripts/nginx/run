@@ -19,25 +19,6 @@ ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDS
 ssl_prefer_server_ciphers off;
 SSLEOF
 
-# Wait for all services to be ready
-if [ "$VERBOSITY" -ge 1 ]; then
-    echo "[nginx] Waiting for services to be ready..."
-fi
-
-for i in {1..60}; do
-    if nc -z localhost 3000 && nc -z localhost 3001 && nc -z localhost 3002; then
-        if [ "$VERBOSITY" -ge 1 ]; then
-            echo "[nginx] All services ready, starting reverse proxy..."
-        fi
-        break
-    fi
-    if [ $i -eq 60 ]; then
-        echo "[nginx] Timeout waiting for services"
-        exit 1
-    fi
-    sleep 1
-done
-
 echo "Starting Nginx reverse proxy..."
 
 # Set nginx error log level based on verbosity

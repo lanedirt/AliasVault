@@ -111,7 +111,6 @@ COPY apps/server/AliasVault.Client/nginx.conf /app/client/nginx.conf
 
 # Copy nginx configuration for single container deployment
 COPY apps/server/nginx.conf /etc/nginx/nginx.conf
-COPY apps/server/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY apps/server/status.html /usr/share/nginx/html/status.html
 
 # Replace upstream server hostnames with "localhost" in nginx.conf
@@ -134,7 +133,7 @@ RUN find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" -o -name "
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/init && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/postgres && \
-    touch /etc/s6-overlay/s6-rc.d/user/contents.d/api \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/api && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/client && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/admin && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/smtp && \
