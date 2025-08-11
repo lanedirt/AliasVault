@@ -73,7 +73,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
                 if (toAddressesFailCount == toAddressesCount)
                 {
                     // No valid recipients given.
-                    logger.LogInformation("No valid recipients in email, returning error to sender.");
+                    logger.LogDebug("No valid recipients in email, returning error to sender.");
                     return SmtpResponse.NoValidRecipientsGiven;
                 }
             }
@@ -311,7 +311,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         if (userEmailClaim is null)
         {
             // Email address has no user claim with corresponding encryption key, so we cannot process it.
-            logger.LogWarning(
+            logger.LogInformation(
                 "Rejected email: email for {ToAddress} is not allowed. No user claim on this ToAddress.",
                 toAddress.User + "@" + toAddress.Host);
             return false;
@@ -321,7 +321,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         {
             // This email claim has no user attached to it (anymore), which most likely means the user has deleted
             // its account. We cannot process this email.
-            logger.LogWarning(
+            logger.LogInformation(
                 "Rejected email: email for {ToAddress} is claimed but has no user associated with it. User has most likely deleted their account.",
                 toAddress.User + "@" + toAddress.Host);
             return false;
@@ -331,7 +331,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         if (userEmailClaim.Disabled)
         {
             // Email claim is disabled, so we cannot process this email.
-            logger.LogWarning(
+            logger.LogInformation(
                 "Rejected email: email for {ToAddress} is claimed but is disabled which means the user has deleted the email alias.",
                 toAddress.User + "@" + toAddress.Host);
             return false;
@@ -353,7 +353,7 @@ public class DatabaseMessageStore(ILogger<DatabaseMessageStore> logger, Config c
         }
 
         var insertedId = await InsertEmailIntoDatabase(message, new MailAddress(toAddress.AsAddress()), userPublicKey);
-        logger.LogInformation(
+        logger.LogDebug(
             "Email for {ToAddress} successfully saved into database with ID {InsertedId}.",
             toAddress.User + "@" + toAddress.Host,
             insertedId);

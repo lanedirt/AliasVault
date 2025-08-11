@@ -82,7 +82,7 @@ else
         GlobalLoadingSpinner.Show();
 
         // Add log entry.
-        Logger.LogWarning("Deleted user {UserName} ({UserId}).", Obj.UserName, Obj.Id);
+        Logger.LogInformation("Deleted user {UserName} ({UserId}).", Obj.UserName, Obj.Id);
 
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         dbContext.AliasVaultUsers.Remove(Obj);

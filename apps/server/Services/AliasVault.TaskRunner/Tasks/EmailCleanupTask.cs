@@ -60,7 +60,7 @@ public class EmailCleanupTask : IMaintenanceTask
             if (globalEmailsDeleted > 0)
             {
                 totalEmailsDeleted += globalEmailsDeleted;
-                _logger.LogWarning(
+                _logger.LogInformation(
                     "Deleted {EmailCount} emails older than {Days} days (global setting)",
                     globalEmailsDeleted,
                     settings.EmailRetentionDays);
@@ -93,7 +93,7 @@ public class EmailCleanupTask : IMaintenanceTask
                 if (userEmailsDeleted > 0)
                 {
                     totalEmailsDeleted += userEmailsDeleted;
-                    _logger.LogWarning(
+                    _logger.LogInformation(
                         "Deleted {EmailCount} emails older than {Days} days for user {UserName} (user-specific setting)",
                         userEmailsDeleted,
                         user.MaxEmailAgeDays,
@@ -104,7 +104,7 @@ public class EmailCleanupTask : IMaintenanceTask
 
         if (totalEmailsDeleted > 0)
         {
-            _logger.LogWarning(
+            _logger.LogInformation(
                 "Total emails deleted by age cleanup: {TotalEmails}",
                 totalEmailsDeleted);
         }

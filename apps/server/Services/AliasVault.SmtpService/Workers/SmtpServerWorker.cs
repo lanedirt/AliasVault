@@ -17,7 +17,7 @@ public class SmtpServerWorker(ILogger<SmtpServerWorker> logger, SmtpServer.SmtpS
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogWarning("AliasVault.SmtpService started at: {Time}", DateTimeOffset.Now);
+        logger.LogInformation("AliasVault.SmtpService started at: {Time}", DateTimeOffset.Now);
 
         // Start the SMTP server
         await smtpServer.StartAsync(stoppingToken);
