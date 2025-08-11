@@ -15,7 +15,7 @@
             </svg>
             Email Storage Stats
         </a>
-        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+        <RefreshButton OnClick="() => RefreshData(CancellationToken.None)" ButtonText="Refresh" />
     </CustomActions>
 </PageHeader>
 
@@ -88,6 +88,7 @@ else
     private int PageSize { get; set; } = 50;
     private int TotalRecords { get; set; }
     private string _searchTerm = string.Empty;
+    private CancellationTokenSource? _searchCancellationTokenSource;
 
     /// <summary>
     /// The last search term.
@@ -102,7 +103,9 @@ else
             if (_searchTerm != value)
             {
                 _searchTerm = value;
-                _ = RefreshData();
+                _searchCancellationTokenSource?.Cancel();
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                _ = RefreshData(_searchCancellationTokenSource.Token);
             }
         }
     }
@@ -113,7 +116,7 @@ else
     {
         SortColumn = sort.column;
         SortDirection = sort.direction;
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
     }
 
     /// <inheritdoc />
@@ -134,53 +137,65 @@ else
                 _searchTerm = SearchTermFromQuery;
             }
 
-            await RefreshData();
+            await RefreshData(CancellationToken.None);
         }
     }
 
     private void HandlePageChanged(int newPage)
     {
         CurrentPage = newPage;
-        _ = RefreshData();
+        _ = RefreshData(CancellationToken.None);
     }
 
-    private async Task RefreshData()
+    private async Task RefreshData(CancellationToken cancellationToken = default)
     {
-        IsLoading = true;
-        StateHasChanged();
-
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-
-        IQueryable<Email> query = dbContext.Emails;
-
-        query = ApplySearchFilter(query);
-        query = ApplySort(query);
-
-        TotalRecords = await query.CountAsync();
-        var emailList = await query
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToListAsync();
-
-        // Get all usernames for the emails in the current list
-        var encryptionKeyIds = emailList.Select(x => x.UserEncryptionKeyId).Distinct().ToList();
-        var encryptionKeyUsernames = await dbContext.UserEncryptionKeys
-                    .Where(x => encryptionKeyIds.Contains(x.Id))
-                    .Join(dbContext.AliasVaultUsers, x => x.UserId, y => y.Id, (x, y) => new { EncryptionKeyId = x.Id, UserId = y.Id, y.UserName })
-                    .ToListAsync();
-
-        // Create new list of viewmodels
-        EmailViewModelList = new List<EmailViewModel>();
-
-        foreach (var email in emailList)
+        try
         {
-            var encryptionKey = encryptionKeyUsernames.FirstOrDefault(x => x.EncryptionKeyId == email.UserEncryptionKeyId);
-            EmailViewModelList.Add(new EmailViewModel { Email = email, UserId = encryptionKey?.UserId ?? string.Empty, UserName = encryptionKey?.UserName ?? string.Empty });
-        }
+            IsLoading = true;
+            StateHasChanged();
 
-        IsLoading = false;
-        IsInitialized = true;
-        StateHasChanged();
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync(cancellationToken);
+
+            IQueryable<Email> query = dbContext.Emails;
+
+            query = ApplySearchFilter(query);
+            query = ApplySort(query);
+
+            TotalRecords = await query.CountAsync(cancellationToken);
+            var emailList = await query
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync(cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            // Get all usernames for the emails in the current list
+            var encryptionKeyIds = emailList.Select(x => x.UserEncryptionKeyId).Distinct().ToList();
+            var encryptionKeyUsernames = await dbContext.UserEncryptionKeys
+                        .Where(x => encryptionKeyIds.Contains(x.Id))
+                        .Join(dbContext.AliasVaultUsers, x => x.UserId, y => y.Id, (x, y) => new { EncryptionKeyId = x.Id, UserId = y.Id, y.UserName })
+                        .ToListAsync(cancellationToken);
+
+            // Create new list of viewmodels
+            EmailViewModelList = new List<EmailViewModel>();
+
+            foreach (var email in emailList)
+            {
+                var encryptionKey = encryptionKeyUsernames.FirstOrDefault(x => x.EncryptionKeyId == email.UserEncryptionKeyId);
+                EmailViewModelList.Add(new EmailViewModel { Email = email, UserId = encryptionKey?.UserId ?? string.Empty, UserName = encryptionKey?.UserName ?? string.Empty });
+            }
+
+            IsLoading = false;
+            IsInitialized = true;
+            StateHasChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when cancellation is requested, do nothing
+        }
     }
 
     /// <summary>
@@ -253,5 +268,15 @@ else
         public Email Email { get; set; } = new();
         public string UserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _searchCancellationTokenSource?.Cancel();
+            _searchCancellationTokenSource?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 }

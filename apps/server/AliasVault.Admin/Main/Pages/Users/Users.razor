@@ -9,7 +9,7 @@
     Title="@(TotalRecords > 0 ? $"Users ({TotalRecords:N0})" : "Users")"
     Description="This page shows an overview of all registered users and the associated vaults.">
     <CustomActions>
-        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+        <RefreshButton OnClick="() => RefreshData(CancellationToken.None)" ButtonText="Refresh" />
     </CustomActions>
 </PageHeader>
 
@@ -86,6 +86,7 @@ else
     private int TotalRecords { get; set; }
 
     private string _searchTerm = string.Empty;
+    private CancellationTokenSource? _searchCancellationTokenSource;
 
     /// <summary>
     /// The last search term.
@@ -100,7 +101,9 @@ else
             if (_searchTerm != value)
             {
                 _searchTerm = value;
-                _ = RefreshData();
+                _searchCancellationTokenSource?.Cancel();
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                _ = RefreshData(_searchCancellationTokenSource.Token);
             }
         }
     }
@@ -112,7 +115,7 @@ else
     {
         SortColumn = sort.column;
         SortDirection = sort.direction;
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
     }
 
     /// <inheritdoc />
@@ -127,72 +130,84 @@ else
     {
         if (firstRender)
         {
-            await RefreshData();
+            await RefreshData(CancellationToken.None);
         }
     }
 
     private void HandlePageChanged(int newPage)
     {
         CurrentPage = newPage;
-        _ = RefreshData();
+        _ = RefreshData(CancellationToken.None);
     }
 
-    private async Task RefreshData()
+    private async Task RefreshData(CancellationToken cancellationToken = default)
     {
-        IsLoading = true;
-        StateHasChanged();
-
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        IQueryable<AliasVaultUser> query = dbContext.AliasVaultUsers;
-
-        query = ApplySearchFilter(query);
-        query = ApplySort(query, dbContext);
-
-        TotalRecords = await query.CountAsync();
-        var users = await query
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .Select(u => new
-            {
-                u.Id,
-                u.UserName,
-                u.CreatedAt,
-                u.TwoFactorEnabled,
-                u.Blocked,
-                Vaults = u.Vaults.Select(v => new
-                {
-                    v.FileSize,
-                    v.CreatedAt,
-                    v.RevisionNumber,
-                    CredentialCount = v.CredentialsCount,
-                }),
-                EmailClaims = u.EmailClaims.Select(ec => new
-                {
-                    ec.CreatedAt,
-                    ec.Address
-                }),
-                ReceivedEmails = u.EmailClaims.SelectMany(ec => dbContext.Emails.Where(e => e.To == ec.Address)).Count(),
-            })
-            .ToListAsync();
-
-        UserList = users.Select(user => new UserViewModel
+        try
         {
-            Id = user.Id,
-            UserName = user.UserName?.ToLower() ?? "N/A",
-            TwoFactorEnabled = user.TwoFactorEnabled,
-            Blocked = user.Blocked,
-            CreatedAt = user.CreatedAt,
-            VaultCount = user.Vaults.Count(),
-            CredentialCount = user.Vaults.OrderByDescending(x => x.RevisionNumber).First().CredentialCount,
-            EmailClaimCount = user.EmailClaims.Count(),
-            ReceivedEmailCount = user.ReceivedEmails,
-            VaultStorageInKb = user.Vaults.Sum(x => x.FileSize),
-            LastVaultUpdate = user.Vaults.Any() ? user.Vaults.Max(x => x.CreatedAt) : user.CreatedAt,
-        }).ToList();
+            IsLoading = true;
+            StateHasChanged();
 
-        IsLoading = false;
-        IsInitialized = true;
-        StateHasChanged();
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync(cancellationToken);
+            IQueryable<AliasVaultUser> query = dbContext.AliasVaultUsers;
+
+            query = ApplySearchFilter(query);
+            query = ApplySort(query, dbContext);
+
+            TotalRecords = await query.CountAsync(cancellationToken);
+            var users = await query
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.UserName,
+                    u.CreatedAt,
+                    u.TwoFactorEnabled,
+                    u.Blocked,
+                    Vaults = u.Vaults.Select(v => new
+                    {
+                        v.FileSize,
+                        v.CreatedAt,
+                        v.RevisionNumber,
+                        CredentialCount = v.CredentialsCount,
+                    }),
+                    EmailClaims = u.EmailClaims.Select(ec => new
+                    {
+                        ec.CreatedAt,
+                        ec.Address
+                    }),
+                    ReceivedEmails = u.EmailClaims.SelectMany(ec => dbContext.Emails.Where(e => e.To == ec.Address)).Count(),
+                })
+                .ToListAsync(cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            UserList = users.Select(user => new UserViewModel
+            {
+                Id = user.Id,
+                UserName = user.UserName?.ToLower() ?? "N/A",
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                Blocked = user.Blocked,
+                CreatedAt = user.CreatedAt,
+                VaultCount = user.Vaults.Count(),
+                CredentialCount = user.Vaults.OrderByDescending(x => x.RevisionNumber).First().CredentialCount,
+                EmailClaimCount = user.EmailClaims.Count(),
+                ReceivedEmailCount = user.ReceivedEmails,
+                VaultStorageInKb = user.Vaults.Sum(x => x.FileSize),
+                LastVaultUpdate = user.Vaults.Any() ? user.Vaults.Max(x => x.CreatedAt) : user.CreatedAt,
+            }).ToList();
+
+            IsLoading = false;
+            IsInitialized = true;
+            StateHasChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when cancellation is requested, do nothing
+        }
     }
 
     /// <summary>
@@ -277,6 +292,16 @@ else
         }
 
         return query;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _searchCancellationTokenSource?.Cancel();
+            _searchCancellationTokenSource?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 
 }
