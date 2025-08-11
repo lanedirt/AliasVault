@@ -309,8 +309,7 @@ export default function LoginScreen() : React.ReactNode {
         setError(t(`apiErrors.${err.message}`));
       } else if (err instanceof LocalAuthError) {
         console.error('Network/SSL error:', err);
-        // Use the error message as the translation key
-        setError(t(`auth.errors.${(err as Error).message}`));
+        setError((err as LocalAuthError).message);
       } else {
         console.error('Login error:', err);
         // Check if self-hosted to show appropriate server error message
@@ -377,9 +376,8 @@ export default function LoginScreen() : React.ReactNode {
       console.error('2FA error:', err);
       if (err instanceof ApiAuthError) {
         setError(t(`apiErrors.${err.message}`));
-      } else if ((err as { translationKey?: boolean })?.translationKey) {
-        // Use the error message as the translation key
-        setError(t(`auth.errors.${(err as Error).message}`));
+      } else if (err instanceof LocalAuthError) {
+        setError((err as Error).message);
       } else {
         // Check if self-hosted to show appropriate server error message
         const isSelfHosted = await webApi.isSelfHosted();

@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AppInfo } from '@/utils/AppInfo';
 import type { StatusResponse, VaultResponse, AuthLogModel, RefreshToken } from '@/utils/dist/shared/models/webapi';
-import { LocalAuthError } from '@/utils/types/errors/LocalAuthError';
+
+import i18n from '@/i18n';
+import { LocalAuthError } from './types/errors/LocalAuthError';
 
 type RequestInit = globalThis.RequestInit;
 
@@ -78,18 +80,18 @@ export class WebApiService {
           });
 
           if (!retryResponse.ok) {
-            throw new Error('Request failed after token refresh');
+            throw new Error(i18n.t('auth.errors.httpError', { status: retryResponse.status }));
           }
 
           return parseJson ? retryResponse.json() : retryResponse as unknown as T;
         } else {
           this.authContextLogout(null);
-          throw new Error('Session expired');
+          throw new Error(i18n.t('auth.errors.sessionExpired'));
         }
       }
 
       if (!response.ok && throwOnError) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(i18n.t('auth.errors.httpError', { status: response.status }));
       }
 
       return parseJson ? response.json() : response as unknown as T;
@@ -178,14 +180,14 @@ export class WebApiService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to refresh token');
+        throw new Error(i18n.t('auth.errors.tokenRefreshFailed'));
       }
 
       const tokenResponse: TokenResponse = await response.json();
       this.updateTokens(tokenResponse.token, tokenResponse.refreshToken);
       return tokenResponse.token;
     } catch {
-      this.authContextLogout('Your session has expired. Please login again.');
+      this.authContextLogout(i18n.t('auth.errors.sessionExpired'));
       return null;
     }
   }
@@ -339,15 +341,11 @@ export class WebApiService {
      */
     if (vaultResponseJson.status === 1) {
       // Note: vault merge is no longer allowed by the API as of 0.20.0, updates with the same revision number are rejected. So this check can be removed later.
-      return 'Your vault needs to be updated. Please login on the AliasVault website and follow the steps.';
+      return i18n.t('vault.errors.vaultOutdated');
     }
 
     if (vaultResponseJson.status === 2) {
-      return 'Your vault is outdated. Please login on the AliasVault website and follow the steps.';
-    }
-
-    if (!vaultResponseJson.vault?.blob) {
-      return 'Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.';
+      return i18n.t('vault.errors.vaultOutdated');
     }
 
     return null;
