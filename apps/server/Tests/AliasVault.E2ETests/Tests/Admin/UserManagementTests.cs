@@ -174,10 +174,6 @@ public class UserManagementTests : AdminPlaywrightTest
         // Wait for the user details page to load
         await WaitForUrlAsync($"users/{_testUserId}**", _testUserEmail);
 
-        // Verify we're on the correct user's page
-        var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain(_testUserEmail), "Test user email should be visible on the user details page");
-
         // Click the edit username button (the SVG edit icon)
         var editButton = Page.Locator("button[id='edit-username-button']");
         await editButton.ClickAsync();
@@ -186,7 +182,7 @@ public class UserManagementTests : AdminPlaywrightTest
         await Page.WaitForSelectorAsync("text=Change Username");
 
         // Verify the form appeared
-        pageContent = await Page.TextContentAsync("body");
+        var pageContent = await Page.TextContentAsync("body");
         Assert.That(pageContent, Does.Contain("Change Username"), "Username change form should appear after clicking edit button");
         Assert.That(pageContent, Does.Contain("Changing a username is permanent"), "Warning message should be visible");
 

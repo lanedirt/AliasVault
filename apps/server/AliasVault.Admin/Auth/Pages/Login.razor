@@ -9,31 +9,60 @@
 
 <ServerValidationErrors @ref="ServerValidationErrors" />
 
-<EditForm Model="Input" FormName="LoginForm" OnValidSubmit="LoginUser" class="mt-8 space-y-6">
-    <DataAnnotationsValidator/>
-    <div>
-        <label asp-for="Input.UserName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
-        <InputTextField id="username" @bind-Value="Input.UserName" type="text" placeholder="username" />
-        <ValidationMessage For="() => Input.UserName"/>
-    </div>
-    <div>
-        <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
-        <InputTextField id="password" @bind-Value="Input.Password" type="password" placeholder="••••••••" />
-        <ValidationMessage For="() => Input.Password"/>
-    </div>
-
-    <div class="flex items-start">
-        <div class="flex items-center h-5">
-            <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+@if (!IsAdminConfigured)
+{
+    <div class="mt-8 p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    Admin User Not Configured
+                </h3>
+                <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                    <p class="mb-3">The admin user has not been configured yet. To set up admin access:</p>
+                    <ol class="list-decimal list-inside space-y-1 mb-3">
+                        <li>Connect to your Docker container: <code class="bg-yellow-100 dark:bg-yellow-800 px-1 py-0.5 rounded text-xs">docker exec -it [container-name] /bin/bash</code></li>
+                        <li>Run the password reset script: <code class="bg-yellow-100 dark:bg-yellow-800 px-1 py-0.5 rounded text-xs">reset-admin-password.sh</code></li>
+                        <li>Restart the container to apply changes: <code class="bg-yellow-100 dark:bg-yellow-800 px-1 py-0.5 rounded text-xs">docker restart [container-name]</code></li>
+                    </ol>
+                    <p class="text-xs">Replace <code class="bg-yellow-100 dark:bg-yellow-800 px-1 py-0.5 rounded">[container-name]</code> with your actual container name, e.g. "aliasvault".</p>
+                </div>
+            </div>
         </div>
-        <div class="ml-3 text-sm">
-            <label for="remember" class="font-medium text-gray-900 dark:text-white">Remember me</label>
-        </div>
-        <a href="user/forgot-password" class="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">Lost Password?</a>
     </div>
+}
+else
+{
+    <EditForm Model="Input" FormName="LoginForm" OnValidSubmit="LoginUser" class="mt-8 space-y-6">
+        <DataAnnotationsValidator/>
+        <div>
+            <label asp-for="Input.UserName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
+            <InputTextField id="username" @bind-Value="Input.UserName" type="text" placeholder="username" />
+            <ValidationMessage For="() => Input.UserName"/>
+        </div>
+        <div>
+            <label asp-for="Input.Password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+            <InputTextField id="password" @bind-Value="Input.Password" type="password" placeholder="••••••••" />
+            <ValidationMessage For="() => Input.Password"/>
+        </div>
 
-    <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to your account</button>
-</EditForm>
+        <div class="flex items-start">
+            <div class="flex items-center h-5">
+                <input id="remember" aria-describedby="remember" name="remember" type="checkbox" class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
+            </div>
+            <div class="ml-3 text-sm">
+                <label for="remember" class="font-medium text-gray-900 dark:text-white">Remember me</label>
+            </div>
+            <a href="user/forgot-password" class="ml-auto text-sm text-primary-700 hover:underline dark:text-primary-500">Lost Password?</a>
+        </div>
+
+        <button type="submit" class="w-full px-5 py-3 text-base font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Login to your account</button>
+    </EditForm>
+}
 
 
 @code {
@@ -43,10 +72,17 @@
 
     [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
+    private bool IsAdminConfigured { get; set; } = true;
+
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        // Check if admin user exists
+        var adminUser = await UserManager.FindByNameAsync("admin");
+        IsAdminConfigured = adminUser != null;
+
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
             // Clear the existing external cookie to ensure a clean login process
