@@ -44,7 +44,13 @@
       "incorrectPassword": "密码错误，请重试。",
       "enterPassword": "请输入密码",
       "serverError": "无法连接AliasVault服务器。请稍后重试，若问题依旧，请联系支持团队。",
-      "incorrectPasswordFallback": "密码错误，请重试。"
+      "serverErrorSelfHosted": "Could not reach the API. For self-hosted instances, please verify the API endpoint is reachable by navigating to it in a browser: it should display 'OK'.",
+      "networkError": "Network request failed. Please check your internet connection and try again.",
+      "networkErrorSelfHosted": "Network request failed. Check your network connection and server availability. For self-hosted instances, please ensure you have a valid SSL certificate installed. Self-signed certificates are not supported on mobile devices for security reasons.",
+      "incorrectPasswordFallback": "密码错误，请重试。",
+      "sessionExpired": "Your session has expired. Please login again.",
+      "tokenRefreshFailed": "Failed to refresh authentication token",
+      "httpError": "HTTP error: {{status}}"
     },
     "confirmLogout": "确定要退出登录吗？否则需要重新输入主密码才能访问保险库内容。",
     "noAccountYet": "还没有账号？",
