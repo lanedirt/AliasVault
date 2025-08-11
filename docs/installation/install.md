@@ -88,7 +88,7 @@ AliasVault includes a built-in email server that allows you to generate email al
 
 #### Verifying Port Access
 
-Use `telnet` to confirm the ports are reachable on your public IP:
+While the AliasVault docker containers are running, use `telnet` to confirm your public IP allows access to the ports:
 
 ```bash
 # Test standard SMTP port
