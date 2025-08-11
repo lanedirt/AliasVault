@@ -59,7 +59,7 @@ jobs:
           timeout_minutes: 2
           max_attempts: 3
           command: |
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/)
+            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:8443/)
             if [ "$http_code" -ne 200 ]; then
               echo "❌ Root endpoint (/) failed with HTTP $http_code"
               docker logs aliasvault-test
@@ -73,7 +73,7 @@ jobs:
           timeout_minutes: 2
           max_attempts: 3
           command: |
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api)
+            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:8443/api)
             if [ "$http_code" -ne 200 ]; then
               echo "❌ API endpoint (/api) failed with HTTP $http_code"
               docker logs aliasvault-test
@@ -87,7 +87,7 @@ jobs:
           timeout_minutes: 2
           max_attempts: 3
           command: |
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/admin/user/login)
+            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:8443/admin/user/login)
             if [ "$http_code" -ne 200 ]; then
               echo "❌ Admin endpoint (/admin) failed with HTTP $http_code"
               docker logs aliasvault-test
