@@ -210,7 +210,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Emails", Url = "/emails" });
+        BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Emails", Url = "emails" });
         BreadcrumbItems.Add(new BreadcrumbItem { DisplayName = "Email Storage Stats" });
 
         await RefreshData();
