@@ -1744,6 +1744,11 @@ video {
   color: rgb(22 101 52 / var(--tw-text-opacity));
 }
 
+.text-orange-600 {
+  --tw-text-opacity: 1;
+  color: rgb(234 88 12 / var(--tw-text-opacity));
+}
+
 .text-primary-600 {
   --tw-text-opacity: 1;
   color: rgb(214 131 56 / var(--tw-text-opacity));
@@ -2227,6 +2232,11 @@ video {
   color: rgb(74 222 128 / var(--tw-text-opacity));
 }
 
+.dark\:text-orange-400:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(251 146 60 / var(--tw-text-opacity));
+}
+
 .dark\:text-primary-200:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 203 116 / var(--tw-text-opacity));
@@ -2579,10 +2589,6 @@ video {
 
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .lg\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .lg\:flex-row {

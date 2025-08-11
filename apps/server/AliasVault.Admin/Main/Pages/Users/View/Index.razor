@@ -2,8 +2,10 @@
 @using AliasVault.Admin.Main.Pages.Users.View.Components
 @using AliasVault.Admin.Main.Models
 @using AliasVault.Admin.Services
+@using Microsoft.EntityFrameworkCore
 @inherits MainBase
 @inject StatisticsService StatisticsService
+@inject ILogger<Index> Logger
 
 <LayoutPageTitle>User</LayoutPageTitle>
 
@@ -28,7 +30,54 @@ else
             <div class="p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
                 <div class="items-center xl:block sm:space-x-4 xl:space-x-0 2xl:space-x-4">
                     <div>
-                        <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-200 pb-2">@User.UserName</h3>
+                        <div class="mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">@User.UserName</h3>
+                                @if (!IsEditingUsername)
+                                {
+                                    <button type="button" @onclick="StartEditingUsername"
+                                            class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-4 bg-gray-700 hover:bg-gray-800 focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+                                            title="Change username">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        @if (IsEditingUsername)
+                        {
+                            <div class="mb-4 space-y-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <div class="mb-3">
+                                    <div class="flex items-center mb-2">
+                                        <svg class="w-5 h-5 text-orange-600 dark:text-orange-400 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Change Username</h4>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                                        Changing a username is permanent and may affect the user's ability to log in.
+                                        This is typically used for account archival or when a user specifically requests a username change.
+                                    </p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">New Username</label>
+                                        <input type="text" @bind="NewUsername" placeholder="Enter new username"
+                                               class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full max-w-md p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" />
+                                        @if (!string.IsNullOrEmpty(UsernameValidationError))
+                                        {
+                                            <p class="text-sm text-red-600 dark:text-red-400 mt-1">@UsernameValidationError</p>
+                                        }
+                                    </div>
+                                    <div class="flex space-x-2 pt-2">
+                                        <Button Color="danger" OnClick="ChangeUsername">Change Username</Button>
+                                        <Button Color="secondary" OnClick="CancelEditingUsername">Cancel</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
 
                         <!-- Usage Statistics Section -->
                         @if (UserUsageStats != null)
@@ -234,6 +283,9 @@ else
     private bool IsEditingEmailLimits { get; set; }
     private int EditMaxEmails { get; set; }
     private int EditMaxEmailAgeDays { get; set; }
+    private bool IsEditingUsername { get; set; }
+    private string NewUsername { get; set; } = string.Empty;
+    private string UsernameValidationError { get; set; } = string.Empty;
 
     /// <inheritdoc />
     protected override async Task OnInitializedAsync()
@@ -447,6 +499,7 @@ Do you want to proceed with the restoration?")) {
 
         if (User != null)
         {
+            var wasBlocked = User.Blocked;
             User.Blocked = !User.Blocked;
 
             // If user is unblocked by the admin, also reset any lockout status, which can be
@@ -457,6 +510,11 @@ Do you want to proceed with the restoration?")) {
             }
 
             await dbContext.SaveChangesAsync();
+
+            // Add log entry for block/unblock action
+            var action = User.Blocked ? "Blocked" : "Unblocked";
+            Logger.LogWarning("{Action} user {UserName} ({UserId}).", action, User.UserName, User.Id);
+
             await RefreshData();
         }
     }
@@ -513,6 +571,95 @@ Do you want to proceed with the restoration?")) {
             IsEditingEmailLimits = false;
             await RefreshData();
             GlobalNotificationService.AddSuccessMessage("Email limits updated successfully.", true);
+        }
+    }
+
+    /// <summary>
+    /// Starts editing username for the user.
+    /// </summary>
+    private void StartEditingUsername()
+    {
+        IsEditingUsername = true;
+        NewUsername = User!.UserName ?? string.Empty;
+        UsernameValidationError = string.Empty;
+    }
+
+    /// <summary>
+    /// Cancels editing username.
+    /// </summary>
+    private void CancelEditingUsername()
+    {
+        IsEditingUsername = false;
+        NewUsername = string.Empty;
+        UsernameValidationError = string.Empty;
+    }
+
+    /// <summary>
+    /// Changes the username for the user with validation.
+    /// </summary>
+    private async Task ChangeUsername()
+    {
+        if (string.IsNullOrWhiteSpace(NewUsername))
+        {
+            UsernameValidationError = "Username cannot be empty.";
+            return;
+        }
+
+        if (NewUsername.Length < 3)
+        {
+            UsernameValidationError = "Username must be at least 3 characters long.";
+            return;
+        }
+
+        if (NewUsername.Length > 256)
+        {
+            UsernameValidationError = "Username cannot be longer than 256 characters.";
+            return;
+        }
+
+        if (NewUsername == User!.UserName)
+        {
+            UsernameValidationError = "New username must be different from current username.";
+            return;
+        }
+
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        // Check if username already exists
+        var existingUser = await dbContext.AliasVaultUsers.FirstOrDefaultAsync(x => x.UserName == NewUsername);
+        if (existingUser != null)
+        {
+            UsernameValidationError = "This username is already in use by another user.";
+            return;
+        }
+
+        // Reload user to ensure we have the latest data
+        User = await dbContext.AliasVaultUsers.FindAsync(Id);
+        if (User != null)
+        {
+            var oldUsername = User.UserName;
+            User.UserName = NewUsername;
+            User.NormalizedUserName = NewUsername.ToUpperInvariant();
+            User.Email = NewUsername;
+            User.NormalizedEmail = NewUsername.ToUpperInvariant();
+            User.UpdatedAt = DateTime.UtcNow;
+
+            try
+            {
+                await dbContext.SaveChangesAsync();
+
+                // Add log entry for username change
+                Logger.LogWarning("Changed username for user {OldUsername} ({UserId}) to {NewUsername}.", oldUsername, User.Id, NewUsername);
+
+                IsEditingUsername = false;
+                UsernameValidationError = string.Empty;
+                await RefreshData();
+                GlobalNotificationService.AddSuccessMessage($"Username changed from '{oldUsername}' to '{NewUsername}' successfully.", true);
+            }
+            catch (Exception ex)
+            {
+                UsernameValidationError = $"Error updating username: {ex.Message}";
+            }
         }
     }
 }
