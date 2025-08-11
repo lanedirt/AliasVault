@@ -14,7 +14,7 @@
     Description="This page shows an overview of recent auth attempts.">
     <CustomActions>
         <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
-        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+        <RefreshButton OnClick="() => RefreshData(CancellationToken.None)" ButtonText="Refresh" />
     </CustomActions>
 </PageHeader>
 
@@ -107,6 +107,8 @@ else
 
     private string _searchTerm = string.Empty;
     private string _lastSearchTerm = string.Empty;
+    private CancellationTokenSource? _searchCancellationTokenSource;
+    
     private string SearchTerm
     {
         get => _searchTerm;
@@ -115,7 +117,9 @@ else
             if (_searchTerm != value)
             {
                 _searchTerm = value;
-                _ = RefreshData();
+                _searchCancellationTokenSource?.Cancel();
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                _ = RefreshData(_searchCancellationTokenSource.Token);
             }
         }
     }
@@ -129,7 +133,9 @@ else
             if (_selectedEventType != value)
             {
                 _selectedEventType = value;
-                _ = RefreshData();
+                _searchCancellationTokenSource?.Cancel();
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                _ = RefreshData(_searchCancellationTokenSource.Token);
             }
         }
     }
@@ -139,7 +145,7 @@ else
     private void ToggleUniqueUsernames()
     {
         ShowUniqueUsernames = !ShowUniqueUsernames;
-        _ = RefreshData();
+        _ = RefreshData(CancellationToken.None);
     }
 
     private string SortColumn { get; set; } = "Id";
@@ -149,7 +155,7 @@ else
     {
         SortColumn = sort.column;
         SortDirection = sort.direction;
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
     }
 
     /// <inheritdoc />
@@ -161,7 +167,7 @@ else
 
         Navigation.LocationChanged += OnLocationChanged;
         ParseQueryAndRefresh();
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -186,7 +192,7 @@ else
         if (_searchTerm != _lastSearchTerm)
         {
             _lastSearchTerm = _searchTerm;
-            _ = RefreshData(); // Fire and forget
+            _ = RefreshData(CancellationToken.None); // Fire and forget
         }
     }
 
@@ -194,96 +200,115 @@ else
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
+        _searchCancellationTokenSource?.Cancel();
+        _searchCancellationTokenSource?.Dispose();
     }
 
     private void HandlePageChanged(int newPage)
     {
         CurrentPage = newPage;
-        _ = RefreshData();
+        _ = RefreshData(CancellationToken.None);
     }
 
-    private async Task RefreshData()
+    private async Task RefreshData(CancellationToken cancellationToken = default)
     {
-        IsLoading = true;
-        StateHasChanged();
-
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var query = dbContext.AuthLogs.AsQueryable();
-
-        if (!string.IsNullOrEmpty(SearchTerm))
+        try
         {
-            // Reset page number back to 1 if the search term has changed.
-            if (SearchTerm != _lastSearchTerm)
-            {
-                CurrentPage = 1;
-            }
-            _lastSearchTerm = SearchTerm;
+            IsLoading = true;
+            StateHasChanged();
 
-            // If the search term starts with "client:", we search for the client header.
-            if (SearchTerm.StartsWith("client:", StringComparison.OrdinalIgnoreCase))
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync(cancellationToken);
+            var query = dbContext.AuthLogs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(SearchTerm))
             {
-                var clientSearchTerm = SearchTerm.Substring(7).ToLower();
-                query = query.Where(x => EF.Functions.Like((x.Client ?? string.Empty).ToLower(), "%" + clientSearchTerm + "%"));
+                // Reset page number back to 1 if the search term has changed.
+                if (SearchTerm != _lastSearchTerm)
+                {
+                    CurrentPage = 1;
+                }
+                _lastSearchTerm = SearchTerm;
+
+                // If the search term starts with "client:", we search for the client header.
+                if (SearchTerm.StartsWith("client:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var clientSearchTerm = SearchTerm.Substring(7).ToLower();
+                    query = query.Where(x => EF.Functions.Like((x.Client ?? string.Empty).ToLower(), "%" + clientSearchTerm + "%"));
+                }
+                else
+                {
+                    var searchTerm = SearchTerm.Trim().ToLower();
+                    query = query.Where(x => EF.Functions.Like((x.Username ?? string.Empty).ToLower(), "%" + searchTerm + "%") ||
+                                             EF.Functions.Like((x.IpAddress ?? string.Empty).ToLower(), "%" + searchTerm + "%"));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(SelectedEventType))
+            {
+                var success = Enum.TryParse<AuthEventType>(SelectedEventType, out var eventType);
+                if (success)
+                {
+                    query = query.Where(x => x.EventType == eventType);
+                }
+            }
+
+            query = ApplySort(query);
+
+            // Handle unique usernames filtering after getting all results (since GroupBy with OrderBy in Select is complex for EF)
+            if (ShowUniqueUsernames)
+            {
+                // Get all matching records first
+                var allLogs = await query.ToListAsync(cancellationToken);
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                // Group by username and take the latest entry for each username
+                var uniqueLogs = allLogs
+                    .GroupBy(x => x.Username)
+                    .Select(g => g.OrderByDescending(x => x.Timestamp).First())
+                    .ToList();
+
+                // Apply pagination to the unique results
+                TotalRecords = uniqueLogs.Count;
+                LogList = uniqueLogs
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToList();
             }
             else
             {
-                var searchTerm = SearchTerm.Trim().ToLower();
-                query = query.Where(x => EF.Functions.Like((x.Username ?? string.Empty).ToLower(), "%" + searchTerm + "%") ||
-                                         EF.Functions.Like((x.IpAddress ?? string.Empty).ToLower(), "%" + searchTerm + "%"));
+                TotalRecords = await query.CountAsync(cancellationToken);
+                LogList = await query
+                    .Skip((CurrentPage - 1) * PageSize)
+                    .Take(PageSize)
+                    .ToListAsync(cancellationToken);
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
             }
-        }
 
-        if (!string.IsNullOrEmpty(SelectedEventType))
+            // Create user lookup dictionary for the current page
+            var usernames = LogList.Select(x => x.Username).Distinct().Where(x => !string.IsNullOrEmpty(x)).ToList();
+            var users = await dbContext.AliasVaultUsers
+                .Where(u => u.UserName != null && usernames.Contains(u.UserName))
+                .Select(u => new { u.UserName, u.Id })
+                .ToListAsync(cancellationToken);
+
+            UserLookup = users.Where(u => u.UserName != null).ToDictionary(u => u.UserName!, u => u.Id);
+
+            IsLoading = false;
+            IsInitialized = true;
+            StateHasChanged();
+        }
+        catch (OperationCanceledException)
         {
-            var success = Enum.TryParse<AuthEventType>(SelectedEventType, out var eventType);
-            if (success)
-            {
-                query = query.Where(x => x.EventType == eventType);
-            }
+            // Expected when cancellation is requested, do nothing
         }
-
-        query = ApplySort(query);
-
-        // Handle unique usernames filtering after getting all results (since GroupBy with OrderBy in Select is complex for EF)
-        if (ShowUniqueUsernames)
-        {
-            // Get all matching records first
-            var allLogs = await query.ToListAsync();
-
-            // Group by username and take the latest entry for each username
-            var uniqueLogs = allLogs
-                .GroupBy(x => x.Username)
-                .Select(g => g.OrderByDescending(x => x.Timestamp).First())
-                .ToList();
-
-            // Apply pagination to the unique results
-            TotalRecords = uniqueLogs.Count;
-            LogList = uniqueLogs
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-        }
-        else
-        {
-            TotalRecords = await query.CountAsync();
-            LogList = await query
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize)
-                .ToListAsync();
-        }
-
-        // Create user lookup dictionary for the current page
-        var usernames = LogList.Select(x => x.Username).Distinct().Where(x => !string.IsNullOrEmpty(x)).ToList();
-        var users = await dbContext.AliasVaultUsers
-            .Where(u => u.UserName != null && usernames.Contains(u.UserName))
-            .Select(u => new { u.UserName, u.Id })
-            .ToListAsync();
-
-        UserLookup = users.Where(u => u.UserName != null).ToDictionary(u => u.UserName!, u => u.Id);
-
-        IsLoading = false;
-        IsInitialized = true;
-        StateHasChanged();
     }
 
     /// <summary>
@@ -356,7 +381,7 @@ else
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         dbContext.AuthLogs.RemoveRange(dbContext.AuthLogs);
         await dbContext.SaveChangesAsync();
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
 
         IsLoading = false;
         StateHasChanged();
