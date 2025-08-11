@@ -126,14 +126,8 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
     ForwardedHostHeaderName = "X-Forwarded-Host",
     ForwardedForHeaderName = "X-Forwarded-For",
 };
-
-// Add known networks to prevent "Unknown proxy" warnings
 forwardedHeadersOptions.KnownNetworks.Clear();
-forwardedHeadersOptions.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("172.16.0.0"), 12));
-forwardedHeadersOptions.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("10.0.0.0"), 8));
-forwardedHeadersOptions.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("192.168.0.0"), 16));
-forwardedHeadersOptions.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse("172.18.0.0"), 16));
-
+forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
 
 // Configure the HTTP request pipeline.
