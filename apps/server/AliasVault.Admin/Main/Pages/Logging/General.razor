@@ -21,18 +21,27 @@
 
        <div class="mb-3 flex space-x-4">
             <div class="flex w-full">
-                <div class="w-2/3 pr-2">
+                <div class="w-1/2 pr-2">
                     <div class="relative">
                         <SearchIcon />
                         <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 ps-10 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                     </div>
                 </div>
-                <div class="w-1/3 pl-2">
+                <div class="w-1/4 px-2">
                     <select @bind="SelectedServiceName" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">All Services</option>
                         @foreach (var service in ServiceNames)
                         {
                             <option value="@service">@service</option>
+                        }
+                    </select>
+                </div>
+                <div class="w-1/4 pl-2">
+                    <select @bind="SelectedLogLevel" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <option value="">All Levels</option>
+                        @foreach (var level in LogLevels)
+                        {
+                            <option value="@level">@level</option>
                         }
                     </select>
                 </div>
@@ -59,10 +68,12 @@ else
                         @{
                             string bgColor = log.Level switch
                             {
-                                "Information" => "bg-blue-500",
-                                "Error" => "bg-red-500",
-                                "Warning" => "bg-yellow-500",
+                                "Verbose" => "bg-gray-500",
                                 "Debug" => "bg-green-500",
+                                "Information" => "bg-blue-500",
+                                "Warning" => "bg-yellow-500",
+                                "Error" => "bg-red-500",
+                                "Fatal" => "bg-red-700",
                                 _ => "bg-gray-500"
                             };
                         }
@@ -130,6 +141,21 @@ else
     }
 
     private List<string> ServiceNames { get; set; } = [];
+    private List<string> LogLevels { get; set; } = [];
+
+    private string _selectedLogLevel = string.Empty;
+    private string SelectedLogLevel
+    {
+        get => _selectedLogLevel;
+        set
+        {
+            if (_selectedLogLevel != value)
+            {
+                _selectedLogLevel = value;
+                _ = RefreshData();
+            }
+        }
+    }
 
     private string SortColumn { get; set; } = "Id";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
@@ -154,7 +180,12 @@ else
         if (firstRender)
         {
             await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-            ServiceNames = await dbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
+            ServiceNames = await dbContext.Logs.Select(l => l.Application).Distinct().OrderBy(x => x).ToListAsync();
+            
+            // Get log levels and sort by severity (highest to lowest)
+            var levels = await dbContext.Logs.Select(l => l.Level).Distinct().ToListAsync();
+            LogLevels = levels.OrderBy(x => GetLogLevelSeverityOrder(x)).ToList();
+            
             await RefreshData();
         }
     }
@@ -175,6 +206,7 @@ else
 
         query = ApplySearchTermFilter(query);
         query = ApplyServiceNameFilter(query);
+        query = ApplyLogLevelFilter(query);
 
         // Apply sort.
         switch (SortColumn)
@@ -190,9 +222,29 @@ else
                     : query.OrderByDescending(x => x.Message);
                 break;
             case "Level":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Level)
-                    : query.OrderByDescending(x => x.Level);
+                // Sort by severity order, not alphabetical
+                if (SortDirection == SortDirection.Ascending)
+                {
+                    query = query.OrderBy(x => 
+                        x.Level == "Verbose" ? 0 :
+                        x.Level == "Debug" ? 1 :
+                        x.Level == "Information" ? 2 :
+                        x.Level == "Warning" ? 3 :
+                        x.Level == "Error" ? 4 :
+                        x.Level == "Fatal" ? 5 : 6)
+                        .ThenBy(x => x.Id);
+                }
+                else
+                {
+                    query = query.OrderBy(x => 
+                        x.Level == "Fatal" ? 0 :
+                        x.Level == "Error" ? 1 :
+                        x.Level == "Warning" ? 2 :
+                        x.Level == "Information" ? 3 :
+                        x.Level == "Debug" ? 4 :
+                        x.Level == "Verbose" ? 5 : 6)
+                        .ThenByDescending(x => x.Id);
+                }
                 break;
             case "Timestamp":
                 query = SortDirection == SortDirection.Ascending
@@ -254,6 +306,38 @@ else
         }
 
         return query;
+    }
+
+    /// <summary>
+    /// Applies a log level filter to the query.
+    /// </summary>
+    /// <param name="query">The query to apply the filter to.</param>
+    private IQueryable<Log> ApplyLogLevelFilter(IQueryable<Log> query)
+    {
+        if (!string.IsNullOrEmpty(SelectedLogLevel))
+        {
+            query = query.Where(x => x.Level == SelectedLogLevel);
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Gets the severity order for a log level (lower number = higher severity).
+    /// Used for sorting log levels in dropdown by severity instead of alphabetically.
+    /// </summary>
+    private int GetLogLevelSeverityOrder(string level)
+    {
+        return level switch
+        {
+            "Fatal" => 0,      // Highest severity
+            "Error" => 1,
+            "Warning" => 2,
+            "Information" => 3,
+            "Debug" => 4,
+            "Verbose" => 5,    // Lowest severity
+            _ => 6
+        };
     }
 
     private async Task DeleteLogsWithConfirmation()
