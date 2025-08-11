@@ -296,15 +296,11 @@ export class WebApiService {
      */
     if (vaultResponseJson.status === 1) {
       // Note: vault merge is no longer allowed by the API as of 0.20.0, updates with the same revision number are rejected. So this check can be removed later.
-      return t('errors.VaultMergeRequired');
+      return t('errors.VaultOutdated');
     }
 
     if (vaultResponseJson.status === 2) {
       return t('errors.VaultOutdated');
-    }
-
-    if (!vaultResponseJson.vault?.blob) {
-      return t('errors.NoVaultFound');
     }
 
     return null;
