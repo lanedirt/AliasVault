@@ -89,9 +89,7 @@
     "executingOperation": "Виконання операції...",
     "loadMore": "Завантажити ще",
     "errors": {
-      "VaultMergeRequired": "Ваше сховище потрібно оновити. Будь ласка, увійдіть на вебсайт AliasVault та виконайте наведені нижче дії.",
       "VaultOutdated": "Ваше сховище застаріло. Будь ласка, увійдіть на вебсайт AliasVault та виконайте наведені нижче дії.",
-      "NoVaultFound": "Ваш обліковий запис ще не має сховища. Будь ласка, ознайомтеся з інструкцією у вебклієнті AliasVault, перш ніж використовувати розширення для браузера.",
       "serverNotAvailable": "Не вдалося зв’язатися зі сервером AliasVault. Будь ласка, спробуйте пізніше або зверніться до служби підтримки, якщо проблема не зникне.",
       "clientVersionNotSupported": "Ця версія розширення браузера AliasVault більше не підтримується сервером. Будь ласка, оновіть розширення браузера до останньої версії.",
       "serverVersionNotSupported": "Щоб використовувати це розширення браузера, потрібно оновити сервер AliasVault до новішої версії. Зверніться до служби підтримки, якщо вам потрібна допомога.",
@@ -106,9 +104,7 @@
       "failedToGetDefaultIdentitySettings": "Failed to get default identity settings",
       "failedToGetPasswordSettings": "Failed to get password settings",
       "failedToUploadVault": "Failed to upload vault",
-      "noDerivedKeyAvailable": "No derived key available for encryption",
-      "failedToUploadVaultToServer": "Failed to upload new vault to server",
-      "noVaultOrDerivedKeyFound": "No vault or derived key found"
+      "failedToUploadVaultToServer": "Failed to upload new vault to server"
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",
