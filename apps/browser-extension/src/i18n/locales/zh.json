@@ -89,9 +89,7 @@
     "executingOperation": "执行操作中……",
     "loadMore": "加载更多",
     "errors": {
-      "VaultMergeRequired": "你的保险库需要更新。请登录AliasVault网站并按照步骤操作。",
       "VaultOutdated": "你的保险库版本多低。请登录AliasVault网站并按照步骤操作。",
-      "NoVaultFound": "你的账户还没有保险库。请先在AliasVault网页客户端完成教程，再使用浏览器扩展。",
       "serverNotAvailable": "AliasVault服务器不可用。请稍后重试，若问题持续请联系支持人员。",
       "clientVersionNotSupported": "此版本的AliasVault浏览器扩展已不被服务器支持。请将浏览器扩展更新到最新版本。",
       "serverVersionNotSupported": "AliasVault服务器需要更新到新版本才能使用此浏览器扩展。如需帮助，请联系支持人员。",
@@ -106,9 +104,7 @@
       "failedToGetDefaultIdentitySettings": "获取默认身份设置失败",
       "failedToGetPasswordSettings": "获取密码设置失败",
       "failedToUploadVault": "上传保险库失败",
-      "noDerivedKeyAvailable": "没有用于加密的派生密钥",
-      "failedToUploadVaultToServer": "向服务器上传新保险库失败",
-      "noVaultOrDerivedKeyFound": "未找到保险库或派生密钥"
+      "failedToUploadVaultToServer": "向服务器上传新保险库失败"
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "发生未知错误。请重试。",
