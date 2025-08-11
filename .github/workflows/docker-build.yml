@@ -1,4 +1,4 @@
-name: Docker Pull and Build
+name: Docker Build Tests
 
 on:
   push:
@@ -11,142 +11,108 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  docker-compose-pull:
-    name: Docker Compose Pull Test
+  docker-all-in-one-build:
+    name: Docker All-in-One Build Test
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:26.0.0
-        options: --privileged
-
     steps:
-      - name: Get repository and branch information
-        id: repo-info
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then
-            echo "REPO_FULL_NAME=lanedirt/AliasVault" >> $GITHUB_ENV
-            echo "BRANCH_NAME=main" >> $GITHUB_ENV
-          else
-            echo "REPO_FULL_NAME=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
-            echo "BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
-          fi
-
       - uses: actions/checkout@v2
 
-      - name: Check local docker-compose.yml for :latest tags
+      - name: Build all-in-one Docker image
         run: |
-          # Check for explicit version tags instead of :latest
-          if grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml; then
-            echo "❌ Error: docker-compose.yml contains explicit version tags instead of :latest"
-            echo "Found the following explicit versions:"
-            grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml
-            echo ""
-            echo "All AliasVault images in docker-compose.yml must use ':latest' tags, not explicit versions."
-            echo "Please update docker-compose.yml to use ':latest' for all AliasVault images."
-            exit 1
-          fi
+          docker build -f dockerfiles/all-in-one/Dockerfile -t aliasvault-allinone:test .
+          echo "✅ All-in-one Docker image built successfully"
 
-          echo "✅ docker-compose.yml correctly uses :latest tags for all AliasVault images"
-
-      - name: Download install script from current branch
+      - name: Run all-in-one container
         run: |
-          INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/$REPO_FULL_NAME/$BRANCH_NAME/install.sh"
-          echo "Downloading install script from: $INSTALL_SCRIPT_URL"
-          curl -f -o install.sh "$INSTALL_SCRIPT_URL"
+          docker run -d \
+            --name aliasvault-test \
+            -p 8080:80 \
+            -p 8443:443 \
+            -p 2525:25 \
+            -p 2587:587 \
+            -v "$(pwd)/database:/database" \
+            -v "$(pwd)/certificates:/certificates" \
+            -v "$(pwd)/logs:/logs" \
+            -v "$(pwd)/secrets:/secrets" \
+            aliasvault-allinone:test
 
-      - name: Create .env file with custom SMTP port
-        run: echo "SMTP_PORT=2525" > .env
-
-      - name: Set permissions and run install.sh (install)
-        id: install_script
+      - name: Wait for services to be ready
         run: |
-          chmod +x install.sh
-          {
-            ./install.sh install --verbose
-            exit_code=$?
-            if [ $exit_code -eq 2 ]; then
-              echo "skip_remaining=true" >> $GITHUB_OUTPUT
-              true
-            elif [ $exit_code -ne 0 ]; then
-              false
+          echo "Waiting for services to initialize..."
+          for i in {1..60}; do
+            if docker exec aliasvault-test curl -f http://localhost:3001/api 2>/dev/null; then
+              echo "✅ API service is ready"
+              break
             fi
-          } || {
-            if [ $exit_code -eq 2 ]; then
-              echo "skip_remaining=true" >> $GITHUB_OUTPUT
-              true
-            else
-              exit $exit_code
-            fi
-          }
+            echo "Waiting for services... ($i/60)"
+            sleep 5
+          done
 
-      - name: Run docker compose up
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
-        run: docker compose -f docker-compose.yml up -d
+      - name: Check container logs if needed
+        if: failure()
+        run: docker logs aliasvault-test
 
-      - name: Wait for services
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
-        run: sleep 10
-
-      - name: Test WASM App
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
+      - name: Test root endpoint
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 2
           max_attempts: 3
           command: |
-            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443)
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/)
             if [ "$http_code" -ne 200 ]; then
-              echo "WASM app failed with $http_code"
+              echo "❌ Root endpoint (/) failed with HTTP $http_code"
+              docker logs aliasvault-test
               exit 1
             fi
+            echo "✅ Root endpoint (/) returned HTTP 200"
 
-      - name: Test WebApi
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
+      - name: Test API endpoint
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 2
           max_attempts: 3
           command: |
-            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/api)
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api)
             if [ "$http_code" -ne 200 ]; then
-              echo "WebApi failed with $http_code"
+              echo "❌ API endpoint (/api) failed with HTTP $http_code"
+              docker logs aliasvault-test
               exit 1
             fi
+            echo "✅ API endpoint (/api) returned HTTP 200"
 
-      - name: Test Admin App
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
+      - name: Test Admin endpoint
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 2
           max_attempts: 3
           command: |
-            http_code=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost:443/admin/user/login)
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/admin/user/login)
             if [ "$http_code" -ne 200 ]; then
-              echo "Admin app failed with $http_code"
+              echo "❌ Admin endpoint (/admin) failed with HTTP $http_code"
+              docker logs aliasvault-test
               exit 1
             fi
+            echo "✅ Admin endpoint (/admin) returned HTTP 200"
 
-      - name: Test SMTP
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
+      - name: Test SMTP port
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 2
           max_attempts: 3
           command: |
             if ! nc -zv localhost 2525 2>&1 | grep -q 'succeeded'; then
-              echo "SMTP failed"
+              echo "❌ SMTP port 2525 is not accessible"
+              docker logs aliasvault-test
               exit 1
             fi
+            echo "✅ SMTP port 2525 is accessible"
 
-      - name: Test reset-admin-password output
-        if: ${{ !steps.install_script.outputs.skip_remaining }}
+      - name: Cleanup
+        if: always()
         run: |
-          output=$(./install.sh reset-admin-password | sed 's/\x1b\[[0-9;]*m//g')
-          if ! echo "$output" | grep -Eq '^\s*Password: [A-Za-z0-9+/=]{8,}'; then
-            echo "Invalid reset-admin-password output"
-            exit 1
-          fi
+          docker stop aliasvault-test || true
+          docker rm aliasvault-test || true
 
   docker-compose-build:
     name: Docker Compose Build Test
