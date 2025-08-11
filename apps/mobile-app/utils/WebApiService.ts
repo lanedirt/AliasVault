@@ -4,6 +4,7 @@ import { AppInfo } from '@/utils/AppInfo';
 import type { StatusResponse, VaultResponse, AuthLogModel, RefreshToken } from '@/utils/dist/shared/models/webapi';
 
 import i18n from '@/i18n';
+
 import { LocalAuthError } from './types/errors/LocalAuthError';
 
 type RequestInit = globalThis.RequestInit;

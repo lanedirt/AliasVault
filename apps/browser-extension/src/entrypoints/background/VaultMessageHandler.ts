@@ -355,7 +355,7 @@ export async function handleUploadVault(
 export async function handlePersistFormValues(data: any): Promise<void> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
   if (!derivedKey) {
-    throw new Error(await t('common.errors.noDerivedKeyAvailable'));
+    throw new Error(await t('common.errors.unknownError'));
   }
 
   // Always stringify the data properly
@@ -456,7 +456,7 @@ async function createVaultSqliteClient() : Promise<SqliteClient> {
   const encryptedVault = await storage.getItem('session:encryptedVault') as string;
   const derivedKey = await storage.getItem('session:derivedKey') as string;
   if (!encryptedVault || !derivedKey) {
-    throw new Error(await t('common.errors.noVaultOrDerivedKeyFound'));
+    throw new Error(await t('common.errors.unknownError'));
   }
 
   // Decrypt the vault.
