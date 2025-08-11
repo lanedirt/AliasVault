@@ -504,7 +504,7 @@ public sealed class DbService : IDisposable
             .Select(email => email!)
             .ToListAsync();
 
-        if (_config.PrivateEmailDomains.Any())
+        if (_config.PrivateEmailDomains.Count == 0)
         {
             // No private email domains known, so there are no email claims.
             return [];
