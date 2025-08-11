@@ -44,7 +44,13 @@
       "incorrectPassword": "Невірний пароль. Будь ласка, спробуйте ще раз.",
       "enterPassword": "Будь ласка, введіть ваш пароль",
       "serverError": "Не вдалося зв’язатися зі сервером AliasVault. Будь ласка, спробуйте пізніше або зверніться до служби підтримки, якщо проблема не зникне.",
-      "incorrectPasswordFallback": "Невірний пароль. Будь ласка, спробуйте ще раз."
+      "serverErrorSelfHosted": "Could not reach the API. For self-hosted instances, please verify the API endpoint is reachable by navigating to it in a browser: it should display 'OK'.",
+      "networkError": "Network request failed. Please check your internet connection and try again.",
+      "networkErrorSelfHosted": "Network request failed. Check your network connection and server availability. For self-hosted instances, please ensure you have a valid SSL certificate installed. Self-signed certificates are not supported on mobile devices for security reasons.",
+      "incorrectPasswordFallback": "Невірний пароль. Будь ласка, спробуйте ще раз.",
+      "sessionExpired": "Your session has expired. Please login again.",
+      "tokenRefreshFailed": "Failed to refresh authentication token",
+      "httpError": "HTTP error: {{status}}"
     },
     "confirmLogout": "Ви впевнені, що хочете вийти? Вам потрібно знову увійти, використовуючи свій головний пароль, щоб отримати доступ до свого сховища.",
     "noAccountYet": "Ще не маєте облікового запису?",
