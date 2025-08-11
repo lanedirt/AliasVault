@@ -106,6 +106,10 @@ COPY --from=dotnet-builder /app/installcli /usr/local/bin/aliasvault-cli
 RUN chmod +x /usr/local/bin/aliasvault-cli/AliasVault.InstallCli && \
     ln -s /usr/local/bin/aliasvault-cli/AliasVault.InstallCli /usr/local/bin/aliasvault-cli.sh
 
+# Copy password reset script and make it executable
+COPY dockerfiles/all-in-one/reset-admin-password.sh /usr/local/bin/reset-admin-password.sh
+RUN chmod +x /usr/local/bin/reset-admin-password.sh
+
 # Copy client nginx configuration and ensure wwwroot is accessible
 COPY apps/server/AliasVault.Client/nginx.conf /app/client/nginx.conf
 

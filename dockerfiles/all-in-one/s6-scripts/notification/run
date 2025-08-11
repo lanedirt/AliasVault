@@ -32,22 +32,21 @@ if [ "$VERBOSITY" -le 1 ]; then
         echo "  • Admin: https://localhost:443/admin"
         echo ""
 
-        # Show admin credentials if available
-        if [ -f /secrets/admin_password_temp ]; then
-            ADMIN_PASSWORD=$(cat /secrets/admin_password_temp)
+        # Check if admin password hash file exists to determine which message to show
+        if [ -f /secrets/admin_password_hash ]; then
+            # Admin password hash exists - show the legacy warning
             echo "🔑 Admin Login:"
             echo "  • Username: admin"
-            echo "  • Password: ${ADMIN_PASSWORD}"
+            echo "  • Password: (previously set - to reset the admin password, login to this container via \`docker exec -it [container-name] /bin/bash\` and run: reset-admin-password.sh)"
             echo ""
-            echo "⚠️  IMPORTANT: Save these credentials securely!"
-            echo "   This password won't be shown again."
-            echo ""
-            # Clean up the temporary password file
-            rm -f /secrets/admin_password_temp
         else
-            echo "🔑 Admin Login:"
-            echo "  • Username: admin"
-            echo "  • Password: (previously set - to reset the admin password, delete the file ./secrets/admin_password_hash and restart the container)"
+            # No admin password hash file - show setup instructions
+            echo "🔑 Admin Setup:"
+            echo "  • Admin user is not configured by default"
+            echo "  • To configure admin access:"
+            echo "    1. docker exec -it [container-name] /bin/bash"
+            echo "    2. reset-admin-password.sh"
+            echo "    3. Restart the container"
             echo ""
         fi
 

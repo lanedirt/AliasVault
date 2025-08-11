@@ -33,7 +33,7 @@ public static class StartupTasks
     }
 
     /// <summary>
-    /// Creates the admin user if it does not exist.
+    /// Creates the admin user if it does not exist and admin password hash is configured.
     /// </summary>
     /// <param name="serviceProvider">IServiceProvider instance.</param>
     /// <returns>Async Task.</returns>
@@ -43,6 +43,14 @@ public static class StartupTasks
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
         var adminUser = await userManager.FindByNameAsync("admin");
         var config = serviceProvider.GetRequiredService<Config>();
+
+        // Skip admin user creation if no admin password hash is configured
+        if (string.IsNullOrEmpty(config.AdminPasswordHash))
+        {
+            Console.WriteLine("Admin password hash not configured - skipping admin user creation.");
+            Console.WriteLine("Run 'reset-admin-password.sh' to configure the admin password.");
+            return;
+        }
 
         if (adminUser == null)
         {
@@ -59,9 +67,9 @@ public static class StartupTasks
         }
         else
         {
-            // Check if the password hash is different AND the password in .env file is newer than the password of user.
-            // If so, update the password hash of the user in the database so it matches the one in the .env file.
-            if (adminUser.PasswordHash != config.AdminPasswordHash && (adminUser.LastPasswordChanged is null || config.LastPasswordChanged > adminUser.LastPasswordChanged))
+            // Check if the password hash is different AND the hash in secret file is newer than the password of user.
+            // If so, update the password hash of the user in the database so it matches the one in the admin_password_hash file.
+            if (adminUser.PasswordHash != config.AdminPasswordHash && (adminUser.LastPasswordChanged is null || (config.LastPasswordChanged != DateTime.MinValue && config.LastPasswordChanged > adminUser.LastPasswordChanged)))
             {
                 // The password has been changed in the .env file, update the user's password hash.
                 adminUser.PasswordHash = config.AdminPasswordHash;

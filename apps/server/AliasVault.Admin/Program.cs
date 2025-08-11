@@ -35,9 +35,19 @@ builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAs
 var config = new Config();
 
 // Get admin password hash and generation timestamp using SecretReader
-var (adminPasswordHash, lastPasswordChanged) = SecretReader.GetAdminPasswordHash();
-config.AdminPasswordHash = adminPasswordHash;
-config.LastPasswordChanged = lastPasswordChanged;
+// If the admin password hash file doesn't exist, leave config values empty (admin user won't be created)
+try
+{
+    var (adminPasswordHash, lastPasswordChanged) = SecretReader.GetAdminPasswordHash();
+    config.AdminPasswordHash = adminPasswordHash;
+    config.LastPasswordChanged = lastPasswordChanged;
+}
+catch (KeyNotFoundException)
+{
+    // Admin password hash not configured - this is expected when no password has been set yet
+    config.AdminPasswordHash = string.Empty;
+    config.LastPasswordChanged = DateTime.MinValue;
+}
 
 var ipLoggingEnabled = Environment.GetEnvironmentVariable("IP_LOGGING_ENABLED") ?? "false";
 config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);
