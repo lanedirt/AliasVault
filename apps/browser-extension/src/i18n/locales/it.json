@@ -89,9 +89,7 @@
     "executingOperation": "Esecuzione operazione...",
     "loadMore": "Carica altro",
     "errors": {
-      "VaultMergeRequired": "La tua cassaforte deve essere aggiornata. Per favore accedi al sito di AliasVault e segui le istruzioni.",
       "VaultOutdated": "La tua cassaforte è obsoleta. Per favore accedi al sito di AliasVault e segui le istruzioni.",
-      "NoVaultFound": "Il tuo account non ha ancora una cassaforte. Completa il tutorial nel client web di AliasVault prima di usare l'estensione del browser.",
       "serverNotAvailable": "Il server di AliasVault non è disponibile. Riprova più tardi o contatta il supporto se il problema persiste.",
       "clientVersionNotSupported": "Questa versione dell'estensione del browser AliasVault non è più supportata dal server. Aggiorna l'estensione alla versione più recente.",
       "serverVersionNotSupported": "Il server di AliasVault necessita un aggiornamento a una versione più recente per poter usare questa estensione. Contatta il supporto se hai bisogno di assistenza.",
@@ -106,9 +104,7 @@
       "failedToGetDefaultIdentitySettings": "Caricamento delle impostazioni predefinite dell'identità non riuscito",
       "failedToGetPasswordSettings": "Caricamento delle impostazioni della password non riuscito",
       "failedToUploadVault": "Caricare della cassaforte non riuscito.",
-      "noDerivedKeyAvailable": "Nessuna chiave derivata disponibile per la crittografia",
-      "failedToUploadVaultToServer": "Impossibile caricare la nuova cassaforte sul server",
-      "noVaultOrDerivedKeyFound": "Nessuna cassaforte o chiave derivata trovata"
+      "failedToUploadVaultToServer": "Impossibile caricare la nuova cassaforte sul server"
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "Si è verificato un errore sconosciuto. Riprova.",
