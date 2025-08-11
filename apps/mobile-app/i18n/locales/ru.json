@@ -44,7 +44,13 @@
       "incorrectPassword": "Неверный пароль. Пожалуйста, повторите попытку.",
       "enterPassword": "Пожалуйста, введите ваш пароль",
       "serverError": "Не удалось подключиться к серверу AliasVault. Пожалуйста, повторите попытку позже или обратитесь в службу поддержки, если проблема не устранится.",
-      "incorrectPasswordFallback": "Incorrect password. Please try again."
+      "serverErrorSelfHosted": "Could not reach the API. For self-hosted instances, please verify the API endpoint is reachable by navigating to it in a browser: it should display 'OK'.",
+      "networkError": "Network request failed. Please check your internet connection and try again.",
+      "networkErrorSelfHosted": "Network request failed. Check your network connection and server availability. For self-hosted instances, please ensure you have a valid SSL certificate installed. Self-signed certificates are not supported on mobile devices for security reasons.",
+      "incorrectPasswordFallback": "Incorrect password. Please try again.",
+      "sessionExpired": "Your session has expired. Please login again.",
+      "tokenRefreshFailed": "Failed to refresh authentication token",
+      "httpError": "HTTP error: {{status}}"
     },
     "confirmLogout": "Вы уверены, что хотите выйти? Вам необходимо повторно войти в систему, используя свой мастер-пароль, чтобы получить доступ к своему хранилищу.",
     "noAccountYet": "Нет аккаунта?",
