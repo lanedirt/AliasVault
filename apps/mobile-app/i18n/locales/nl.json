@@ -44,7 +44,13 @@
       "incorrectPassword": "Onjuist wachtwoord. Probeer het opnieuw.",
       "enterPassword": "Voer je wachtwoord in",
       "serverError": "Kon de AliasVault server niet bereiken. Probeer het later opnieuw of neem contact op met support als het probleem aanhoudt.",
-      "incorrectPasswordFallback": "Onjuist wachtwoord. Probeer het opnieuw."
+      "serverErrorSelfHosted": "Kan de API niet bereiken. Voor self-hosted instances, controleer of de API URL werkt door er via de browser handmatig naartoe te navigeren: de pagina moet \"OK\" weergeven.",
+      "networkError": "Netwerkfout. Controleer de verbinding en probeer het opnieuw.",
+      "networkErrorSelfHosted": "Netwerkfout. Controleer de verbinding en probeer het opnieuw. Voor self-hosted instances, controleer dat er een geldig SSL-certificaat is geconfigureerd. Self-signed SSL-certificaten worden niet ondersteund door de app wegens veiligheidsredenen.",
+      "incorrectPasswordFallback": "Onjuist wachtwoord. Probeer het opnieuw.",
+      "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+      "tokenRefreshFailed": "Authenticatietoken vernieuwen mislukt",
+      "httpError": "HTTP fout: {{status}}"
     },
     "confirmLogout": "Weet je zeker dat je wilt uitloggen? Je moet opnieuw inloggen met je hoofdwachtwoord om toegang te krijgen tot je vault.",
     "noAccountYet": "Nog geen account?",
