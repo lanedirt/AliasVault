@@ -14,6 +14,7 @@ import type { LoginResponse, VaultResponse } from '@/utils/dist/shared/models/we
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { SrpUtility } from '@/utils/SrpUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
+import { LocalAuthError } from '@/utils/types/errors/LocalAuthError';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -306,9 +307,15 @@ export default function LoginScreen() : React.ReactNode {
       if (err instanceof ApiAuthError) {
         console.error('ApiAuthError error:', err);
         setError(t(`apiErrors.${err.message}`));
+      } else if (err instanceof LocalAuthError) {
+        console.error('Network/SSL error:', err);
+        // Use the error message as the translation key
+        setError(t(`auth.errors.${(err as Error).message}`));
       } else {
         console.error('Login error:', err);
-        setError(t('auth.errors.serverError'));
+        // Check if self-hosted to show appropriate server error message
+        const isSelfHosted = await webApi.isSelfHosted();
+        setError(t(isSelfHosted ? 'auth.errors.serverErrorSelfHosted' : 'auth.errors.serverError'));
       }
       setIsLoading(false);
       setLoginStatus(null);
@@ -370,9 +377,13 @@ export default function LoginScreen() : React.ReactNode {
       console.error('2FA error:', err);
       if (err instanceof ApiAuthError) {
         setError(t(`apiErrors.${err.message}`));
+      } else if ((err as { translationKey?: boolean })?.translationKey) {
+        // Use the error message as the translation key
+        setError(t(`auth.errors.${(err as Error).message}`));
       } else {
-        console.error('2FA error:', err);
-        setError(t('auth.errors.serverError'));
+        // Check if self-hosted to show appropriate server error message
+        const isSelfHosted = await webApi.isSelfHosted();
+        setError(t(isSelfHosted ? 'auth.errors.serverErrorSelfHosted' : 'auth.errors.serverError'));
       }
       setIsLoading(false);
     }

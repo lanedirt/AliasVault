@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AppInfo } from '@/utils/AppInfo';
 import type { StatusResponse, VaultResponse, AuthLogModel, RefreshToken } from '@/utils/dist/shared/models/webapi';
+import { LocalAuthError } from '@/utils/types/errors/LocalAuthError';
 
 type RequestInit = globalThis.RequestInit;
 
@@ -122,6 +123,34 @@ export class WebApiService {
       return response;
     } catch (error) {
       console.error('API request failed:', error);
+
+      // Detect SSL certificate errors
+      if (error instanceof TypeError) {
+        const errorMessage = error.message.toLowerCase();
+
+        // Common SSL/TLS error patterns on iOS and Android
+        if (errorMessage.includes('ssl') ||
+            errorMessage.includes('tls') ||
+            errorMessage.includes('cert') ||
+            errorMessage.includes('trust') ||
+            errorMessage.includes('self-signed') ||
+            errorMessage.includes('ca') ||
+            errorMessage.includes('network request failed')) {
+
+          // Check if this is a self-hosted instance
+          const isSelfHosted = await this.isSelfHosted();
+
+          if (isSelfHosted) {
+            // For self-hosted instances, throw error with translation key
+            throw new LocalAuthError('networkErrorSelfHosted');
+          } else {
+            // For the default API URL, throw error with translation key
+            throw new LocalAuthError('networkError');
+          }
+        }
+      }
+
+      // Re-throw the original error if it's not SSL-related
       throw error;
     }
   }
