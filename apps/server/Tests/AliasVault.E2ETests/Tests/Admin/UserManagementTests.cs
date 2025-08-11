@@ -93,11 +93,68 @@ public class UserManagementTests : AdminPlaywrightTest
         await base.OneTimeTearDown();
     }
 
+     /// <summary>
+    /// Test that username change validation works correctly.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    [Order(1)]
+    public async Task ChangeUsernameValidationTest()
+    {
+        // Navigate to the user details page
+        await NavigateUsingBlazorRouter($"users/{_testUserId}");
+        await WaitForUrlAsync($"users/{_testUserId}**");
+
+        // Click the edit username button
+        var editButton = Page.Locator("button[title='Change username']");
+        await editButton.ClickAsync();
+
+        // Wait for the form to appear
+        await Page.WaitForSelectorAsync("text=Change Username");
+
+        // Test empty username validation
+        var usernameInput = Page.Locator("input[placeholder='Enter new username']");
+        await usernameInput.FillAsync(string.Empty);
+
+        var changeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Change Username" });
+        await changeButton.ClickAsync();
+
+        // Should show validation error
+        await Page.WaitForSelectorAsync("text=Username cannot be empty");
+        var pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("Username cannot be empty"), "Empty username validation should work");
+
+        // Test username too short
+        await usernameInput.FillAsync("ab");
+        await changeButton.ClickAsync();
+
+        await Page.WaitForSelectorAsync("text=at least 3 characters");
+        pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("at least 3 characters"), "Username too short validation should work");
+
+        // Test same username validation
+        var currentUser = await DbContext.AliasVaultUsers.FindAsync(_testUserId);
+        await usernameInput.FillAsync(currentUser!.UserName!);
+        await changeButton.ClickAsync();
+
+        await Page.WaitForSelectorAsync("text=must be different from current username");
+        pageContent = await Page.TextContentAsync("body");
+        Assert.That(pageContent, Does.Contain("must be different from current username"), "Same username validation should work");
+
+        // Cancel the operation
+        var cancelButton = Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
+        await cancelButton.ClickAsync();
+
+        // Verify form disappears
+        await Page.WaitForSelectorAsync("text=Change Username", new() { State = WaitForSelectorState.Detached });
+    }
+
     /// <summary>
     /// Test that admin can successfully change a user's username and verify logging.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
+    [Order(2)]
     public async Task ChangeUsernameWithLoggingTest()
     {
         // Get the initial log count for comparison
@@ -150,10 +207,13 @@ public class UserManagementTests : AdminPlaywrightTest
 
         // Verify the change in the database
         var updatedUser = await DbContext.AliasVaultUsers.AsNoTracking().FirstAsync(x => x.Id == _testUserId);
-        Assert.That(updatedUser?.UserName, Is.EqualTo(_newUserEmail), "Username should be updated in the database");
-        Assert.That(updatedUser?.Email, Is.EqualTo(_newUserEmail), "Email should be updated in the database");
-        Assert.That(updatedUser?.NormalizedUserName, Is.EqualTo(_newUserEmail.ToUpperInvariant()), "Normalized username should be updated");
-        Assert.That(updatedUser?.NormalizedEmail, Is.EqualTo(_newUserEmail.ToUpperInvariant()), "Normalized email should be updated");
+        Assert.Multiple(() =>
+        {
+            Assert.That(updatedUser?.UserName, Is.EqualTo(_newUserEmail), "Username should be updated in the database");
+            Assert.That(updatedUser?.Email, Is.EqualTo(_newUserEmail), "Email should be updated in the database");
+            Assert.That(updatedUser?.NormalizedUserName, Is.EqualTo(_newUserEmail.ToUpperInvariant()), "Normalized username should be updated");
+            Assert.That(updatedUser?.NormalizedEmail, Is.EqualTo(_newUserEmail.ToUpperInvariant()), "Normalized email should be updated");
+        });
 
         // Verify that a log entry was created
         var newLogCount = await DbContext.Logs.CountAsync();
@@ -165,68 +225,16 @@ public class UserManagementTests : AdminPlaywrightTest
             .OrderByDescending(l => l.TimeStamp)
             .FirstOrDefaultAsync();
 
-        Assert.That(logEntry, Is.Not.Null, "Username change log entry should exist");
-        Assert.That(logEntry!.Level, Is.EqualTo("Warning"), "Log level should be Warning");
-        Assert.That(logEntry.Message, Does.Contain("Changed username for user"), "Log message should contain username change text");
-        Assert.That(logEntry.Message, Does.Contain(originalUsername), "Log message should contain old username");
-        Assert.That(logEntry.Message, Does.Contain(_newUserEmail), "Log message should contain new username");
+        Assert.Multiple(() =>
+        {
+            Assert.That(logEntry, Is.Not.Null, "Username change log entry should exist");
+            Assert.That(logEntry!.Level, Is.EqualTo("Warning"), "Log level should be Warning");
+            Assert.That(logEntry.Message, Does.Contain("Changed username for user"), "Log message should contain username change text");
+            Assert.That(logEntry.Message, Does.Contain(originalUsername), "Log message should contain old username");
+            Assert.That(logEntry.Message, Does.Contain(_newUserEmail), "Log message should contain new username");
+        });
 
         // Update our test variables for cleanup
         _testUserEmail = _newUserEmail;
-    }
-
-    /// <summary>
-    /// Test that username change validation works correctly.
-    /// </summary>
-    /// <returns>Async task.</returns>
-    [Test]
-    public async Task ChangeUsernameValidationTest()
-    {
-        // Navigate to the user details page
-        await NavigateUsingBlazorRouter($"users/{_testUserId}");
-        await WaitForUrlAsync($"users/{_testUserId}**");
-
-        // Click the edit username button
-        var editButton = Page.Locator("button[title='Change username']");
-        await editButton.ClickAsync();
-
-        // Wait for the form to appear
-        await Page.WaitForSelectorAsync("text=Change Username");
-
-        // Test empty username validation
-        var usernameInput = Page.Locator("input[placeholder='Enter new username']");
-        await usernameInput.FillAsync(string.Empty);
-
-        var changeButton = Page.GetByRole(AriaRole.Button, new() { Name = "Change Username" });
-        await changeButton.ClickAsync();
-
-        // Should show validation error
-        await Page.WaitForSelectorAsync("text=Username cannot be empty");
-        var pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("Username cannot be empty"), "Empty username validation should work");
-
-        // Test username too short
-        await usernameInput.FillAsync("ab");
-        await changeButton.ClickAsync();
-
-        await Page.WaitForSelectorAsync("text=at least 3 characters");
-        pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("at least 3 characters"), "Username too short validation should work");
-
-        // Test same username validation
-        var currentUser = await DbContext.AliasVaultUsers.FindAsync(_testUserId);
-        await usernameInput.FillAsync(currentUser!.UserName!);
-        await changeButton.ClickAsync();
-
-        await Page.WaitForSelectorAsync("text=must be different from current username");
-        pageContent = await Page.TextContentAsync("body");
-        Assert.That(pageContent, Does.Contain("must be different from current username"), "Same username validation should work");
-
-        // Cancel the operation
-        var cancelButton = Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
-        await cancelButton.ClickAsync();
-
-        // Verify form disappears
-        await Page.WaitForSelectorAsync("text=Change Username", new() { State = WaitForSelectorState.Detached });
     }
 }

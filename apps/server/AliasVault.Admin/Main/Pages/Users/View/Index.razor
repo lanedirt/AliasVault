@@ -499,7 +499,6 @@ Do you want to proceed with the restoration?")) {
 
         if (User != null)
         {
-            var wasBlocked = User.Blocked;
             User.Blocked = !User.Blocked;
 
             // If user is unblocked by the admin, also reset any lockout status, which can be
