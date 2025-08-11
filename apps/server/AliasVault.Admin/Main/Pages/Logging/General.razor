@@ -10,7 +10,7 @@
     Description="This page shows an overview of recent system logs.">
     <CustomActions>
         <DeleteButton OnClick="DeleteLogsWithConfirmation" ButtonText="Delete all logs" />
-        <RefreshButton OnClick="RefreshData" ButtonText="Refresh" />
+        <RefreshButton OnClick="() => RefreshData(CancellationToken.None)" ButtonText="Refresh" />
     </CustomActions>
 </PageHeader>
 
@@ -102,6 +102,8 @@ else
 
     private string _searchTerm = string.Empty;
     private string _lastSearchTerm = string.Empty;
+    private CancellationTokenSource? _searchCancellationTokenSource;
+    
     private string SearchTerm
     {
         get => _searchTerm;
@@ -110,7 +112,9 @@ else
             if (_searchTerm != value)
             {
                 _searchTerm = value;
-                _ = RefreshData();
+                _searchCancellationTokenSource?.Cancel();
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                _ = RefreshData(_searchCancellationTokenSource.Token);
             }
         }
     }
@@ -124,7 +128,9 @@ else
             if (_selectedServiceName != value)
             {
                 _selectedServiceName = value;
-                _ = RefreshData();
+                _searchCancellationTokenSource?.Cancel();
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                _ = RefreshData(_searchCancellationTokenSource.Token);
             }
         }
     }
@@ -138,7 +144,7 @@ else
     {
         SortColumn = sort.column;
         SortDirection = sort.direction;
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
     }
 
     /// <inheritdoc />
@@ -155,66 +161,78 @@ else
         {
             await using var dbContext = await DbContextFactory.CreateDbContextAsync();
             ServiceNames = await dbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
-            await RefreshData();
+            await RefreshData(CancellationToken.None);
         }
     }
 
     private void HandlePageChanged(int newPage)
     {
         CurrentPage = newPage;
-        _ = RefreshData();
+        _ = RefreshData(CancellationToken.None);
     }
 
-    private async Task RefreshData()
+    private async Task RefreshData(CancellationToken cancellationToken = default)
     {
-        IsLoading = true;
-        StateHasChanged();
-
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var query = dbContext.Logs.AsQueryable();
-
-        query = ApplySearchTermFilter(query);
-        query = ApplyServiceNameFilter(query);
-
-        // Apply sort.
-        switch (SortColumn)
+        try
         {
-            case "Application":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Application)
-                    : query.OrderByDescending(x => x.Application);
-                break;
-            case "Message":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Message)
-                    : query.OrderByDescending(x => x.Message);
-                break;
-            case "Level":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Level)
-                    : query.OrderByDescending(x => x.Level);
-                break;
-            case "Timestamp":
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.TimeStamp)
-                    : query.OrderByDescending(x => x.TimeStamp);
-                break;
-            default:
-                query = SortDirection == SortDirection.Ascending
-                    ? query.OrderBy(x => x.Id)
-                    : query.OrderByDescending(x => x.Id);
-                break;
+            IsLoading = true;
+            StateHasChanged();
+
+            await using var dbContext = await DbContextFactory.CreateDbContextAsync(cancellationToken);
+            var query = dbContext.Logs.AsQueryable();
+
+            query = ApplySearchTermFilter(query);
+            query = ApplyServiceNameFilter(query);
+
+            // Apply sort.
+            switch (SortColumn)
+            {
+                case "Application":
+                    query = SortDirection == SortDirection.Ascending
+                        ? query.OrderBy(x => x.Application)
+                        : query.OrderByDescending(x => x.Application);
+                    break;
+                case "Message":
+                    query = SortDirection == SortDirection.Ascending
+                        ? query.OrderBy(x => x.Message)
+                        : query.OrderByDescending(x => x.Message);
+                    break;
+                case "Level":
+                    query = SortDirection == SortDirection.Ascending
+                        ? query.OrderBy(x => x.Level)
+                        : query.OrderByDescending(x => x.Level);
+                    break;
+                case "Timestamp":
+                    query = SortDirection == SortDirection.Ascending
+                        ? query.OrderBy(x => x.TimeStamp)
+                        : query.OrderByDescending(x => x.TimeStamp);
+                    break;
+                default:
+                    query = SortDirection == SortDirection.Ascending
+                        ? query.OrderBy(x => x.Id)
+                        : query.OrderByDescending(x => x.Id);
+                    break;
+            }
+
+            TotalRecords = await query.CountAsync(cancellationToken);
+            LogList = await query
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync(cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            IsLoading = false;
+            IsInitialized = true;
+            StateHasChanged();
         }
-
-        TotalRecords = await query.CountAsync();
-        LogList = await query
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToListAsync();
-
-        IsLoading = false;
-        IsInitialized = true;
-        StateHasChanged();
+        catch (OperationCanceledException)
+        {
+            // Expected when cancellation is requested, do nothing
+        }
     }
 
     /// <summary>
@@ -272,9 +290,19 @@ else
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         dbContext.Logs.RemoveRange(dbContext.Logs);
         await dbContext.SaveChangesAsync();
-        await RefreshData();
+        await RefreshData(CancellationToken.None);
 
         IsLoading = false;
         StateHasChanged();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _searchCancellationTokenSource?.Cancel();
+            _searchCancellationTokenSource?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 }
