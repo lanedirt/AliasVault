@@ -95,6 +95,51 @@ jobs:
             fi
             echo "✅ Admin endpoint (/admin) returned HTTP 200"
 
+      - name: Verify admin password hash file does not exist initially
+        run: |
+          if [ -f "./secrets/admin_password_hash" ]; then
+            echo "❌ Admin password hash file should not exist initially"
+            cat ./secrets/admin_password_hash
+            exit 1
+          fi
+          echo "✅ Admin password hash file correctly does not exist initially"
+
+      - name: Test admin password reset flow
+        run: |
+          echo "🔧 Testing admin password reset flow..."
+
+          # Run the reset password script with auto-confirm
+          echo "Running reset-admin-password.sh script..."
+          password_output=$(docker exec aliasvault-test reset-admin-password.sh -y 2>&1)
+          echo "Script output:"
+          echo "$password_output"
+
+          # Extract the generated password from the output
+          generated_password=$(echo "$password_output" | grep -E "^Password: " | sed 's/Password: //')
+          if [ -z "$generated_password" ]; then
+            echo "❌ Failed to extract generated password from script output"
+            echo "Full output was:"
+            echo "$password_output"
+            exit 1
+          fi
+          echo "✅ Generated password extracted: $generated_password"
+
+          # Verify that the admin_password_hash file now exists in the container
+          if ! docker exec aliasvault-test test -f /secrets/admin_password_hash; then
+            echo "❌ Admin password hash file was not created in container"
+            docker exec aliasvault-test ls -la /secrets/
+            exit 1
+          fi
+          echo "✅ Admin password hash file created in container"
+
+          # Verify that the admin_password_hash file exists locally (mounted volume)
+          if [ ! -f "./secrets/admin_password_hash" ]; then
+            echo "❌ Admin password hash file not found in local secrets folder"
+            ls -la ./secrets/
+            exit 1
+          fi
+          echo "✅ Admin password hash file exists in local secrets folder"
+
       - name: Test SMTP port
         uses: nick-fields/retry@v3
         with:
