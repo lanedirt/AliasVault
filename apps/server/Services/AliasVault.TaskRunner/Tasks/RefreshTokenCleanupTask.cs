@@ -46,7 +46,7 @@ public class RefreshTokenCleanupTask : IMaintenanceTask
 
         if (deletedCount > 0)
         {
-            _logger.LogWarning("Deleted {Count} expired refresh tokens", deletedCount);
+            _logger.LogInformation("Deleted {Count} expired refresh tokens", deletedCount);
         }
     }
 }

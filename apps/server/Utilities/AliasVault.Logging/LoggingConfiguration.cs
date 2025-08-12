@@ -34,8 +34,11 @@ public static class LoggingConfiguration
         "AliasVault.SmtpService.Workers.SmtpServerWorker",
 
         // Task completion events
+        "AliasVault.TaskRunner.Tasks.EmailQuotaCleanupTask",
+        "AliasVault.TaskRunner.Tasks.DisabledEmailCleanupTask",
         "AliasVault.TaskRunner.Tasks.EmailCleanupTask",
         "AliasVault.TaskRunner.Tasks.LogCleanupTask",
+        "AliasVault.TaskRunner.Tasks.RefreshTokenCleanupTask",
 
         // Admin actions
         "AliasVault.Admin.Main.Pages.Users.Delete",
@@ -44,6 +47,7 @@ public static class LoggingConfiguration
         "AliasVault.Admin.Auth.Pages.Login",
         "AliasVault.Admin.Auth.Pages.LoginWith2fa",
         "AliasVault.Admin.Auth.Pages.LoginWithRecoveryCode",
+        "AliasVault.Admin.Main.Pages.Settings.Server",
         "AliasVault.Admin.Main.Pages.Users.View.Index",
 
         // Email processing events

@@ -1,6 +1,6 @@
 @page "/settings/server"
 @inject ServerSettingsService SettingsService
-@inject ILogger<ServerSettingsService> Logger
+@inject ILogger<Server> Logger
 @using AliasVault.Shared.Models.Enums
 @using AliasVault.Shared.Server.Models
 @using AliasVault.Shared.Server.Services
@@ -164,7 +164,7 @@
                 await _taskRunnerHistoryComponent.RefreshData();
             }
 
-            Logger.LogWarning("Maintenance tasks manually queued.");
+            Logger.LogInformation("Maintenance tasks manually queued.");
             GlobalNotificationService.AddSuccessMessage("Maintenance tasks queued. They will be executed on the next polling cycle (default every minute). Check the logs for details.", true);
         }
         catch (Exception ex)

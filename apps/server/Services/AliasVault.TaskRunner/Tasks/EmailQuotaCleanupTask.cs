@@ -102,7 +102,7 @@ public class EmailQuotaCleanupTask : IMaintenanceTask
                 {
                     totalEmailsDeleted += emailsDeleted;
                     usersProcessed++;
-                    _logger.LogWarning(
+                    _logger.LogInformation(
                         "Deleted {EmailCount} emails for user {Username} to maintain quota of {MaxEmails} ({LimitSource} setting)",
                         emailsDeleted,
                         userGroup.Key.UserName,
@@ -114,7 +114,7 @@ public class EmailQuotaCleanupTask : IMaintenanceTask
 
         if (totalEmailsDeleted > 0)
         {
-            _logger.LogWarning(
+            _logger.LogInformation(
                 "Total emails deleted by quota cleanup: {TotalEmails} across {UserCount} users",
                 totalEmailsDeleted,
                 usersProcessed);

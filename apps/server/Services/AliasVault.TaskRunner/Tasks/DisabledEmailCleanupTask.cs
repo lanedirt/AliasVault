@@ -45,7 +45,7 @@ public class DisabledEmailCleanupTask : IMaintenanceTask
         var settings = await _settingsService.GetAllSettingsAsync();
         if (settings.DisabledEmailRetentionDays <= 0)
         {
-            _logger.LogInformation("Disabled email cleanup is disabled (retention days set to 0)");
+            _logger.LogDebug("Disabled email cleanup is disabled (retention days set to 0)");
             return;
         }
 
@@ -60,7 +60,7 @@ public class DisabledEmailCleanupTask : IMaintenanceTask
 
         if (disabledAliasAddresses.Count == 0)
         {
-            _logger.LogInformation("No disabled aliases found that need cleanup");
+            _logger.LogDebug("No disabled aliases found that need cleanup");
             return;
         }
 
@@ -71,7 +71,7 @@ public class DisabledEmailCleanupTask : IMaintenanceTask
 
         if (deletedCount > 0)
         {
-            _logger.LogWarning("Deleted {Count} emails for {AliasCount} disabled aliases.", deletedCount, disabledAliasAddresses.Count);
+            _logger.LogInformation("Deleted {Count} emails for {AliasCount} disabled aliases.", deletedCount, disabledAliasAddresses.Count);
         }
     }
 }

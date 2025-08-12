@@ -512,7 +512,7 @@ Do you want to proceed with the restoration?")) {
 
             // Add log entry for block/unblock action
             var action = User.Blocked ? "Blocked" : "Unblocked";
-            Logger.LogWarning("{Action} user {UserName} ({UserId}).", action, User.UserName, User.Id);
+            Logger.LogInformation("{Action} user {UserName} ({UserId}).", action, User.UserName, User.Id);
 
             await RefreshData();
         }
