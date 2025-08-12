@@ -21,6 +21,8 @@ using Serilog.Filters;
 /// </summary>
 public static class LoggingConfiguration
 {
+    private const string SourceContextKey = "SourceContext";
+
     /// <summary>
     /// List of source contexts that are allowed to log Information level to the database.
     /// These are important operational events that should be persisted to the database (in addition to file logging).
@@ -110,9 +112,9 @@ public static class LoggingConfiguration
         }
 
         // For Information level, only log from allowed sources
-        if (evt.Level == LogEventLevel.Information && evt.Properties.ContainsKey("SourceContext"))
+        if (evt.Level == LogEventLevel.Information && evt.Properties.ContainsKey(SourceContextKey))
         {
-            var sourceContext = evt.Properties["SourceContext"].ToString().Trim('"');
+            var sourceContext = evt.Properties[SourceContextKey].ToString().Trim('"');
             if (AllowedInformationSourcesForDatabase.Contains(sourceContext))
             {
                 return true;
@@ -131,8 +133,8 @@ public static class LoggingConfiguration
     {
         return evt =>
         {
-            var sourceContext = evt.Properties.ContainsKey("SourceContext")
-                ? evt.Properties["SourceContext"].ToString()
+            var sourceContext = evt.Properties.ContainsKey(SourceContextKey)
+                ? evt.Properties[SourceContextKey].ToString()
                 : string.Empty;
             var configuredLevel = GetLogEventLevel(sourceContext, configuration);
             return evt.Level >= configuredLevel;

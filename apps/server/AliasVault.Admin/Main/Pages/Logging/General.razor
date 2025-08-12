@@ -190,9 +190,9 @@ else
 
             // Get log levels and sort by severity (highest to lowest)
             var levels = await dbContext.Logs.Select(l => l.Level).Distinct().ToListAsync();
-            LogLevels = levels.OrderBy(x => GetLogLevelSeverityOrder(x)).ToList();
+            LogLevels = levels.OrderBy(GetLogLevelSeverityOrder).ToList();
 
-            await RefreshData(CancellationToken.None));
+            await RefreshData(CancellationToken.None);
         }
     }
 
@@ -212,58 +212,8 @@ else
             await using var dbContext = await DbContextFactory.CreateDbContextAsync(cancellationToken);
             var query = dbContext.Logs.AsQueryable();
 
-            query = ApplySearchTermFilter(query);
-            query = ApplyServiceNameFilter(query);
-
-            // Apply sort.
-            switch (SortColumn)
-            {
-                case "Application":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Application)
-                        : query.OrderByDescending(x => x.Application);
-                    break;
-                case "Message":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Message)
-                        : query.OrderByDescending(x => x.Message);
-                    break;
-                case "Level":
-                    // Sort by severity order, not alphabetical
-                    if (SortDirection == SortDirection.Ascending)
-                    {
-                        query = query.OrderBy(x =>
-                            x.Level == "Verbose" ? 0 :
-                            x.Level == "Debug" ? 1 :
-                            x.Level == "Information" ? 2 :
-                            x.Level == "Warning" ? 3 :
-                            x.Level == "Error" ? 4 :
-                            x.Level == "Fatal" ? 5 : 6)
-                            .ThenBy(x => x.Id);
-                    }
-                    else
-                    {
-                        query = query.OrderBy(x =>
-                            x.Level == "Fatal" ? 0 :
-                            x.Level == "Error" ? 1 :
-                            x.Level == "Warning" ? 2 :
-                            x.Level == "Information" ? 3 :
-                            x.Level == "Debug" ? 4 :
-                            x.Level == "Verbose" ? 5 : 6)
-                            .ThenByDescending(x => x.Id);
-                    }
-                break;
-                case "Timestamp":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.TimeStamp)
-                        : query.OrderByDescending(x => x.TimeStamp);
-                    break;
-                default:
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Id)
-                        : query.OrderByDescending(x => x.Id);
-                    break;
-            }
+            query = ApplyFilters(query);
+            query = ApplySorting(query);
 
             TotalRecords = await query.CountAsync(cancellationToken);
             LogList = await query
@@ -284,6 +234,90 @@ else
         {
             // Expected when cancellation is requested, do nothing
         }
+    }
+
+    /// <summary>
+    /// Applies all filters to the query.
+    /// </summary>
+    private IQueryable<Log> ApplyFilters(IQueryable<Log> query)
+    {
+        query = ApplySearchTermFilter(query);
+        query = ApplyServiceNameFilter(query);
+
+        if (!string.IsNullOrEmpty(SelectedLogLevel))
+        {
+            query = query.Where(x => x.Level == SelectedLogLevel);
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies sorting to the query based on SortColumn and SortDirection.
+    /// </summary>
+    private IQueryable<Log> ApplySorting(IQueryable<Log> query)
+    {
+        switch (SortColumn)
+        {
+            case "Application":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Application)
+                    : query.OrderByDescending(x => x.Application);
+                break;
+            case "Message":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Message)
+                    : query.OrderByDescending(x => x.Message);
+                break;
+            case "Level":
+                query = ApplyLevelSorting(query);
+                break;
+            case "Timestamp":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.TimeStamp)
+                    : query.OrderByDescending(x => x.TimeStamp);
+                break;
+            default:
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies special sorting for log levels based on severity.
+    /// </summary>
+    private IQueryable<Log> ApplyLevelSorting(IQueryable<Log> query)
+    {
+        if (SortDirection == SortDirection.Ascending)
+        {
+            // Sort from lowest severity (Verbose) to highest (Fatal)
+            query = query
+                .OrderBy(x => x.Level != "Verbose")
+                .ThenBy(x => x.Level != "Debug")
+                .ThenBy(x => x.Level != "Information")
+                .ThenBy(x => x.Level != "Warning")
+                .ThenBy(x => x.Level != "Error")
+                .ThenBy(x => x.Level != "Fatal")
+                .ThenBy(x => x.Id);
+        }
+        else
+        {
+            // Sort from highest severity (Fatal) to lowest (Verbose)
+            query = query
+                .OrderBy(x => x.Level != "Fatal")
+                .ThenBy(x => x.Level != "Error")
+                .ThenBy(x => x.Level != "Warning")
+                .ThenBy(x => x.Level != "Information")
+                .ThenBy(x => x.Level != "Debug")
+                .ThenBy(x => x.Level != "Verbose")
+                .ThenByDescending(x => x.Id);
+        }
+
+        return query;
     }
 
     /// <summary>
@@ -326,24 +360,10 @@ else
     }
 
     /// <summary>
-    /// Applies a log level filter to the query.
-    /// </summary>
-    /// <param name="query">The query to apply the filter to.</param>
-    private IQueryable<Log> ApplyLogLevelFilter(IQueryable<Log> query)
-    {
-        if (!string.IsNullOrEmpty(SelectedLogLevel))
-        {
-            query = query.Where(x => x.Level == SelectedLogLevel);
-        }
-
-        return query;
-    }
-
-    /// <summary>
     /// Gets the severity order for a log level (lower number = higher severity).
     /// Used for sorting log levels in dropdown by severity instead of alphabetically.
     /// </summary>
-    private int GetLogLevelSeverityOrder(string level)
+    private static int GetLogLevelSeverityOrder(string level)
     {
         return level switch
         {
