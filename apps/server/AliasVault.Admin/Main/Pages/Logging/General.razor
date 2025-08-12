@@ -21,18 +21,27 @@
 
        <div class="mb-3 flex space-x-4">
             <div class="flex w-full">
-                <div class="w-2/3 pr-2">
+                <div class="w-1/2 pr-2">
                     <div class="relative">
                         <SearchIcon />
                         <input type="text" @bind-value="SearchTerm" @bind-value:event="oninput" id="search" placeholder="Search logs..." class="w-full px-4 ps-10 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                     </div>
                 </div>
-                <div class="w-1/3 pl-2">
+                <div class="w-1/4 px-2">
                     <select @bind="SelectedServiceName" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
                         <option value="">All Services</option>
                         @foreach (var service in ServiceNames)
                         {
                             <option value="@service">@service</option>
+                        }
+                    </select>
+                </div>
+                <div class="w-1/4 pl-2">
+                    <select @bind="SelectedLogLevel" class="w-full px-4 py-2 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                        <option value="">All Levels</option>
+                        @foreach (var level in LogLevels)
+                        {
+                            <option value="@level">@level</option>
                         }
                     </select>
                 </div>
@@ -59,10 +68,12 @@ else
                         @{
                             string bgColor = log.Level switch
                             {
-                                "Information" => "bg-blue-500",
-                                "Error" => "bg-red-500",
-                                "Warning" => "bg-yellow-500",
+                                "Verbose" => "bg-gray-500",
                                 "Debug" => "bg-green-500",
+                                "Information" => "bg-blue-500",
+                                "Warning" => "bg-yellow-500",
+                                "Error" => "bg-red-500",
+                                "Fatal" => "bg-red-700",
                                 _ => "bg-gray-500"
                             };
                         }
@@ -103,7 +114,7 @@ else
     private string _searchTerm = string.Empty;
     private string _lastSearchTerm = string.Empty;
     private CancellationTokenSource? _searchCancellationTokenSource;
-    
+
     private string SearchTerm
     {
         get => _searchTerm;
@@ -136,6 +147,21 @@ else
     }
 
     private List<string> ServiceNames { get; set; } = [];
+    private List<string> LogLevels { get; set; } = [];
+
+    private string _selectedLogLevel = string.Empty;
+    private string SelectedLogLevel
+    {
+        get => _selectedLogLevel;
+        set
+        {
+            if (_selectedLogLevel != value)
+            {
+                _selectedLogLevel = value;
+                _ = RefreshData();
+            }
+        }
+    }
 
     private string SortColumn { get; set; } = "Id";
     private SortDirection SortDirection { get; set; } = SortDirection.Descending;
@@ -160,7 +186,12 @@ else
         if (firstRender)
         {
             await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-            ServiceNames = await dbContext.Logs.Select(l => l.Application).Distinct().ToListAsync();
+            ServiceNames = await dbContext.Logs.Select(l => l.Application).Distinct().OrderBy(x => x).ToListAsync();
+
+            // Get log levels and sort by severity (highest to lowest)
+            var levels = await dbContext.Logs.Select(l => l.Level).Distinct().ToListAsync();
+            LogLevels = levels.OrderBy(GetLogLevelSeverityOrder).ToList();
+
             await RefreshData(CancellationToken.None);
         }
     }
@@ -181,38 +212,8 @@ else
             await using var dbContext = await DbContextFactory.CreateDbContextAsync(cancellationToken);
             var query = dbContext.Logs.AsQueryable();
 
-            query = ApplySearchTermFilter(query);
-            query = ApplyServiceNameFilter(query);
-
-            // Apply sort.
-            switch (SortColumn)
-            {
-                case "Application":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Application)
-                        : query.OrderByDescending(x => x.Application);
-                    break;
-                case "Message":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Message)
-                        : query.OrderByDescending(x => x.Message);
-                    break;
-                case "Level":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Level)
-                        : query.OrderByDescending(x => x.Level);
-                    break;
-                case "Timestamp":
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.TimeStamp)
-                        : query.OrderByDescending(x => x.TimeStamp);
-                    break;
-                default:
-                    query = SortDirection == SortDirection.Ascending
-                        ? query.OrderBy(x => x.Id)
-                        : query.OrderByDescending(x => x.Id);
-                    break;
-            }
+            query = ApplyFilters(query);
+            query = ApplySorting(query);
 
             TotalRecords = await query.CountAsync(cancellationToken);
             LogList = await query
@@ -233,6 +234,90 @@ else
         {
             // Expected when cancellation is requested, do nothing
         }
+    }
+
+    /// <summary>
+    /// Applies all filters to the query.
+    /// </summary>
+    private IQueryable<Log> ApplyFilters(IQueryable<Log> query)
+    {
+        query = ApplySearchTermFilter(query);
+        query = ApplyServiceNameFilter(query);
+
+        if (!string.IsNullOrEmpty(SelectedLogLevel))
+        {
+            query = query.Where(x => x.Level == SelectedLogLevel);
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies sorting to the query based on SortColumn and SortDirection.
+    /// </summary>
+    private IQueryable<Log> ApplySorting(IQueryable<Log> query)
+    {
+        switch (SortColumn)
+        {
+            case "Application":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Application)
+                    : query.OrderByDescending(x => x.Application);
+                break;
+            case "Message":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Message)
+                    : query.OrderByDescending(x => x.Message);
+                break;
+            case "Level":
+                query = ApplyLevelSorting(query);
+                break;
+            case "Timestamp":
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.TimeStamp)
+                    : query.OrderByDescending(x => x.TimeStamp);
+                break;
+            default:
+                query = SortDirection == SortDirection.Ascending
+                    ? query.OrderBy(x => x.Id)
+                    : query.OrderByDescending(x => x.Id);
+                break;
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies special sorting for log levels based on severity.
+    /// </summary>
+    private IQueryable<Log> ApplyLevelSorting(IQueryable<Log> query)
+    {
+        if (SortDirection == SortDirection.Ascending)
+        {
+            // Sort from lowest severity (Verbose) to highest (Fatal)
+            query = query
+                .OrderBy(x => x.Level != "Verbose")
+                .ThenBy(x => x.Level != "Debug")
+                .ThenBy(x => x.Level != "Information")
+                .ThenBy(x => x.Level != "Warning")
+                .ThenBy(x => x.Level != "Error")
+                .ThenBy(x => x.Level != "Fatal")
+                .ThenBy(x => x.Id);
+        }
+        else
+        {
+            // Sort from highest severity (Fatal) to lowest (Verbose)
+            query = query
+                .OrderBy(x => x.Level != "Fatal")
+                .ThenBy(x => x.Level != "Error")
+                .ThenBy(x => x.Level != "Warning")
+                .ThenBy(x => x.Level != "Information")
+                .ThenBy(x => x.Level != "Debug")
+                .ThenBy(x => x.Level != "Verbose")
+                .ThenByDescending(x => x.Id);
+        }
+
+        return query;
     }
 
     /// <summary>
@@ -272,6 +357,24 @@ else
         }
 
         return query;
+    }
+
+    /// <summary>
+    /// Gets the severity order for a log level (lower number = higher severity).
+    /// Used for sorting log levels in dropdown by severity instead of alphabetically.
+    /// </summary>
+    private static int GetLogLevelSeverityOrder(string level)
+    {
+        return level switch
+        {
+            "Fatal" => 0,      // Highest severity
+            "Error" => 1,
+            "Warning" => 2,
+            "Information" => 3,
+            "Debug" => 4,
+            "Verbose" => 5,    // Lowest severity
+            _ => 6
+        };
     }
 
     private async Task DeleteLogsWithConfirmation()

@@ -21,6 +21,35 @@ using Serilog.Filters;
 /// </summary>
 public static class LoggingConfiguration
 {
+    private const string SourceContextKey = "SourceContext";
+
+    /// <summary>
+    /// List of source contexts that are allowed to log Information level to the database.
+    /// These are important operational events that should be persisted to the database (in addition to file logging).
+    /// </summary>
+    private static readonly HashSet<string> AllowedInformationSourcesForDatabase = new()
+    {
+        // Service lifecycle events
+        "AliasVault.TaskRunner.Workers.TaskRunnerWorker",
+        "AliasVault.SmtpService.Workers.SmtpServerWorker",
+
+        // Task completion events
+        "AliasVault.TaskRunner.Tasks.EmailCleanupTask",
+        "AliasVault.TaskRunner.Tasks.LogCleanupTask",
+
+        // Admin actions
+        "AliasVault.Admin.Main.Pages.Users.Delete",
+        "AliasVault.Admin.Main.Pages.Account.Manage.Disable2fa",
+        "AliasVault.Admin.Main.Pages.Account.Manage.EnableAuthenticator",
+        "AliasVault.Admin.Auth.Pages.Login",
+        "AliasVault.Admin.Auth.Pages.LoginWith2fa",
+        "AliasVault.Admin.Auth.Pages.LoginWithRecoveryCode",
+        "AliasVault.Admin.Main.Pages.Users.View.Index",
+
+        // Email processing events
+        "AliasVault.SmtpService.Handlers.DatabaseMessageStore",
+    };
+
     /// <summary>
     /// Configures Serilog logging for the application.
     /// </summary>
@@ -56,15 +85,43 @@ public static class LoggingConfiguration
                     rollingInterval: RollingInterval.Day,
                     outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} {Message:lj} {Properties:j}{NewLine}{Exception}"))
 
-            // Log all warning and above to database via EF core except for:
-            // - Microsoft.EntityFrameworkCore logsas this would create a loop.
+            // Log to database:
+            // - All warnings and above
+            // - Specific Information logs from allowed sources
+            // Exclude Microsoft.EntityFrameworkCore logs to prevent loops
             .WriteTo.Logger(lc => lc
-                .Filter.ByIncludingOnly(evt => evt.Level >= LogEventLevel.Warning)
+                .Filter.ByIncludingOnly(evt => ShouldLogToDatabase(evt))
                 .Filter.ByExcluding(Matching.FromSource("Microsoft.EntityFrameworkCore"))
                 .WriteTo.Sink(new DatabaseSink(CultureInfo.InvariantCulture, () => services.BuildServiceProvider().GetRequiredService<IDbContextFactory<AliasServerDbContext>>(), applicationName)))
             .CreateLogger());
 
         return services;
+    }
+
+    /// <summary>
+    /// Determines if a log event should be written to the database.
+    /// </summary>
+    /// <param name="evt">The log event to check.</param>
+    /// <returns>True if the event should be logged to database, false otherwise.</returns>
+    private static bool ShouldLogToDatabase(LogEvent evt)
+    {
+        // Always log warnings and above
+        if (evt.Level >= LogEventLevel.Warning)
+        {
+            return true;
+        }
+
+        // For Information level, only log from allowed sources
+        if (evt.Level == LogEventLevel.Information && evt.Properties.ContainsKey(SourceContextKey))
+        {
+            var sourceContext = evt.Properties[SourceContextKey].ToString().Trim('"');
+            if (AllowedInformationSourcesForDatabase.Contains(sourceContext))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -76,8 +133,8 @@ public static class LoggingConfiguration
     {
         return evt =>
         {
-            var sourceContext = evt.Properties.ContainsKey("SourceContext")
-                ? evt.Properties["SourceContext"].ToString()
+            var sourceContext = evt.Properties.ContainsKey(SourceContextKey)
+                ? evt.Properties[SourceContextKey].ToString()
                 : string.Empty;
             var configuredLevel = GetLogEventLevel(sourceContext, configuration);
             return evt.Level >= configuredLevel;

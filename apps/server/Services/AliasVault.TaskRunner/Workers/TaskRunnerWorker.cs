@@ -29,7 +29,7 @@ public class TaskRunnerWorker(
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogWarning("AliasVault.TaskRunner started at: {Time}", DateTimeOffset.Now);
+        logger.LogInformation("AliasVault.TaskRunner started at: {Time}", DateTimeOffset.Now);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -95,7 +95,7 @@ public class TaskRunnerWorker(
     /// <param name="stoppingToken">The cancellation token.</param>
     private async Task ExecuteMaintenanceTasks(TaskRunnerJob job, AliasServerDbContext dbContext, CancellationToken stoppingToken)
     {
-        logger.LogWarning("Starting maintenance tasks at {Time} (On-demand: {IsOnDemand})", DateTime.UtcNow, job.IsOnDemand);
+        logger.LogInformation("Starting maintenance tasks at {Time} (On-demand: {IsOnDemand})", DateTime.UtcNow, job.IsOnDemand);
 
         try
         {

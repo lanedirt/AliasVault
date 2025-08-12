@@ -648,7 +648,7 @@ Do you want to proceed with the restoration?")) {
                 await dbContext.SaveChangesAsync();
 
                 // Add log entry for username change
-                Logger.LogWarning("Changed username for user {OldUsername} ({UserId}) to {NewUsername}.", oldUsername, User.Id, NewUsername);
+                Logger.LogInformation("Changed username for user {OldUsername} ({UserId}) to {NewUsername}.", oldUsername, User.Id, NewUsername);
 
                 IsEditingUsername = false;
                 UsernameValidationError = string.Empty;

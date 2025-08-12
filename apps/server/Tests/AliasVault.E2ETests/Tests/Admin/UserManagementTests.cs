@@ -224,7 +224,7 @@ public class UserManagementTests : AdminPlaywrightTest
         Assert.Multiple(() =>
         {
             Assert.That(logEntry, Is.Not.Null, "Username change log entry should exist");
-            Assert.That(logEntry!.Level, Is.EqualTo("Warning"), "Log level should be Warning");
+            Assert.That(logEntry!.Level, Is.EqualTo("Information"), "Log level should be Information");
             Assert.That(logEntry.Message, Does.Contain("Changed username for user"), "Log message should contain username change text");
             Assert.That(logEntry.Message, Does.Contain(originalUsername), "Log message should contain old username");
             Assert.That(logEntry.Message, Does.Contain(_newUserEmail), "Log message should contain new username");
