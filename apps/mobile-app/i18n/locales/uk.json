@@ -137,18 +137,18 @@
     "emailPreview": "Попередній перегляд електронного листа",
     "switchBackToBrowser": "Щоб продовжити, поверніться до браузера.",
     "twoFactorAuth": "Двофакторна автентифікація",
-    "totpCode": "TOTP Code",
-    "attachments": "Attachments",
-    "loadingAttachments": "Loading attachments...",
-    "addAttachments": "Add Attachments",
-    "deleteAttachment": "Delete",
+    "totpCode": "Код TOTP",
+    "attachments": "Вкладення",
+    "loadingAttachments": "Завантаження вкладень...",
+    "addAttachments": "Додати вкладення",
+    "deleteAttachment": "Видалити",
     "toasts": {
-      "credentialUpdated": "Credential updated successfully",
-      "credentialCreated": "Credential created successfully"
+      "credentialUpdated": "Облікові дані успішно оновлено",
+      "credentialCreated": "Облікові дані успішно створено"
     },
-    "createNewAliasFor": "Create new alias for",
+    "createNewAliasFor": "Створити новий псевдонім для",
     "errors": {
-      "loadFailed": "Failed to load credential",
+      "loadFailed": "Не вдалося завантажити облікові дані",
       "generateUsernameFailed": "Failed to generate username",
       "generatePasswordFailed": "Failed to generate password",
       "generic": "Error"
