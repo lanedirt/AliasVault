@@ -62,13 +62,14 @@
     <ItemGroup>
       <EmbeddedResource Include="TestData\Exports\bitwarden.csv" />
       <EmbeddedResource Include="TestData\Exports\chrome.csv" />
+      <EmbeddedResource Include="TestData\Exports\dashlane.csv" />
+      <EmbeddedResource Include="TestData\Exports\dropbox.csv" />
       <EmbeddedResource Include="TestData\Exports\firefox.csv" />
       <EmbeddedResource Include="TestData\Exports\strongbox.csv" />
       <EmbeddedResource Include="TestData\Exports\keepass.csv" />
       <EmbeddedResource Include="TestData\Exports\keepassxc.csv" />
       <EmbeddedResource Include="TestData\Exports\1password_8.csv" />
       <EmbeddedResource Include="TestData\Exports\protonpass.csv" />
-      <EmbeddedResource Include="TestData\Exports\dashlane.csv" />
       <EmbeddedResource Include="TestData\Exports\lastpass.csv" />
     </ItemGroup>
 
