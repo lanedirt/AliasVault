@@ -593,6 +593,56 @@ public class ImportExportTests
     }
 
     /// <summary>
+    /// Test case for importing credentials from Dropbox CSV and ensuring all values are present.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromDropboxCsv()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.dropbox.csv");
+
+        // Act
+        var importedCredentials = await DropboxImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(5));
+
+        // Test Gmail credential
+        var gmailCredential = importedCredentials.First(c => c.ServiceName == "Gmail");
+        Assert.Multiple(() =>
+        {
+            Assert.That(gmailCredential.ServiceName, Is.EqualTo("Gmail"));
+            Assert.That(gmailCredential.ServiceUrl, Is.EqualTo("https://gmail.com"));
+            Assert.That(gmailCredential.Username, Is.EqualTo("testuser@gmail.com"));
+            Assert.That(gmailCredential.Password, Is.EqualTo("gmailpass123"));
+            Assert.That(gmailCredential.Notes, Is.EqualTo("Important email account"));
+        });
+
+        // Test GitHub credential
+        var githubCredential = importedCredentials.First(c => c.ServiceName == "GitHub");
+        Assert.Multiple(() =>
+        {
+            Assert.That(githubCredential.ServiceName, Is.EqualTo("GitHub"));
+            Assert.That(githubCredential.ServiceUrl, Is.EqualTo("https://github.com"));
+            Assert.That(githubCredential.Username, Is.EqualTo("devuser"));
+            Assert.That(githubCredential.Password, Is.EqualTo("devpass789"));
+            Assert.That(githubCredential.Notes, Is.EqualTo("Development platform"));
+        });
+
+        // Test Secure Note (no login credentials)
+        var secureNoteCredential = importedCredentials.First(c => c.ServiceName == "Secure Note");
+        Assert.Multiple(() =>
+        {
+            Assert.That(secureNoteCredential.ServiceName, Is.EqualTo("Secure Note"));
+            Assert.That(secureNoteCredential.ServiceUrl, Is.Null);
+            Assert.That(secureNoteCredential.Username, Is.Empty);
+            Assert.That(secureNoteCredential.Password, Is.Empty);
+            Assert.That(secureNoteCredential.Notes, Is.EqualTo("Important information stored securely"));
+        });
+    }
+
+    /// <summary>
     /// Test case for getting the CSV template structure.
     /// </summary>
     [Test]
