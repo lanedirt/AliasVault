@@ -29,4 +29,11 @@ public class StatusResponse
     /// can use to determine if it should refresh the vault from the server.
     /// </summary>
     public required long VaultRevision { get; set; }
+
+    /// <summary>
+    /// Gets or sets the SRP salt. This is used by the client to validate that the local encryption key
+    /// still matches the latest vault revision. If it doesn't match, the client should trigger a logout
+    /// to make the user re-authenticate with the new password.
+    /// </summary>
+    public required string SrpSalt { get; set; }
 }
