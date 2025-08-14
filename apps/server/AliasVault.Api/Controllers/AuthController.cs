@@ -583,25 +583,6 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     }
 
     /// <summary>
-    /// Generate a device identifier based on request headers. This is used to associate refresh tokens
-    /// with a specific device for a specific user.
-    ///
-    /// NOTE: current implementation means that only one refresh token can be valid for a
-    /// specific user/device combo at a time. The identifier generation could be made more unique in the future
-    /// to prevent any unwanted conflicts.
-    /// </summary>
-    /// <param name="request">The HttpRequest instance for the request that the client used.</param>
-    /// <returns>Unique device identifier as string.</returns>
-    private static string GenerateDeviceIdentifier(HttpRequest request)
-    {
-        var userAgent = request.Headers.UserAgent.ToString();
-        var acceptLanguage = request.Headers.AcceptLanguage.ToString();
-
-        var rawIdentifier = $"{userAgent}|{acceptLanguage}";
-        return rawIdentifier;
-    }
-
-    /// <summary>
     /// Generate a refresh token for a user. This token is used to request a new access token when the current
     /// access token expires. The refresh token is long-lived by design.
     /// </summary>
@@ -888,7 +869,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
          // Generate device identifier
         var accessToken = GenerateJwtToken(user);
         var refreshToken = GenerateRefreshToken();
-        var deviceIdentifier = GenerateDeviceIdentifier(Request);
+        var deviceIdentifier = AuthHelper.GenerateDeviceIdentifier(Request);
 
         // Add new refresh token.
         context.AliasVaultUserRefreshTokens.Add(new AliasVaultUserRefreshToken
