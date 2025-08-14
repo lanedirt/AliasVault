@@ -244,8 +244,6 @@ export default function LoginScreen() : React.ReactNode {
     await new Promise(resolve => requestAnimationFrame(resolve));
 
     try {
-      authContext.clearGlobalMessage();
-
       const initiateLoginResponse = await srpUtil.initiateLogin(ConversionUtility.normalizeUsername(credentials.username));
 
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(

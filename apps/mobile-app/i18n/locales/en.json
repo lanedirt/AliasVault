@@ -80,7 +80,8 @@
       "versionNotSupported": "This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.",
       "serverNeedsUpdate": "The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.",
       "vaultDecryptFailed": "Vault could not be decrypted, if the problem persists please logout and login again.",
-      "unknownErrorDuringSync": "Unknown error during vault sync"
+      "unknownErrorDuringSync": "Unknown error during vault sync",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {

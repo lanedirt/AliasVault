@@ -3,7 +3,7 @@ import { NavigationContainerRef, ParamListBase } from '@react-navigation/native'
 import * as LocalAuthentication from 'expo-local-authentication';
 import { router, useGlobalSearchParams, usePathname } from 'expo-router';
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { AppState, Platform } from 'react-native';
+import { Alert, AppState, Platform } from 'react-native';
 
 import EncryptionUtility from '@/utils/EncryptionUtility';
 
@@ -26,8 +26,6 @@ type AuthContextType = {
   initializeAuth: () => Promise<{ isLoggedIn: boolean; enabledAuthMethods: AuthMethod[] }>;
   login: () => Promise<void>;
   logout: (errorMessage?: string) => Promise<void>;
-  globalMessage: string | null;
-  clearGlobalMessage: () => void;
   setAuthMethods: (methods: AuthMethod[]) => Promise<void>;
   getAuthMethodDisplayKey: () => Promise<string>;
   getAutoLockTimeout: () => Promise<number>;
@@ -36,6 +34,7 @@ type AuthContextType = {
   isBiometricsEnabledOnDevice: () => Promise<boolean>;
   setOfflineMode: (isOffline: boolean) => void;
   verifyPassword: (password: string) => Promise<string | null>;
+  getEncryptionKeyDerivationParams: () => Promise<{ salt: string; encryptionType: string; encryptionSettings: string } | null>;
   // Autofill methods
   shouldShowAutofillReminder: boolean;
   markAutofillConfigured: () => Promise<void>;
@@ -58,7 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
-  const [globalMessage, setGlobalMessage] = useState<string | null>(null);
   const [shouldShowAutofillReminder, setShouldShowAutofillReminder] = useState(false);
   const [returnUrl, setReturnUrl] = useState<{ path: string; params?: object } | null>(null);
   const [isOffline, setIsOffline] = useState(false);
@@ -167,21 +165,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await AsyncStorage.removeItem('authMethods');
     dbContext?.clearDatabase();
 
-    // Set local storage global message that will be shown on the login page.
     if (errorMessage) {
-      setGlobalMessage(errorMessage);
+      // Show alert
+      Alert.alert(errorMessage);
     }
 
     setUsername(null);
     setIsLoggedIn(false);
   }, [dbContext]);
-
-  /**
-   * Clear global message (called after displaying the message).
-   */
-  const clearGlobalMessage = useCallback((): void => {
-    setGlobalMessage(null);
-  }, []);
 
   /**
    * Set the authentication methods and save them to storage
@@ -287,17 +278,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
+   * Get the encryption key derivation parameters from native storage.
+   * Returns parsed parameters or null if not available.
+   */
+  const getEncryptionKeyDerivationParams = useCallback(async (): Promise<{
+    salt: string;
+    encryptionType: string;
+    encryptionSettings: string;
+  } | null> => {
+    try {
+      const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
+      if (!encryptionKeyDerivationParams) {
+        return null;
+      }
+      return JSON.parse(encryptionKeyDerivationParams);
+    } catch (error) {
+      console.error('Failed to get encryption key derivation params:', error);
+      return null;
+    }
+  }, []);
+
+  /**
    * Verify the password. Returns the current password hash if the password is correct, otherwise returns null.
    */
   const verifyPassword = useCallback(async (password: string): Promise<string | null> => {
-    // Check locally if the current password is correct by attempting to decrypt the vault
-    const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
-    if (!encryptionKeyDerivationParams) {
+    // Get the key derivation parameters
+    const params = await getEncryptionKeyDerivationParams();
+    if (!params) {
       throw new Error('Failed to verify current password. Please try again.');
     }
-
-    // Parse the key derivation parameters
-    const params = JSON.parse(encryptionKeyDerivationParams);
 
     // Derive the encryption key from the password using the stored parameters
     const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
@@ -316,7 +325,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return currentPasswordHashBase64;
-  }, [dbContext]);
+  }, [dbContext, getEncryptionKeyDerivationParams]);
 
   // Handle app state changes
   useEffect(() => {
@@ -383,7 +392,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoggedIn,
     isInitialized,
     username,
-    globalMessage,
     shouldShowAutofillReminder,
     returnUrl,
     isOffline,
@@ -393,7 +401,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth,
     login,
     logout,
-    clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplayKey,
     isBiometricsEnabledOnDevice,
@@ -403,12 +410,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
+    getEncryptionKeyDerivationParams,
     setOfflineMode: setIsOffline,
   }), [
     isLoggedIn,
     isInitialized,
     username,
-    globalMessage,
     shouldShowAutofillReminder,
     returnUrl,
     isOffline,
@@ -418,7 +425,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth,
     login,
     logout,
-    clearGlobalMessage,
     setAuthMethods,
     getAuthMethodDisplayKey,
     isBiometricsEnabledOnDevice,
@@ -428,6 +434,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     markAutofillConfigured,
     setReturnUrl,
     verifyPassword,
+    getEncryptionKeyDerivationParams,
   ]);
 
   return (
