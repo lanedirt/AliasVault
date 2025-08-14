@@ -80,7 +80,8 @@
       "versionNotSupported": "This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.",
       "serverNeedsUpdate": "The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.",
       "vaultDecryptFailed": "Vault could not be decrypted, if the problem persists please logout and login again.",
-      "unknownErrorDuringSync": "Unknown error during vault sync"
+      "unknownErrorDuringSync": "Unknown error during vault sync",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {
@@ -373,8 +374,6 @@
     "INVALID_AUTHENTICATOR_CODE": "Virheellinen todennuskoodi. Yritä uudelleen.",
     "INVALID_RECOVERY_CODE": "Invalid recovery code. Please try again.",
     "REFRESH_TOKEN_REQUIRED": "Refresh token is required.",
-    "USER_NOT_FOUND_IN_TOKEN": "User not found in token.",
-    "USER_NOT_FOUND_IN_DATABASE": "User not found in database.",
     "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refresh token revoked successfully.",
     "PUBLIC_REGISTRATION_DISABLED": "New account registration is currently disabled on this server. Please contact the administrator.",
