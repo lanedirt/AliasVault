@@ -46,7 +46,7 @@ const Unlock: React.FC = () => {
       const statusResponse = await webApi.getStatus();
       const statusError = webApi.validateStatusResponse(statusResponse);
       if (statusError !== null) {
-        await webApi.logout(t('common.apiErrors.' + statusError));
+        await webApi.logout(t('common.errors.' + statusError));
         navigate('/logout');
       }
       setIsInitialLoading(false);

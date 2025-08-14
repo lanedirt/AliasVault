@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { storage } from 'wxt/utils/storage';
 
+import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
 import type { Vault, VaultResponse, VaultPostResponse } from '@/utils/dist/shared/models/webapi';
 import { EncryptionUtility } from '@/utils/EncryptionUtility';
 import { SqliteClient } from '@/utils/SqliteClient';
@@ -82,11 +83,6 @@ export async function handleStoreVault(
      * Some updates, e.g. when mutating local database, these values will not be set.
      */
 
-    // Store derived key in session storage (if it has a value)
-    if (vaultRequest.derivedKey) {
-      await storage.setItem('session:derivedKey', vaultRequest.derivedKey);
-    }
-
     if (vaultRequest.publicEmailDomainList) {
       await storage.setItem('session:publicEmailDomains', vaultRequest.publicEmailDomainList);
     }
@@ -103,6 +99,36 @@ export async function handleStoreVault(
   } catch (error) {
     console.error('Failed to store vault:', error);
     return { success: false, error: await t('common.errors.failedToStoreVault') };
+  }
+}
+
+/**
+ * Store the encryption key (derived key) in browser storage.
+ */
+export async function handleStoreEncryptionKey(
+  derivedKey: string,
+) : Promise<messageBoolResponse> {
+  try {
+    await storage.setItem('session:derivedKey', derivedKey);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to store encryption key:', error);
+    return { success: false, error: await t('common.errors.failedToStoreEncryptionKey') };
+  }
+}
+
+/**
+ * Store the encryption key derivation parameters in browser storage.
+ */
+export async function handleStoreEncryptionKeyDerivationParams(
+  params: EncryptionKeyDerivationParams,
+) : Promise<messageBoolResponse> {
+  try {
+    await storage.setItem('session:encryptionKeyDerivationParams', params);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to store encryption key derivation params:', error);
+    return { success: false, error: await t('common.errors.failedToStoreEncryptionParams') };
   }
 }
 
@@ -166,7 +192,7 @@ export async function handleGetVault(
     };
   } catch (error) {
     console.error('Failed to get vault:', error);
-    return { success: false, error: await t('common.errors.failedToGetVault') };
+    return { success: false, error: await t('common.errors.failedToRetrieveData') };
   }
 }
 
@@ -178,6 +204,7 @@ export function handleClearVault(
   storage.removeItems([
     'session:encryptedVault',
     'session:derivedKey',
+    'session:encryptionKeyDerivationParams',
     'session:publicEmailDomains',
     'session:privateEmailDomains',
     'session:vaultRevisionNumber'
@@ -203,7 +230,7 @@ export async function handleGetCredentials(
     return { success: true, credentials: credentials };
   } catch (error) {
     console.error('Error getting credentials:', error);
-    return { success: false, error: await t('common.errors.failedToGetCredentials') };
+    return { success: false, error: await t('common.errors.failedToRetrieveData') };
   }
 }
 
@@ -223,7 +250,7 @@ export async function handleCreateIdentity(
     const sqliteClient = await createVaultSqliteClient();
 
     // Add the new credential to the vault/database.
-    sqliteClient.createCredential(message.credential);
+    await sqliteClient.createCredential(message.credential, message.attachments || []);
 
     // Upload the new vault to the server.
     await uploadNewVaultToServer(sqliteClient);
@@ -231,7 +258,7 @@ export async function handleCreateIdentity(
     return { success: true };
   } catch (error) {
     console.error('Failed to create identity:', error);
-    return { success: false, error: await t('common.errors.failedToCreateIdentity') };
+    return { success: false, error: await t('common.errors.unknownError') };
   }
 }
 
@@ -273,7 +300,7 @@ export function handleGetDefaultEmailDomain(): Promise<stringResponse> {
       return { success: true, value: defaultEmailDomain ?? undefined };
     } catch (error) {
       console.error('Error getting default email domain:', error);
-      return { success: false, error: await t('common.errors.failedToGetDefaultEmailDomain') };
+      return { success: false, error: await t('common.errors.failedToRetrieveData') };
     }
   })();
 }
@@ -297,7 +324,7 @@ export async function handleGetDefaultIdentitySettings(
     };
   } catch (error) {
     console.error('Error getting default identity settings:', error);
-    return { success: false, error: await t('common.errors.failedToGetDefaultIdentitySettings') };
+    return { success: false, error: await t('common.errors.failedToRetrieveData') };
   }
 }
 
@@ -313,7 +340,7 @@ export async function handleGetPasswordSettings(
     return { success: true, settings: passwordSettings };
   } catch (error) {
     console.error('Error getting password settings:', error);
-    return { success: false, error: await t('common.errors.failedToGetPasswordSettings') };
+    return { success: false, error: await t('common.errors.failedToRetrieveData') };
   }
 }
 
@@ -324,6 +351,15 @@ export async function handleGetDerivedKey(
 ) : Promise<string> {
   const derivedKey = await storage.getItem('session:derivedKey') as string;
   return derivedKey;
+}
+
+/**
+ * Get the encryption key derivation parameters for password change detection and offline mode.
+ */
+export async function handleGetEncryptionKeyDerivationParams(
+) : Promise<EncryptionKeyDerivationParams | null> {
+  const params = await storage.getItem('session:encryptionKeyDerivationParams') as EncryptionKeyDerivationParams | null;
+  return params;
 }
 
 /**
@@ -443,7 +479,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
   if (response.status === 0) {
     await storage.setItem('session:vaultRevisionNumber', response.newRevisionNumber);
   } else {
-    throw new Error(await t('common.errors.failedToUploadVaultToServer'));
+    throw new Error(await t('common.errors.failedToUploadVault'));
   }
 
   return response;

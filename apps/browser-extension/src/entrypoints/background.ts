@@ -2,9 +2,10 @@ import { onMessage, sendMessage } from "webext-bridge/background";
 
 import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 import { handleOpenPopup, handlePopupWithCredential, handleToggleContextMenu } from '@/entrypoints/background/PopupMessageHandler';
-import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentitySettings, handleGetDerivedKey, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
+import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentitySettings, handleGetDerivedKey, handleGetEncryptionKeyDerivationParams, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreEncryptionKey, handleStoreEncryptionKeyDerivationParams, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
 
 import { GLOBAL_CONTEXT_MENU_ENABLED_KEY } from '@/utils/Constants';
+import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
 
 import { defineBackground, storage, browser } from '#imports';
 
@@ -15,17 +16,26 @@ export default defineBackground({
   async main() {
     // Listen for messages using webext-bridge
     onMessage('CHECK_AUTH_STATUS', () => handleCheckAuthStatus());
-    onMessage('STORE_VAULT', ({ data }) => handleStoreVault(data));
-    onMessage('UPLOAD_VAULT', ({ data }) => handleUploadVault(data));
-    onMessage('SYNC_VAULT', () => handleSyncVault());
+
+    onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
+    onMessage('GET_ENCRYPTION_KEY_DERIVATION_PARAMS', () => handleGetEncryptionKeyDerivationParams());
     onMessage('GET_VAULT', () => handleGetVault());
-    onMessage('CLEAR_VAULT', () => handleClearVault());
     onMessage('GET_CREDENTIALS', () => handleGetCredentials());
-    onMessage('CREATE_IDENTITY', ({ data }) => handleCreateIdentity(data));
+
     onMessage('GET_DEFAULT_EMAIL_DOMAIN', () => handleGetDefaultEmailDomain());
     onMessage('GET_DEFAULT_IDENTITY_SETTINGS', () => handleGetDefaultIdentitySettings());
     onMessage('GET_PASSWORD_SETTINGS', () => handleGetPasswordSettings());
-    onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
+
+    onMessage('STORE_VAULT', ({ data }) => handleStoreVault(data));
+    onMessage('STORE_ENCRYPTION_KEY', ({ data }) => handleStoreEncryptionKey(data as string));
+    onMessage('STORE_ENCRYPTION_KEY_DERIVATION_PARAMS', ({ data }) => handleStoreEncryptionKeyDerivationParams(data as EncryptionKeyDerivationParams));
+
+    onMessage('CREATE_IDENTITY', ({ data }) => handleCreateIdentity(data));
+    onMessage('UPLOAD_VAULT', ({ data }) => handleUploadVault(data));
+    onMessage('SYNC_VAULT', () => handleSyncVault());
+
+    onMessage('CLEAR_VAULT', () => handleClearVault());
+
     onMessage('OPEN_POPUP', () => handleOpenPopup());
     onMessage('OPEN_POPUP_WITH_CREDENTIAL', ({ data }) => handlePopupWithCredential(data));
     onMessage('TOGGLE_CONTEXT_MENU', ({ data }) => handleToggleContextMenu(data));

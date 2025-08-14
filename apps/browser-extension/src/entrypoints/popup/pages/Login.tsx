@@ -50,6 +50,66 @@ const Login: React.FC = () => {
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);
 
+  /**
+   * Handle successful authentication by storing tokens and initializing the database
+   */
+  const handleSuccessfulAuth = async (
+    username: string,
+    token: string,
+    refreshToken: string,
+    passwordHashBase64: string,
+    loginResponse: LoginResponse
+  ) : Promise<void> => {
+    // Try to get latest vault manually providing auth token.
+    const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
+      'Authorization': `Bearer ${token}`
+    } });
+
+    const vaultError = webApi.validateVaultResponse(vaultResponseJson, t);
+    if (vaultError) {
+      setError(vaultError);
+      hideLoading();
+      return;
+    }
+
+    // All is good. Store auth info which is required to make requests to the web API.
+    await authContext.setAuthTokens(username, token, refreshToken);
+
+    // Store the encryption key and derivation params separately
+    await dbContext.storeEncryptionKey(passwordHashBase64);
+    await dbContext.storeEncryptionKeyDerivationParams({
+      salt: loginResponse.salt,
+      encryptionType: loginResponse.encryptionType,
+      encryptionSettings: loginResponse.encryptionSettings
+    });
+
+    // Initialize the SQLite context with the new vault data.
+    const sqliteClient = await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
+
+    // Set logged in status to true which refreshes the app.
+    await authContext.login();
+
+    // If there are pending migrations, redirect to the upgrade page.
+    try {
+      if (await sqliteClient.hasPendingMigrations()) {
+        navigate('/upgrade', { replace: true });
+        hideLoading();
+        return;
+      }
+    } catch (err) {
+      await authContext.logout();
+      setError(err instanceof Error ? err.message : t('auth.errors.migrationError'));
+      hideLoading();
+      return;
+    }
+
+    // Navigate to reinitialize page which will take care of the proper redirect.
+    navigate('/reinitialize', { replace: true });
+
+    // Show app.
+    hideLoading();
+  };
+
   useEffect(() => {
     /**
      * Load the client URL from the storage.
@@ -143,46 +203,14 @@ const Login: React.FC = () => {
         throw new Error(t('auth.errors.noToken'));
       }
 
-      // Try to get latest vault manually providing auth token.
-      const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
-        'Authorization': `Bearer ${validationResponse.token.token}`
-      } });
-
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson, t);
-      if (vaultError) {
-        setError(vaultError);
-        hideLoading();
-        return;
-      }
-
-      // All is good. Store auth info which is required to make requests to the web API.
-      await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), validationResponse.token.token, validationResponse.token.refreshToken);
-
-      // Initialize the SQLite context with the new vault data.
-      const sqliteClient = await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-
-      // Set logged in status to true which refreshes the app.
-      await authContext.login();
-
-      // If there are pending migrations, redirect to the upgrade page.
-      try {
-        if (await sqliteClient.hasPendingMigrations()) {
-          navigate('/upgrade', { replace: true });
-          hideLoading();
-          return;
-        }
-      } catch (err) {
-        await authContext.logout();
-        setError(err instanceof Error ? err.message : t('auth.errors.migrationError'));
-        hideLoading();
-        return;
-      }
-
-      // Navigate to reinitialize page which will take care of the proper redirect.
-      navigate('/reinitialize', { replace: true });
-
-      // Show app.
-      hideLoading();
+      // Handle successful authentication
+      await handleSuccessfulAuth(
+        ConversionUtility.normalizeUsername(credentials.username),
+        validationResponse.token.token,
+        validationResponse.token.refreshToken,
+        passwordHashBase64,
+        loginResponse
+      );
     } catch (err) {
       // Show API authentication errors as-is.
       if (err instanceof ApiAuthError) {
@@ -227,43 +255,14 @@ const Login: React.FC = () => {
         throw new Error(t('auth.errors.noToken'));
       }
 
-      // Try to get latest vault manually providing auth token.
-      const vaultResponseJson = await webApi.authFetch<VaultResponse>('Vault', { method: 'GET', headers: {
-        'Authorization': `Bearer ${validationResponse.token.token}`
-      } });
-
-      const vaultError = webApi.validateVaultResponse(vaultResponseJson, t);
-      if (vaultError) {
-        setError(vaultError);
-        hideLoading();
-        return;
-      }
-
-      // All is good. Store auth info which is required to make requests to the web API.
-      await authContext.setAuthTokens(ConversionUtility.normalizeUsername(credentials.username), validationResponse.token.token, validationResponse.token.refreshToken);
-
-      // Initialize the SQLite context with the new vault data.
-      const sqliteClient = await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
-
-      // Set logged in status to true which refreshes the app.
-      await authContext.login();
-
-      // If there are pending migrations, redirect to the upgrade page.
-      try {
-        if (await sqliteClient.hasPendingMigrations()) {
-          navigate('/upgrade', { replace: true });
-          hideLoading();
-          return;
-        }
-      } catch (err) {
-        await authContext.logout();
-        setError(err instanceof Error ? err.message : t('auth.errors.migrationError'));
-        hideLoading();
-        return;
-      }
-
-      // Navigate to reinitialize page which will take care of the proper redirect.
-      navigate('/reinitialize', { replace: true });
+      // Handle successful authentication
+      await handleSuccessfulAuth(
+        ConversionUtility.normalizeUsername(credentials.username),
+        validationResponse.token.token,
+        validationResponse.token.refreshToken,
+        passwordHashBase64,
+        loginResponse
+      );
 
       // Reset 2FA state and login response as it's no longer needed
       setTwoFactorRequired(false);
@@ -271,7 +270,6 @@ const Login: React.FC = () => {
       setPasswordHashString(null);
       setPasswordHashBase64(null);
       setLoginResponse(null);
-      hideLoading();
     } catch (err) {
       // Show API authentication errors as-is.
       console.error('2FA error:', err);
