@@ -363,7 +363,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
 
         // Remove the provided refresh token and any other existing refresh tokens that are issued to the current device ID.
         // This to make sure all tokens are revoked for this device that user is "logging out" from.
-        var deviceIdentifier = GenerateDeviceIdentifier(Request);
+        var deviceIdentifier = AuthHelper.GenerateDeviceIdentifier(Request);
         var allDeviceTokens = await context.AliasVaultUserRefreshTokens.Where(t => t.UserId == user.Id && (t.Value == model.RefreshToken || t.DeviceIdentifier == deviceIdentifier)).ToListAsync();
         context.AliasVaultUserRefreshTokens.RemoveRange(allDeviceTokens);
         await context.SaveChangesAsync();
