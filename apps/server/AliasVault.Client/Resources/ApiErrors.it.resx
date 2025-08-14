@@ -119,12 +119,6 @@
   <data name="REFRESH_TOKEN_REQUIRED" xml:space="preserve">
     <value>È necessario aggiornare il token.</value>
   </data>
-  <data name="USER_NOT_FOUND_IN_TOKEN" xml:space="preserve">
-    <value>Utente non trovato (nome-1)</value>
-  </data>
-  <data name="USER_NOT_FOUND_IN_DATABASE" xml:space="preserve">
-    <value>Utente non trovato (nome-2)</value>
-  </data>
   <data name="ACCOUNT_BLOCKED" xml:space="preserve">
     <value>Il tuo account è stato disabilitato. Se ritieni che questo sia un errore, contatta il supporto.</value>
   </data>
