@@ -67,7 +67,7 @@
     <comment>Description for vault creation process</comment>
   </data>
   <data name="SaveFailedError" xml:space="preserve">
-    <value>Vault creation successful but failed to save to server. Please refresh the page and try again or contact support.</value>
+    <value>Dein Tresor wurde erfolgreich erstellt, aber das Speichern auf dem Server ist fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut – oder kontaktiere den Support.</value>
     <comment>Error message when vault creation succeeds but save fails</comment>
   </data>
   <data name="CreationFailedError" xml:space="preserve">

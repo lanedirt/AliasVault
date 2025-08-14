@@ -92,7 +92,7 @@
   </data>
   <!-- Success and error messages -->
   <data name="TwoFactorEnabledSuccess" xml:space="preserve">
-    <value>Two-factor authentication is now successfully enabled. On your next login you will need to enter your 2FA code.</value>
+    <value>Die Zwei-Faktor-Authentifizierung wurde erfolgreich aktiviert. Bei Deiner nächsten Anmeldung musst Du Deinen 2FA-Code eingeben.</value>
     <comment>Success message when 2FA is enabled</comment>
   </data>
   <data name="FailedToEnable2Fa" xml:space="preserve">

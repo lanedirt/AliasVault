@@ -99,7 +99,7 @@
     <comment>Error message when credential creation fails</comment>
   </data>
   <data name="CredentialCreatedSuccessMessage" xml:space="preserve">
-    <value>Credential created successfully.</value>
+    <value>Zugang erfolgreich erstellt.</value>
     <comment>Success message when credential is created</comment>
   </data>
 </root>

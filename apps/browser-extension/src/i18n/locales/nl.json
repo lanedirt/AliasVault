@@ -89,9 +89,7 @@
     "executingOperation": "Actie uitvoeren...",
     "loadMore": "Laad meer",
     "errors": {
-      "VaultMergeRequired": "Je vault moet worden bijgewerkt. Log in op de AliasVault website en volg de stappen.",
       "VaultOutdated": "Je vault is verouderd. Log in op de AliasVault website en volg de stappen.",
-      "NoVaultFound": "Je account heeft nog geen vault. Voltooi eerst de tutorial in de AliasVault webclient voordat je de browserextensie gebruikt.",
       "serverNotAvailable": "De AliasVault server is niet beschikbaar. Probeer het later opnieuw of neem contact op met de ondersteuning als het probleem aanhoudt.",
       "clientVersionNotSupported": "Deze versie van de AliasVault browserextensie wordt niet meer ondersteund door de server. Update je browserextensie naar de nieuwste versie.",
       "serverVersionNotSupported": "De AliasVault server moet worden bijgewerkt naar een nieuwere versie om deze browserextensie te kunnen gebruiken. Neem contact op met support als je hulp nodig hebt.",
@@ -106,9 +104,7 @@
       "failedToGetDefaultIdentitySettings": "Standaard identiteit instellingen ophalen mislukt",
       "failedToGetPasswordSettings": "Wachtwoordinstellingen ophalen mislukt",
       "failedToUploadVault": "Vault uploaden mislukt",
-      "noDerivedKeyAvailable": "Geen afgeleide sleutel beschikbaar voor versleuteling",
-      "failedToUploadVaultToServer": "Nieuwe vault uploaden naar server mislukt",
-      "noVaultOrDerivedKeyFound": "Geen vault of afgeleide sleutel gevonden"
+      "failedToUploadVaultToServer": "Nieuwe vault uploaden naar server mislukt"
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "Er is een onbekende fout opgetreden. Probeer het opnieuw.",

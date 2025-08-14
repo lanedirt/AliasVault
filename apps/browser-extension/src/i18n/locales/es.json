@@ -3,10 +3,10 @@
     "loginTitle": "Log in to AliasVault",
     "username": "Username or email",
     "usernamePlaceholder": "name / name@company.com",
-    "password": "Password",
+    "password": "Contraseña",
     "passwordPlaceholder": "Enter your password",
     "rememberMe": "Remember me",
-    "loginButton": "Login",
+    "loginButton": "Iniciar sesión",
     "noAccount": "No account yet?",
     "createVault": "Create new vault",
     "twoFactorTitle": "Please enter the authentication code from your authenticator app.",
@@ -15,7 +15,7 @@
     "verify": "Verify",
     "cancel": "Cancel",
     "twoFactorNote": "Note: if you don't have access to your authenticator device, you can reset your 2FA with a recovery code by logging in via the website.",
-    "masterPassword": "Master Password",
+    "masterPassword": "Contraseña maestra",
     "unlockVault": "Unlock Vault",
     "unlockTitle": "Unlock Your Vault",
     "unlockDescription": "Enter your master password to unlock your vault.",
@@ -89,9 +89,7 @@
     "executingOperation": "Executing operation...",
     "loadMore": "Load more",
     "errors": {
-      "VaultMergeRequired": "Your vault needs to be updated. Please login on the AliasVault website and follow the steps.",
       "VaultOutdated": "Your vault is outdated. Please login on the AliasVault website and follow the steps.",
-      "NoVaultFound": "Your account does not have a vault yet. Please complete the tutorial in the AliasVault web client before using the browser extension.",
       "serverNotAvailable": "The AliasVault server is not available. Please try again later or contact support if the problem persists.",
       "clientVersionNotSupported": "This version of the AliasVault browser extension is not supported by the server anymore. Please update your browser extension to the latest version.",
       "serverVersionNotSupported": "The AliasVault server needs to be updated to a newer version in order to use this browser extension. Please contact support if you need help.",
@@ -106,9 +104,7 @@
       "failedToGetDefaultIdentitySettings": "Failed to get default identity settings",
       "failedToGetPasswordSettings": "Failed to get password settings",
       "failedToUploadVault": "Failed to upload vault",
-      "noDerivedKeyAvailable": "No derived key available for encryption",
-      "failedToUploadVaultToServer": "Failed to upload new vault to server",
-      "noVaultOrDerivedKeyFound": "No vault or derived key found"
+      "failedToUploadVaultToServer": "Failed to upload new vault to server"
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",

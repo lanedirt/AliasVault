@@ -32,6 +32,9 @@ public class LanguageService(
     {
         new LanguageConfig("en", "English", "🇺🇸"),
         new LanguageConfig("nl", "Nederlands", "🇳🇱"),
+        new LanguageConfig("it", "Italiano", "🇮🇹"),
+        new LanguageConfig("zh", "简体中文", "🇨🇳"),
+        new LanguageConfig("ru", "Русский", "🇷🇺"),
 
         // Add new languages here:
         // new LanguageConfig("de", "Deutsch", "🇩🇪"),
@@ -119,8 +122,7 @@ public class LanguageService(
             var browserLanguage = await _jsRuntime.InvokeAsync<string>("navigator.language");
             var cultureName = browserLanguage.Split('-')[0];
 
-            var supportedLanguages = GetSupportedLanguages();
-            return supportedLanguages.ContainsKey(cultureName) ? cultureName : "en";
+            return GetSupportedLanguages().ContainsKey(cultureName) ? cultureName : "en";
         }
         catch
         {
@@ -201,8 +203,7 @@ public class LanguageService(
             return;
         }
 
-        var supportedLanguages = GetSupportedLanguages();
-        if (!supportedLanguages.ContainsKey(languageCode))
+        if (!GetSupportedLanguages().ContainsKey(languageCode))
         {
             return;
         }
@@ -268,9 +269,9 @@ public class LanguageService(
             {
                 var browserLang = await _jsRuntime.InvokeAsync<string>("eval", "navigator.language");
                 var cultureName = browserLang.Split('-')[0];
-                if (cultureName == "nl")
+                if (GetSupportedLanguages().ContainsKey(cultureName))
                 {
-                    initialLanguage = "nl";
+                    initialLanguage = cultureName;
                 }
             }
             catch
@@ -280,8 +281,7 @@ public class LanguageService(
         }
 
         // Validate the language
-        var supportedLanguages = GetSupportedLanguages();
-        if (!supportedLanguages.ContainsKey(initialLanguage))
+        if (!GetSupportedLanguages().ContainsKey(initialLanguage))
         {
             initialLanguage = "en";
         }

@@ -45,6 +45,14 @@
     <value>Stel het standaard e-maildomein in dat wordt gebruikt bij het aanmaken van nieuwe inloggegevens.</value>
     <comment>Description for default email domain setting</comment>
   </data>
+  <data name="DefaultEmailDomainDescriptionNote">
+    <value>Let op: e-mails die worden ontvangen op privédomeinen zijn beveiligd met end-to-end versleuteling en uitsluitend door jou te lezen. E-mails die worden ontvangen op openbare domeinen kunnen daarentegen door iedereen worden gelezen die het ontvangende e-mailadres kent.</value>
+    <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
+  </data>
+  <data name="DefaultEmailDomainLearnMore">
+    <value>Lees meer over het verschil</value>
+    <comment>Link to documentation for default email domain setting</comment>
+  </data>
   <data name="PrivateDomainsLabel">
     <value>Privé Domeinen</value>
     <comment>Label for private domains group</comment>
@@ -100,7 +108,7 @@
   </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
-    <value>Wachtwoord Instellingen</value>
+    <value>Wachtwoord instellingen</value>
     <comment>Title for password settings section</comment>
   </data>
   <!-- App Language Settings Section -->
