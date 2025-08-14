@@ -81,7 +81,7 @@
       "serverNeedsUpdate": "AliasVault服务器需要更新至新版本才能使用此移动应用。如需帮助，请联系支持团队。",
       "vaultDecryptFailed": "保险库解密失败，若问题持续，请退出登录后重新登录。",
       "unknownErrorDuringSync": "保险库同步时发生未知错误",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "passwordChanged": "登录密码已更新，请重新登录以确保账户安全。"
     }
   },
   "credentials": {
