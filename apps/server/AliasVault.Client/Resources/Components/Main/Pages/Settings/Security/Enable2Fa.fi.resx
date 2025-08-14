@@ -78,12 +78,12 @@
   </data>
   <!-- Setup instructions -->
   <data name="QrCodeInstructions" xml:space="preserve">
-    <value>Scan this QR code with your authenticator app or enter the following secret manually:</value>
+    <value>Skannaa tämä QR-koodi tunnistautumissovelluksellasi tai anna seuraava salainen koodi manuaalisesti:</value>
     <comment>Instructions for scanning QR code or entering secret</comment>
   </data>
   <!-- Form elements -->
   <data name="VerificationCodePlaceholder" xml:space="preserve">
-    <value>Enter verification code</value>
+    <value></value>
     <comment>Placeholder text for verification code input</comment>
   </data>
   <data name="VerifyAndEnableButton" xml:space="preserve">
