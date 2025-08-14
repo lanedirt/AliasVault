@@ -96,10 +96,10 @@
       "unknownError": "Si è verificato un errore sconosciuto",
       "failedToStoreVault": "Salvataggio cassaforte non riuscito",
       "vaultNotAvailable": "Cassaforte non disponibile",
-      "failedToRetrieveData": "Failed to retrieve data",
+      "failedToRetrieveData": "Recupero dati non riuscito",
       "vaultIsLocked": "La cassaforte è bloccata",
       "failedToUploadVault": "Caricare della cassaforte non riuscito.",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "passwordChanged": "La tua password è cambiata dall'ultima volta che hai effettuato l'accesso. Effettua nuovamente l'accesso per motivi di sicurezza."
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "Si è verificato un errore sconosciuto. Riprova.",
