@@ -2,7 +2,7 @@ import { onMessage, sendMessage } from "webext-bridge/background";
 
 import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 import { handleOpenPopup, handlePopupWithCredential, handleToggleContextMenu } from '@/entrypoints/background/PopupMessageHandler';
-import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentitySettings, handleGetDerivedKey, handleGetEncryptionKeyDerivationParams, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreEncryptionKey, handleStoreEncryptionKeyDerivationParams, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
+import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentitySettings, handleGetEncryptionKey, handleGetEncryptionKeyDerivationParams, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreEncryptionKey, handleStoreEncryptionKeyDerivationParams, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
 
 import { GLOBAL_CONTEXT_MENU_ENABLED_KEY } from '@/utils/Constants';
 import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
@@ -17,7 +17,7 @@ export default defineBackground({
     // Listen for messages using webext-bridge
     onMessage('CHECK_AUTH_STATUS', () => handleCheckAuthStatus());
 
-    onMessage('GET_DERIVED_KEY', () => handleGetDerivedKey());
+    onMessage('GET_ENCRYPTION_KEY', () => handleGetEncryptionKey());
     onMessage('GET_ENCRYPTION_KEY_DERIVATION_PARAMS', () => handleGetEncryptionKeyDerivationParams());
     onMessage('GET_VAULT', () => handleGetVault());
     onMessage('GET_CREDENTIALS', () => handleGetCredentials());

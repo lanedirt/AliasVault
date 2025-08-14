@@ -106,10 +106,10 @@ export async function handleStoreVault(
  * Store the encryption key (derived key) in browser storage.
  */
 export async function handleStoreEncryptionKey(
-  derivedKey: string,
+  encryptionKey: string,
 ) : Promise<messageBoolResponse> {
   try {
-    await storage.setItem('session:derivedKey', derivedKey);
+    await storage.setItem('session:encryptionKey', encryptionKey);
     return { success: true };
   } catch (error) {
     console.error('Failed to store encryption key:', error);
@@ -168,7 +168,7 @@ export async function handleGetVault(
 ) : Promise<messageVaultResponse> {
   try {
     const encryptedVault = await storage.getItem('session:encryptedVault') as string;
-    const derivedKey = await storage.getItem('session:derivedKey') as string;
+    const encryptionKey = await storage.getItem('session:encryptionKey') as string;
     const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[];
     const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
     const vaultRevisionNumber = await storage.getItem('session:vaultRevisionNumber') as number;
@@ -180,7 +180,7 @@ export async function handleGetVault(
 
     const decryptedVault = await EncryptionUtility.symmetricDecrypt(
       encryptedVault,
-      derivedKey
+      encryptionKey
     );
 
     return {
@@ -203,7 +203,7 @@ export function handleClearVault(
 ) : messageBoolResponse {
   storage.removeItems([
     'session:encryptedVault',
-    'session:derivedKey',
+    'session:encryptionKey',
     'session:encryptionKeyDerivationParams',
     'session:publicEmailDomains',
     'session:privateEmailDomains',
@@ -218,9 +218,9 @@ export function handleClearVault(
  */
 export async function handleGetCredentials(
 ) : Promise<messageCredentialsResponse> {
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
 
-  if (!derivedKey) {
+  if (!encryptionKey) {
     return { success: false, error: await t('common.errors.vaultIsLocked') };
   }
 
@@ -240,9 +240,9 @@ export async function handleGetCredentials(
 export async function handleCreateIdentity(
   message: any,
 ) : Promise<messageBoolResponse> {
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
 
-  if (!derivedKey) {
+  if (!encryptionKey) {
     return { success: false, error: await t('common.errors.vaultIsLocked') };
   }
 
@@ -345,12 +345,12 @@ export async function handleGetPasswordSettings(
 }
 
 /**
- * Get the derived key for the encrypted vault.
+ * Get the encryption key for the encrypted vault.
  */
-export async function handleGetDerivedKey(
+export async function handleGetEncryptionKey(
 ) : Promise<string> {
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
-  return derivedKey;
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  return encryptionKey;
 }
 
 /**
@@ -389,8 +389,8 @@ export async function handleUploadVault(
  * Data is encrypted using the derived key for additional security.
  */
 export async function handlePersistFormValues(data: any): Promise<void> {
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
-  if (!derivedKey) {
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  if (!encryptionKey) {
     throw new Error(await t('common.errors.unknownError'));
   }
 
@@ -398,7 +398,7 @@ export async function handlePersistFormValues(data: any): Promise<void> {
   const serializedData = JSON.stringify(data);
   const encryptedData = await EncryptionUtility.symmetricEncrypt(
     serializedData,
-    derivedKey
+    encryptionKey
   );
   await storage.setItem('session:persistedFormValues', encryptedData);
 }
@@ -408,17 +408,17 @@ export async function handlePersistFormValues(data: any): Promise<void> {
  * Data is decrypted using the derived key.
  */
 export async function handleGetPersistedFormValues(): Promise<any | null> {
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
   const encryptedData = await storage.getItem('session:persistedFormValues') as string | null;
 
-  if (!encryptedData || !derivedKey) {
+  if (!encryptedData || !encryptionKey) {
     return null;
   }
 
   try {
     const decryptedData = await EncryptionUtility.symmetricDecrypt(
       encryptedData,
-      derivedKey
+      encryptionKey
     );
     return JSON.parse(decryptedData);
   } catch (error) {
@@ -439,11 +439,11 @@ export async function handleClearPersistedFormValues(): Promise<void> {
  */
 async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<VaultPostResponse> {
   const updatedVaultData = sqliteClient.exportToBase64();
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
 
   const encryptedVault = await EncryptionUtility.symmetricEncrypt(
     updatedVaultData,
-    derivedKey
+    encryptionKey
   );
 
   await storage.setItems([
@@ -490,15 +490,15 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
  */
 async function createVaultSqliteClient() : Promise<SqliteClient> {
   const encryptedVault = await storage.getItem('session:encryptedVault') as string;
-  const derivedKey = await storage.getItem('session:derivedKey') as string;
-  if (!encryptedVault || !derivedKey) {
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  if (!encryptedVault || !encryptionKey) {
     throw new Error(await t('common.errors.unknownError'));
   }
 
   // Decrypt the vault.
   const decryptedVault = await EncryptionUtility.symmetricDecrypt(
     encryptedVault,
-    derivedKey
+    encryptionKey
   );
 
   // Initialize the SQLite client with the decrypted vault.
