@@ -153,7 +153,7 @@
     <value>Username does not match the current user.</value>
   </data>
   <data name="PASSWORD_MISMATCH" xml:space="preserve">
-    <value>The provided password does not match your current password.</value>
+    <value>Annettu salasana ei vastaa nykyistä salasanaasi.</value>
   </data>
   <data name="ACCOUNT_SUCCESSFULLY_DELETED" xml:space="preserve">
     <value>Account successfully deleted.</value>
