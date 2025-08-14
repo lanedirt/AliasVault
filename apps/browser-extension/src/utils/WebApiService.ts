@@ -262,7 +262,8 @@ export class WebApiService {
       return {
         clientVersionSupported: true,
         serverVersion: '0.0.0',
-        vaultRevision: 0
+        vaultRevision: 0,
+        srpSalt: ''
       };
     }
   }
@@ -272,15 +273,15 @@ export class WebApiService {
    */
   public validateStatusResponse(statusResponse: StatusResponse): string | null {
     if (statusResponse.serverVersion === '0.0.0') {
-      return 'errors.serverNotAvailable';
+      return 'serverNotAvailable';
     }
 
     if (!statusResponse.clientVersionSupported) {
-      return 'errors.clientVersionNotSupported';
+      return 'clientVersionNotSupported';
     }
 
     if (!AppInfo.isServerVersionSupported(statusResponse.serverVersion)) {
-      return 'errors.serverVersionNotSupported';
+      return 'serverVersionNotSupported';
     }
 
     return null;

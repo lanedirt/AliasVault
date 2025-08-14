@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { sendMessage } from 'webext-bridge/popup';
 
-import type { VaultMetadata } from '@/utils/dist/shared/models/metadata';
+import type { EncryptionKeyDerivationParams, VaultMetadata } from '@/utils/dist/shared/models/metadata';
 import type { VaultResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import SqliteClient from '@/utils/SqliteClient';
@@ -13,6 +13,8 @@ type DbContextType = {
   dbInitialized: boolean;
   dbAvailable: boolean;
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<SqliteClient>;
+  storeEncryptionKey: (derivedKey: string) => Promise<void>;
+  storeEncryptionKeyDerivationParams: (params: EncryptionKeyDerivationParams) => Promise<void>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
   setCurrentVaultRevisionNumber: (revisionNumber: number) => Promise<void>;
@@ -70,7 +72,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
      */
     const request: StoreVaultRequest = {
       vaultBlob: vaultResponse.vault.blob,
-      derivedKey: derivedKey,
       publicEmailDomainList: vaultResponse.vault.publicEmailDomainList,
       privateEmailDomainList: vaultResponse.vault.privateEmailDomainList,
       vaultRevisionNumber: vaultResponse.vault.currentRevisionNumber,
@@ -146,6 +147,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [dbInitialized, checkStoredVault]);
 
   /**
+   * Store encryption key in background worker.
+   */
+  const storeEncryptionKey = useCallback(async (encryptionKey: string) : Promise<void> => {
+    await sendMessage('STORE_ENCRYPTION_KEY', encryptionKey, 'background');
+  }, []);
+
+  /**
+   * Store encryption key derivation params in background worker.
+   */
+  const storeEncryptionKeyDerivationParams = useCallback(async (params: EncryptionKeyDerivationParams) : Promise<void> => {
+    await sendMessage('STORE_ENCRYPTION_KEY_DERIVATION_PARAMS', params, 'background');
+  }, []);
+
+  /**
    * Clear database and remove from background worker, called when logging out.
    */
   const clearDatabase = useCallback(() : void => {
@@ -160,11 +175,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     dbInitialized,
     dbAvailable,
     initializeDatabase,
+    storeEncryptionKey,
+    storeEncryptionKeyDerivationParams,
     clearDatabase,
     getVaultMetadata,
     setCurrentVaultRevisionNumber,
     hasPendingMigrations,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
+  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, storeEncryptionKey, storeEncryptionKeyDerivationParams, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
 
   return (
     <DbContext.Provider value={contextValue}>
