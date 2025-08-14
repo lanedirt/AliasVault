@@ -362,6 +362,12 @@ public class VaultController(ILogger<VaultController> logger, IAliasServerDbCont
 
         await authLoggingService.LogAuthEventSuccessAsync(user.UserName!, AuthEventType.PasswordChange);
 
+        // Force revoke all user logged in sessions except current one.
+        // This means that other clients which have not already updated to the new password will be logged out.
+        // This ensures that all clients login again with the new password to refresh their encryption keys for future vault mutations.
+        var deviceIdentifier = AuthHelper.GenerateDeviceIdentifier(Request);
+        await context.AliasVaultUserRefreshTokens.Where(x => x.UserId == user.Id && x.DeviceIdentifier != deviceIdentifier).ExecuteDeleteAsync();
+
         return Ok(new VaultUpdateResponse { Status = VaultStatus.Ok, NewRevisionNumber = newRevisionNumber });
     }
 

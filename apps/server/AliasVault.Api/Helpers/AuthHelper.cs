@@ -72,4 +72,23 @@ public static class AuthHelper
         var latestVault = user.Vaults.OrderByDescending(x => x.RevisionNumber).Select(x => new { x.Salt, x.Verifier, x.EncryptionType, x.EncryptionSettings }).First();
         return (latestVault.Salt, latestVault.Verifier, latestVault.EncryptionType, latestVault.EncryptionSettings);
     }
+
+    /// <summary>
+    /// Generate a device identifier based on request headers. This is used to associate refresh tokens
+    /// with a specific device for a specific user.
+    ///
+    /// NOTE: current implementation means that only one refresh token can be valid for a
+    /// specific user/device combo at a time. The identifier generation could be made more unique in the future
+    /// to prevent any unwanted conflicts.
+    /// </summary>
+    /// <param name="request">The HttpRequest instance for the request that the client used.</param>
+    /// <returns>Unique device identifier as string.</returns>
+    public static string GenerateDeviceIdentifier(HttpRequest request)
+    {
+        var userAgent = request.Headers.UserAgent.ToString();
+        var acceptLanguage = request.Headers.AcceptLanguage.ToString();
+
+        var rawIdentifier = $"{userAgent}|{acceptLanguage}";
+        return rawIdentifier;
+    }
 }
