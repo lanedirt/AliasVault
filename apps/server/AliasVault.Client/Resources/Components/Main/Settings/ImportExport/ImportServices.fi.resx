@@ -175,7 +175,7 @@
     <comment>Dashlane export instructions part 1</comment>
   </data>
   <data name="DashlaneInstructionsPart2" xml:space="preserve">
-    <value>Note: the .zip file you download will contain a "credentials.csv" file. You need to unzip the archive first, and then upload the "credentials.csv" CSV file below.</value>
+    <value>Huomaa: .zip tiedosto, jonka lataat, sisältää "credentials.csv" tiedosto. Sinun täytyy ensin purkaa arkisto ja sitten ladata "credentials.csv" CSV-tiedosto.</value>
     <comment>Dashlane export instructions part 2</comment>
   </data>
   <!-- KeePassXC -->
