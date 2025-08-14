@@ -96,10 +96,10 @@
       "unknownError": "发生未知错误",
       "failedToStoreVault": "存储保险库失败",
       "vaultNotAvailable": "保险库不可用",
-      "failedToRetrieveData": "Failed to retrieve data",
+      "failedToRetrieveData": "无法检索数据",
       "vaultIsLocked": "保险库已锁定",
       "failedToUploadVault": "上传保险库失败",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "passwordChanged": "登录密码已更新，请重新登录以确保账户安全。"
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "发生未知错误。请重试。",
