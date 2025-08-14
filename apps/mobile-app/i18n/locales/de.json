@@ -80,7 +80,8 @@
       "versionNotSupported": "Diese Version der AliasVault-App wird vom Server nicht mehr unterstützt. Bitte aktualisiere Deine App auf die neueste Version.",
       "serverNeedsUpdate": "Der AliasVault-Server muss auf eine neuere Version aktualisiert werden, um diese mobile App nutzen zu können. Bitte kontaktiere den Support, falls Du Hilfe benötigst.",
       "vaultDecryptFailed": "Tresor konnte nicht entschlüsselt werden. Wenn das Problem weiterhin besteht, melden Dich bitte erneut an.",
-      "unknownErrorDuringSync": "Unbekannter Fehler während der Synchronisation des Tresors"
+      "unknownErrorDuringSync": "Unbekannter Fehler während der Synchronisation des Tresors",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {
@@ -373,8 +374,6 @@
     "INVALID_AUTHENTICATOR_CODE": "Ungültiger Sicherheits-Code. Bitte versuche es erneut.",
     "INVALID_RECOVERY_CODE": "Ungültiger Wiederherstellungscode. Bitte versuche es erneut.",
     "REFRESH_TOKEN_REQUIRED": "Refresh token is required.",
-    "USER_NOT_FOUND_IN_TOKEN": "User not found in token.",
-    "USER_NOT_FOUND_IN_DATABASE": "Der Benutzer konnte nicht in der Datenbank gefunden werden.",
     "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refresh token revoked successfully.",
     "PUBLIC_REGISTRATION_DISABLED": "Die Registrierung eines neuen Kontos ist auf diesem Server derzeit deaktiviert. Bitte kontaktiere den Administrator.",
