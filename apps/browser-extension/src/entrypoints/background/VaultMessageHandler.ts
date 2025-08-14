@@ -167,8 +167,9 @@ export async function handleSyncVault(
 export async function handleGetVault(
 ) : Promise<messageVaultResponse> {
   try {
+    const encryptionKey = await handleGetEncryptionKey();
+
     const encryptedVault = await storage.getItem('session:encryptedVault') as string;
-    const encryptionKey = await storage.getItem('session:encryptionKey') as string;
     const publicEmailDomains = await storage.getItem('session:publicEmailDomains') as string[];
     const privateEmailDomains = await storage.getItem('session:privateEmailDomains') as string[];
     const vaultRevisionNumber = await storage.getItem('session:vaultRevisionNumber') as number;
@@ -176,6 +177,11 @@ export async function handleGetVault(
     if (!encryptedVault) {
       console.error('Vault not available');
       return { success: false, error: await t('common.errors.vaultNotAvailable') };
+    }
+
+    if (!encryptionKey) {
+      console.error('Encryption key not available');
+      return { success: false, error: await t('common.errors.vaultIsLocked') };
     }
 
     const decryptedVault = await EncryptionUtility.symmetricDecrypt(
@@ -204,6 +210,8 @@ export function handleClearVault(
   storage.removeItems([
     'session:encryptedVault',
     'session:encryptionKey',
+    // TODO: the derivedKey clear can be removed some period of time after 0.22.0 is released.
+    'session:derivedKey',
     'session:encryptionKeyDerivationParams',
     'session:publicEmailDomains',
     'session:privateEmailDomains',
@@ -218,7 +226,7 @@ export function handleClearVault(
  */
 export async function handleGetCredentials(
 ) : Promise<messageCredentialsResponse> {
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  const encryptionKey = await handleGetEncryptionKey();
 
   if (!encryptionKey) {
     return { success: false, error: await t('common.errors.vaultIsLocked') };
@@ -240,7 +248,7 @@ export async function handleGetCredentials(
 export async function handleCreateIdentity(
   message: any,
 ) : Promise<messageBoolResponse> {
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  const encryptionKey = await handleGetEncryptionKey();
 
   if (!encryptionKey) {
     return { success: false, error: await t('common.errors.vaultIsLocked') };
@@ -348,8 +356,16 @@ export async function handleGetPasswordSettings(
  * Get the encryption key for the encrypted vault.
  */
 export async function handleGetEncryptionKey(
-) : Promise<string> {
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+) : Promise<string | null> {
+  // Try the current key name first (since 0.22.0)
+  let encryptionKey = await storage.getItem('session:encryptionKey') as string | null;
+
+  // Fall back to the legacy key name if not found
+  if (!encryptionKey) {
+    // TODO: this check can be removed some period of time after 0.22.0 is released.
+    encryptionKey = await storage.getItem('session:derivedKey') as string | null;
+  }
+
   return encryptionKey;
 }
 
@@ -389,7 +405,7 @@ export async function handleUploadVault(
  * Data is encrypted using the derived key for additional security.
  */
 export async function handlePersistFormValues(data: any): Promise<void> {
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  const encryptionKey = await handleGetEncryptionKey();
   if (!encryptionKey) {
     throw new Error(await t('common.errors.unknownError'));
   }
@@ -408,7 +424,7 @@ export async function handlePersistFormValues(data: any): Promise<void> {
  * Data is decrypted using the derived key.
  */
 export async function handleGetPersistedFormValues(): Promise<any | null> {
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  const encryptionKey = await handleGetEncryptionKey();
   const encryptedData = await storage.getItem('session:persistedFormValues') as string | null;
 
   if (!encryptedData || !encryptionKey) {
@@ -439,7 +455,11 @@ export async function handleClearPersistedFormValues(): Promise<void> {
  */
 async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<VaultPostResponse> {
   const updatedVaultData = sqliteClient.exportToBase64();
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  const encryptionKey = await handleGetEncryptionKey();
+
+  if (!encryptionKey) {
+    throw new Error(await t('common.errors.vaultIsLocked'));
+  }
 
   const encryptedVault = await EncryptionUtility.symmetricEncrypt(
     updatedVaultData,
@@ -490,7 +510,7 @@ async function uploadNewVaultToServer(sqliteClient: SqliteClient) : Promise<Vaul
  */
 async function createVaultSqliteClient() : Promise<SqliteClient> {
   const encryptedVault = await storage.getItem('session:encryptedVault') as string;
-  const encryptionKey = await storage.getItem('session:encryptionKey') as string;
+  const encryptionKey = await handleGetEncryptionKey();
   if (!encryptedVault || !encryptionKey) {
     throw new Error(await t('common.errors.unknownError'));
   }

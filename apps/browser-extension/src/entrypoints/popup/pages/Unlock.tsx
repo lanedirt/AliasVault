@@ -105,6 +105,9 @@ const Unlock: React.FC = () => {
       // Get the derived key as base64 string required for decryption.
       const passwordHashBase64 = Buffer.from(passwordHash).toString('base64');
 
+      // Store the encryption key in session storage.
+      await dbContext.storeEncryptionKey(passwordHashBase64);
+
       // Initialize the SQLite context with the new vault data.
       await dbContext.initializeDatabase(vaultResponseJson, passwordHashBase64);
 
