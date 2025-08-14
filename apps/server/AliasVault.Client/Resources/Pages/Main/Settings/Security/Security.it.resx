@@ -71,7 +71,7 @@
     <comment>Refresh button text</comment>
   </data>
   <data name="BreadcrumbTitle" xml:space="preserve">
-    <value>Impostazioni sicurezza</value>
+    <value>Impostazioni di sicurezza</value>
     <comment>Breadcrumb title for security settings</comment>
   </data>
 </root>
