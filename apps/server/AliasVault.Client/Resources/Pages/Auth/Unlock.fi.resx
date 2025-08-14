@@ -79,7 +79,7 @@
     <comment>Description for password unlock form</comment>
   </data>
   <data name="YourPasswordLabel" xml:space="preserve">
-    <value>Your password</value>
+    <value>Salasanasi</value>
     <comment>Label for password input field</comment>
   </data>
   <data name="UnlockButton" xml:space="preserve">
