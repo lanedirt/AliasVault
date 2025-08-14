@@ -80,7 +80,8 @@
       "versionNotSupported": "此版本的AliasVault移动应用已不再被服务器支持。请将应用更新至最新版本。",
       "serverNeedsUpdate": "AliasVault服务器需要更新至新版本才能使用此移动应用。如需帮助，请联系支持团队。",
       "vaultDecryptFailed": "保险库解密失败，若问题持续，请退出登录后重新登录。",
-      "unknownErrorDuringSync": "保险库同步时发生未知错误"
+      "unknownErrorDuringSync": "保险库同步时发生未知错误",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {
@@ -373,8 +374,6 @@
     "INVALID_AUTHENTICATOR_CODE": "认证器验证码无效。请重试。",
     "INVALID_RECOVERY_CODE": "恢复码无效。请重试。",
     "REFRESH_TOKEN_REQUIRED": "需要刷新令牌。",
-    "USER_NOT_FOUND_IN_TOKEN": "令牌中未找到用户。",
-    "USER_NOT_FOUND_IN_DATABASE": "数据库中未找到用户。",
     "INVALID_REFRESH_TOKEN": "无效的刷新令牌。",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "刷新令牌已成功撤销。",
     "PUBLIC_REGISTRATION_DISABLED": "当前服务器已禁用新账户注册。请联系管理员。",
