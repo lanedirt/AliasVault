@@ -47,13 +47,13 @@ export function useVaultMutate() : {
       // Upload the updated vault to the server.
       const base64Vault = dbContext.sqliteClient!.exportToBase64();
 
-      // Get derived key from background worker
-      const derivedKey = await sendMessage('GET_DERIVED_KEY', {}, 'background') as string;
+      // Get encryption key from background worker
+      const encryptionKey = await sendMessage('GET_ENCRYPTION_KEY', {}, 'background') as string;
 
       // Encrypt the vault.
       const encryptedVaultBlob = await EncryptionUtility.symmetricEncrypt(
         base64Vault,
-        derivedKey
+        encryptionKey
       );
 
       const request: UploadVaultRequest = {
