@@ -68,7 +68,7 @@
     <comment>1Password export instructions part 1</comment>
   </data>
   <data name="OnePasswordInstructionsPart2" xml:space="preserve">
-    <value>Once you have exported the file, you can upload it below.</value>
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
     <comment>1Password export instructions part 2</comment>
   </data>
   <!-- Bitwarden -->
@@ -77,7 +77,7 @@
     <comment>Description for Bitwarden import service</comment>
   </data>
   <data name="BitwardenInstructionsPart1" xml:space="preserve">
-    <value>In order to import your Bitwarden vault, you need to export it as a CSV file. You can do this by logging into your Bitwarden account, going to the 'Tools' menu and selecting 'Export vault' (to CSV).</value>
+    <value>Tuodaksesi Bitwarden-holvin, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen kirjautumumalla Bitwarden-tilillesi. menemällä "Tools" valikkoon ja valitsemalla "Export vault (to CSV)".</value>
     <comment>Bitwarden export instructions part 1</comment>
   </data>
   <data name="BitwardenInstructionsPart2" xml:space="preserve">
@@ -90,7 +90,7 @@
     <comment>Description for LastPass import service</comment>
   </data>
   <data name="LastPassInstructionsPart1" xml:space="preserve">
-    <value>In order to import your LastPass vault, you need to export it as a CSV file. You can do this by logging into your LastPass account, going to 'Advanced Options' in the left sidebar and selecting 'Export' > 'LastPass CSV File'.</value>
+    <value>Tuodaksesi LastPass-holvin, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen kirjautumumalla LastPass-tilillesi. menemällä "Advanced Options" valikkoon työkaluvalikossa ja valitsemalla "Export" > "LastPass CSV File".</value>
     <comment>LastPass export instructions part 1</comment>
   </data>
   <data name="LastPassInstructionsPart2" xml:space="preserve">
