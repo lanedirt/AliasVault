@@ -80,7 +80,8 @@
       "versionNotSupported": "Questa versione dell'app AliasVault non è più supportata dal server. Aggiorna l'app all'ultima versione.",
       "serverNeedsUpdate": "Il server AliasVault necessita di un aggiornamento per usare questa app. Contatta il supporto se serve aiuto.",
       "vaultDecryptFailed": "Impossibile decriptare la cassaforte, se il problema persiste esci e accedi nuovamente.",
-      "unknownErrorDuringSync": "Errore sconosciuto durante la sincronizzazione cassaforte"
+      "unknownErrorDuringSync": "Errore sconosciuto durante la sincronizzazione cassaforte",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {
@@ -373,8 +374,6 @@
     "INVALID_AUTHENTICATOR_CODE": "Codice di autenticazione non valido. Riprova.",
     "INVALID_RECOVERY_CODE": "Codice di recupero non valido. Riprova.",
     "REFRESH_TOKEN_REQUIRED": "È richiesto il token di aggiornamento.",
-    "USER_NOT_FOUND_IN_TOKEN": "Utente non trovato nel token.",
-    "USER_NOT_FOUND_IN_DATABASE": "Utente non trovato nel database.",
     "INVALID_REFRESH_TOKEN": "Token di aggiornamento non valido.",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Token di aggiornamento revocato con successo.",
     "PUBLIC_REGISTRATION_DISABLED": "La registrazione di nuovi account è disabilitata su questo server. Contatta l'amministratore.",
