@@ -90,6 +90,19 @@ export const useVaultSync = () : {
         return false;
       }
 
+      // Check if the SRP salt has changed compared to locally stored encryption key derivation params
+      const keyDerivationParams = await authContext.getEncryptionKeyDerivationParams();
+      if (keyDerivationParams && statusResponse.srpSalt !== '' && statusResponse.srpSalt !== keyDerivationParams.salt) {
+        /**
+         * Server SRP salt has changed compared to locally stored value, which means the user has changed
+         * their password since the last time they logged in. This means that the local encryption key is no
+         * longer valid and the user needs to re-authenticate. We trigger a logout but do not revoke tokens
+         * as these were already revoked by the server upon password change.
+         */
+        await webApi.logout(t('vault.errors.passwordChanged'), false);
+        return false;
+      }
+
       // If we get here, it means we have a valid connection to the server.
       authContext.setOfflineMode(false);
 

@@ -261,19 +261,21 @@ export class WebApiService {
   /**
    * Logout and revoke tokens via WebApi and remove local storage tokens via AuthContext.
    */
-  public async logout(statusError: string | null = null): Promise<void> {
+  public async logout(statusError: string | null = null, revokeTokens: boolean = true): Promise<void> {
     // Logout and revoke tokens via WebApi.
     try {
-      const refreshToken = await this.getRefreshToken();
-      if (!refreshToken) {
-        return;
-      }
+      if (revokeTokens) {
+        const refreshToken = await this.getRefreshToken();
+        if (!refreshToken) {
+          return;
+        }
 
-      // We do not await this as we want to continue with the logout even if the revoke fails or takes a long time.
-      this.post('Auth/revoke', {
-        token: await this.getAccessToken(),
-        refreshToken: refreshToken,
-      }, false);
+        // We do not await this as we want to continue with the logout even if the revoke fails or takes a long time.
+        this.post('Auth/revoke', {
+          token: await this.getAccessToken(),
+          refreshToken: refreshToken,
+        }, false);
+      }
     } catch (err) {
       console.error('WebApi logout error:', err);
     }

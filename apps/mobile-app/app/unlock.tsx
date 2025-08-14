@@ -17,13 +17,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import { useWebApi } from '@/context/WebApiContext';
-import NativeVaultManager from '@/specs/NativeVaultManager';
 
 /**
  * Unlock screen.
  */
 export default function UnlockScreen() : React.ReactNode {
-  const { isLoggedIn, username, isBiometricsEnabled } = useAuth();
+  const { isLoggedIn, username, isBiometricsEnabled, getBiometricDisplayNameKey, getEncryptionKeyDerivationParams } = useAuth();
   const dbContext = useDb();
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,22 +30,21 @@ export default function UnlockScreen() : React.ReactNode {
   const colors = useColors();
   const { t } = useTranslation();
   const webApi = useWebApi();
-  const { getBiometricDisplayNameKey } = useAuth();
   const [biometricDisplayName, setBiometricDisplayName] = useState('');
 
   /**
    * Check if the key derivation parameters are stored in native storage.
    * If not, we can't unlock the vault so logout instead to redirect user to login screen.
    */
-  const getKeyDerivationParams = useCallback(async () : Promise<string | null> => {
-    const encryptionKeyDerivationParams = await NativeVaultManager.getEncryptionKeyDerivationParams();
-    if (!encryptionKeyDerivationParams) {
+  const getKeyDerivationParams = useCallback(async () : Promise<{ salt: string; encryptionType: string; encryptionSettings: string } | null> => {
+    const params = await getEncryptionKeyDerivationParams();
+    if (!params) {
       await webApi.logout();
       router.replace('/login');
       return null;
     }
-    return encryptionKeyDerivationParams;
-  }, [webApi]);
+    return params;
+  }, [webApi, getEncryptionKeyDerivationParams]);
 
   useEffect(() => {
     getKeyDerivationParams();
@@ -83,13 +81,10 @@ export default function UnlockScreen() : React.ReactNode {
       }
 
       // Get the key derivation parameters from native storage
-      const encryptionKeyDerivationParams = await getKeyDerivationParams();
-      if (!encryptionKeyDerivationParams) {
+      const params = await getKeyDerivationParams();
+      if (!params) {
         return;
       }
-
-      // Parse the key derivation parameters
-      const params = JSON.parse(encryptionKeyDerivationParams);
 
       // Derive the encryption key from the password using the stored parameters
       const passwordHash = await EncryptionUtility.deriveKeyFromPassword(
