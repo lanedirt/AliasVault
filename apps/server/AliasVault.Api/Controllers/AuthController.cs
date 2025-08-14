@@ -109,6 +109,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
             ClientVersionSupported = clientSupported,
             ServerVersion = AppInfo.GetFullVersion(),
             VaultRevision = latestRevision,
+            SrpSalt = latestVault?.Salt ?? string.Empty,
         });
     }
 
@@ -597,7 +598,7 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
     }
 
     /// <summary>
-    /// Get the JWT key from the environment variables or container secrets.
+    /// Get the JWT key from the container secrets or environment variables.
     /// </summary>
     /// <returns>JWT key as string.</returns>
     /// <exception cref="KeyNotFoundException">Thrown if JWT key cannot be found.</exception>
