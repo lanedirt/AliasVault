@@ -83,7 +83,7 @@
     <comment>Label for service URL field</comment>
   </data>
   <data name="CreateButton" xml:space="preserve">
-    <value>Create</value>
+    <value>Luo</value>
     <comment>Create button text</comment>
   </data>
   <data name="AdvancedModeLink" xml:space="preserve">
