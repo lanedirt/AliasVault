@@ -469,6 +469,7 @@ else
 Important notes:
 • The next time the user logs in, they will load this vault version.
 • If the user has changed their password recently, their password will be reverted to the one associated with this vault.
+• All active sessions will be revoked and the user will need to login again on all devices.
 
 Do you want to proceed with the restoration?")) {
             // Load vault
@@ -483,6 +484,11 @@ Do you want to proceed with the restoration?")) {
 
             // Save it.
             await dbContext.SaveChangesAsync();
+
+            // Revoke all user sessions to force re-authentication with potentially reverted password
+            await RevokeAllTokens();
+            Logger.LogInformation("Revoked all sessions for user {UserName} ({UserId}) after vault restoration to revision {RevisionNumber}.",
+                User!.UserName, User.Id, currentVault.RevisionNumber);
 
             // Reload the page.
             await RefreshData();
