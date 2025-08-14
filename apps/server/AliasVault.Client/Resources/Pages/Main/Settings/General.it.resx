@@ -46,11 +46,11 @@
     <comment>Description for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescriptionNote">
-    <value>Note: Email received on private domains are end-to-end encrypted and can only be read by you, while email received on public domains can be read by anyone that knows the receiving email address.</value>
+    <value>Nota: Le email ricevute su domini privati sono crittografate end-to-end e possono essere lette solo da te, mentre l'email ricevuta sui domini pubblici può essere letta da chiunque conosca l'indirizzo email ricevente.</value>
     <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
   </data>
   <data name="DefaultEmailDomainLearnMore">
-    <value>Learn more about the difference</value>
+    <value>Ulteriori informazioni sulla differenza</value>
     <comment>Link to documentation for default email domain setting</comment>
   </data>
   <data name="PrivateDomainsLabel">
