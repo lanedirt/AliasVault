@@ -80,7 +80,8 @@
       "versionNotSupported": "Эта версия мобильного приложения AliasVault больше не поддерживается сервером. Пожалуйста, обновите ваше приложение до последней версии.",
       "serverNeedsUpdate": "Для использования этого мобильного приложения необходимо обновить сервер AliasVault до более новой версии. Пожалуйста, обратитесь в службу поддержки, если вам нужна помощь.",
       "vaultDecryptFailed": "Хранилище не удалось расшифровать, если проблема не устраняется, пожалуйста, выйдите и войдите в систему еще раз.",
-      "unknownErrorDuringSync": "Неизвестная ошибка во время синхронизации хранилища"
+      "unknownErrorDuringSync": "Неизвестная ошибка во время синхронизации хранилища",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {
@@ -373,8 +374,6 @@
     "INVALID_AUTHENTICATOR_CODE": "Неверный код аутентификатора. Пожалуйста, попробуйте снова.",
     "INVALID_RECOVERY_CODE": "Неверный код восстановления. Пожалуйста, попробуйте снова.",
     "REFRESH_TOKEN_REQUIRED": "Требуется токен обновления.",
-    "USER_NOT_FOUND_IN_TOKEN": "Пользователь не найден в токене.",
-    "USER_NOT_FOUND_IN_DATABASE": "Пользователь не найден в базе данных.",
     "INVALID_REFRESH_TOKEN": "Недопустимый токен обновления.",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Токен обновления успешно отозван.",
     "PUBLIC_REGISTRATION_DISABLED": "В настоящее время регистрация новой учетной записи на этом сервере отключена. Пожалуйста, свяжитесь с администратором.",
