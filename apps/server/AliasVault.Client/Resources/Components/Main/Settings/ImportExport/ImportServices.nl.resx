@@ -228,11 +228,11 @@
   </data>
   <!-- Dropbox -->
   <data name="DropboxDescription" xml:space="preserve">
-    <value>Import passwords from Dropbox Passwords</value>
+    <value>Importeer wachtwoorden uit Dropbox Passwords</value>
     <comment>Description for Dropbox import service</comment>
   </data>
   <data name="DropboxInstructionsPart1" xml:space="preserve">
-    <value>In order to import your Dropbox Passwords, you need to export them as a CSV file. You can do this by opening Dropbox Passwords, going to 'Account' > 'Export' (to .CSV).</value>
+    <value>Om je wachtwoorden uit Dropbox Passwords te importeren, moet je deze als CSV-bestand exporteren. Je kunt dit doen door Dropbox Passwords te openen, en vervolgens te navigeren naar 'Account' > 'Exporteren' (naar .CSV).</value>
     <comment>Dropbox export instructions part 1</comment>
   </data>
   <!-- Common text that can be reused -->
