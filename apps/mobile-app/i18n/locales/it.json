@@ -81,7 +81,7 @@
       "serverNeedsUpdate": "Il server AliasVault necessita di un aggiornamento per usare questa app. Contatta il supporto se serve aiuto.",
       "vaultDecryptFailed": "Impossibile decriptare la cassaforte, se il problema persiste esci e accedi nuovamente.",
       "unknownErrorDuringSync": "Errore sconosciuto durante la sincronizzazione cassaforte",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "passwordChanged": "La tua password è cambiata dall'ultima volta che hai effettuato l'accesso. Effettua nuovamente l'accesso per motivi di sicurezza."
     }
   },
   "credentials": {
