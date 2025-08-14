@@ -109,8 +109,6 @@
       "INVALID_AUTHENTICATOR_CODE": "Invalid authenticator code. Please try again.",
       "INVALID_RECOVERY_CODE": "Invalid recovery code. Please try again.",
       "REFRESH_TOKEN_REQUIRED": "Refresh token is required.",
-      "USER_NOT_FOUND_IN_TOKEN": "User not found in token.",
-      "USER_NOT_FOUND_IN_DATABASE": "User not found in database.",
       "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
       "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refresh token revoked successfully.",
       "PUBLIC_REGISTRATION_DISABLED": "New account registration is currently disabled on this server. Please contact the administrator.",

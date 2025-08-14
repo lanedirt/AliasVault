@@ -20,16 +20,6 @@ public enum ApiErrorCode
     REFRESH_TOKEN_REQUIRED,
 
     /// <summary>
-    /// User not found in the provided token.
-    /// </summary>
-    USER_NOT_FOUND_IN_TOKEN,
-
-    /// <summary>
-    /// User not found in the database.
-    /// </summary>
-    USER_NOT_FOUND_IN_DATABASE,
-
-    /// <summary>
     /// User account is locked.
     /// </summary>
     ACCOUNT_LOCKED,

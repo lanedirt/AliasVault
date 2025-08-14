@@ -296,13 +296,13 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         var principal = GetPrincipalFromToken(tokenModel.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
-            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_TOKEN, 401));
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND, 401));
         }
 
         var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
-            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_DATABASE, 401));
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND, 401));
         }
 
         // Check if the account is blocked.
@@ -345,13 +345,13 @@ public class AuthController(IAliasServerDbContextFactory dbContextFactory, UserM
         var principal = GetPrincipalFromToken(model.Token);
         if (principal.FindFirst(ClaimTypes.NameIdentifier)?.Value == null)
         {
-            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_TOKEN, 401));
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND, 401));
         }
 
         var user = await userManager.FindByIdAsync(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
         if (user == null)
         {
-            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND_IN_DATABASE, 401));
+            return Unauthorized(ApiErrorCodeHelper.CreateErrorResponse(ApiErrorCode.USER_NOT_FOUND, 401));
         }
 
         // Check if the refresh token is valid.
