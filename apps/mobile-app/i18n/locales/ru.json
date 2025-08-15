@@ -360,7 +360,6 @@
   "validation": {
     "required": "Это поле является обязательным",
     "serviceNameRequired": "Требуется указать название сервиса",
-    "invalidUrlFormat": "Недопустимый формат URL-адреса",
     "invalidDateFormat": "Дата должна быть указана в формате ГГГГ-ММ-ДД",
     "invalidEmailFormat": "Неверный формат электронной почты"
   },
