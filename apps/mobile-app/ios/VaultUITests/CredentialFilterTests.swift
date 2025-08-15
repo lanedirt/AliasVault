@@ -141,6 +141,45 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(matches.count, 1)
         XCTAssertEqual(matches.first?.service.name, "Title Only newyorktimes")
     }
+    
+    // [#12] - Priority ordering
+    func testPriorityOrdering() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "coolblue.nl")
+        
+        XCTAssertEqual(matches.count, 1)
+        XCTAssertEqual(matches.first?.service.name, "Coolblue")
+    }
+
+    // [#14] - Domain name part matching
+    func testDomainNamePartMatch() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "https://coolblue.be")
+
+        XCTAssertEqual(matches.count, 0)
+    }
+
+    // [#15] - Package name matching
+    func testPackageNameMatch() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "com.coolblue.app")
+
+        XCTAssertEqual(matches.count, 1)
+        XCTAssertEqual(matches.first?.service.name, "Coolblue App")
+    }
+
+    // [#16] - Invalid URL handling
+    func testInvalidUrl() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "not a url")
+
+        XCTAssertTrue(matches.isEmpty)
+    }
+
+    // [#17] - Anti-phishing protection
+    func testAntiPhishingProtection() {
+        // Test that credentials with URLs don't match on text when a non-matching base URL is provided
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "https://secure-bankk.com") // Phishing domain (extra 'k')
+
+        // Should find no matches - Bank Account has URL so won't match on text
+        XCTAssertTrue(matches.isEmpty)
+    }
 
     // MARK: - Shared Test Data
 
@@ -160,6 +199,7 @@ final class CredentialFilterTests: XCTestCase {
             createTestCredential(serviceName: "Stack Overflow", serviceUrl: "https://stackoverflow.com", username: "user@stackoverflow.com"),
             createTestCredential(serviceName: "Subdomain Example", serviceUrl: "https://app.example.com", username: "user@example.com"),
             createTestCredential(serviceName: "Title Only newyorktimes", serviceUrl: "", username: ""),
+            createTestCredential(serviceName: "Bank Account", serviceUrl: "https://secure-bank.com", username: "user@bank.com"),
         ]
     }
 

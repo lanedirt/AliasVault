@@ -235,6 +235,56 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Title Only newyorktimes');
   });
 
+  /* [#14] - Domain name part matching */
+  it('should handle domain name part matching', () => {
+    const matches = filterCredentials(
+      testCredentials,
+      'https://coolblue.be',
+      ''
+    );
+
+    // Browser extension should find no matches since domains don't match
+    expect(matches).toHaveLength(0);
+  });
+
+  // [#15] - Package name matching
+  it('should handle package name matching', () => {
+    const matches = filterCredentials(
+      testCredentials,
+      'com.coolblue.app',
+      ''
+    );
+
+    // Browser extension should find exact URL match for "Coolblue App"
+    expect(matches).toHaveLength(1);
+    expect(matches[0].ServiceName).toBe('Coolblue App');
+  });
+
+  // [#16] - Invalid URL handling
+  it('should handle invalid URL', () => {
+    const matches = filterCredentials(
+      testCredentials,
+      'not a url',
+      ''
+    );
+
+    // Browser extension should find no matches for invalid URL
+    expect(matches).toHaveLength(0);
+  });
+
+  // [#17] - Anti-phishing protection
+  it('should prevent phishing attacks', () => {
+    // Test that credentials with URLs don't match on text when URL is provided
+    const matches = filterCredentials(
+      testCredentials,
+      'https://secure-bankk.com', // Phishing domain (extra 'k')
+      'Bank Account'
+    );
+
+    // Should find no matches - Bank Account has URL so won't match on text
+    expect(matches).toHaveLength(0);
+  });
+
   /**
    * Creates the shared test credential dataset used across all platforms.
    * Note: when making changes to this list, make sure to update the corresponding list for iOS and Android tests as well.
@@ -251,6 +301,7 @@ describe('Filter - Credential URL Matching', () => {
       createTestCredential('Stack Overflow', 'https://stackoverflow.com', 'user@stackoverflow.com'),
       createTestCredential('Subdomain Example', 'https://app.example.com', 'user@example.com'),
       createTestCredential('Title Only newyorktimes', '', ''),
+      createTestCredential('Bank Account', 'https://secure-bank.com', 'user@bank.com'),
     ];
   }
 
