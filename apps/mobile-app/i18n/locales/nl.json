@@ -360,7 +360,6 @@
   "validation": {
     "required": "Dit veld is verplicht",
     "serviceNameRequired": "Servicenaam is verplicht",
-    "invalidUrlFormat": "Ongeldig URL-formaat",
     "invalidDateFormat": "Datum moet in YYYY-MM-DD formaat zijn",
     "invalidEmailFormat": "Ongeldig e-mailformaat"
   },
