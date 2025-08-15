@@ -136,11 +136,17 @@ export default function CredentialDetailsScreen() : React.ReactNode {
               {credential.ServiceName}
             </ThemedText>
             {credential.ServiceUrl && (
-              <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
-                <Text style={[styles.serviceUrl, { color: colors.primary }]}>
+              /^https?:\/\//i.test(credential.ServiceUrl) ? (
+                <TouchableOpacity onPress={() => Linking.openURL(credential.ServiceUrl!)}>
+                  <Text style={[styles.serviceUrl, { color: colors.primary }]}>
+                    {credential.ServiceUrl}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.serviceUrl}>
                   {credential.ServiceUrl}
                 </Text>
-              </TouchableOpacity>
+              )
             )}
           </View>
         </ThemedView>
