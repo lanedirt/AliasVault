@@ -75,7 +75,6 @@ class AutofillTest {
     // [#5] - Partial URL stored matches full URL search
     @Test
     fun testPartialUrlMatchWithFullUrl() {
-        // Test case: stored URL is "dumpert.nl", search with full URL
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "https://www.dumpert.nl",
@@ -88,7 +87,6 @@ class AutofillTest {
     // [#6] - Full URL stored matches partial URL search
     @Test
     fun testFullUrlMatchWithPartialUrl() {
-        // Test case: stored URL is full, search with partial
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "coolblue.nl",
@@ -205,10 +203,21 @@ class AutofillTest {
         assertEquals("Coolblue", complexUrl[0].service.name)
     }
 
+    // [#12] - Priority ordering
+    @Test
+    fun testPriorityOrdering() {
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
+            testCredentials,
+            "coolblue.nl",
+        )
+
+        assertEquals(1, matches.size)
+        assertEquals("Coolblue", matches[0].service.name)
+    }
+
     // [#13] - Title-only matching
     @Test
     fun testTitleOnlyMatching() {
-        // Test service name matching when no URL is available
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "newyorktimes",
@@ -218,44 +227,24 @@ class AutofillTest {
         assertEquals("Title Only newyorktimes", matches[0].service.name)
     }
 
-    // [#14] - Domain name part matching (Android specific)
+    // [#14] - Domain name part matching
     @Test
     fun testDomainNamePartMatch() {
-        // Test that unrelated domains don't match (coolblue.be doesn't match coolblue.nl)
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "https://coolblue.be",
         )
 
-        // Should find no matches due to anti-phishing protection (Coolblue has URL so won't match on text)
         assertTrue(matches.isEmpty())
-    }
-
-    // [#12] - Priority ordering (not applicable to Android)
-    @Test
-    fun testPriorityOrdering() {
-        // Android doesn't implement priority ordering like browser extension
-        // but we include the test for cross-platform consistency
-        val matches = CredentialMatcher.filterCredentialsByAppInfo(
-            testCredentials,
-            "coolblue.nl",
-        )
-
-        // Android should find domain match
-        assertEquals(1, matches.size)
-        assertEquals("Coolblue", matches[0].service.name)
     }
 
     // [#15] - Package name matching
     @Test
     fun testPackageNameMatch() {
-        // Package names should match exact URL.
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
             "com.coolblue.app",
         )
-
-        // Should find exact URL match for "Coolblue App"
         assertEquals(1, matches.size)
         assertTrue(matches.any { it.service.name == "Coolblue App" })
     }
@@ -274,13 +263,10 @@ class AutofillTest {
     // [#17] - Anti-phishing protection
     @Test
     fun testAntiPhishingProtection() {
-        // Test that credentials with URLs don't match on text when URL is provided
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "https://secure-bankk.com", // Phishing domain (extra 'k')
+            "https://secure-bankk.com",
         )
-
-        // Should find no matches - Bank Account has URL so won't match on text
         assertTrue(matches.isEmpty())
     }
 
