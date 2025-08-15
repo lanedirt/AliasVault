@@ -52,7 +52,7 @@ const CredentialAddEdit: React.FC = () => {
   const credentialSchema = useMemo(() => Yup.object().shape({
     Id: Yup.string(),
     ServiceName: Yup.string().required(t('credentials.validation.serviceNameRequired')),
-    ServiceUrl: Yup.string().url(t('credentials.validation.invalidUrl')).nullable().optional(),
+    ServiceUrl: Yup.string().nullable().optional(),
     Alias: Yup.object().shape({
       FirstName: Yup.string().nullable().optional(),
       LastName: Yup.string().nullable().optional(),
