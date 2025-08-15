@@ -322,46 +322,46 @@
   },
   "navigation": {
     "credentials": "Облікові дані",
-    "emails": "Електронні адреси",
+    "emails": "Електронні листи",
     "settings": "Налаштування"
   },
   "emails": {
-    "title": "Електронні адреси",
-    "emailDetails": "Деталі електронної пошти",
+    "title": "Електронні листи",
+    "emailDetails": "Деталі електронного листа",
     "subject": "Тема:",
     "date": "Дата:",
     "from": "Від:",
     "to": "До:",
     "attachments": "Вкладення",
-    "deleteEmail": "Видалити електронну пошту",
+    "deleteEmail": "Видалити електронного листа",
     "deleteEmailConfirm": "Ви впевнені, що хочете видалити цей електронний лист? Ця дія є остаточною і не може бути скасована.",
-    "emailNotFound": "Електронну пошту не знайдено",
+    "emailNotFound": "Електронний лист не знайдено",
     "noPlainText": "Цей електронний лист не містить відкритого тексту.",
-    "sizeKB": "KB",
-    "offlineMessage": "You are offline. Please connect to the internet to load your emails.",
-    "emptyMessage": "You have not received any emails at your private email addresses yet. When you receive a new email, it will appear here.",
+    "sizeKB": "КБ",
+    "offlineMessage": "Ви офлайн. Будь ласка, приєднайтесь до Інтернету, щоб завантажити свої електронні листи.",
+    "emptyMessage": "Ви ще не отримували жодних листів на свої приватні адреси електронної пошти. Коли ви отримаєте новий лист, він з’явиться тут.",
     "time": {
-      "justNow": "just now",
-      "minutesAgo_single": "{{count}} min ago",
-      "minutesAgo_plural": "{{count}} mins ago",
-      "hoursAgo_single": "{{count}} hr ago",
-      "hoursAgo_plural": "{{count}} hrs ago",
-      "yesterday": "yesterday"
+      "justNow": "щойно",
+      "minutesAgo_single": "{{count}} хвилина тому",
+      "minutesAgo_plural": "{{count}} хвилин тому",
+      "hoursAgo_single": "{{count}} година тому",
+      "hoursAgo_plural": "{{count}} годин тому",
+      "yesterday": "учора"
     },
     "errors": {
-      "generic": "An error occurred",
-      "loadFailed": "Failed to load emails",
-      "deleteFailed": "Failed to delete email",
-      "dbNotAvailable": "Database context or email not available",
-      "decryptFailed": "Failed to decrypt attachment",
-      "downloadFailed": "Failed to download attachment"
+      "generic": "Сталась помилка",
+      "loadFailed": "Не вдалося завантажити електронні листи",
+      "deleteFailed": "Не вдалося видалити електронний лист",
+      "dbNotAvailable": "Контекст бази даних або електронні листи недоступні",
+      "decryptFailed": "Не вдалося розшифрувати вкладення",
+      "downloadFailed": "Не вдалося завантажити вкладення"
     }
   },
   "validation": {
-    "required": "This field is required",
-    "serviceNameRequired": "Service name is required",
-    "invalidDateFormat": "Date must be in YYYY-MM-DD format",
-    "invalidEmailFormat": "Invalid email format"
+    "required": "Це поле обов'язкове",
+    "serviceNameRequired": "Назва служби обов'язкова",
+    "invalidDateFormat": "Дата має бути у форматі РРРР-ММ-ДД",
+    "invalidEmailFormat": "Недійсний формат електронної пошти"
   },
   "apiErrors": {
     "CLAIM_DOES_NOT_MATCH_USER": "The current chosen email address is already in use. Please change the email address by editing this credential.",
