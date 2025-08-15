@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0EF28D873AC559A33A3B178F /* libPods-VaultUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A795EF04BF70F714FA4B0E5 /* libPods-VaultUITests.a */; };
 		1381C2F6D317F2404928BA59 /* libPods-VaultUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C32D89DCBA51D7C8CDE51DD2 /* libPods-VaultUI.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -22,6 +23,7 @@
 		CE48FCEC2DBE939A00E5E3D6 /* VaultModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */; };
 		CE48FD372DBE95EB00E5E3D6 /* VaultModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */; };
 		CE48FD632DBEA3B800E5E3D6 /* VaultUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */; };
+		CE59C7632E4F47FE0024A246 /* VaultUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */; };
 		CE73B3A02DFC8A0C0081B6CB /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = CE73B39F2DFC8A0C0081B6CB /* AppIcon.icon */; };
 		CE9A58FC2DBA982100CB0A4C /* RCTNativeVaultManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */; };
 		CE9A5A022DBAAE5000CB0A4C /* RCTNativeVaultManager.h in Sources */ = {isa = PBXBuildFile; fileRef = CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */; };
@@ -43,6 +45,13 @@
 
 /* Begin PBXContainerItemProxy section */
 		CE48FD652DBEA3B800E5E3D6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEE481692DBE8AC800F4A367;
+			remoteInfo = VaultUI;
+		};
+		CE59C7642E4F47FE0024A246 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
@@ -138,6 +147,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		017AFF1289CCDC7514CC84DA /* Pods-VaultUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultUITests.release.xcconfig"; path = "Target Support Files/Pods-VaultUITests/Pods-VaultUITests.release.xcconfig"; sourceTree = "<group>"; };
+		0185B497D6794232013782D4 /* Pods-VaultUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultUITests.debug.xcconfig"; path = "Target Support Files/Pods-VaultUITests/Pods-VaultUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		09DFCC3CBA13D19073CBCC7F /* Pods-VaultStoreKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreKit.debug.xcconfig"; path = "Target Support Files/Pods-VaultStoreKit/Pods-VaultStoreKit.debug.xcconfig"; sourceTree = "<group>"; };
 		0E23F2188770B15FCBFEBC57 /* libPods-AliasVault.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AliasVault.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* AliasVault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AliasVault.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,6 +169,7 @@
 		83C4F2FD713FB96C56BB0D24 /* Pods-VaultStoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreTests.release.xcconfig"; path = "Target Support Files/Pods-VaultStoreTests/Pods-VaultStoreTests.release.xcconfig"; sourceTree = "<group>"; };
 		962DE0FB93C9458BAFEEED60 /* AliasVault-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "AliasVault-Bridging-Header.h"; path = "AliasVault/AliasVault-Bridging-Header.h"; sourceTree = "<group>"; };
 		9668BBEEC62508A81A7214E2 /* Pods-PreviewHost.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PreviewHost.release.xcconfig"; path = "Target Support Files/Pods-PreviewHost/Pods-PreviewHost.release.xcconfig"; sourceTree = "<group>"; };
+		9A795EF04BF70F714FA4B0E5 /* libPods-VaultUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VaultUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E9AD944E3A0F270C797F5DD /* libPods-VaultStoreKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VaultStoreKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9E70CCF7AAA4E05B57CCCC4 /* Pods-VaultStoreKitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VaultStoreKitTests.debug.xcconfig"; path = "Target Support Files/Pods-VaultStoreKitTests/Pods-VaultStoreKitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = AliasVault/SplashScreen.storyboard; sourceTree = "<group>"; };
@@ -170,6 +182,7 @@
 		C87FA54AAFE121325F22CDDE /* Pods-PreviewHost.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PreviewHost.debug.xcconfig"; path = "Target Support Files/Pods-PreviewHost/Pods-PreviewHost.debug.xcconfig"; sourceTree = "<group>"; };
 		CE26D68C2DA7FCD2006DC04D /* VaultManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultManager.swift; sourceTree = "<group>"; };
 		CE3AE2B02DC7ACD700E7745E /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		CE59C75F2E4F47FD0024A246 /* VaultUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VaultUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE73B39F2DFC8A0C0081B6CB /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = AppIcon.icon; sourceTree = "<group>"; };
 		CE9A58FA2DBA982100CB0A4C /* RCTNativeVaultManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTNativeVaultManager.h; sourceTree = "<group>"; };
 		CE9A58FB2DBA982100CB0A4C /* RCTNativeVaultManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RCTNativeVaultManager.mm; sourceTree = "<group>"; };
@@ -188,7 +201,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CEE9098F2DA548C7008D568F /* Exceptions for "Autofill" folder in "Autofill" target */ = {
+		CEE9098F2DA548C7008D568F /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -198,62 +211,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CEE480882DBE86DC00F4A367 /* VaultStoreKit */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultStoreKit;
-			sourceTree = "<group>";
-		};
-		CEE480972DBE86DD00F4A367 /* VaultStoreKitTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultStoreKitTests;
-			sourceTree = "<group>";
-		};
-		CEE4816B2DBE8AC800F4A367 /* VaultUI */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultUI;
-			sourceTree = "<group>";
-		};
-		CEE482AB2DBE8EFE00F4A367 /* VaultModels */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = VaultModels;
-			sourceTree = "<group>";
-		};
-		CEE909812DA548C7008D568F /* Autofill */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CEE9098F2DA548C7008D568F /* Exceptions for "Autofill" folder in "Autofill" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = Autofill;
-			sourceTree = "<group>";
-		};
+		CE59C7602E4F47FD0024A246 /* VaultUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultUITests; sourceTree = "<group>"; };
+		CEE480882DBE86DC00F4A367 /* VaultStoreKit */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultStoreKit; sourceTree = "<group>"; };
+		CEE480972DBE86DD00F4A367 /* VaultStoreKitTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultStoreKitTests; sourceTree = "<group>"; };
+		CEE4816B2DBE8AC800F4A367 /* VaultUI */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultUI; sourceTree = "<group>"; };
+		CEE482AB2DBE8EFE00F4A367 /* VaultModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VaultModels; sourceTree = "<group>"; };
+		CEE909812DA548C7008D568F /* Autofill */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CEE9098F2DA548C7008D568F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Autofill; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -265,6 +228,15 @@
 				CEE482BF2DBE8EFF00F4A367 /* VaultModels.framework in Frameworks */,
 				CEE4809C2DBE86DD00F4A367 /* VaultStoreKit.framework in Frameworks */,
 				3D1B0279B0714C8FF732D2D3 /* libPods-AliasVault.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE59C75C2E4F47FD0024A246 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CE59C7632E4F47FE0024A246 /* VaultUI.framework in Frameworks */,
+				0EF28D873AC559A33A3B178F /* libPods-VaultUITests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +320,7 @@
 				456ACD01FF420AE789429A59 /* libPods-VaultStoreTests.a */,
 				C32D89DCBA51D7C8CDE51DD2 /* libPods-VaultUI.a */,
 				9E9AD944E3A0F270C797F5DD /* libPods-VaultStoreKitTests.a */,
+				9A795EF04BF70F714FA4B0E5 /* libPods-VaultUITests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -371,6 +344,7 @@
 				CEE480972DBE86DD00F4A367 /* VaultStoreKitTests */,
 				CEE4816B2DBE8AC800F4A367 /* VaultUI */,
 				CEE482AB2DBE8EFE00F4A367 /* VaultModels */,
+				CE59C7602E4F47FD0024A246 /* VaultUITests */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
@@ -390,6 +364,7 @@
 				CEE480912DBE86DD00F4A367 /* VaultStoreKitTests.xctest */,
 				CEE4816A2DBE8AC800F4A367 /* VaultUI.framework */,
 				CEE482AA2DBE8EFE00F4A367 /* VaultModels.framework */,
+				CE59C75F2E4F47FD0024A246 /* VaultUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -439,6 +414,8 @@
 				1A927300CBD3BFE2B7A3CA37 /* Pods-VaultUI.release.xcconfig */,
 				A9E70CCF7AAA4E05B57CCCC4 /* Pods-VaultStoreKitTests.debug.xcconfig */,
 				B18F3A7E310165C29C8C6DFE /* Pods-VaultStoreKitTests.release.xcconfig */,
+				0185B497D6794232013782D4 /* Pods-VaultUITests.debug.xcconfig */,
+				017AFF1289CCDC7514CC84DA /* Pods-VaultUITests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -506,6 +483,28 @@
 			productName = AliasVault;
 			productReference = 13B07F961A680F5B00A75B9A /* AliasVault.app */;
 			productType = "com.apple.product-type.application";
+		};
+		CE59C75E2E4F47FD0024A246 /* VaultUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CE59C7682E4F47FE0024A246 /* Build configuration list for PBXNativeTarget "VaultUITests" */;
+			buildPhases = (
+				2E8B1031EFFD64F99242A5C1 /* [CP] Check Pods Manifest.lock */,
+				CE59C75B2E4F47FD0024A246 /* Sources */,
+				CE59C75C2E4F47FD0024A246 /* Frameworks */,
+				CE59C75D2E4F47FD0024A246 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CE59C7652E4F47FE0024A246 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CE59C7602E4F47FD0024A246 /* VaultUITests */,
+			);
+			name = VaultUITests;
+			productName = VaultUITests;
+			productReference = CE59C75F2E4F47FD0024A246 /* VaultUITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		CEE480862DBE86DC00F4A367 /* VaultStoreKit */ = {
 			isa = PBXNativeTarget;
@@ -626,11 +625,14 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1630;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
+					};
+					CE59C75E2E4F47FD0024A246 = {
+						CreatedOnToolsVersion = 16.4;
 					};
 					CEE480862DBE86DC00F4A367 = {
 						CreatedOnToolsVersion = 16.3;
@@ -659,6 +661,10 @@
 				en,
 				Base,
 				nl,
+				fr,
+				es,
+				uk,
+				de,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
@@ -670,6 +676,7 @@
 				CEE480862DBE86DC00F4A367 /* VaultStoreKit */,
 				CEE480902DBE86DD00F4A367 /* VaultStoreKitTests */,
 				CEE481692DBE8AC800F4A367 /* VaultUI */,
+				CE59C75E2E4F47FD0024A246 /* VaultUITests */,
 				CEE482A92DBE8EFE00F4A367 /* VaultModels */,
 			);
 		};
@@ -685,6 +692,13 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				D6E19ADE0A608FA46984C60D /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE59C75D2E4F47FD0024A246 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -782,6 +796,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-AliasVault/Pods-AliasVault-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		2E8B1031EFFD64F99242A5C1 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-VaultUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		5DC7F827F296E839DC4DE7BD /* [CP] Check Pods Manifest.lock */ = {
@@ -1005,6 +1041,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CE59C75B2E4F47FD0024A246 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CEE480832DBE86DC00F4A367 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1047,6 +1090,11 @@
 			isa = PBXTargetDependency;
 			target = CEE481692DBE8AC800F4A367 /* VaultUI */;
 			targetProxy = CE48FD652DBEA3B800E5E3D6 /* PBXContainerItemProxy */;
+		};
+		CE59C7652E4F47FE0024A246 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEE481692DBE8AC800F4A367 /* VaultUI */;
+			targetProxy = CE59C7642E4F47FE0024A246 /* PBXContainerItemProxy */;
 		};
 		CEE480942DBE86DD00F4A367 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1215,10 +1263,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -1272,14 +1317,80 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		CE59C7662E4F47FE0024A246 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0185B497D6794232013782D4 /* Pods-VaultUITests.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 8PHW4HN3F7;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
+				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.VaultUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CE59C7672E4F47FE0024A246 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 017AFF1289CCDC7514CC84DA /* Pods-VaultUITests.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 8PHW4HN3F7;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRODUCT_BUNDLE_IDENTIFIER = net.aliasvault.app.VaultUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -1761,6 +1872,15 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CE59C7682E4F47FE0024A246 /* Build configuration list for PBXNativeTarget "VaultUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CE59C7662E4F47FE0024A246 /* Debug */,
+				CE59C7672E4F47FE0024A246 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
