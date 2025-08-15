@@ -237,13 +237,9 @@
     "birthDate": "Data di nascita",
     "birthDatePlaceholder": "AAAA-MM-GG",
     "metadata": "Metadati",
-    "errors": {
-      "invalidUrl": "Inserisci un URL valido"
-    },
     "validation": {
       "required": "Questo campo è obbligatorio",
       "serviceNameRequired": "Il nome del servizio è obbligatorio",
-      "invalidUrl": "Formato URL non valido",
       "invalidEmail": "Formato email non valido",
       "invalidDateFormat": "La data deve essere nel formato AAAA-MM-GG"
     }
