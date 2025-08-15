@@ -96,10 +96,10 @@
       "unknownError": "Er is een onbekende fout opgetreden",
       "failedToStoreVault": "Vault opslaan mislukt",
       "vaultNotAvailable": "Vault niet beschikbaar",
-      "failedToRetrieveData": "Failed to retrieve data",
+      "failedToRetrieveData": "Gegevens ophalen mislukt",
       "vaultIsLocked": "Vault is vergrendeld",
       "failedToUploadVault": "Vault uploaden mislukt",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "passwordChanged": "Je wachtwoord is veranderd sinds de laatste keer dat je bent ingelogd. Log opnieuw in."
     },
     "apiErrors": {
       "UNKNOWN_ERROR": "Er is een onbekende fout opgetreden. Probeer het opnieuw.",
