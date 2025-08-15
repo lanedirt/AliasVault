@@ -237,13 +237,9 @@
     "birthDate": "Birth Date",
     "birthDatePlaceholder": "YYYY-MM-DD",
     "metadata": "Metadata",
-    "errors": {
-      "invalidUrl": "Please enter a valid URL"
-    },
     "validation": {
       "required": "This field is required",
       "serviceNameRequired": "Service name is required",
-      "invalidUrl": "Invalid URL format",
       "invalidEmail": "Invalid email format",
       "invalidDateFormat": "Date must be in YYYY-MM-DD format"
     }
