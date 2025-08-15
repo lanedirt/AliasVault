@@ -237,13 +237,9 @@
     "birthDate": "出生日期",
     "birthDatePlaceholder": "YYYY-MM-DD",
     "metadata": "备注",
-    "errors": {
-      "invalidUrl": "请输入有效的 URL"
-    },
     "validation": {
       "required": "此字段为必填项",
       "serviceNameRequired": "服务名称为必填项",
-      "invalidUrl": "无效的 URL 格式",
       "invalidEmail": "无效的邮箱格式",
       "invalidDateFormat": "日期必须为 YYYY-MM-DD 格式"
     }
