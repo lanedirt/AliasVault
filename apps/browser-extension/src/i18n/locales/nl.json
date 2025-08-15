@@ -237,13 +237,9 @@
     "birthDate": "Geboortedatum",
     "birthDatePlaceholder": "YYYY-MM-DD",
     "metadata": "Metadata",
-    "errors": {
-      "invalidUrl": "Voer een geldige URL in"
-    },
     "validation": {
       "required": "Dit veld is verplicht",
       "serviceNameRequired": "Servicenaam is verplicht",
-      "invalidUrl": "Ongeldig URL-formaat",
       "invalidEmail": "Ongeldig e-mailformaat",
       "invalidDateFormat": "Datum moet in YYYY-MM-DD formaat zijn"
     }
