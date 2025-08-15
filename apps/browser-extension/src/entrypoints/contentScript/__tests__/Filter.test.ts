@@ -12,6 +12,7 @@ describe('Filter - Credential URL Matching', () => {
     testCredentials = createSharedTestCredentials();
   });
 
+  // [#1] - Exact URL match
   it('should match exact URL', () => {
     const matches = filterCredentials(
       testCredentials,
@@ -23,6 +24,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Coolblue');
   });
 
+  // [#2] - Base URL with path match
   it('should match base URL with path', () => {
     const matches = filterCredentials(
       testCredentials,
@@ -34,6 +36,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Gmail');
   });
 
+  // [#3] - Root domain with subdomain match
   it('should match root domain with subdomain', () => {
     const matches = filterCredentials(
       testCredentials,
@@ -45,6 +48,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Google');
   });
 
+  // [#4] - No matches for non-existent domain
   it('should return empty array for no matches', () => {
     const matches = filterCredentials(
       testCredentials,
@@ -55,7 +59,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches).toHaveLength(0);
   });
 
-  // New comprehensive test cases
+  // [#5] - Partial URL stored matches full URL search
   it('should match partial URL with full URL - dumpert.nl case', () => {
     // Test case: stored URL is "dumpert.nl", search with full URL
     const matches = filterCredentials(
@@ -68,6 +72,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Dumpert');
   });
 
+  // [#6] - Full URL stored matches partial URL search
   it('should match full URL with partial URL', () => {
     // Test case: stored URL is full, search with partial
     const matches = filterCredentials(
@@ -80,6 +85,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Coolblue');
   });
 
+  // [#7] - Protocol variations (http/https/none) match
   it('should handle protocol variations correctly', () => {
     // Test that http and https variations match
     const httpsMatches = filterCredentials(
@@ -106,6 +112,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(noProtocolMatches[0].ServiceName).toBe('GitHub');
   });
 
+  // [#8] - WWW prefix variations match
   it('should handle www variations correctly', () => {
     // Test that www variations match
     const withWww = filterCredentials(
@@ -125,6 +132,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(withoutWww[0].ServiceName).toBe('Dumpert');
   });
 
+  // [#9] - Subdomain matching
   it('should handle subdomain matching', () => {
     // Test subdomain matching
     const appSubdomain = filterCredentials(
@@ -151,6 +159,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(noSubdomain[0].ServiceName).toBe('Subdomain Example');
   });
 
+  // [#10] - Paths and query strings ignored
   it('should ignore paths and query strings', () => {
     // Test that paths and query strings are ignored
     const withPath = filterCredentials(
@@ -177,6 +186,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(withFragment[0].ServiceName).toBe('Gmail');
   });
 
+  // [#11] - Complex URL variations
   it('should handle complex URL variations', () => {
     // Test complex URL matching scenario
     const complexUrl = filterCredentials(
@@ -189,6 +199,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(complexUrl[0].ServiceName).toBe('Coolblue');
   });
 
+  // [#12] - Priority ordering (exact over partial)
   it('should prioritize exact matches over partial matches', () => {
     // Add a credential with exact domain match to test priority
     const credentialsWithExact = [
@@ -212,6 +223,7 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches[0].ServiceName).toBe('Exact Match');
   });
 
+  // [#13] - Title-only matching
   it('should match title only', () => {
     const matches = filterCredentials(
       testCredentials,
