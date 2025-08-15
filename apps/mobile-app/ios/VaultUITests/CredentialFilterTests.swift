@@ -48,10 +48,8 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertTrue(matches.isEmpty)
     }
 
-    // New comprehensive test cases
     // [#5] - Partial URL stored matches full URL search
     func testPartialUrlMatchWithFullUrl() {
-        // Test case: stored URL is "dumpert.nl", search with full URL
         let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "https://www.dumpert.nl")
 
         XCTAssertEqual(matches.count, 1)
@@ -60,7 +58,6 @@ final class CredentialFilterTests: XCTestCase {
 
     // [#6] - Full URL stored matches partial URL search
     func testFullUrlMatchWithPartialUrl() {
-        // Test case: stored URL is full, search with partial
         let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "coolblue.nl")
 
         XCTAssertEqual(matches.count, 1)
@@ -133,21 +130,20 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertTrue(matches.contains { $0.service.name == "Coolblue" })
     }
 
-    // [#13] - Title-only matching
-    func testTitleOnlyMatching() {
-        // Test service name matching when no URL is available
-        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "newyorktimes")
-
-        XCTAssertEqual(matches.count, 1)
-        XCTAssertEqual(matches.first?.service.name, "Title Only newyorktimes")
-    }
-    
     // [#12] - Priority ordering
     func testPriorityOrdering() {
         let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "coolblue.nl")
         
         XCTAssertEqual(matches.count, 1)
         XCTAssertEqual(matches.first?.service.name, "Coolblue")
+    }
+
+    // [#13] - Title-only matching
+    func testTitleOnlyMatching() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "newyorktimes")
+
+        XCTAssertEqual(matches.count, 1)
+        XCTAssertEqual(matches.first?.service.name, "Title Only newyorktimes")
     }
 
     // [#14] - Domain name part matching
@@ -174,10 +170,7 @@ final class CredentialFilterTests: XCTestCase {
 
     // [#17] - Anti-phishing protection
     func testAntiPhishingProtection() {
-        // Test that credentials with URLs don't match on text when a non-matching base URL is provided
-        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "https://secure-bankk.com") // Phishing domain (extra 'k')
-
-        // Should find no matches - Bank Account has URL so won't match on text
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "https://secure-bankk.com")
         XCTAssertTrue(matches.isEmpty)
     }
 
