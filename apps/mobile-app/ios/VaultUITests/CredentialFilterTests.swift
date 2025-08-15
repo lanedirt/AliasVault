@@ -17,6 +17,7 @@ final class CredentialFilterTests: XCTestCase {
         super.tearDown()
     }
 
+    // [#1] - Exact URL match
     func testExactUrlMatch() {
         let matches = filterCredentials(testCredentials, searchText: "www.coolblue.nl")
 
@@ -24,6 +25,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(matches.first?.service.name, "Coolblue")
     }
 
+    // [#2] - Base URL with path match
     func testBaseUrlMatch() {
         let matches = filterCredentials(testCredentials, searchText: "https://gmail.com/signin")
 
@@ -31,6 +33,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(matches.first?.service.name, "Gmail")
     }
 
+    // [#3] - Root domain with subdomain match
     func testRootDomainMatch() {
         let matches = filterCredentials(testCredentials, searchText: "https://mail.google.com")
 
@@ -38,6 +41,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(matches.first?.service.name, "Google")
     }
 
+    // [#4] - No matches for non-existent domain
     func testNoMatches() {
         let matches = filterCredentials(testCredentials, searchText: "https://nonexistent.com")
 
@@ -45,6 +49,7 @@ final class CredentialFilterTests: XCTestCase {
     }
 
     // New comprehensive test cases
+    // [#5] - Partial URL stored matches full URL search
     func testPartialUrlMatchWithFullUrl() {
         // Test case: stored URL is "dumpert.nl", search with full URL
         let matches = filterCredentials(testCredentials, searchText: "https://www.dumpert.nl")
@@ -53,6 +58,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(matches.first?.service.name, "Dumpert")
     }
 
+    // [#6] - Full URL stored matches partial URL search
     func testFullUrlMatchWithPartialUrl() {
         // Test case: stored URL is full, search with partial
         let matches = filterCredentials(testCredentials, searchText: "coolblue.nl")
@@ -61,6 +67,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertTrue(matches.contains { $0.service.name == "Coolblue" })
     }
 
+    // [#7] - Protocol variations (http/https/none) match
     func testProtocolVariations() {
         // Test that http and https variations match
         let httpsMatches = filterCredentials(testCredentials, searchText: "https://github.com")
@@ -75,6 +82,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(noProtocolMatches.first?.service.name, "GitHub")
     }
 
+    // [#8] - WWW prefix variations match
     func testWwwVariations() {
         // Test that www variations match
         let withWww = filterCredentials(testCredentials, searchText: "www.dumpert.nl")
@@ -86,6 +94,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(withoutWww.first?.service.name, "Dumpert")
     }
 
+    // [#9] - Subdomain matching
     func testSubdomainMatching() {
         // Test subdomain matching
         let appSubdomain = filterCredentials(testCredentials, searchText: "https://app.example.com")
@@ -100,6 +109,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(noSubdomain.first?.service.name, "Subdomain Example")
     }
 
+    // [#10] - Paths and query strings ignored
     func testPathAndQueryIgnored() {
         // Test that paths and query strings are ignored
         let withPath = filterCredentials(testCredentials, searchText: "https://github.com/user/repo")
@@ -114,6 +124,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertEqual(withFragment.first?.service.name, "Gmail")
     }
 
+    // [#11] - Complex URL variations
     func testComplexUrlVariations() {
         // Test complex URL matching scenario
         let matches = filterCredentials(testCredentials, searchText: "https://www.coolblue.nl/product/12345?ref=google")
@@ -122,6 +133,7 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertTrue(matches.contains { $0.service.name == "Coolblue" })
     }
 
+    // [#13] - Title-only matching
     func testTitleOnlyMatching() {
         // Test service name matching when no URL is available
         let matches = filterCredentials(testCredentials, searchText: "newyorktimes")
