@@ -259,11 +259,25 @@ extension VaultStore {
                 let aliasUpdatedAtString = row[27] as? String,
                 let aliasIsDeletedInt64 = row[28] as? Int64,
                 let aliasCreatedAt = parseDateString(aliasCreatedAtString),
-                let aliasUpdatedAt = parseDateString(aliasUpdatedAtString),
-                let aliasBirthDateString = row[24] as? String,
-                let aliasBirthDate = parseDateString(aliasBirthDateString) {
+                let aliasUpdatedAt = parseDateString(aliasUpdatedAtString) {
 
                 let aliasIsDeleted = aliasIsDeletedInt64 == 1
+
+                let aliasBirthDate: Date
+                if let aliasBirthDateString = row[24] as? String,
+                   let parsedBirthDate = parseDateString(aliasBirthDateString) {
+                    aliasBirthDate = parsedBirthDate
+                } else {
+                    // Use 0001-01-01 00:00 as the default date if birthDate is null
+                    var dateComponents = DateComponents()
+                    dateComponents.year = 1
+                    dateComponents.month = 1
+                    dateComponents.day = 1
+                    dateComponents.hour = 0
+                    dateComponents.minute = 0
+                    dateComponents.second = 0
+                    aliasBirthDate = Calendar(identifier: .gregorian).date(from: dateComponents)!
+                }
 
                 alias = Alias(
                     id: UUID(uuidString: aliasIdString)!,

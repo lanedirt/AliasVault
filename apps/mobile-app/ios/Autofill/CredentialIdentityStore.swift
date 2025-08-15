@@ -1,5 +1,6 @@
 import AuthenticationServices
 import VaultModels
+import VaultUI
 
 /**
  * Native iOS implementation of the CredentialIdentityStore protocol.
@@ -21,15 +22,18 @@ public class CredentialIdentityStore {
                   let host = url.host else {
                 return nil
             }
-            guard let username = credential.username, !username.isEmpty else {
-                return nil
+            
+            // Use the same logic as the UI for determining the identifier
+            let identifier = usernameOrEmail(credential: credential)
+            guard !identifier.isEmpty else {
+                return nil // Skip credentials with no identifier
             }
 
             let effectiveDomain = Self.effectiveDomain(from: host)
 
             return ASPasswordCredentialIdentity(
                 serviceIdentifier: ASCredentialServiceIdentifier(identifier: effectiveDomain, type: .domain),
-                user: username,
+                user: identifier,
                 recordIdentifier: credential.id.uuidString
             )
         }
@@ -59,15 +63,21 @@ public class CredentialIdentityStore {
 
     /// Remove one or more specific credentials from iOS credential store.
     public func removeCredentialIdentities(_ credentials: [Credential]) async throws {
-        let identities = credentials.map { credential in
+        let identities = credentials.compactMap { credential -> ASPasswordCredentialIdentity? in
             let serviceIdentifier = ASCredentialServiceIdentifier(
                 identifier: credential.service.name ?? "",
                 type: .domain
             )
+            
+            // Use the same logic as the UI for determining the identifier
+            let identifier = usernameOrEmail(credential: credential)
+            guard !identifier.isEmpty else {
+                return nil // Skip credentials with no identifier
+            }
 
             return ASPasswordCredentialIdentity(
                 serviceIdentifier: serviceIdentifier,
-                user: credential.username ?? "",
+                user: identifier,
                 recordIdentifier: credential.id.uuidString
             )
         }
