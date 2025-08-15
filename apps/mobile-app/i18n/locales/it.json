@@ -360,7 +360,6 @@
   "validation": {
     "required": "Campo obbligatorio",
     "serviceNameRequired": "Nome del servizio obbligatorio",
-    "invalidUrlFormat": "Formato URL non valido",
     "invalidDateFormat": "La data deve essere nel formato AAAA-MM-GG",
     "invalidEmailFormat": "Formato email non valido"
   },
