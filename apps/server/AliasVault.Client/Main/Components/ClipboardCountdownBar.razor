@@ -1,0 +1,34 @@
+@inject ClipboardCopyService ClipboardCopyService
+@implements IDisposable
+
+@if (IsVisible)
+{
+    <div class="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-200 dark:bg-gray-700">
+        <div class="h-full bg-orange-500 dark:bg-orange-400 transition-all duration-100 ease-linear"
+             style="width: @(Progress * 100)%"></div>
+    </div>
+}
+
+@code {
+    private bool IsVisible { get; set; }
+    private double Progress { get; set; }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        ClipboardCopyService.OnTimerProgress += HandleTimerProgress;
+    }
+
+    private void HandleTimerProgress(double progress)
+    {
+        Progress = progress;
+        IsVisible = progress > 0;
+        InvokeAsync(StateHasChanged);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        ClipboardCopyService.OnTimerProgress -= HandleTimerProgress;
+    }
+}
