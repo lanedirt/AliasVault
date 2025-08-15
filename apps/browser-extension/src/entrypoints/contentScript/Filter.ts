@@ -66,13 +66,16 @@ function domainsMatch(domain1: string, domain2: string): boolean {
 }
 
 /**
- * Filter credentials based on current URL and page context to determine which credentials to show
- * in the autofill popup. Credentials are sorted by priority:
+ * Filter credentials based on current URL and page context with anti-phishing protection.
+ * 
+ * **Security Note**: When searching with a URL, text search fallback only applies to 
+ * credentials with no service URL defined. This prevents phishing attacks where a 
+ * malicious site might match credentials intended for the legitimate site.
+ * 
+ * Credentials are sorted by priority:
  * 1. Exact domain match (highest priority)
  * 2. Partial domain match (root domain match)
- * 3. Base URL match AND page title word match
- * 4. Base URL match only
- * 5. Page title word match only (lowest priority)
+ * 3. Page title word match (only for credentials without service URLs)
  */
 export function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string): Credential[] {
   const filtered: CredentialWithPriority[] = [];
@@ -101,7 +104,10 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
       .slice(0, 3);
   }
 
-  // Prepare page title words for matching
+  /*
+   * SECURITY: Fallback to page title matching, but ONLY for credentials with no service URL
+   * This prevents phishing attacks by ensuring URL-based credentials only match their domains
+   */
   const titleWords = pageTitle.length > 0
     ? pageTitle.toLowerCase()
       .split(/\s+/)
@@ -113,6 +119,11 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
 
   // Check for page title matches as fallback
   credentials.forEach(cred => {
+    // CRITICAL: Only check credentials that have NO service URL defined
+    if (cred.ServiceUrl && cred.ServiceUrl.length > 0) {
+      return;
+    }
+
     // Skip if already in filtered list
     if (filtered.some(f => f.Id === cred.Id)) {
       return;

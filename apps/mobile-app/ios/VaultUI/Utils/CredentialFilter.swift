@@ -58,11 +58,15 @@ public class CredentialFilter {
         return d1Root == d2Root
     }
     
-    /// Filter credentials based on search text. This matches the iOS filterCredentials logic exactly.
+    /// Filter credentials based on search text with anti-phishing protection.
     /// - Parameters:
     ///   - credentials: List of credentials to filter
     ///   - searchText: Search term (app info, URL, etc.)
     /// - Returns: Filtered list of credentials
+    /// 
+    /// **Security Note**: When searching with a URL, text search fallback only applies to 
+    /// credentials with no service URL defined. This prevents phishing attacks where a 
+    /// malicious site might match credentials intended for the legitimate site.
     public static func filterCredentials(_ credentials: [Credential], searchText: String) -> [Credential] {
         if searchText.isEmpty {
             return credentials
@@ -83,12 +87,16 @@ public class CredentialFilter {
                 }
             }
             
-            // If no domain matches found, try text search in service name
+            // SECURITY: If no domain matches found, only search text in credentials with NO service URL
+            // This prevents phishing attacks by ensuring URL-based credentials only match their domains
             if matches.isEmpty {
                 let domainParts = searchDomain.components(separatedBy: ".")
                 let domainWithoutExtension = domainParts.first?.lowercased() ?? searchDomain.lowercased()
                 
                 let nameMatches = credentials.filter { credential in
+                    // CRITICAL: Only search in credentials that have no service URL defined
+                    guard credential.service.url?.isEmpty != false else { return false }
+                    
                     let serviceNameMatch = credential.service.name?.lowercased().contains(domainWithoutExtension) ?? false
                     let notesMatch = credential.notes?.lowercased().contains(domainWithoutExtension) ?? false
                     return serviceNameMatch || notesMatch
