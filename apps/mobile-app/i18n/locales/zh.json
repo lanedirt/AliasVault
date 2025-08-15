@@ -360,7 +360,6 @@
   "validation": {
     "required": "此字段为必填项",
     "serviceNameRequired": "服务名称为必填项",
-    "invalidUrlFormat": "无效的网址格式",
     "invalidDateFormat": "日期必须为YYYY-MM-DD格式",
     "invalidEmailFormat": "无效的邮箱格式"
   },
