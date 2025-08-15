@@ -360,7 +360,6 @@
   "validation": {
     "required": "This field is required",
     "serviceNameRequired": "Service name is required",
-    "invalidUrlFormat": "Invalid URL format",
     "invalidDateFormat": "Date must be in YYYY-MM-DD format",
     "invalidEmailFormat": "Invalid email format"
   },
