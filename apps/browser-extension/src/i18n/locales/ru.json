@@ -237,13 +237,9 @@
     "birthDate": "Дата рождения",
     "birthDatePlaceholder": "ГГГГ-ММ-ДД",
     "metadata": "Метаданные",
-    "errors": {
-      "invalidUrl": "Пожалуйста, введите действительный URL-адрес"
-    },
     "validation": {
       "required": "Это поле является обязательным",
       "serviceNameRequired": "Требуется указать название сервиса",
-      "invalidUrl": "Недопустимый формат URL-адреса",
       "invalidEmail": "Неверный формат электронной почты",
       "invalidDateFormat": "Дата должна быть указана в формате ГГГГ-ММ-ДД"
     }
