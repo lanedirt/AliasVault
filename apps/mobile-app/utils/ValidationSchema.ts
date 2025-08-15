@@ -8,7 +8,7 @@ import * as Yup from 'yup';
 export const createCredentialSchema = (t: (key: string) => string) => Yup.object().shape({
   Id: Yup.string().optional(),
   ServiceName: Yup.string().required(t('validation.serviceNameRequired')),
-  ServiceUrl: Yup.string().url(t('validation.invalidUrlFormat')).nullable().notRequired(),
+  ServiceUrl: Yup.string().nullable().notRequired(),
   Alias: Yup.object().shape({
     FirstName: Yup.string().nullable().notRequired(),
     LastName: Yup.string().nullable().notRequired(),
