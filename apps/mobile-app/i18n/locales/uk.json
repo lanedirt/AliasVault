@@ -81,7 +81,7 @@
       "serverNeedsUpdate": "Щоб користуватися цим мобільним додатком, потрібно оновити сервер AliasVault до новішої версії. Зверніться до служби підтримки, якщо вам потрібна допомога.",
       "vaultDecryptFailed": "Не вдалося розшифрувати сховище. Якщо проблема не зникає, вийдіть із системи та увійдіть знову.",
       "unknownErrorDuringSync": "Невідома помилка під час синхронізації сховища",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "passwordChanged": "Ваш пароль змінився з моменту останнього входу. З міркувань безпеки, будь ласка, увійдіть ще раз."
     }
   },
   "credentials": {
@@ -150,41 +150,41 @@
     "createNewAliasFor": "Створити новий псевдонім для",
     "errors": {
       "loadFailed": "Не вдалося завантажити облікові дані",
-      "generateUsernameFailed": "Failed to generate username",
-      "generatePasswordFailed": "Failed to generate password",
-      "generic": "Error"
+      "generateUsernameFailed": "Не вдалося згенерувати ім'я користувача",
+      "generatePasswordFailed": "Не вдалося згенерувати пароль",
+      "generic": "Помилка"
     },
     "contextMenu": {
-      "title": "Credential Options",
-      "edit": "Edit",
-      "delete": "Delete",
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
+      "title": "Відомості про облікові дані",
+      "edit": "Редагувати",
+      "delete": "Видалити",
+      "copyUsername": "Копіювати ім'я користувача",
+      "copyEmail": "Копіювати електронну адресу",
+      "copyPassword": "Копіювати пароль"
     }
   },
   "settings": {
-    "title": "Settings",
-    "iosAutofill": "iOS Autofill",
+    "title": "Налаштування",
+    "iosAutofill": "iOS автозаповнення",
     "iosAutofillSettings": {
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in iOS. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
-      "step1": "1. Open iOS Settings via the button below",
-      "step2": "2. Go to \"General\"",
-      "step3": "3. Tap \"AutoFill & Passwords\"",
-      "step4": "4. Enable \"AliasVault\"",
-      "step5": "5. Disable other password providers (e.g. \"iCloud Passwords\") to avoid conflicts",
-      "openIosSettings": "Open iOS Settings",
-      "alreadyConfigured": "I already configured it",
-      "warningText": "Note: You'll need to authenticate with Face ID/Touch ID or your device passcode when using autofill."
+      "headerText": "Ви можете налаштувати AliasVault для забезпечення вбудованої функції автозаповнення паролів в iOS. Дотримуйтесь інструкцій нижче, щоб увімкнути її.",
+      "howToEnable": "Як увімкнути:",
+      "step1": "1. Відкрийте налаштування iOS за допомогою кнопки нижче",
+      "step2": "2. Перейдіть до розділу «Загальні»",
+      "step3": "3. Натисніть «Автозаповнення та паролі»",
+      "step4": "4. Увімкнути \"AliasVault\"",
+      "step5": "5. Вимкніть інших постачальників паролів (наприклад, «Паролі iCloud»), щоб уникнути конфліктів",
+      "openIosSettings": "Відкрийте налаштування iOS",
+      "alreadyConfigured": "Я вже це налаштував",
+      "warningText": "Примітка: Під час використання автозаповнення вам потрібно буде пройти автентифікацію за допомогою Face ID/Touch ID або пароля вашого пристрою."
     },
-    "androidAutofill": "Android Autofill",
+    "androidAutofill": "Автозаповнення Android",
     "androidAutofillSettings": {
-      "warningTitle": "⚠️ Experimental Feature",
-      "warningDescription": "Autofill support for Android is currently in an experimental state.",
-      "warningLink": "Read more about it here",
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
+      "warningTitle": "⚠️ Експериментальна функція",
+      "warningDescription": "Підтримка автозаповнення для Android наразі перебуває в експериментальному стані.",
+      "warningLink": "Детальніше про це читайте тут",
+      "headerText": "Ви можете налаштувати AliasVault для забезпечення вбудованої функції автозаповнення паролів в Android. Дотримуйтесь інструкцій нижче, щоб увімкнути її.",
+      "howToEnable": "Як увімкнути:",
       "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
       "openAutofillSettings": "Open Autofill Settings",
       "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
