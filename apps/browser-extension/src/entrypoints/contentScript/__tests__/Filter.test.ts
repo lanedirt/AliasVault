@@ -230,7 +230,7 @@ describe('Filter - Credential URL Matching', () => {
   function createSharedTestCredentials(): Credential[] {
     return [
       createTestCredential('Gmail', 'https://gmail.com', 'user@gmail.com'),
-      createTestCredential('Google', 'https://google.com', 'user@gmail.com'),
+      createTestCredential('Google', 'https://google.com', 'user@google.com'),
       createTestCredential('Coolblue', 'https://www.coolblue.nl', 'user@coolblue.nl'),
       createTestCredential('Amazon', 'https://amazon.com', 'user@amazon.com'),
       createTestCredential('Coolblue App', 'com.coolblue.app', 'user@coolblue.nl'),
