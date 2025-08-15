@@ -185,73 +185,73 @@
       "warningLink": "Детальніше про це читайте тут",
       "headerText": "Ви можете налаштувати AliasVault для забезпечення вбудованої функції автозаповнення паролів в Android. Дотримуйтесь інструкцій нижче, щоб увімкнути її.",
       "howToEnable": "Як увімкнути:",
-      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
-      "openAutofillSettings": "Open Autofill Settings",
-      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
-      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
-      "alreadyConfigured": "I already configured it"
+      "step1": "1. Відкрийте налаштування Android за допомогою кнопки нижче та змініть «бажаний сервіс автозаповнення» на «AliasVault»",
+      "openAutofillSettings": "Відкрити налаштування автозаповнення",
+      "buttonTip": "Якщо кнопка вище не працює, можливо, вона заблокована через налаштування безпеки. Ви можете вручну перейти до Налаштувань Android → Загальне керування → Паролі та автозаповнення.",
+      "step2": "2. Деякі програми, наприклад, Google Chrome, можуть вимагати ручної конфігурації в налаштуваннях, щоб дозволити використання сторонніх програм автозаповнення. Однак більшість програм повинні працювати з автозаповненням за замовчуванням.",
+      "alreadyConfigured": "Я вже це налаштував"
     },
-    "vaultUnlock": "Vault Unlock Method",
-    "autoLock": "Auto-lock Timeout",
-    "identityGenerator": "Identity Generator",
-    "security": "Security",
-    "appVersion": "App version {{version}} ({{url}})",
+    "vaultUnlock": "Метод розблокування сховища",
+    "autoLock": "Тайм-аут автоматичного блокування",
+    "identityGenerator": "Генератор ідентифікаційних даних",
+    "security": "Безпека",
+    "appVersion": "Версія додатку {{version}} ({{url}})",
     "autoLockOptions": {
-      "never": "Never",
-      "5seconds": "5 seconds",
-      "30seconds": "30 seconds",
-      "1minute": "1 minute",
-      "15minutes": "15 minutes",
-      "30minutes": "30 minutes",
-      "1hour": "1 hour",
-      "4hours": "4 hours",
-      "8hours": "8 hours"
+      "never": "Ніколи",
+      "5seconds": "5 секунд",
+      "30seconds": "30 секунд",
+      "1minute": "1 хвилина",
+      "15minutes": "15 хвилин",
+      "30minutes": "30 хвилин",
+      "1hour": "1 година",
+      "4hours": "4 години",
+      "8hours": "8 годин"
     },
-    "language": "Language",
-    "languageSystemMessage": "To change the app language, configure the preferred language for AliasVault in your device settings.",
-    "openSettings": "Open Settings",
+    "language": "Мова",
+    "languageSystemMessage": "Щоб змінити мову програми, налаштуйте потрібну мову для AliasVault у налаштуваннях вашого пристрою.",
+    "openSettings": "Відкрити Налаштування",
     "vaultUnlockSettings": {
-      "description": "Choose how you want to unlock your vault.",
-      "biometrics": "Biometrics",
+      "description": "Виберіть, як ви хочете розблокувати своє сховище.",
+      "biometrics": "Біометрія",
       "faceId": "Face ID",
       "touchId": "Touch ID",
       "faceIdTouchId": "Face ID / Touch ID",
-      "biometricEnabled": "{{biometric}} is now successfully enabled",
-      "biometricNotAvailable": "{{biometric}} Not Available",
-      "biometricDisabledMessage": "{{biometric}} is disabled for AliasVault. In order to use it, please enable it in your device settings first.",
-      "biometricHelp": "Your vault decryption key will be securely stored on your local device in the {{keystore}} and can be accessed securely with {{biometric}}.",
-      "biometricUnavailableHelp": "{{biometric}} is not available. Tap to open settings and/or go to your device settings to enable and configure it.",
-      "passwordHelp": "Re-enter your full master password to unlock your vault. This is always enabled as fallback option.",
-      "keystoreIOS": "iOS Keychain",
-      "keystoreAndroid": "Android Keystore"
+      "biometricEnabled": "{{biometric}} тепер успішно ввімкнено",
+      "biometricNotAvailable": "{{biometric}} Недоступно",
+      "biometricDisabledMessage": "{{biometric}} вимкнено для AliasVault. Щоб використовувати його, спочатку ввімкніть в налаштуваннях вашого пристрою.",
+      "biometricHelp": "Ваш ключ розшифрування сховища буде безпечно збережено на вашому локальному пристрої в {{keystore}}, і до нього можна буде отримати безпечний доступ за допомогою {{biometric}}.",
+      "biometricUnavailableHelp": "{{biometric}} недоступний. Натисніть, щоб відкрити налаштування, та/або перейдіть до налаштувань пристрою, щоб увімкнути та налаштувати його.",
+      "passwordHelp": "Ще раз введіть свій головний пароль, щоб розблокувати сховище. Це завжди ввімкнено як резервний варіант.",
+      "keystoreIOS": "Сховище ключів iOS",
+      "keystoreAndroid": "Сховище ключів Android"
     },
     "autoLockSettings": {
-      "description": "Choose how long the app can stay in the background before requiring re-authentication. You'll need to use Face ID or enter your password to unlock the vault again."
+      "description": "Виберіть, як довго програма може залишатися у фоновому режимі, перш ніж вимагатиме повторної автентифікації. Щоб знову розблокувати сховище, вам потрібно буде скористатися Face ID або ввести пароль."
     },
     "identityGeneratorSettings": {
-      "description": "Configure the default language and gender preference for generating new identities.",
-      "languageSection": "Language",
-      "languageDescription": "Set the language that will be used when generating new identities.",
-      "genderSection": "Gender",
-      "genderDescription": "Set the gender preference for generating new identities.",
+      "description": "Налаштуйте мову та стать за замовчуванням для створення нових ідентифікаційних даних.",
+      "languageSection": "Мова",
+      "languageDescription": "Встановіть мову, яка використовуватиметься під час створення нових ідентифікаторів.",
+      "genderSection": "Стать",
+      "genderDescription": "Встановити параметри гендеру для генерації нових ідентифікацій.",
       "languageOptions": {
-        "english": "English",
-        "dutch": "Dutch"
+        "english": "Англійська",
+        "dutch": "Нідерландська"
       },
       "genderOptions": {
-        "random": "Random",
-        "male": "Male",
-        "female": "Female"
+        "random": "Випадкова",
+        "male": "Чоловіча",
+        "female": "Жіноча"
       },
       "errors": {
-        "loadFailed": "Failed to load identity generator settings.",
-        "languageUpdateFailed": "Failed to update language setting.",
-        "genderUpdateFailed": "Failed to update gender setting."
+        "loadFailed": "Не вдалося завантажити налаштування генератора ідентифікаційних даних.",
+        "languageUpdateFailed": "Не вдалося оновити налаштування мови.",
+        "genderUpdateFailed": "Не вдалося оновити налаштування статі."
       }
     },
     "securitySettings": {
-      "title": "Security",
-      "description": "Manage your account and vault security settings.",
+      "title": "Безпека",
+      "description": "Керуйте налаштуваннями безпеки свого облікового запису та сховища.",
       "changeMasterPassword": "Change Master Password",
       "activeSessionsTitle": "Active Sessions",
       "recentAuthLogs": "Recent Auth Logs",
