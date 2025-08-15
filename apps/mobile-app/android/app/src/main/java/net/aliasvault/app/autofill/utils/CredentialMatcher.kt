@@ -8,14 +8,55 @@ import net.aliasvault.app.vaultstore.models.Credential
  * for a given app or website context.
  */
 object CredentialMatcher {
+    
+    /**
+     * Extract domain from URL, handling both full URLs and partial domains.
+     * @param url URL or domain string
+     * @return Normalized domain without protocol or www
+     */
+    private fun extractDomain(url: String): String {
+        var domain = url.trim().lowercase()
+        // Remove protocol if present
+        domain = domain.removePrefix("https://").removePrefix("http://")
+        // Remove www. prefix
+        domain = domain.removePrefix("www.")
+        // Remove path, query, and fragment
+        domain = domain.substringBefore("/").substringBefore("?").substringBefore("#")
+        return domain
+    }
+    
+    /**
+     * Check if two domains match, supporting partial matches.
+     * @param domain1 First domain
+     * @param domain2 Second domain
+     * @return True if domains match (including partial matches)
+     */
+    private fun domainsMatch(domain1: String, domain2: String): Boolean {
+        if (domain1.isBlank() || domain2.isBlank()) return false
+        
+        val d1 = extractDomain(domain1)
+        val d2 = extractDomain(domain2)
+        
+        // Exact match
+        if (d1 == d2) return true
+        
+        // Check if one domain contains the other (for subdomain matching)
+        if (d1.contains(d2) || d2.contains(d1)) return true
+        
+        // Check root domain match
+        val d1Root = extractRootDomain(d1)
+        val d2Root = extractRootDomain(d2)
+        
+        return d1Root == d2Root
+    }
+    
     /**
      * Filters a list of credentials based on app/package name or URL.
-     * Matching strategies in order of specificity:
-     * 1. Exact URL match
-     * 2. Base URL match (excluding path/query)
-     * 3. Root domain match
-     * 4. Domain key match (package middle segment or domain without TLD)
-     * 5. General text matching on service name, username, and URL
+     * Matching strategies in order of priority:
+     * 1. Exact domain match
+     * 2. Partial domain match (root domain match)
+     * 3. Domain key match (package middle segment or domain without TLD)
+     * 4. General text matching on service name and notes
      */
     fun filterCredentialsByAppInfo(
         credentials: List<Credential>,
@@ -25,82 +66,62 @@ object CredentialMatcher {
             return credentials
         }
 
-        val input = appInfo.trim().lowercase()
-        val isUrlLike = input.contains('.') && !input.contains(' ')
-        val host: String?
-        val rootDomain: String?
-        val domainKey: String
-
-        if (isUrlLike && listOf("http://", "https://", "www.").any { input.startsWith(it) }) {
-            // Treat as full or partial URL
-            val cleaned = input
-                .removePrefix("https://")
-                .removePrefix("http://")
-                .removePrefix("www.")
-            host = cleaned.substringBefore("/").substringBefore("?")
-            rootDomain = extractRootDomain(host)
-            domainKey = extractDomainWithoutExtension(rootDomain)
-        } else if (isUrlLike && !input.contains('/')) {
-            // Treat as package name (e.g., com.coolblue.app)
+        val input = appInfo.trim()
+        val inputDomain = extractDomain(input)
+        val isPackageName = input.lowercase().matches(Regex("^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"))
+        
+        val domainKey: String = if (isPackageName) {
+            // Extract key from package name (e.g., "coolblue" from "com.coolblue.app")
             val parts = input.split('.')
-            host = null
-            rootDomain = null
-            domainKey = if (parts.size >= 3) parts[1] else parts.first()
+            if (parts.size >= 3) parts[1] else parts.firstOrNull() ?: input
         } else {
-            // Plain text search
-            host = null
-            rootDomain = null
-            domainKey = input
+            // Extract domain without extension
+            extractDomainWithoutExtension(inputDomain)
         }
 
         val matches = mutableListOf<Credential>()
+        val matchedIds = mutableSetOf<String>()
 
-        if (host != null) {
-            // 1. Exact URL match (with or without scheme)
-            matches += credentials.filter { cred ->
-                cred.service.url?.trim()?.lowercase() in listOf(
-                    input,
-                    "https://$host",
-                    "http://$host",
-                )
-            }
-            // 2. Base URL match
-            matches += credentials.filter { cred ->
-                cred.service.url?.trim()?.lowercase()?.let { url ->
-                    url.startsWith("https://$host") || url.startsWith("http://$host")
-                } == true
+        // Priority 1: Domain matches (exact and partial)
+        if (inputDomain.isNotBlank()) {
+            credentials.forEach { cred ->
+                val serviceUrl = cred.service.url
+                if (!serviceUrl.isNullOrBlank() && cred.id !in matchedIds) {
+                    if (domainsMatch(input, serviceUrl)) {
+                        matches.add(cred)
+                        matchedIds.add(cred.id)
+                    }
+                }
             }
         }
-
-        // 3. Root domain fuzzy match on both URL and service name
-        if (rootDomain != null) {
-            val rootDomainNoTld = rootDomain.substringBefore('.') // e.g., "coolblue" from "coolblue.nl"
-
-            matches += credentials.filter { cred ->
-                val urlMatches = cred.service.url?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }?.let { url ->
-                    val u = url.removePrefix("https://")
-                        .removePrefix("http://")
-                        .removePrefix("www.")
-                        .substringBefore("/")
-                    val base = extractRootDomain(u)
-                    base.contains(rootDomainNoTld) || rootDomainNoTld.contains(base)
-                } == true
-
-                val nameMatches = cred.service.name?.trim()?.lowercase()?.let { name ->
-                    name.contains(rootDomainNoTld) || rootDomainNoTld.contains(name)
-                } == true
-
-                urlMatches || nameMatches
+        
+        // Priority 2: Domain key match against service name and notes
+        if (domainKey.isNotBlank()) {
+            credentials.forEach { cred ->
+                if (cred.id !in matchedIds) {
+                    val nameMatches = cred.service.name?.lowercase()?.contains(domainKey) == true
+                    val notesMatches = cred.notes?.lowercase()?.contains(domainKey) == true
+                    
+                    if (nameMatches || notesMatches) {
+                        matches.add(cred)
+                        matchedIds.add(cred.id)
+                    }
+                }
             }
         }
-
-        // 4. Domain key match against service name, URL, and notes
-        matches += credentials.filter { cred ->
-            val nameMatches = cred.service.name?.trim()?.lowercase()?.contains(domainKey) == true
-            val urlMatches = cred.service.url?.trim()?.lowercase()?.contains(domainKey) == true
-            val notesMatches = cred.notes?.lowercase()?.contains(domainKey) == true
-
-            nameMatches || urlMatches || notesMatches
+        
+        // Priority 3: Fallback text search if no matches found
+        if (matches.isEmpty()) {
+            val searchText = input.lowercase()
+            credentials.forEach { cred ->
+                val nameMatches = cred.service.name?.lowercase()?.contains(searchText) == true
+                val urlMatches = cred.service.url?.lowercase()?.contains(searchText) == true
+                val notesMatches = cred.notes?.lowercase()?.contains(searchText) == true
+                
+                if (nameMatches || urlMatches || notesMatches) {
+                    matches.add(cred)
+                }
+            }
         }
 
         // Deduplicate matches based on credential ID to avoid duplicates from different matching strategies

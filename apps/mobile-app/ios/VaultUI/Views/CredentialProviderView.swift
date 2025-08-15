@@ -252,61 +252,75 @@ public class CredentialProviderViewModel: ObservableObject {
             return
         }
 
-        func extractRootDomain(from urlString: String) -> String? {
-            guard let url = URL(string: urlString), let host = url.host else { return nil }
-            let parts = host.components(separatedBy: ".")
-            return parts.count >= 2 ? parts.suffix(2).joined(separator: ".") : host
+        func extractDomain(from urlString: String) -> String {
+            var domain = urlString.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            // Remove protocol if present
+            domain = domain.replacingOccurrences(of: "https://", with: "")
+            domain = domain.replacingOccurrences(of: "http://", with: "")
+            // Remove www. prefix
+            domain = domain.replacingOccurrences(of: "www.", with: "")
+            // Remove path, query, and fragment
+            if let firstSlash = domain.firstIndex(of: "/") {
+                domain = String(domain[..<firstSlash])
+            }
+            if let firstQuestion = domain.firstIndex(of: "?") {
+                domain = String(domain[..<firstQuestion])
+            }
+            if let firstHash = domain.firstIndex(of: "#") {
+                domain = String(domain[..<firstHash])
+            }
+            return domain
         }
 
-        func extractDomainWithoutExtension(from domain: String) -> String {
-            return domain.components(separatedBy: ".").first ?? domain
+        func extractRootDomain(from domain: String) -> String {
+            let parts = domain.components(separatedBy: ".")
+            return parts.count >= 2 ? parts.suffix(2).joined(separator: ".") : domain
         }
 
-        if let searchUrl = URL(string: searchText), let hostname = searchUrl.host, !hostname.isEmpty {
-            let baseUrl = "\(searchUrl.scheme ?? "https")://\(hostname)"
-            let rootDomain = extractRootDomain(from: searchUrl.absoluteString) ?? hostname
-            let domainWithoutExtension = extractDomainWithoutExtension(from: rootDomain).lowercased()
+        func domainsMatch(_ domain1: String, _ domain2: String) -> Bool {
+            let d1 = extractDomain(from: domain1)
+            let d2 = extractDomain(from: domain2)
+            
+            // Exact match
+            if d1 == d2 { return true }
+            
+            // Check if one domain contains the other (for subdomain matching)
+            if d1.contains(d2) || d2.contains(d1) { return true }
+            
+            // Check root domain match
+            let d1Root = extractRootDomain(from: d1)
+            let d2Root = extractRootDomain(from: d2)
+            
+            return d1Root == d2Root
+        }
 
+        // Try to parse as URL first
+        let searchDomain = extractDomain(from: searchText)
+        
+        if !searchDomain.isEmpty {
             var matches: Set<Credential> = []
 
-            // 1. Exact URL match
-            let exactMatches = credentials.filter { credential in
-                if let serviceUrl = credential.service.url,
-                let url = URL(string: serviceUrl) {
-                    return url.absoluteString.lowercased() == searchUrl.absoluteString.lowercased()
+            // Check for domain matches with priority
+            credentials.forEach { credential in
+                guard let serviceUrl = credential.service.url, !serviceUrl.isEmpty else { return }
+                
+                if domainsMatch(searchText, serviceUrl) {
+                    matches.insert(credential)
                 }
-                return false
             }
-            matches.formUnion(exactMatches)
 
-            // 2. Base URL match (excluding query/path)
-            let baseUrlMatches = credentials.filter { credential in
-                if let serviceUrl = credential.service.url,
-                let url = URL(string: serviceUrl) {
-                    return url.absoluteString.lowercased().hasPrefix(baseUrl.lowercased())
+            // If no domain matches found, try text search in service name
+            if matches.isEmpty {
+                let domainParts = searchDomain.components(separatedBy: ".")
+                let domainWithoutExtension = domainParts.first?.lowercased() ?? searchDomain.lowercased()
+                
+                let nameMatches = credentials.filter { credential in
+                    let serviceNameMatch = credential.service.name?.lowercased().contains(domainWithoutExtension) ?? false
+                    let notesMatch = credential.notes?.lowercased().contains(domainWithoutExtension) ?? false
+                    return serviceNameMatch || notesMatch
                 }
-                return false
+                matches.formUnion(nameMatches)
             }
-            matches.formUnion(baseUrlMatches)
-
-            // 3. Root domain match (e.g., coolblue.nl)
-            let rootDomainMatches = credentials.filter { credential in
-                if let serviceUrl = credential.service.url,
-                let credRootDomain = extractRootDomain(from: serviceUrl) {
-                    return credRootDomain.lowercased() == rootDomain.lowercased()
-                }
-                return false
-            }
-            matches.formUnion(rootDomainMatches)
-
-            // 4. Domain name part match (e.g., "coolblue" in service name or notes)
-            let domainNameMatches = credentials.filter { credential in
-                let serviceNameMatch = credential.service.name?.lowercased().contains(domainWithoutExtension) ?? false
-                let notesMatch = credential.notes?.lowercased().contains(domainWithoutExtension) ?? false
-                let reverseNameMatch = domainWithoutExtension.contains(credential.service.name?.lowercased() ?? "")
-                return serviceNameMatch || notesMatch || reverseNameMatch
-            }
-            matches.formUnion(domainNameMatches)
 
             filteredCredentials = Array(matches)
         } else {

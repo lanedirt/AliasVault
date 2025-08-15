@@ -6,36 +6,99 @@ type CredentialWithPriority = Credential & {
 }
 
 /**
+ * Extract domain from URL, handling both full URLs and partial domains
+ * @param url - URL or domain string
+ * @returns Normalized domain without protocol or www
+ */
+function extractDomain(url: string): string {
+  if (!url) {
+    return '';
+  }
+
+  // Remove protocol if present
+  let domain = url.toLowerCase().trim();
+  domain = domain.replace(/^https?:\/\//, '');
+
+  // Remove www. prefix
+  domain = domain.replace(/^www\./, '');
+
+  // Remove path, query, and fragment
+  domain = domain.split('/')[0];
+  domain = domain.split('?')[0];
+  domain = domain.split('#')[0];
+
+  return domain;
+}
+
+/**
+ * Check if two domains match, supporting partial matches
+ * @param domain1 - First domain
+ * @param domain2 - Second domain
+ * @returns True if domains match (including partial matches)
+ */
+function domainsMatch(domain1: string, domain2: string): boolean {
+  if (!domain1 || !domain2) {
+    return false;
+  }
+
+  const d1 = extractDomain(domain1);
+  const d2 = extractDomain(domain2);
+
+  // Exact match
+  if (d1 === d2) {
+    return true;
+  }
+
+  // Check if one domain contains the other (for subdomain matching)
+  if (d1.includes(d2) || d2.includes(d1)) {
+    return true;
+  }
+
+  // Extract root domains for comparison
+  const d1Parts = d1.split('.');
+  const d2Parts = d2.split('.');
+
+  // Get the last 2 parts (domain.tld) for comparison
+  const d1Root = d1Parts.slice(-2).join('.');
+  const d2Root = d2Parts.slice(-2).join('.');
+
+  return d1Root === d2Root;
+}
+
+/**
  * Filter credentials based on current URL and page context to determine which credentials to show
  * in the autofill popup. Credentials are sorted by priority:
- * 1. Exact URL match (highest priority)
- * 2. Base URL match AND page title word match
- * 3. Base URL match only
- * 4. Page title word match only (lowest priority)
+ * 1. Exact domain match (highest priority)
+ * 2. Partial domain match (root domain match)
+ * 3. Base URL match AND page title word match
+ * 4. Base URL match only
+ * 5. Page title word match only (lowest priority)
  */
 export function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string): Credential[] {
-  const urlObject = new URL(currentUrl);
-  const baseUrl = `${urlObject.protocol}//${urlObject.hostname}`;
   const filtered: CredentialWithPriority[] = [];
+  const currentDomain = extractDomain(currentUrl);
 
-  const sanitizedCurrentUrl = currentUrl.toLowerCase().replace('www.', '');
-
-  // 1. Exact URL match (priority 1)
+  // Check each credential for matches
   credentials.forEach(cred => {
     if (!cred.ServiceUrl || cred.ServiceUrl.length === 0) {
       return;
     }
 
-    const sanitizedCredUrl = cred.ServiceUrl.toLowerCase().replace('www.', '');
+    const credDomain = extractDomain(cred.ServiceUrl);
 
-    if (sanitizedCurrentUrl.startsWith(sanitizedCredUrl)) {
-      filtered.push({ ...cred, priority: 1 });
+    // Check for domain match (exact or partial)
+    if (domainsMatch(currentDomain, credDomain)) {
+      // Exact match gets higher priority
+      const priority = currentDomain === credDomain ? 1 : 2;
+      filtered.push({ ...cred, priority });
     }
   });
 
-  // If we have one or more exact matches, do not continue to other matches
+  // If we have domain matches, return them sorted by priority
   if (filtered.length > 0) {
-    return filtered;
+    return filtered
+      .sort((a, b) => a.priority - b.priority)
+      .slice(0, 3);
   }
 
   // Prepare page title words for matching
@@ -48,51 +111,25 @@ export function filterCredentials(credentials: Credential[], currentUrl: string,
       )
     : [];
 
-  // Check for base URL matches and page title matches
+  // Check for page title matches as fallback
   credentials.forEach(cred => {
-    if (!cred.ServiceUrl || filtered.some(f => f.Id === cred.Id)) {
+    // Skip if already in filtered list
+    if (filtered.some(f => f.Id === cred.Id)) {
       return;
     }
 
-    let hasBaseUrlMatch = false;
-    let hasTitleMatch = false;
-
-    // Check base URL match
-    try {
-      const credUrlObject = new URL(cred.ServiceUrl);
-      const currentUrlObject = new URL(baseUrl);
-
-      const credDomainParts = credUrlObject.hostname.toLowerCase().split('.');
-      const currentDomainParts = currentUrlObject.hostname.toLowerCase().split('.');
-
-      const credRootDomain = credDomainParts.slice(-2).join('.');
-      const currentRootDomain = currentDomainParts.slice(-2).join('.');
-
-      if (credUrlObject.protocol === currentUrlObject.protocol &&
-          credRootDomain === currentRootDomain) {
-        hasBaseUrlMatch = true;
-      }
-    } catch {
-      // Invalid URL, skip
-    }
-
     // Check page title match
-    if (titleWords.length > 0) {
+    if (titleWords.length > 0 && cred.ServiceName) {
       const credNameWords = cred.ServiceName.toLowerCase()
         .split(/\s+/)
         .filter(word => word.length > 3 && !CombinedStopWords.has(word));
-      hasTitleMatch = titleWords.some(word =>
+      const hasTitleMatch = titleWords.some(word =>
         credNameWords.some(credWord => credWord.includes(word))
       );
-    }
 
-    // Assign priority based on matches
-    if (hasBaseUrlMatch && hasTitleMatch) {
-      filtered.push({ ...cred, priority: 2 });
-    } else if (hasBaseUrlMatch) {
-      filtered.push({ ...cred, priority: 3 });
-    } else if (hasTitleMatch) {
-      filtered.push({ ...cred, priority: 4 });
+      if (hasTitleMatch) {
+        filtered.push({ ...cred, priority: 5 });
+      }
     }
   });
 
