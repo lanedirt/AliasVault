@@ -92,7 +92,7 @@ export const useVaultSync = () : {
 
       // Check if the SRP salt has changed compared to locally stored encryption key derivation params
       const keyDerivationParams = await authContext.getEncryptionKeyDerivationParams();
-      if (keyDerivationParams && statusResponse.srpSalt !== '' && statusResponse.srpSalt !== keyDerivationParams.salt) {
+      if (keyDerivationParams && statusResponse.srpSalt && statusResponse.srpSalt !== keyDerivationParams.salt) {
         /**
          * Server SRP salt has changed compared to locally stored value, which means the user has changed
          * their password since the last time they logged in. This means that the local encryption key is no
