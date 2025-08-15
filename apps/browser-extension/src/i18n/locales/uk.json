@@ -96,13 +96,13 @@
       "unknownError": "Сталася невідома помилка",
       "failedToStoreVault": "Не вдалося зберегти сховище",
       "vaultNotAvailable": "Сховище недоступне",
-      "failedToRetrieveData": "Failed to retrieve data",
+      "failedToRetrieveData": "Не вдалося отримати дані",
       "vaultIsLocked": "Сховище заблоковано",
-      "failedToUploadVault": "Failed to upload vault",
-      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
+      "failedToUploadVault": "Не вдалося завантажити сховище",
+      "passwordChanged": "Ваш пароль змінився з моменту останнього входу. З міркувань безпеки, будь ласка, увійдіть ще раз."
     },
     "apiErrors": {
-      "UNKNOWN_ERROR": "An unknown error occurred. Please try again.",
+      "UNKNOWN_ERROR": "Сталася невідома помилка. Будь ласка, спробуйте ще раз.",
       "ACCOUNT_LOCKED": "Account temporarily locked due to too many failed attempts. Please try again later.",
       "ACCOUNT_BLOCKED": "Your account has been disabled. If you believe this is a mistake, please contact support.",
       "USER_NOT_FOUND": "Invalid username or password. Please try again.",
