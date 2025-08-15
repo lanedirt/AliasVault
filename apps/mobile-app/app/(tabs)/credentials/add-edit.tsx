@@ -62,7 +62,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       Username: "",
       Password: "",
       ServiceName: "",
-      ServiceUrl: "",
+      ServiceUrl: "https://",
       Notes: "",
       Alias: {
         FirstName: "",
@@ -255,7 +255,7 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       Username: data.Username,
       Password: data.Password,
       ServiceName: data.ServiceName,
-      ServiceUrl: data.ServiceUrl,
+      ServiceUrl: (data.ServiceUrl === 'http://' || data.ServiceUrl === 'https://') ? '' : data.ServiceUrl,
       Notes: data.Notes,
       Alias: {
         FirstName: data.Alias.FirstName,
@@ -274,7 +274,8 @@ export default function AddEditCredentialScreen() : React.ReactNode {
       credentialToSave.Username = watch('Username');
       credentialToSave.Password = watch('Password');
       credentialToSave.ServiceName = watch('ServiceName');
-      credentialToSave.ServiceUrl = watch('ServiceUrl');
+      const serviceUrl = watch('ServiceUrl');
+      credentialToSave.ServiceUrl = (serviceUrl === 'http://' || serviceUrl === 'https://') ? '' : serviceUrl;
       credentialToSave.Notes = watch('Notes');
       credentialToSave.Alias.FirstName = watch('Alias.FirstName');
       credentialToSave.Alias.LastName = watch('Alias.LastName');

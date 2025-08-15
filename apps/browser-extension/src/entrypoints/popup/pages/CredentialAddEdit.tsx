@@ -98,7 +98,7 @@ const CredentialAddEdit: React.FC = () => {
       Username: "",
       Password: "",
       ServiceName: "",
-      ServiceUrl: "",
+      ServiceUrl: "https://",
       Notes: "",
       Alias: {
         FirstName: "",
@@ -401,6 +401,11 @@ const CredentialAddEdit: React.FC = () => {
       birthdate = IdentityHelperUtils.normalizeBirthDateForDb(birthdate);
     }
 
+    // Clean up empty protocol-only URLs
+    if (data.ServiceUrl === 'http://' || data.ServiceUrl === 'https://') {
+      data.ServiceUrl = '';
+    }
+
     // If we're creating a new credential and mode is random, generate random values here
     if (!isEditMode && mode === 'random') {
       // Generate random values now and then read them from the form fields to manually assign to the credentialToSave object
@@ -413,6 +418,9 @@ const CredentialAddEdit: React.FC = () => {
       data.Alias.BirthDate = birthdate;
       data.Alias.Gender = watch('Alias.Gender');
       data.Alias.Email = watch('Alias.Email');
+      // Clean up ServiceUrl for random mode too
+      const serviceUrl = watch('ServiceUrl');
+      data.ServiceUrl = (serviceUrl === 'http://' || serviceUrl === 'https://') ? '' : serviceUrl;
     }
 
     // Extract favicon from service URL if the credential has one

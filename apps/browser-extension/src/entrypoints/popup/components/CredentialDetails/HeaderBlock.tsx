@@ -21,14 +21,18 @@ const HeaderBlock: React.FC<HeaderBlockProps> = ({ credential }) => (
       <div>
         <h1 className="text-lg font-bold text-gray-900 dark:text-white">{credential.ServiceName}</h1>
         {credential.ServiceUrl && (
-          <a
-            href={credential.ServiceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 break-all"
-          >
-            {credential.ServiceUrl}
-          </a>
+          /^https?:\/\//i.test(credential.ServiceUrl) ? (
+            <a
+              href={credential.ServiceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 break-all"
+            >
+              {credential.ServiceUrl}
+            </a>
+          ) : (
+            <span className="break-all">{credential.ServiceUrl}</span>
+          )
         )}
       </div>
     </div>
