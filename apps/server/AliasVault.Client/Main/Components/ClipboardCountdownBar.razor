@@ -1,34 +1,135 @@
 @inject ClipboardCopyService ClipboardCopyService
+@inject JsInteropService JsInteropService
 @implements IDisposable
+@using Microsoft.JSInterop
 
 @if (IsVisible)
 {
     <div class="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-200 dark:bg-gray-700">
-        <div class="h-full bg-orange-500 dark:bg-orange-400 transition-all duration-100 ease-linear"
-             style="width: @(Progress * 100)%"></div>
+        <div class="h-full @GetBarColorClass() transition-all duration-100 ease-linear @GetAnimationClass()"
+             style="width: @(Progress * 100)%">
+        </div>
     </div>
+
+    @if (CurrentStatus == "pending")
+    {
+        <style>
+            @@keyframes custom-pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+            .custom-pulse-animation {
+                animation: custom-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+        </style>
+    }
 }
 
 @code {
     private bool IsVisible { get; set; }
     private double Progress { get; set; }
+    private string CurrentStatus { get; set; } = "active";
+    private DotNetObjectReference<ClipboardCountdownBar>? _objRef;
 
     /// <inheritdoc />
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         ClipboardCopyService.OnTimerProgress += HandleTimerProgress;
+
+        // Register for JavaScript status callbacks
+        _objRef = DotNetObjectReference.Create(this);
+        await JsInteropService.RegisterClipboardStatusCallback(_objRef);
     }
 
     private void HandleTimerProgress(double progress)
     {
         Progress = progress;
-        IsVisible = progress > 0;
+
+        if (progress > 0)
+        {
+            // Normal countdown in progress
+            IsVisible = true;
+            CurrentStatus = "active";
+        }
+        else
+        {
+            // Countdown completed - only default to pending if not already cleared
+            if (CurrentStatus != "cleared")
+            {
+                IsVisible = true;
+                Progress = 1.0; // Show full bar when pending
+                CurrentStatus = "pending";
+            }
+        }
+
         InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Called from JavaScript when clipboard status changes.
+    /// </summary>
+    [JSInvokable]
+    public async Task OnClipboardStatusChange(string status)
+    {
+        Console.WriteLine($"[ClipboardCountdownBar] Status changed to: {status}");
+
+        // Ignore the test 'registered' status
+        if (status == "registered")
+        {
+            return;
+        }
+
+        // Ensure UI updates happen on the UI thread
+        await InvokeAsync(() =>
+        {
+            CurrentStatus = status;
+
+            // Hide the bar when clipboard is cleared
+            if (status == "cleared")
+            {
+                IsVisible = false;
+                Progress = 0;
+            }
+            // Update pending state properly
+            else if (status == "pending")
+            {
+                IsVisible = true;
+                Progress = 1.0;
+            }
+            // Handle active state
+            else if (status == "active")
+            {
+                // Let timer handle active state, but ensure we're visible if we should be
+            }
+
+            StateHasChanged();
+        });
+    }
+
+    private string GetBarColorClass()
+    {
+        return CurrentStatus switch
+        {
+            "pending" => "bg-blue-500 dark:bg-blue-400", // Blue when pending (waiting for focus)
+            _ => "bg-orange-500 dark:bg-orange-400" // Orange when actively counting down or cleared
+        };
+    }
+
+    private string GetAnimationClass()
+    {
+        // Add pulse animation when pending to draw attention
+        return CurrentStatus == "pending" ? "custom-pulse-animation" : "";
+    }
+
     /// <inheritdoc />
-    public void Dispose()
+    public async void Dispose()
     {
         ClipboardCopyService.OnTimerProgress -= HandleTimerProgress;
+
+        if (_objRef != null)
+        {
+            await JsInteropService.UnregisterClipboardStatusCallback();
+            _objRef.Dispose();
+        }
     }
 }

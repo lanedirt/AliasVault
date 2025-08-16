@@ -116,6 +116,46 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         await jsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", value);
 
     /// <summary>
+    /// Copy a string to the clipboard and schedule automatic clearing after specified seconds.
+    /// </summary>
+    /// <param name="value">Value to copy to clipboard.</param>
+    /// <param name="clearAfterSeconds">Number of seconds after which to clear the clipboard.</param>
+    /// <returns>True if copy was successful, false otherwise.</returns>
+    public async Task<bool> CopyToClipboardWithClear(string value, int clearAfterSeconds) =>
+        await jsRuntime.InvokeAsync<bool>("copyToClipboardWithClear", value, clearAfterSeconds);
+
+    /// <summary>
+    /// Clear the clipboard safely, handling document focus issues.
+    /// </summary>
+    /// <returns>True if clipboard was cleared successfully, false otherwise.</returns>
+    public async Task<bool> SafeClearClipboard() =>
+        await jsRuntime.InvokeAsync<bool>("safeClearClipboard");
+
+    /// <summary>
+    /// Clear the clipboard by setting it to an empty string.
+    /// </summary>
+    /// <returns>Task.</returns>
+    public async Task ClearClipboard() =>
+        await jsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", string.Empty);
+
+    /// <summary>
+    /// Register a callback for clipboard status changes.
+    /// </summary>
+    /// <typeparam name="TComponent">Component type.</typeparam>
+    /// <param name="objRef">DotNetObjectReference.</param>
+    /// <returns>Task.</returns>
+    public async Task RegisterClipboardStatusCallback<TComponent>(DotNetObjectReference<TComponent> objRef)
+        where TComponent : class =>
+        await jsRuntime.InvokeVoidAsync("registerClipboardStatusCallback", objRef);
+
+    /// <summary>
+    /// Unregister the clipboard status callback.
+    /// </summary>
+    /// <returns>Task.</returns>
+    public async Task UnregisterClipboardStatusCallback() =>
+        await jsRuntime.InvokeVoidAsync("unregisterClipboardStatusCallback");
+
+    /// <summary>
     /// Initializes the top menu.
     /// </summary>
     /// <returns>Task.</returns>

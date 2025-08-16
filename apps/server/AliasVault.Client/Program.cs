@@ -95,7 +95,7 @@ builder.Services.AddScoped<MinDurationLoadingService>();
 builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<JsInteropService>();
 builder.Services.AddScoped<EmailService>();
-builder.Services.AddSingleton<ClipboardCopyService>();
+builder.Services.AddScoped<ClipboardCopyService>();
 builder.Services.AddScoped<ConfirmModalService>();
 builder.Services.AddScoped<QuickCreateStateService>();
 builder.Services.AddScoped<LanguageService>();
