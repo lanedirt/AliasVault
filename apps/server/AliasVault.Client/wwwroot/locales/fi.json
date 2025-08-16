@@ -1,25 +1,25 @@
 {
   "loading": {
-    "title": "AliasVault is loading",
-    "message": "Initializing secure environment. AliasVault prioritizes your privacy by running entirely in your browser. The first load might take a short while.",
+    "title": "AliasVault käynnistyy",
+    "message": "Alustetaan turvallista ympäristöä. AliasVault asettaa yksityisyytesi etusijalle toimien täysin verkkoselaimessasi. Ensimmäinen käynnistyskerta voi kestää jonkin aikaa. ",
     "refreshText": "",
-    "refreshButtonText": "Refresh Page"
+    "refreshButtonText": "Päivitä sivu"
   },
   "errors": {
-    "unhandledError": "An unhandled error has occurred. Please try reloading the page. If the issue persists, please contact support.",
-    "webAssemblyError": "AliasVault requires WebAssembly, which this browser does not support. Try using a more modern browser that supports WebAssembly.",
-    "reloadPageText": "Reload Page"
+    "unhandledError": "On tapahtunut käsittelemätön virhe. Yritä ladata sivu uudelleen. Jos ongelma jatkuu, ota yhteyttä tukeen.",
+    "webAssemblyError": "AliasVault tarvitsee WebAssemblyn, jota käyttämäsi selain ei tue. Kokeile käyttää nykyaikaisempaa selainta, joka tukee WebAssemblyä. ",
+    "reloadPageText": "Lataa sivu uudelleen"
   },
   "quotes": {
     "security": [
-      "Your identity is your most valuable asset. Protect it like one.",
-      "In the digital world, a strong password is your first line of defense.",
-      "Security is not a product, but a process.",
-      "The weakest link in the security chain is the human element.",
-      "Security is always excessive until it's not enough.",
-      "Trust, but verify - especially online.",
-      "Your data is only as secure as your weakest password.",
-      "The most secure password is the one you can't remember."
+      "Henkilöllisyytesi on arvoikkain voimavarasi. Suojaa sitä ainokaisenasi. ",
+      "Digitaalisessa maailmassa vahva salasana on sinun ensimmäinen puolustuslinja.",
+      "Turvallisuus ei ole tuote, vaan prosessi.",
+      "Turvallisimmassakin ketjussa heikoin lenkki on inhimillinen tekijä.",
+      "Turvallisuus on aina ylenpalttista, kunnes se ei riitä.",
+      "Luota, mutta vahvista - erityisesti verkossa.",
+      "Datasi on vain niin turvallista kuin heikoin salasanasi .",
+      "Turvallisin salasana on se, jota et pysty muistamaan. "
     ]
   }
 }
