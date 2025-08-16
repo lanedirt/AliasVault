@@ -71,7 +71,7 @@
     <comment>Message when no active sessions are available</comment>
   </data>
   <data name="DeviceColumn" xml:space="preserve">
-    <value>Device</value>
+    <value>Laite</value>
     <comment>Table column header</comment>
   </data>
   <data name="LastActiveColumn" xml:space="preserve">
