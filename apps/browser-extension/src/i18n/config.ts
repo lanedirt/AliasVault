@@ -4,6 +4,7 @@
  */
 
 import enTranslations from './locales/en.json';
+import fiTranslations from './locales/fi.json';
 import itTranslations from './locales/it.json';
 import nlTranslations from './locales/nl.json';
 import ruTranslations from './locales/ru.json';
@@ -16,6 +17,9 @@ import zhTranslations from './locales/zh.json';
 export const LANGUAGE_RESOURCES = {
   en: {
     translation: enTranslations
+  },
+  fi: {
+    translation: fiTranslations
   },
   nl: {
     translation: nlTranslations
@@ -47,6 +51,12 @@ export const AVAILABLE_LANGUAGES: ILanguageConfig[] = [
     name: 'Dutch',
     nativeName: 'Nederlands',
     flag: '🇳🇱'
+  },
+  {
+    code: 'fi',
+    name: 'Finnish',
+    nativeName: 'Suomi',
+    flag: '🇫🇮'
   },
   {
     code: 'it',
