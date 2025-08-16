@@ -59,23 +59,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="LoggingInWithWebAuthn" xml:space="preserve">
-    <value>Logging in with WebAuthn...</value>
+    <value>Kirjaudutaan käyttämällä WebAuthi:ia... </value>
     <comment>Message shown while WebAuthn authentication is in progress</comment>
   </data>
   <data name="QuickUnlockDescription" xml:space="preserve">
-    <value>Quickly unlock your vault using your fingerprint, face ID, or security key. Or login with your password as a fallback.</value>
+    <value>Avaa holvi nopeasti käyttämällä sormenjälkeä, kasvotunnistetta tai turva-avainta. Tai kirjaudu sisään salasanallasi fallbackin avulla.</value>
     <comment>Description explaining WebAuthn unlock options</comment>
   </data>
   <data name="UnlockWithWebAuthn" xml:space="preserve">
-    <value>Unlock with WebAuthn</value>
+    <value>Avaa WebAuth:ia käyttäen</value>
     <comment>Button text for WebAuthn unlock</comment>
   </data>
   <data name="UnlockWithPassword" xml:space="preserve">
-    <value>Unlock with password</value>
+    <value>Avaa salasanalla</value>
     <comment>Button text for password unlock</comment>
   </data>
   <data name="EnterMasterPasswordDescription" xml:space="preserve">
-    <value>Enter your master password to unlock your vault.</value>
+    <value>Syötä pääsalasanasi avataksesi holvisi lukituksen.</value>
     <comment>Description for password unlock form</comment>
   </data>
   <data name="YourPasswordLabel" xml:space="preserve">
@@ -87,39 +87,39 @@
     <comment>Button text for unlock submission</comment>
   </data>
   <data name="SwitchAccountsText" xml:space="preserve">
-    <value>Switch accounts?</value>
+    <value>Vaihdetaanko tiliä?</value>
     <comment>Text before logout link</comment>
   </data>
   <data name="LogOutLink" xml:space="preserve">
-    <value>Log out</value>
+    <value>Kirjaudu ulos</value>
     <comment>Link text for logout</comment>
   </data>
   <data name="UnlockingVaultMessage" xml:space="preserve">
-    <value>Unlocking vault...</value>
+    <value>Avataan holvia...</value>
     <comment>Loading message while unlocking vault</comment>
   </data>
   <data name="UnlockRequestError" xml:space="preserve">
-    <value>An error occurred while processing the unlock request.</value>
+    <value>Tapahtui virhe käsiteltäessä lukituksen avauspyyntöä.</value>
     <comment>Error message for unlock request processing</comment>
   </data>
   <data name="IncorrectPasswordError" xml:space="preserve">
-    <value>The password is incorrect. Please try entering your password again, or log out and log in again.</value>
+    <value>Salasana on virheellinen. Yritä syöttää salasana uudelleen tai kirjautua ulos ja kirjautua sisään uudelleen.</value>
     <comment>Error message for incorrect password</comment>
   </data>
   <data name="SessionTimedOutError" xml:space="preserve">
-    <value>Your session has timed out. Please log in again.</value>
+    <value>Istuntosi aikakatkaistiin! Ole hyvä ja kirjaudu uudelleen!</value>
     <comment>Error message for session timeout</comment>
   </data>
   <data name="ConnectionFailedError" xml:space="preserve">
-    <value>Connection with the AliasVault servers failed. Please try again (later).</value>
+    <value>Yhteys AliasVault-palvelimiin epäonnistui. Yritä uudelleen (myöhemmin).</value>
     <comment>Error message for server connection failure</comment>
   </data>
   <data name="WebAuthnNotSupportedError" xml:space="preserve">
-    <value>Your current browser does not support the WebAuthn PRF extension. Please login with your password instead.</value>
+    <value>Nykyinen selain ei tue WebAuthn PRF laajennusta. Ole hyvä ja kirjaudu sen sijaan salasanalla.</value>
     <comment>Error message when WebAuthn is not supported</comment>
   </data>
   <data name="GenericUnlockError" xml:space="preserve">
-    <value>An error occurred while processing the login request. Try again (later).</value>
+    <value>Tapahtui virhe käsiteltäessä kirjautumispyyntöä. Yritä uudelleen (myöhemmin).</value>
     <comment>Generic error message for unlock failures</comment>
   </data>
 </root>
