@@ -14,7 +14,7 @@ import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY } from '@/utils/Constants';
+import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY } from '@/utils/Constants';
 
 import { storage, browser } from "#imports";
 
@@ -49,11 +49,12 @@ const Settings: React.FC = () => {
     isGloballyEnabled: true,
     isContextMenuEnabled: true
   });
+  const [clipboardTimeout, setClipboardTimeout] = useState<number>(10);
 
   /**
    * Get current tab in browser.
    */
-  const getCurrentTab = async (): Promise<browser.Tabs.Tab> => {
+  const getCurrentTab = async () : Promise<chrome.tabs.Tab> => {
     const queryOptions = { active: true, currentWindow: true };
     const [tab] = await browser.tabs.query(queryOptions);
     return tab;
@@ -122,6 +123,10 @@ const Settings: React.FC = () => {
 
     // Load API URL
     await loadApiUrl();
+
+    // Load clipboard clear timeout
+    const timeout = await storage.getItem(CLIPBOARD_CLEAR_TIMEOUT_KEY) as number ?? 10;
+    setClipboardTimeout(timeout);
 
     setSettings({
       disabledUrls,
@@ -227,6 +232,15 @@ const Settings: React.FC = () => {
       ...prev,
       theme: newTheme
     }));
+  };
+
+  /**
+   * Set clipboard clear timeout.
+   */
+  const setClipboardClearTimeout = async (timeout: number) : Promise<void> => {
+    await storage.setItem(CLIPBOARD_CLEAR_TIMEOUT_KEY, timeout);
+    await sendMessage('SET_CLIPBOARD_CLEAR_TIMEOUT', timeout, 'background');
+    setClipboardTimeout(timeout);
   };
 
   /**
@@ -384,6 +398,29 @@ const Settings: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Security Settings Section */}
+      <section>
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.security')}</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.clipboardClearTimeout')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.clipboardClearTimeoutDescription')}</p>
+              <select
+                value={clipboardTimeout}
+                onChange={(e) => setClipboardClearTimeout(Number(e.target.value))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="0">{t('settings.clipboardClearDisabled')}</option>
+                <option value="5">{t('settings.clipboardClear5Seconds')}</option>
+                <option value="10">{t('settings.clipboardClear10Seconds')}</option>
+                <option value="15">{t('settings.clipboardClear15Seconds')}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Appearance Settings Section */}
       <section>

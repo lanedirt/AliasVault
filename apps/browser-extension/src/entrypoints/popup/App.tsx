@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
+import { ClipboardCountdownBar } from '@/entrypoints/popup/components/ClipboardCountdownBar';
 import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
 import Header from '@/entrypoints/popup/components/Layout/Header';
 import LoadingSpinner from '@/entrypoints/popup/components/LoadingSpinner';
@@ -95,6 +96,7 @@ const App: React.FC = () => {
             </div>
           )}
 
+          <ClipboardCountdownBar />
           <Header
             routes={routes}
             rightButtons={headerButtons}
