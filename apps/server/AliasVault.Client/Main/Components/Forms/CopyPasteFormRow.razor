@@ -1,6 +1,7 @@
 ﻿@inject ClipboardCopyService ClipboardCopyService
 @inject JsInteropService JsInteropService
 @inject IStringLocalizerFactory LocalizerFactory
+@inject DbService DbService
 @implements IDisposable
 @using Microsoft.Extensions.Localization
 
@@ -50,14 +51,13 @@
 
     private async Task CopyToClipboard()
     {
-        await JsInteropService.CopyToClipboard(Value);
-        ClipboardCopyService.SetCopied(Id);
+        // Get the global clipboard clear setting
+        var clearAfterSeconds = DbService.Settings.ClipboardClearSeconds;
 
-        // After 2 seconds, reset the copied state if it's still the same element
-        await Task.Delay(2000);
-        if (ClipboardCopyService.GetCopiedId() == Id)
+        var success = await JsInteropService.CopyToClipboardWithClear(Value, clearAfterSeconds);
+        if (success)
         {
-            ClipboardCopyService.SetCopied(string.Empty);
+            ClipboardCopyService.SetCopied(Id);
         }
     }
 
