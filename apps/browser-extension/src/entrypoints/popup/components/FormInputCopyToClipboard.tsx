@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { sendMessage } from 'webext-bridge/popup';
 
 import { ClipboardCopyService } from '@/entrypoints/popup/utils/ClipboardCopyService';
 
@@ -81,6 +82,9 @@ export const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> =
     try {
       await navigator.clipboard.writeText(value);
       clipboardService.setCopied(id);
+      
+      // Notify background script that clipboard was copied
+      await sendMessage('CLIPBOARD_COPIED', { value }, 'background');
 
       // Reset copied state after 2 seconds
       setTimeout(() => {

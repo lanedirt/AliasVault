@@ -1,6 +1,7 @@
 import  * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { sendMessage } from 'webext-bridge/popup';
 
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 
@@ -68,6 +69,9 @@ const TotpBlock: React.FC<TotpBlockProps> = ({ credentialId }) => {
     try {
       await navigator.clipboard.writeText(code);
       setCopiedId(id);
+      
+      // Notify background script that clipboard was copied
+      await sendMessage('CLIPBOARD_COPIED', { value: code }, 'background');
 
       // Reset copied state after 2 seconds
       setTimeout(() => {

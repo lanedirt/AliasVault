@@ -9,8 +9,7 @@ import { BoolResponse as messageBoolResponse } from '@/utils/types/messaging/Boo
 
 import { t } from '@/i18n/StandaloneI18n';
 
-import { defineContentScript } from '#imports';
-import { createShadowRootUi } from '#imports';
+import { defineContentScript, createShadowRootUi } from '#imports';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
