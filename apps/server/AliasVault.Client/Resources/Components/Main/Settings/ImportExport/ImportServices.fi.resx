@@ -73,7 +73,7 @@
   </data>
   <!-- Bitwarden -->
   <data name="BitwardenDescription" xml:space="preserve">
-    <value>Import passwords from your Bitwarden vault</value>
+    <value>Tuo salasanat Bitwarden holvistasi</value>
     <comment>Description for Bitwarden import service</comment>
   </data>
   <data name="BitwardenInstructionsPart1" xml:space="preserve">
