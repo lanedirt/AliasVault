@@ -21,107 +21,107 @@
   </xsd:schema>
   <!-- Page title and description -->
   <data name="PageTitle">
-    <value>General settings</value>
+    <value>Yleiset asetukset</value>
     <comment>Page title for general settings</comment>
   </data>
   <data name="PageDescription">
-    <value>Configure general AliasVault settings.</value>
+    <value>Määritä yleiset AliasVault-asetukset.</value>
     <comment>Page description for general settings</comment>
   </data>
   <data name="BreadcrumbTitle">
-    <value>General settings</value>
+    <value>Yleiset asetukset</value>
     <comment>Breadcrumb title for general settings</comment>
   </data>
   <!-- Email Settings Section -->
   <data name="EmailSettingsTitle">
-    <value>Email Settings</value>
+    <value>Sähköpostiasetukset</value>
     <comment>Title for email settings section</comment>
   </data>
   <data name="DefaultEmailDomainLabel">
-    <value>Default email domain</value>
+    <value>Oletussähköpostin domain</value>
     <comment>Label for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescription">
-    <value>Set the default email domain that will be used when creating new credentials.</value>
+    <value>Aseta oletussähköpostin domain, jota haluat käyttää uusillle käyttäjätunnuksille. </value>
     <comment>Description for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescriptionNote">
-    <value>Note: Email received on private domains are end-to-end encrypted and can only be read by you, while email received on public domains can be read by anyone that knows the receiving email address.</value>
+    <value>Huomautus: Yksityisillä verkkotunnuksilla vastaanotettu sähköpostiosoite on salattu, ja vain sinä voit lukea sen kun taas sähköposti vastaanotettu julkisella verkkotunnuksella voi lukea kuka tahansa, joka tietää vastaanottavan sähköpostiosoitteen.</value>
     <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
   </data>
   <data name="DefaultEmailDomainLearnMore">
-    <value>Learn more about the difference</value>
+    <value>Lue lisää eroista</value>
     <comment>Link to documentation for default email domain setting</comment>
   </data>
   <data name="PrivateDomainsLabel">
-    <value>Private Domains</value>
+    <value>Yksityiset verkkotunnukset</value>
     <comment>Label for private domains group</comment>
   </data>
   <data name="PublicDomainsLabel">
-    <value>Public Domains</value>
+    <value>Julkiset verkkotunnukset</value>
     <comment>Label for public domains group</comment>
   </data>
   <data name="AutoEmailRefreshLabel">
-    <value>Auto refresh emails content when new ones arrive</value>
+    <value>Päivitä sähköpostien sisältö automaattisesti, kun uudet saapuvat</value>
     <comment>Label for auto email refresh setting</comment>
   </data>
   <!-- Alias Settings Section -->
   <data name="AliasSettingsTitle">
-    <value>Alias Settings</value>
+    <value>Aliaksen asetukset</value>
     <comment>Title for alias settings section</comment>
   </data>
   <data name="AliasGenerationLanguageLabel">
-    <value>Alias generation language</value>
+    <value>Alias-generaattorin kieli</value>
     <comment>Label for alias generation language setting</comment>
   </data>
   <data name="AliasGenerationLanguageDescription">
-    <value>Set the default language that will be used when generating new identities.</value>
+    <value>Aseta oletuskieli, jota käytetään luotaessa uusia henkilöllisyyksiä.</value>
     <comment>Description for alias generation language setting</comment>
   </data>
   <data name="EnglishOption">
-    <value>English</value>
+    <value>Englanti</value>
     <comment>English language option</comment>
   </data>
   <data name="DutchOption">
-    <value>Dutch</value>
+    <value>Hollanti</value>
     <comment>Dutch language option</comment>
   </data>
   <data name="AliasGenerationGenderLabel">
-    <value>Alias generation gender</value>
+    <value>Aliaksen sukupuoli</value>
     <comment>Label for alias generation gender setting</comment>
   </data>
   <data name="AliasGenerationGenderDescription">
-    <value>Set the default gender preference for generating new identities.</value>
+    <value>Aseta oletussukupuoli uusille henkilöllisyyksille.</value>
     <comment>Description for alias generation gender setting</comment>
   </data>
   <data name="RandomOption">
-    <value>Random</value>
+    <value>Satunnainen</value>
     <comment>Random gender option</comment>
   </data>
   <data name="MaleOption">
-    <value>Male</value>
+    <value>Mies</value>
     <comment>Male gender option</comment>
   </data>
   <data name="FemaleOption">
-    <value>Female</value>
+    <value>Nainen</value>
     <comment>Female gender option</comment>
   </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
-    <value>Password Settings</value>
+    <value>Salasana-asetukset</value>
     <comment>Title for password settings section</comment>
   </data>
   <!-- App Language Settings Section -->
   <data name="AppLanguageTitle">
-    <value>Application Language</value>
+    <value>Sovelluksen kieli</value>
     <comment>Title for app language settings section</comment>
   </data>
   <data name="AppLanguageLabel">
-    <value>Language</value>
+    <value>Kieli</value>
     <comment>Label for app language setting</comment>
   </data>
   <data name="AppLanguageDescription">
-    <value>Set the language for the application interface.</value>
+    <value>Aseta kieli sovelluksen käyttöliittymälle.</value>
     <comment>Description for app language setting</comment>
   </data>
 </root>
