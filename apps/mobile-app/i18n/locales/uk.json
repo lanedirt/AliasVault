@@ -369,97 +369,97 @@
     "UNKNOWN_ERROR": "Сталася невідома помилка. Будь ласка, спробуйте ще раз.",
     "ACCOUNT_LOCKED": "Обліковий запис тимчасово заблоковано через занадто багато невдалих спроб. Будь ласка, спробуйте пізніше.",
     "ACCOUNT_BLOCKED": "Ваш обліковий запис вимкнено. Якщо ви вважаєте, що це помилка, зверніться до служби підтримки.",
-    "USER_NOT_FOUND": "Недійсне ім'я користувача або пароль. Спробуйте ще раз.",
-    "INVALID_AUTHENTICATOR_CODE": "Недійсний код автентифікатора. Спробуйте ще раз.",
-    "INVALID_RECOVERY_CODE": "Invalid recovery code. Please try again.",
-    "REFRESH_TOKEN_REQUIRED": "Refresh token is required.",
-    "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
-    "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refresh token revoked successfully.",
-    "PUBLIC_REGISTRATION_DISABLED": "New account registration is currently disabled on this server. Please contact the administrator.",
-    "USERNAME_REQUIRED": "Username is required.",
-    "USERNAME_ALREADY_IN_USE": "Username is already in use.",
-    "USERNAME_AVAILABLE": "Username is available.",
-    "USERNAME_MISMATCH": "Username does not match the current user.",
-    "PASSWORD_MISMATCH": "The provided password does not match your current password.",
-    "ACCOUNT_SUCCESSFULLY_DELETED": "Account successfully deleted.",
-    "USERNAME_EMPTY_OR_WHITESPACE": "Username cannot be empty or whitespace.",
-    "USERNAME_TOO_SHORT": "Username too short: must be at least 3 characters long.",
-    "USERNAME_TOO_LONG": "Username too long: cannot be longer than 40 characters.",
-    "USERNAME_INVALID_EMAIL": "Invalid email address.",
-    "USERNAME_INVALID_CHARACTERS": "Username is invalid, can only contain letters or digits.",
-    "VAULT_NOT_UP_TO_DATE": "Your vault is not up-to-date. Please synchronize your vault and try again.",
-    "INTERNAL_SERVER_ERROR": "Internal server error.",
-    "VAULT_ERROR": "The local vault is not up-to-date. Please synchronize your vault by refreshing the page and try again."
+    "USER_NOT_FOUND": "Недійсне ім'я користувача або пароль. Будь ласка, спробуйте ще раз.",
+    "INVALID_AUTHENTICATOR_CODE": "Недійсний код автентифікатора. Будь ласка, спробуйте ще раз.",
+    "INVALID_RECOVERY_CODE": "Недійсний код відновлення. Будь ласка, спробуйте ще раз.",
+    "REFRESH_TOKEN_REQUIRED": "Необхідне оновлення токена.",
+    "INVALID_REFRESH_TOKEN": "Оновлення токена невдале.",
+    "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Оновлення токена відкликано успішно.",
+    "PUBLIC_REGISTRATION_DISABLED": "Реєстрація нових облікових записів на цьому сервері наразі вимкнена. Будь ласка, зверніться до адміністратора.",
+    "USERNAME_REQUIRED": "Ім'я користувача обов'язкове.",
+    "USERNAME_ALREADY_IN_USE": "Ім'я користувача вже використовується.",
+    "USERNAME_AVAILABLE": "Ім'я користувача доступне.",
+    "USERNAME_MISMATCH": "Ім'я користувача не відповідає поточному користувачеві.",
+    "PASSWORD_MISMATCH": "Введений пароль не відповідає вашому поточному паролю.",
+    "ACCOUNT_SUCCESSFULLY_DELETED": "Обліковий запис успішно видалено.",
+    "USERNAME_EMPTY_OR_WHITESPACE": "Ім’я користувача не може бути порожнім або містити пробіли.",
+    "USERNAME_TOO_SHORT": "Ім’я користувача закоротке: має містити щонайменше 3 символи.",
+    "USERNAME_TOO_LONG": "Ім'я користувача занадто довге: не може бути довшим за 40 символів.",
+    "USERNAME_INVALID_EMAIL": "Недійсна адреса електронної пошти.",
+    "USERNAME_INVALID_CHARACTERS": "Ім'я користувача недійсне, може містити лише літери або цифри.",
+    "VAULT_NOT_UP_TO_DATE": "Ваше сховище застаріло. Синхронізуйте його та спробуйте ще раз.",
+    "INTERNAL_SERVER_ERROR": "Внутрішня помилка сервера.",
+    "VAULT_ERROR": "Локальне сховище не оновлене. Синхронізуйте своє сховище, оновивши сторінку, та повторіть спробу."
   },
   "app": {
     "status": {
-      "unlockingVault": "Unlocking vault",
-      "decryptingVault": "Decrypting vault",
-      "openingVaultReadOnly": "Opening vault in read-only mode",
-      "retryingConnection": "Retrying connection..."
+      "unlockingVault": "Розблокування сховища",
+      "decryptingVault": "Розшифрування сховища",
+      "openingVaultReadOnly": "Відкриття сховища в режимі лише для читання",
+      "retryingConnection": "Повторна спроба підключення..."
     },
     "alerts": {
-      "syncIssue": "Sync Issue",
-      "syncIssueMessage": "The AliasVault server could not be reached and your vault could not be synced. Would you like to open your local vault in read-only mode or retry the connection?",
-      "openLocalVault": "Open Local Vault",
-      "retrySync": "Retry Sync",
-      "error": "Error"
+      "syncIssue": "Проблема синхронізації",
+      "syncIssueMessage": "Не вдалося зв’язатися із сервером AliasVault і ваше сховище не вдалося синхронізувати. Бажаєте відкрити локальне сховище в режимі лише для читання чи повторити спробу підключення?",
+      "openLocalVault": "Відкрити локальне сховище",
+      "retrySync": "Повторити синхронізацію",
+      "error": "Помилка"
     },
     "navigation": {
-      "login": "Login",
-      "loginSettings": "Login Settings",
-      "notFound": "Not Found"
+      "login": "Увійти",
+      "loginSettings": "Налаштування входу",
+      "notFound": "Не знайдено"
     },
     "notFound": {
-      "title": "Page not found",
-      "message": "This page has been moved or deleted.",
-      "goHome": "Go back to the start"
+      "title": "Сторінку не знайдено",
+      "message": "Цю сторінку було переміщено або видалено.",
+      "goHome": "Повернутися до початку"
     },
     "appName": "AliasVault",
     "reinitialize": {
-      "vaultAutoLockedMessage": "Vault auto-locked after timeout.",
-      "attemptingToUnlockMessage": "Attempting to unlock."
+      "vaultAutoLockedMessage": "Сховище автоматично заблоковано після закінчення часу очікування.",
+      "attemptingToUnlockMessage": "Спроба розблокування."
     },
     "loginSettings": {
-      "title": "API Connection",
+      "title": "API з'єднання",
       "aliasvaultNet": "Aliasvault.net",
-      "selfHosted": "Self-hosted",
-      "customApiUrl": "Custom API URL",
+      "selfHosted": "Розміщено на власному хостингу",
+      "customApiUrl": "URL-адреса користувацького API",
       "customApiUrlPlaceholder": "https://my-aliasvault-instance.com/api",
-      "version": "Version: {{version}}"
+      "version": "Версія: {{version}}"
     }
   },
   "upgrade": {
-    "title": "Upgrade Vault",
-    "subtitle": "AliasVault has updated and your vault needs to be upgraded. This should only take a few seconds.",
-    "versionInformation": "Version Information",
-    "yourVault": "Your vault:",
-    "newVersion": "New version:",
-    "upgrade": "Upgrade",
-    "upgrading": "Upgrading...",
-    "logout": "Logout",
-    "whatsNew": "What's New",
-    "whatsNewDescription": "An upgrade is required to support the following changes:",
-    "noDescriptionAvailable": "No description available for this version.",
-    "okay": "Ok",
+    "title": "Оновлення сховища",
+    "subtitle": "AliasVault оновлено, і ваше сховище потрібно оновити. Це займе лише кілька секунд.",
+    "versionInformation": "Інформація про версію",
+    "yourVault": "Ваше сховище:",
+    "newVersion": "Нова версія:",
+    "upgrade": "Оновити",
+    "upgrading": "Оновлення...",
+    "logout": "Вихід",
+    "whatsNew": "Що нового",
+    "whatsNewDescription": "Для підтримки таких змін потрібне оновлення:",
+    "noDescriptionAvailable": "Для цієї версії немає опису.",
+    "okay": "Ок",
     "status": {
-      "preparingUpgrade": "Preparing upgrade...",
-      "vaultAlreadyUpToDate": "Vault is already up to date",
-      "startingDatabaseTransaction": "Starting database transaction...",
-      "applyingDatabaseMigrations": "Applying database migrations...",
-      "applyingMigration": "Applying migration {{current}} of {{total}}...",
-      "committingChanges": "Committing changes..."
+      "preparingUpgrade": "Підготовка оновлення...",
+      "vaultAlreadyUpToDate": "Сховище вже оновлено",
+      "startingDatabaseTransaction": "Початок транзакції бази даних...",
+      "applyingDatabaseMigrations": "Застосування міграцій бази даних...",
+      "applyingMigration": "Застосування міграції {{current}} з {{total}}...",
+      "committingChanges": "Внесення змін..."
     },
     "alerts": {
-      "error": "Error",
-      "unableToGetVersionInfo": "Unable to get version information. Please try again.",
-      "selfHostedServer": "Self-Hosted Server",
-      "selfHostedWarning": "If you're using a self-hosted server, make sure to also update your self-hosted instance as otherwise logging in to the web client will stop working.",
-      "cancel": "Cancel",
-      "continueUpgrade": "Continue Upgrade",
-      "upgradeFailed": "Upgrade Failed",
-      "failedToApplyMigration": "Failed to apply migration ({{current}} of {{total}})",
-      "unknownErrorDuringUpgrade": "An unknown error occurred during the upgrade. Please try again."
+      "error": "Помилка",
+      "unableToGetVersionInfo": "Не вдалося отримати інформацію про версію. Спробуйте ще раз.",
+      "selfHostedServer": "Сервер із самостійним розміщенням",
+      "selfHostedWarning": "Якщо ви використовуєте власний сервер, обов’язково оновіть і свій власний екземпляр, інакше вхід до вебклієнта перестане працювати.",
+      "cancel": "Скасувати",
+      "continueUpgrade": "Продовжити оновлення",
+      "upgradeFailed": "Помилка оновлення",
+      "failedToApplyMigration": "Не вдалося застосувати міграцію ({{current}} з {{total}})",
+      "unknownErrorDuringUpgrade": "Під час оновлення сталася невідома помилка. Спробуйте ще раз."
     }
   }
 }
