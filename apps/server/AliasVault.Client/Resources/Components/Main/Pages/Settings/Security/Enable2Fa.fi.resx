@@ -60,20 +60,20 @@
   </resheader>
   <!-- Page title and breadcrumbs -->
   <data name="PageTitle" xml:space="preserve">
-    <value>Enable two-factor authentication</value>
+    <value>Ota käyttöön kaksivaiheinen tunnistautuminen</value>
     <comment>Page title for the enable 2FA page</comment>
   </data>
   <data name="BreadcrumbSecuritySettings" xml:space="preserve">
-    <value>Security settings</value>
+    <value>Tietoturva-asetukset</value>
     <comment>Breadcrumb text for security settings</comment>
   </data>
   <data name="BreadcrumbEnable2Fa" xml:space="preserve">
-    <value>Enable two-factor authentication</value>
+    <value>Ota käyttöön kaksivaiheinen tunnistautuminen</value>
     <comment>Breadcrumb text for enable 2FA</comment>
   </data>
   <!-- Page description -->
   <data name="PageDescription" xml:space="preserve">
-    <value>Enable two-factor authentication to increase the security of your vaults.</value>
+    <value>Ota käyttöön kaksivaiheinen tunnistautuminen lisätäksesi holviesi turvallisuutta.</value>
     <comment>Description text explaining 2FA setup</comment>
   </data>
   <!-- Setup instructions -->
@@ -87,7 +87,7 @@
     <comment>Placeholder text for verification code input</comment>
   </data>
   <data name="VerifyAndEnableButton" xml:space="preserve">
-    <value>Verify and Enable</value>
+    <value>Vahvista ja ota käyttöön</value>
     <comment>Button text to verify and enable 2FA</comment>
   </data>
   <!-- Success and error messages -->
@@ -96,7 +96,7 @@
     <comment>Success message when 2FA is enabled</comment>
   </data>
   <data name="FailedToEnable2Fa" xml:space="preserve">
-    <value>Failed to enable two-factor authentication.</value>
+    <value>Kaksivaiheisen tunnistautumisen käyttöönotto epäonnistui.</value>
     <comment>Error message when 2FA setup fails</comment>
   </data>
 </root>
