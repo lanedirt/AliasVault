@@ -40,6 +40,162 @@ window.clipboardCopy = {
     }
 };
 
+// Global clipboard manager with timestamp-based clearing
+window.clipboardManager = {
+    clearByTime: null,
+    clearTimer: null,
+    copiedValue: null,
+    clearPending: false,  // Track if clear is pending due to focus issues
+    statusCallback: null,  // Callback to notify Blazor of status changes
+
+    // Set up a new clipboard clear schedule
+    scheduleClipboardClear: function(seconds) {
+        // Clear any existing timer
+        if (this.clearTimer) {
+            clearTimeout(this.clearTimer);
+            this.clearTimer = null;
+        }
+
+        // Reset pending state
+        this.clearPending = false;
+        this.notifyStatusChange('active');
+
+        // Set the clear by time
+        this.clearByTime = Date.now() + (seconds * 1000);
+
+        // Try to clear when the time is reached
+        this.clearTimer = setTimeout(() => {
+            this.attemptClipboardClear('timer expired');
+        }, seconds * 1000);
+    },
+
+    // Notify Blazor of status change
+    notifyStatusChange: function(status) {
+        if (this.statusCallback) {
+            try {
+                this.statusCallback.invokeMethodAsync('OnClipboardStatusChange', status);
+            } catch (error) {
+            }
+        }
+    },
+
+    // Attempt to clear the clipboard
+    attemptClipboardClear: function(source) {
+        // Check if we should clear
+        if (!this.clearByTime) {
+            return Promise.resolve(false);
+        }
+
+        const now = Date.now();
+        const timeRemaining = this.clearByTime - now;
+
+        if (timeRemaining > 100) {  // Allow 100ms tolerance for timer precision
+            // If called from timer and there's still time, reschedule
+            if (source === 'timer expired' && timeRemaining > 0) {
+                this.clearTimer = setTimeout(() => {
+                    this.attemptClipboardClear('timer expired');
+                }, timeRemaining);
+            }
+            return Promise.resolve(false);
+        }
+
+        return navigator.clipboard.writeText('')
+            .then(() => {
+                this.clearByTime = null;
+                this.copiedValue = null;
+                this.clearPending = false;
+                if (this.clearTimer) {
+                    clearTimeout(this.clearTimer);
+                    this.clearTimer = null;
+                }
+                this.notifyStatusChange('cleared');
+                return true;
+            })
+            .catch((error) => {
+                if (error.name === 'NotAllowedError' || error.message.includes('Document is not focused')) {
+                    // Don't clear the clearByTime, we'll retry when we get focus
+                    this.clearPending = true;
+                    this.notifyStatusChange('pending');
+                    return false;
+                }
+                console.warn(`[Clipboard] ❌ ERROR - Failed to clear clipboard from: ${source}`, error);
+                return false;
+            });
+    },
+
+    // Check and clear if needed (called on focus events)
+    checkAndClear: function(source) {
+        if (this.clearByTime && Date.now() >= this.clearByTime) {
+            // Reset pending state when we're actively trying to clear
+            this.clearPending = false;
+            this.notifyStatusChange('active');
+            // Small delay to ensure browser is ready after focus
+            setTimeout(() => {
+                this.attemptClipboardClear(source);
+            }, 100);
+        } else if (this.clearByTime) {
+            const remaining = Math.ceil((this.clearByTime - Date.now()) / 1000);
+        }
+    }
+};
+
+// Copy to clipboard and schedule clear
+window.copyToClipboardWithClear = function(text, clearAfterSeconds) {
+    return navigator.clipboard.writeText(text)
+        .then(() => {
+            if (clearAfterSeconds > 0) {
+                window.clipboardManager.copiedValue = text;
+                window.clipboardManager.scheduleClipboardClear(clearAfterSeconds);
+            }
+            return true;
+        })
+        .catch((error) => {
+            console.error('[Clipboard] ❌ Failed to copy to clipboard:', error);
+            return false;
+        });
+};
+
+// Global focus event listener
+window.addEventListener('focus', () => {
+    window.clipboardManager.checkAndClear('window focus event');
+});
+
+// Global visibility change listener
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        window.clipboardManager.checkAndClear('document became visible');
+    }
+});
+
+// Also check on page visibility API
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        window.clipboardManager.checkAndClear('page no longer hidden');
+    }
+});
+
+// Check when window becomes active (another way to detect focus)
+window.addEventListener('pageshow', () => {
+    window.clipboardManager.checkAndClear('pageshow event');
+});
+
+// Legacy method for compatibility
+window.safeClearClipboard = function() {
+    return window.clipboardManager.attemptClipboardClear('manual clear request');
+};
+
+// Register a callback for clipboard status changes
+window.registerClipboardStatusCallback = function(callback) {
+    window.clipboardManager.statusCallback = callback;
+    // Test the callback immediately to make sure it works
+    window.clipboardManager.notifyStatusChange('registered');
+};
+
+// Unregister the callback
+window.unregisterClipboardStatusCallback = function() {
+    window.clipboardManager.statusCallback = null;
+};
+
 // Primarily used by E2E tests.
 window.blazorNavigate = (url) => {
     Blazor.navigateTo(url);
@@ -304,7 +460,7 @@ const visibilityChangeHandlers = new Map();
 
 /**
  * Registers visibility callback that is invoked when the visibility state of the current page/tab changes.
- * 
+ *
  * @param {any} dotnetHelper
  */
 window.registerVisibilityCallback = function (dotnetHelper) {
@@ -312,23 +468,23 @@ window.registerVisibilityCallback = function (dotnetHelper) {
     const handler = function() {
         dotnetHelper.invokeMethodAsync('OnVisibilityChange', !document.hidden);
     };
-    
+
     visibilityChangeHandlers.set(dotnetHelper, handler);
     document.addEventListener("visibilitychange", handler);
-    
+
     // Initial call to set the correct initial state.
     dotnetHelper.invokeMethodAsync('OnVisibilityChange', !document.hidden);
 };
 
 /**
  * Unregisters any previously registered visibility callbacks to prevent memory leaks.
- * 
+ *
  * @param {any} dotnetHelper
  */
 window.unregisterVisibilityCallback = function (dotnetHelper) {
     // Get the stored handler.
     const handler = visibilityChangeHandlers.get(dotnetHelper);
-    
+
     if (handler) {
         // Remove the event listener with the same function reference.
         document.removeEventListener("visibilitychange", handler);
