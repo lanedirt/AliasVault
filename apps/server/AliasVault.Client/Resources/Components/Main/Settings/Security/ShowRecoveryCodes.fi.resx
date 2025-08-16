@@ -59,19 +59,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Recovery codes</value>
+    <value>Palautuskoodit</value>
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>The recovery codes below are used to access your account in case you lose access to your authenticator device. Make a photo or write them down and store them in a secure location. Do not share them with anyone.</value>
+    <value>Allaolevia palautuskooeja käytetään sisäänkirjautumisesssa, kun hävität tai et muuten voi käyttää asetettua todennuslaitetta tai ohjelmaa. Ota niistä kuva tai kirjoita ne ylös ja tallenna ne varmaan paikkaan. Älä jaa niitä kenenkään kanssa. </value>
     <comment>Description of recovery codes</comment>
   </data>
   <data name="WarningTitle" xml:space="preserve">
-    <value>Store these recovery codes in a safe place.</value>
+    <value>Säilytä nämä palautuskoodit turvallisessa paikassa.</value>
     <comment>Warning title about storing codes</comment>
   </data>
   <data name="WarningDescription" xml:space="preserve">
-    <value>If you lose your device and don't have the recovery codes you will lose access to your account. These codes are only shown once!</value>
+    <value>Jos menetät laitteesi ja sinulla ei ole palautuskoodeja, menetät pääsyn tiliisi. Nämä koodit näytetään vain kerran!</value>
     <comment>Warning description about recovery codes</comment>
   </data>
 </root>
