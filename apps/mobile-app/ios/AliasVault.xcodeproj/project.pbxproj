@@ -661,6 +661,7 @@
 				en,
 				Base,
 				nl,
+				fi,
 				fr,
 				es,
 				uk,
