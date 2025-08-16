@@ -76,6 +76,12 @@ public sealed class SettingsService
     public string AppLanguage => GetSetting("AppLanguage", "en")!;
 
     /// <summary>
+    /// Gets the ClipboardClearSeconds setting.
+    /// </summary>
+    /// <returns>Number of seconds after which to clear clipboard (0 = disabled).</returns>
+    public int ClipboardClearSeconds => GetSetting("ClipboardClearSeconds", 10);
+
+    /// <summary>
     /// Gets the password settings from the database. If it fails, we use the model's default values.
     /// </summary>
     public PasswordSettings PasswordSettings
@@ -156,6 +162,13 @@ public sealed class SettingsService
     /// <param name="value">The new value.</param>
     /// <returns>Task.</returns>
     public Task SetAppLanguage(string value) => SetSettingAsync("AppLanguage", value);
+
+    /// <summary>
+    /// Sets the ClipboardClearSeconds setting.
+    /// </summary>
+    /// <param name="value">The new value.</param>
+    /// <returns>Task.</returns>
+    public Task SetClipboardClearSeconds(int value) => SetSettingAsync("ClipboardClearSeconds", value);
 
     /// <summary>
     /// Gets a setting value by key.
