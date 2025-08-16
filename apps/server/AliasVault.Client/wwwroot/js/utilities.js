@@ -72,10 +72,7 @@ window.clipboardManager = {
     // Notify Blazor of status change
     notifyStatusChange: function(status) {
         if (this.statusCallback) {
-            try {
-                this.statusCallback.invokeMethodAsync('OnClipboardStatusChange', status);
-            } catch (error) {
-            }
+            this.statusCallback.invokeMethodAsync('OnClipboardStatusChange', status);
         }
     },
 
@@ -116,10 +113,8 @@ window.clipboardManager = {
                     // Don't clear the clearByTime, we'll retry when we get focus
                     this.clearPending = true;
                     this.notifyStatusChange('pending');
-                    return false;
                 }
                 console.warn(`[Clipboard] ❌ ERROR - Failed to clear clipboard from: ${source}`, error);
-                return false;
             });
     },
 
@@ -133,8 +128,6 @@ window.clipboardManager = {
             setTimeout(() => {
                 this.attemptClipboardClear(source);
             }, 100);
-        } else if (this.clearByTime) {
-            const remaining = Math.ceil((this.clearByTime - Date.now()) / 1000);
         }
     }
 };
