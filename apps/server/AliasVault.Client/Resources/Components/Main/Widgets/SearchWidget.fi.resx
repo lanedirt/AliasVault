@@ -20,27 +20,27 @@
     </xsd:element>
   </xsd:schema>
   <data name="SearchVaultPlaceholder">
-    <value>Search vault...</value>
+    <value>Etsi holvi...</value>
     <comment>Placeholder text for search input field</comment>
   </data>
   <data name="SearchHelpText">
-    <value>Type a term to search for, this can be the service name, description or email address.</value>
+    <value>Kirjoita haettava termi, tämä voi olla palvelun nimi, kuvaus tai sähköpostiosoite.</value>
     <comment>Help text explaining what can be searched</comment>
   </data>
   <data name="SearchTooShortMessage">
-    <value>Please type more chars</value>
+    <value>Syötä lisää merkkejä</value>
     <comment>Message when search term is too short</comment>
   </data>
   <data name="SearchingForMessage">
-    <value>Searching for "{0}"</value>
+    <value>Etsitään "{0}"</value>
     <comment>Message showing current search term</comment>
   </data>
   <data name="NoResultsFoundMessage">
-    <value>No results found</value>
+    <value>Tuloksia ei löytynyt</value>
     <comment>Message when no search results are found</comment>
   </data>
   <data name="SearchingMessage">
-    <value>Searching...</value>
+    <value>Etsitään...</value>
     <comment>Message when search is in progress</comment>
   </data>
 </root>
