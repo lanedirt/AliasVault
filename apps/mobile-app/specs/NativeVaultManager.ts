@@ -37,6 +37,9 @@ export interface Spec extends TurboModule {
   getAutoLockTimeout(): Promise<number>;
   getAuthMethods(): Promise<string[]>;
   openAutofillSettingsPage(): Promise<void>;
+  
+  // Clipboard management
+  clearClipboardAfterDelay(delayInSeconds: number): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('NativeVaultManager');

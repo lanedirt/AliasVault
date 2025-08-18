@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
@@ -12,6 +13,7 @@ import { useColors } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useDb } from '@/context/DbContext';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type TotpSectionProps = {
   credential: Credential;
@@ -69,9 +71,18 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
   /**
    * Copy the totp code to the clipboard.
    */
-  const copyToClipboard = async (code: string): Promise<void> => {
+  const copyToClipboardWithClear = async (code: string): Promise<void> => {
     try {
       await Clipboard.setStringAsync(code);
+      
+      // Get clipboard clear timeout from settings
+      const timeoutStr = await AsyncStorage.getItem('clipboard_clear_timeout');
+      const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+
+      // Schedule clipboard clear if timeout is set
+      if (timeoutSeconds > 0) {
+        await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
+      }
 
       if (Platform.OS !== 'android') {
         // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
@@ -194,7 +205,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
         <TouchableOpacity
           key={totpCode.Id}
           style={styles.content}
-          onPress={() => copyToClipboard(currentCodes[totpCode.Id])}
+          onPress={() => copyToClipboardWithClear(currentCodes[totpCode.Id])}
         >
           <View style={styles.codeContainer}>
             <View>

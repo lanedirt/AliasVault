@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +11,7 @@ import type { Credential } from '@/utils/dist/shared/models/vault';
 import { useColors } from '@/hooks/useColorScheme';
 
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type CredentialCardProps = {
   credential: Credential;
@@ -59,10 +61,30 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
   };
 
   /**
+   * Helper function to copy text to clipboard with auto-clear
+   */
+  const copyToClipboard = async (text: string): Promise<void> => {
+    try {
+      await Clipboard.setStringAsync(text);
+      
+      // Get clipboard clear timeout from settings
+      const timeoutStr = await AsyncStorage.getItem('clipboard_clear_timeout');
+      const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+
+      // Schedule clipboard clear if timeout is set
+      if (timeoutSeconds > 0) {
+        await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
+  };
+
+  /**
    * Handles the context menu action when an item is selected.
    * @param event - The event object containing the selected action details
    */
-  const handleContextMenuAction = (event: OnPressMenuItemEvent): void => {
+  const handleContextMenuAction = async (event: OnPressMenuItemEvent): Promise<void> => {
     const { name } = event.nativeEvent;
 
     switch (name) {
@@ -100,7 +122,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
         break;
       case 'Copy Username':
         if (credential.Username) {
-          Clipboard.setStringAsync(credential.Username);
+          await copyToClipboard(credential.Username);
           if (Platform.OS === 'ios') {
             Toast.show({
               type: 'success',
@@ -112,7 +134,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
         break;
       case 'Copy Email':
         if (credential.Alias?.Email) {
-          Clipboard.setStringAsync(credential.Alias.Email);
+          await copyToClipboard(credential.Alias.Email);
           if (Platform.OS === 'ios') {
             Toast.show({
               type: 'success',
@@ -124,7 +146,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
         break;
       case 'Copy Password':
         if (credential.Password) {
-          Clipboard.setStringAsync(credential.Password);
+          await copyToClipboard(credential.Password);
           if (Platform.OS === 'ios') {
             Toast.show({
               type: 'success',

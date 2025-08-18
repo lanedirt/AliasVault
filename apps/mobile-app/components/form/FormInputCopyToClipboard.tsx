@@ -1,10 +1,14 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { useColors } from '@/hooks/useColorScheme';
+
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type FormInputCopyToClipboardProps = {
   label: string;
@@ -22,19 +26,40 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
 }) : React.ReactNode => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const colors = useColors();
+  const { t } = useTranslation();
 
   /**
    * Copy the value to the clipboard.
    */
   const copyToClipboard = async () : Promise<void> => {
     if (value) {
-      await Clipboard.setStringAsync(value);
+      try {
+        // Copy to clipboard using expo-clipboard
+        await Clipboard.setStringAsync(value);
 
-      if (Platform.OS !== 'android') {
-        // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
+        // Get clipboard clear timeout from settings
+        const timeoutStr = await AsyncStorage.getItem('clipboard_clear_timeout');
+        const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+
+        // Schedule clipboard clear if timeout is set
+        if (timeoutSeconds > 0) {
+          await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
+        }
+
+        if (Platform.OS !== 'android') {
+          // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
+          Toast.show({
+            type: 'success',
+            text1: t('common.copied'),
+            position: 'bottom',
+            visibilityTime: 2000,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
         Toast.show({
-          type: 'success',
-          text1: 'Copied to clipboard',
+          type: 'error',
+          text1: t('common.error'),
           position: 'bottom',
           visibilityTime: 2000,
         });
