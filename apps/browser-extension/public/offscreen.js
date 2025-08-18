@@ -28,7 +28,7 @@ async function clearClipboard() {
   try {
     // Use execCommand to clear clipboard
     console.log(textEl);
-    textEl.value = '\u200B'; // Zero-width space
+    textEl.value = '\n';
     textEl.select();
     console.log(textEl.value);
     document.execCommand('copy');
