@@ -158,9 +158,11 @@ async function createOffscreenDocument(): Promise<void> {
  * Clear clipboard using offscreen document or fallback method.
  */
 async function clearClipboardContent(): Promise<void> {
-  // Try to use offscreen document if available (Chrome 109+)
-  if (chrome.offscreen) {
-    // Ensure offscreen document exists
+  if (import.meta.env.CHROME || import.meta.env.EDGE) {
+    /*
+     * Chrome and Edge use mv3 and do not have direct access to clipboard
+     * so we use an offscreen document to clear the clipboard.
+     */
     await createOffscreenDocument();
 
     // Send message to offscreen document to clear clipboard
@@ -172,8 +174,8 @@ async function clearClipboardContent(): Promise<void> {
       throw new Error(response?.message || 'Failed to clear clipboard via offscreen');
     }
   } else {
-    // Fallback: try direct clipboard access (may not work in service worker)
-    await navigator.clipboard.writeText(' ');
+    // Firefox and Safari use mv2 and do not have offscreen document support, use direct clipboard access.
+    await navigator.clipboard.writeText('');
   }
 }
 
