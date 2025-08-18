@@ -109,7 +109,7 @@
     "randomAlias": "Satunnainen Alias",
     "manual": "Käyttöopas",
     "generateRandomAlias": "Luo satunnainen alias",
-    "searchPlaceholder": "Search credentials...",
+    "searchPlaceholder": "Etsi käyttäjätunnuksia...",
     "noMatchingCredentials": "Vastaavia tunnuksia ei löytynyt",
     "noCredentialsFound": "Käyttäjätunnuksia ei löytynyt. Luo sellainen päästäksesi alkuun. Vihje: voit myös kirjautua AliasVaultin web-sovellukseen tuodaksesi käyttäjätunnuksia muista salasananhallintalaitteista.",
     "recentEmails": "Viimeaikaiset sähköpostit",
