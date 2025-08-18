@@ -195,6 +195,7 @@
     "autoLock": "Auto-lock Timeout",
     "clipboardClear": "Clear Clipboard",
     "clipboardClearDescription": "Automatically clear copied passwords and sensitive information from your clipboard after a specified time period.",
+    "clipboardClearAndroidWarning": "Note: some Android devices have clipboard history enabled, which may keep track of previously copied items, even after AliasVault clears the clipboard. AliasVault can only overwrite the most recent item, but older entries may remain visible in history. For security reasons, we recommend disabling any clipboard history features in your device settings.",
     "clipboardClearOptions": {
       "never": "Never",
       "5seconds": "5 seconds",

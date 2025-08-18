@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -15,6 +15,7 @@ const TIMEOUT_OPTIONS = [
   { value: 5, label: 'settings.clipboardClearOptions.5seconds' },
   { value: 10, label: 'settings.clipboardClearOptions.10seconds' },
   { value: 15, label: 'settings.clipboardClearOptions.15seconds' },
+  { value: 30, label: 'settings.clipboardClearOptions.30seconds' },
 ];
 
 /**
@@ -76,6 +77,14 @@ export default function ClipboardClearScreen(): React.ReactNode {
       color: colors.primary,
       marginLeft: 8,
     },
+    warningContainer: {
+      marginTop: 16,
+    },
+    warningDescription: {
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 20,
+    },
   });
 
   return (
@@ -101,6 +110,13 @@ export default function ClipboardClearScreen(): React.ReactNode {
             );
           })}
         </View>
+        {Platform.OS === 'android' && (
+          <View style={styles.warningContainer}>
+            <ThemedText style={styles.warningDescription}>
+              {t('settings.clipboardClearAndroidWarning')}
+            </ThemedText>
+          </View>
+        )}
       </ThemedScrollView>
     </ThemedContainer>
   );

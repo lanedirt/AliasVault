@@ -484,6 +484,38 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
     }
 
     /**
+     * Clear clipboard after a delay.
+     * @param delayInSeconds The delay in seconds after which to clear the clipboard
+     * @param promise The promise to resolve
+     */
+    @ReactMethod
+    override fun clearClipboardAfterDelay(delayInSeconds: Double, promise: Promise?) {
+        Log.d(TAG, "Scheduling clipboard clear after $delayInSeconds seconds")
+
+        if (delayInSeconds <= 0) {
+            Log.d(TAG, "Delay is 0 or negative, not scheduling clipboard clear")
+            promise?.resolve(null)
+            return
+        }
+
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        val delayMs = (delayInSeconds * 1000).toLong()
+
+        handler.postDelayed({
+            try {
+                Log.d(TAG, "Clearing clipboard after $delayInSeconds seconds delay")
+                val clipboardManager = reactApplicationContext.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                clipboardManager.clearPrimaryClip()
+                Log.d(TAG, "Clipboard cleared successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error clearing clipboard", e)
+            }
+        }, delayMs)
+
+        promise?.resolve(null)
+    }
+
+    /**
      * Get the auth methods.
      * @param promise The promise to resolve
      */
