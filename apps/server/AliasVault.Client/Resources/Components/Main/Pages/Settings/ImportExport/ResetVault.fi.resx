@@ -91,7 +91,7 @@
     <comment>Reset vault note about action being irreversible</comment>
   </data>
   <data name="ResetVaultConfirmUsernameLabel" xml:space="preserve">
-    <value>To continue, please type your username to confirm</value>
+    <value>Jatkaaksesi, kirjoita käyttäjänimesi vahvistaaksesi</value>
     <comment>Reset vault username confirmation label</comment>
   </data>
   <data name="ResetVaultContinueButton" xml:space="preserve">
