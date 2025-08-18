@@ -11,7 +11,7 @@ AliasVault is a privacy-first password and email alias manager. Create unique id
 
 **⭐ Star us on GitHub, it motivates us a lot!**
 
-If you enjoy using our project, please also consider leaving a review on our apps or browser extensions, and share it with your friends or colleagues. Your support helps others discover an alternative to traditional & closed-source password managers.
+If you enjoy using AliasVault, please also consider leaving a review on our apps or browser extensions, and share it with your friends or colleagues. Your support helps others discover a privacy-first alternative to traditional & closed-source password managers.
 
 ## About
 Built on 15 years of experience, AliasVault is independent, open-source, self-hostable and community-driven. It’s the response to a web that tracks everything: a way to take back control of your digital privacy and help you stay secure online.
