@@ -60,6 +60,14 @@ export default function SettingsLayout(): React.ReactNode {
         }}
       />
       <Stack.Screen
+        name="clipboard-clear"
+        options={{
+          title: t('settings.clipboardClear'),
+          headerBackTitle: t('settings.title'),
+          ...defaultHeaderOptions,
+        }}
+      />
+      <Stack.Screen
         name="identity-generator"
         options={{
           title: t('settings.identityGenerator'),

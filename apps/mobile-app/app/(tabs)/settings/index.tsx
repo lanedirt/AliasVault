@@ -27,11 +27,12 @@ export default function SettingsScreen() : React.ReactNode {
   const colors = useColors();
   const { t } = useTranslation();
   const { getAuthMethodDisplayKey, shouldShowAutofillReminder } = useAuth();
-  const { getAutoLockTimeout } = useAuth();
+  const { getAutoLockTimeout, getClipboardClearTimeout } = useAuth();
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
   const [autoLockDisplay, setAutoLockDisplay] = useState<string>('');
+  const [clipboardClearDisplay, setClipboardClearDisplay] = useState<string>('');
   const [authMethodDisplay, setAuthMethodDisplay] = useState<string>('');
   const [isFirstLoad, setIsFirstLoad] = useMinDurationLoading(true, 100);
 
@@ -66,6 +67,24 @@ export default function SettingsScreen() : React.ReactNode {
       };
 
       /**
+       * Load the clipboard clear display.
+       */
+      const loadClipboardClearDisplay = async () : Promise<void> => {
+        const clipboardTimeout = await getClipboardClearTimeout();
+        let display = t('common.never');
+
+        if (clipboardTimeout === 5) {
+          display = t('settings.clipboardClearOptions.5seconds');
+        } else if (clipboardTimeout === 10) {
+          display = t('settings.clipboardClearOptions.10seconds');
+        } else if (clipboardTimeout === 15) {
+          display = t('settings.clipboardClearOptions.15seconds');
+        }
+
+        setClipboardClearDisplay(display);
+      };
+
+      /**
        * Load the auth method display.
        */
       const loadAuthMethodDisplay = async () : Promise<void> => {
@@ -77,7 +96,7 @@ export default function SettingsScreen() : React.ReactNode {
        * Load all settings data.
        */
       const loadData = async () : Promise<void> => {
-        await Promise.all([loadAutoLockDisplay(), loadAuthMethodDisplay(), loadApiUrl()]);
+        await Promise.all([loadAutoLockDisplay(), loadClipboardClearDisplay(), loadAuthMethodDisplay(), loadApiUrl()]);
         setIsFirstLoad(false);
       };
 
@@ -141,6 +160,13 @@ export default function SettingsScreen() : React.ReactNode {
    */
   const handleIdentityGeneratorPress = () : void => {
     router.push('/(tabs)/settings/identity-generator');
+  };
+
+  /**
+   * Handle the clipboard clear settings press.
+   */
+  const handleClipboardClearPress = () : void => {
+    router.push('/(tabs)/settings/clipboard-clear');
   };
 
   /**
@@ -369,6 +395,24 @@ export default function SettingsScreen() : React.ReactNode {
                 <InlineSkeletonLoader width={80} style={styles.skeletonLoader} />
               ) : (
                 <ThemedText style={styles.settingItemValue}>{autoLockDisplay}</ThemedText>
+              )}
+              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.separator} />
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleClipboardClearPress}
+          >
+            <View style={styles.settingItemIcon}>
+              <Ionicons name="clipboard-outline" size={20} color={colors.text} />
+            </View>
+            <View style={styles.settingItemContent}>
+              <ThemedText style={styles.settingItemText}>{t('settings.clipboardClear')}</ThemedText>
+              {isFirstLoad ? (
+                <InlineSkeletonLoader width={80} style={styles.skeletonLoader} />
+              ) : (
+                <ThemedText style={styles.settingItemValue}>{clipboardClearDisplay}</ThemedText>
               )}
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>

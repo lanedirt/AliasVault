@@ -11,7 +11,7 @@
     "error": "Error",
     "success": "Success",
     "never": "Never",
-    "copied": "Copied",
+    "copied": "Copied to clipboard",
     "loadMore": "Load more",
     "use": "Use"
   },
@@ -193,6 +193,14 @@
     },
     "vaultUnlock": "Vault Unlock Method",
     "autoLock": "Auto-lock Timeout",
+    "clipboardClear": "Clear Clipboard",
+    "clipboardClearDescription": "Automatically clear copied passwords and sensitive information from your clipboard after a specified time period.",
+    "clipboardClearOptions": {
+      "never": "Never",
+      "5seconds": "5 seconds",
+      "10seconds": "10 seconds",
+      "15seconds": "15 seconds"
+    },
     "identityGenerator": "Identity Generator",
     "security": "Security",
     "appVersion": "App version {{version}} ({{url}})",
