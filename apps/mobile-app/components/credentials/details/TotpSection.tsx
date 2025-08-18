@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
@@ -12,6 +11,7 @@ import { useColors } from '@/hooks/useColorScheme';
 
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
+import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
@@ -28,6 +28,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
   const colors = useColors();
   const dbContext = useDb();
   const { t } = useTranslation();
+  const { getClipboardClearTimeout } = useAuth();
 
   /**
    * Get the remaining seconds.
@@ -76,8 +77,7 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
       await Clipboard.setStringAsync(code);
       
       // Get clipboard clear timeout from settings
-      const timeoutStr = await AsyncStorage.getItem('clipboard_clear_timeout');
-      const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+      const timeoutSeconds = await getClipboardClearTimeout();
 
       // Schedule clipboard clear if timeout is set
       if (timeoutSeconds > 0) {

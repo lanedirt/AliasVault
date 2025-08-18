@@ -274,7 +274,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getClipboardClearTimeout = useCallback(async (): Promise<number> => {
     try {
       const timeoutStr = await AsyncStorage.getItem(CLIPBOARD_TIMEOUT_KEY);
-      return timeoutStr ? parseInt(timeoutStr, 10) : 10;
+      return timeoutStr ? parseInt(timeoutStr, 10) : 15;
     } catch (error) {
       console.error('Failed to get clipboard clear timeout:', error);
       return 10;

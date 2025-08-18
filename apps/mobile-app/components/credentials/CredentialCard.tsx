@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +10,7 @@ import type { Credential } from '@/utils/dist/shared/models/vault';
 import { useColors } from '@/hooks/useColorScheme';
 
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
+import { useAuth } from '@/context/AuthContext';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type CredentialCardProps = {
@@ -24,6 +24,7 @@ type CredentialCardProps = {
 export function CredentialCard({ credential, onCredentialDelete }: CredentialCardProps) : React.ReactNode {
   const colors = useColors();
   const { t } = useTranslation();
+  const { getClipboardClearTimeout } = useAuth();
 
   /**
    * Get the display text for a credential, showing username by default,
@@ -68,8 +69,7 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
       await Clipboard.setStringAsync(text);
       
       // Get clipboard clear timeout from settings
-      const timeoutStr = await AsyncStorage.getItem('clipboard_clear_timeout');
-      const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+      const timeoutSeconds = await getClipboardClearTimeout();
 
       // Schedule clipboard clear if timeout is set
       if (timeoutSeconds > 0) {

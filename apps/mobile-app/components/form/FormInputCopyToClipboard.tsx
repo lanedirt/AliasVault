@@ -1,5 +1,4 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +7,7 @@ import Toast from 'react-native-toast-message';
 
 import { useColors } from '@/hooks/useColorScheme';
 
+import { useAuth } from '@/context/AuthContext';
 import { useClipboardCountdown } from '@/context/ClipboardCountdownContext';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
@@ -28,6 +28,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const colors = useColors();
   const { t } = useTranslation();
+  const { getClipboardClearTimeout } = useAuth();
   const { activeFieldId, setActiveField } = useClipboardCountdown();
   
   const animatedWidth = useRef(new Animated.Value(0)).current;
@@ -50,8 +51,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       animatedWidth.setValue(100);
       
       // Get timeout and start animation
-      AsyncStorage.getItem('clipboard_clear_timeout').then((timeoutStr) => {
-        const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+      getClipboardClearTimeout().then((timeoutSeconds) => {
         if (timeoutSeconds > 0 && activeFieldId === fieldId) {
           Animated.timing(animatedWidth, {
             toValue: 0,
@@ -70,7 +70,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       animatedWidth.stopAnimation();
       animatedWidth.setValue(0);
     }
-  }, [isCountingDown, activeFieldId, fieldId, animatedWidth, setActiveField]);
+  }, [isCountingDown, activeFieldId, fieldId, animatedWidth, setActiveField, getClipboardClearTimeout]);
 
   /**
    * Copy the value to the clipboard.
@@ -82,8 +82,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
         await Clipboard.setStringAsync(value);
 
         // Get clipboard clear timeout from settings
-        const timeoutStr = await AsyncStorage.getItem('clipboard_clear_timeout');
-        const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+        const timeoutSeconds = await getClipboardClearTimeout();
 
         // Schedule clipboard clear if timeout is set
         if (timeoutSeconds > 0) {
