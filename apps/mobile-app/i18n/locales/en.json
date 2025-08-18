@@ -199,7 +199,8 @@
       "never": "Never",
       "5seconds": "5 seconds",
       "10seconds": "10 seconds",
-      "15seconds": "15 seconds"
+      "15seconds": "15 seconds",
+      "30seconds": "30 seconds"
     },
     "identityGenerator": "Identity Generator",
     "security": "Security",

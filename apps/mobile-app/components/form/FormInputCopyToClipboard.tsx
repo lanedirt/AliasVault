@@ -8,6 +8,7 @@ import Toast from 'react-native-toast-message';
 
 import { useColors } from '@/hooks/useColorScheme';
 
+import { useClipboardCountdown } from '@/context/ClipboardCountdownContext';
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type FormInputCopyToClipboardProps = {
@@ -27,15 +28,49 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const colors = useColors();
   const { t } = useTranslation();
+  const { activeFieldId, setActiveField } = useClipboardCountdown();
   
   const animatedWidth = useRef(new Animated.Value(0)).current;
-  const [isCountingDown, setIsCountingDown] = useState(false);
+  // Create a stable unique ID based on label and value
+  const fieldId = useRef(`${label}-${value}-${Math.random().toString(36).substring(2, 11)}`).current;
+  const isCountingDown = activeFieldId === fieldId;
 
   useEffect(() => {
-    return () => {
+    return (): void => {
+      // Cleanup on unmount
       animatedWidth.stopAnimation();
     };
   }, [animatedWidth]);
+
+  useEffect(() => {
+    /* Handle animation based on whether this field is active */
+    if (isCountingDown) {
+      // This field is now active - reset and start animation
+      animatedWidth.stopAnimation();
+      animatedWidth.setValue(100);
+      
+      // Get timeout and start animation
+      AsyncStorage.getItem('clipboard_clear_timeout').then((timeoutStr) => {
+        const timeoutSeconds = timeoutStr ? parseInt(timeoutStr, 10) : 10;
+        if (timeoutSeconds > 0 && activeFieldId === fieldId) {
+          Animated.timing(animatedWidth, {
+            toValue: 0,
+            duration: timeoutSeconds * 1000,
+            useNativeDriver: false,
+            easing: Easing.linear,
+          }).start((finished) => {
+            if (finished && activeFieldId === fieldId) {
+              setActiveField(null);
+            }
+          });
+        }
+      });
+    } else {
+      // This field is not active - stop animation and reset
+      animatedWidth.stopAnimation();
+      animatedWidth.setValue(0);
+    }
+  }, [isCountingDown, activeFieldId, fieldId, animatedWidth, setActiveField]);
 
   /**
    * Copy the value to the clipboard.
@@ -52,20 +87,19 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
 
         // Schedule clipboard clear if timeout is set
         if (timeoutSeconds > 0) {
+          // Clear any existing active field first (this will cancel its animation)
+          setActiveField(null);
+          
+          // Schedule the clipboard clear
           await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
           
-          // Start countdown animation
-          setIsCountingDown(true);
-          animatedWidth.setValue(100);
-          
-          Animated.timing(animatedWidth, {
-            toValue: 0,
-            duration: timeoutSeconds * 1000,
-            useNativeDriver: false,
-            easing: Easing.linear,
-          }).start(() => {
-            setIsCountingDown(false);
-          });
+          /*
+           * Now set this field as active - animation will be handled by the effect
+           * Use setTimeout to ensure state update happens in next tick
+           */
+          setTimeout(() => {
+            setActiveField(fieldId);
+          }, 0);
         }
 
         if (Platform.OS !== 'android') {
@@ -98,6 +132,14 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       alignItems: 'center',
       flexDirection: 'row',
     },
+    animatedOverlay: {
+      backgroundColor: `${colors.primary}50`,
+      borderRadius: 8,
+      bottom: 0,
+      left: 0,
+      position: 'absolute',
+      top: 0,
+    },
     iconButton: {
       padding: 8,
     },
@@ -105,12 +147,14 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       backgroundColor: colors.accentBackground,
       borderRadius: 8,
       marginBottom: 8,
-      padding: 12,
+      overflow: 'hidden',
+      position: 'relative',
     },
     inputContent: {
       alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'space-between',
+      padding: 12,
     },
     label: {
       color: colors.textMuted,
@@ -121,14 +165,6 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       color: colors.text,
       fontSize: 16,
       fontWeight: '500',
-    },
-    animatedOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      backgroundColor: `${colors.primary}50`,
-      borderRadius: 8,
     },
   });
 

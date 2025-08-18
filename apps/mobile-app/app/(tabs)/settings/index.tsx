@@ -79,6 +79,8 @@ export default function SettingsScreen() : React.ReactNode {
           display = t('settings.clipboardClearOptions.10seconds');
         } else if (clipboardTimeout === 15) {
           display = t('settings.clipboardClearOptions.15seconds');
+        } else if (clipboardTimeout === 30) {
+          display = t('settings.clipboardClearOptions.30seconds');
         }
 
         setClipboardClearDisplay(display);
@@ -101,7 +103,7 @@ export default function SettingsScreen() : React.ReactNode {
       };
 
       loadData();
-    }, [getAutoLockTimeout, getAuthMethodDisplayKey, setIsFirstLoad, loadApiUrl, t])
+    }, [getAutoLockTimeout, getAuthMethodDisplayKey, setIsFirstLoad, loadApiUrl, getClipboardClearTimeout, t])
   );
 
   /**
