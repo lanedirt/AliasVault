@@ -1,9 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, Easing } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -27,6 +27,15 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const colors = useColors();
   const { t } = useTranslation();
+  
+  const animatedWidth = useRef(new Animated.Value(0)).current;
+  const [isCountingDown, setIsCountingDown] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      animatedWidth.stopAnimation();
+    };
+  }, [animatedWidth]);
 
   /**
    * Copy the value to the clipboard.
@@ -44,6 +53,19 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
         // Schedule clipboard clear if timeout is set
         if (timeoutSeconds > 0) {
           await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
+          
+          // Start countdown animation
+          setIsCountingDown(true);
+          animatedWidth.setValue(100);
+          
+          Animated.timing(animatedWidth, {
+            toValue: 0,
+            duration: timeoutSeconds * 1000,
+            useNativeDriver: false,
+            easing: Easing.linear,
+          }).start(() => {
+            setIsCountingDown(false);
+          });
         }
 
         if (Platform.OS !== 'android') {
@@ -100,6 +122,14 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       fontSize: 16,
       fontWeight: '500',
     },
+    animatedOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      backgroundColor: `${colors.primary}50`,
+      borderRadius: 8,
+    },
   });
 
   return (
@@ -107,6 +137,19 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       onPress={copyToClipboard}
       style={styles.inputContainer}
     >
+      {isCountingDown && (
+        <Animated.View
+          style={[
+            styles.animatedOverlay,
+            {
+              width: animatedWidth.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
+        />
+      )}
       <View style={styles.inputContent}>
         <View>
           <Text style={styles.label}>
