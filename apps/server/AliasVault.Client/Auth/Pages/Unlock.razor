@@ -26,7 +26,11 @@ else if (IsWebAuthnLoading) {
 else
 {
     <div class="flex space-x-4">
-        <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="User image">
+        <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+            <span class="text-primary-600 dark:text-primary-400 text-base font-medium">
+                @(Username?.FirstOrDefault().ToString().ToUpper() ?? "?")
+            </span>
+        </div>
         <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">@Username</h2>
     </div>
 
