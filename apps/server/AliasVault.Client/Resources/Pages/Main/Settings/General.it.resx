@@ -106,6 +106,43 @@
     <value>Femmina</value>
     <comment>Female gender option</comment>
   </data>
+  <!-- Clipboard Settings Section -->
+  <data name="ClipboardSettingsTitle">
+    <value>Clipboard Settings</value>
+    <comment>Title for clipboard settings section</comment>
+  </data>
+  <data name="ClipboardClearSecondsLabel">
+    <value>Auto-clear clipboard after copying</value>
+    <comment>Label for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearSecondsDescription">
+    <value>Automatically clear clipboard contents after copying passwords or other sensitive data.</value>
+    <comment>Description for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearDisabledOption">
+    <value>Disabled</value>
+    <comment>Option to disable clipboard clearing</comment>
+  </data>
+  <data name="ClipboardClear5SecondsOption">
+    <value>5 seconds</value>
+    <comment>Option to clear clipboard after 5 seconds</comment>
+  </data>
+  <data name="ClipboardClear10SecondsOption">
+    <value>10 seconds</value>
+    <comment>Option to clear clipboard after 10 seconds</comment>
+  </data>
+  <data name="ClipboardClear15SecondsOption">
+    <value>15 seconds</value>
+    <comment>Option to clear clipboard after 15 seconds</comment>
+  </data>
+  <data name="NoteLabel">
+    <value>Note</value>
+    <comment>Label for note/warning text</comment>
+  </data>
+  <data name="ClipboardClearLimitationNote">
+    <value>Clearing clipboard in the web app is only possible when the tab is active. When tab loses focus, it will clear clipboard when it comes into focus again.</value>
+    <comment>Note explaining limitations of clipboard clearing feature</comment>
+  </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
     <value>Impostazioni Password</value>
