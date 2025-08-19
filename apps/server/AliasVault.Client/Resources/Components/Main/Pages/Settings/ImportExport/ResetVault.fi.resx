@@ -95,7 +95,7 @@
     <comment>Reset vault username confirmation label</comment>
   </data>
   <data name="ResetVaultContinueButton" xml:space="preserve">
-    <value>Continue with vault reset</value>
+    <value>Jatka holvin nollausta</value>
     <comment>Reset vault continue button</comment>
   </data>
   <data name="ResetVaultFinalWarning" xml:space="preserve">
