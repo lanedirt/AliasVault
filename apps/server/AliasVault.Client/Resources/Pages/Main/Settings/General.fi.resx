@@ -108,39 +108,39 @@
   </data>
   <!-- Clipboard Settings Section -->
   <data name="ClipboardSettingsTitle">
-    <value>Clipboard Settings</value>
+    <value>Leikepöydän asetukset</value>
     <comment>Title for clipboard settings section</comment>
   </data>
   <data name="ClipboardClearSecondsLabel">
-    <value>Auto-clear clipboard after copying</value>
+    <value>Tyhjennä leikepöytä automaattisesti kopioinnin jälkeen</value>
     <comment>Label for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearSecondsDescription">
-    <value>Automatically clear clipboard contents after copying passwords or other sensitive data.</value>
+    <value>Tyhjennä leikepöydän sisältö automaattisesti salasanojen tai muiden arkaluonteisten tietojen kopioinnin jälkeen.</value>
     <comment>Description for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearDisabledOption">
-    <value>Disabled</value>
+    <value>Pois käytöstä</value>
     <comment>Option to disable clipboard clearing</comment>
   </data>
   <data name="ClipboardClear5SecondsOption">
-    <value>5 seconds</value>
+    <value>5 sekuntia</value>
     <comment>Option to clear clipboard after 5 seconds</comment>
   </data>
   <data name="ClipboardClear10SecondsOption">
-    <value>10 seconds</value>
+    <value>10 sekuntia</value>
     <comment>Option to clear clipboard after 10 seconds</comment>
   </data>
   <data name="ClipboardClear15SecondsOption">
-    <value>15 seconds</value>
+    <value>15 sekuntia</value>
     <comment>Option to clear clipboard after 15 seconds</comment>
   </data>
   <data name="NoteLabel">
-    <value>Note</value>
+    <value>Muistiinpanot</value>
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Clearing clipboard in the web app is only possible when the tab is active. When tab loses focus, it will clear clipboard when it comes into focus again.</value>
+    <value>Leikepöydän tyhjennys web-sovelluksessa on mahdollista vain, kun välilehti on aktiivinen. Kun välilehti menettää tarkennuksen, se tyhjentää leikepöydän, kun se tulee keskittyä uudelleen.</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
