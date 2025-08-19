@@ -304,6 +304,13 @@
     "keyboardShortcuts": "Scorciatoie da tastiera",
     "configureKeyboardShortcuts": "Configura scorciatoie da tastiera",
     "configure": "Configura",
+    "security": "Security",
+    "clipboardClearTimeout": "Clear clipboard after copying",
+    "clipboardClearTimeoutDescription": "Automatically clear the clipboard after copying sensitive data",
+    "clipboardClearDisabled": "Never clear",
+    "clipboardClear5Seconds": "Clear after 5 seconds",
+    "clipboardClear10Seconds": "Clear after 10 seconds",
+    "clipboardClear15Seconds": "Clear after 15 seconds",
     "versionPrefix": "Versione ",
     "validation": {
       "apiUrlRequired": "L'URL API è obbligatorio",
