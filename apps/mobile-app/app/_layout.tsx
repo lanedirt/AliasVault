@@ -14,6 +14,7 @@ import SpaceMono from '@/assets/fonts/SpaceMono-Regular.ttf';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { AliasVaultToast } from '@/components/Toast';
 import { AuthProvider } from '@/context/AuthContext';
+import { ClipboardCountdownProvider } from '@/context/ClipboardCountdownContext';
 import { DbProvider } from '@/context/DbContext';
 import { WebApiProvider } from '@/context/WebApiContext';
 import { initI18n } from '@/i18n';
@@ -182,7 +183,9 @@ export default function RootLayout() : React.ReactNode {
     <DbProvider>
       <AuthProvider>
         <WebApiProvider>
-          <RootLayoutNav />
+          <ClipboardCountdownProvider>
+            <RootLayoutNav />
+          </ClipboardCountdownProvider>
         </WebApiProvider>
       </AuthProvider>
     </DbProvider>

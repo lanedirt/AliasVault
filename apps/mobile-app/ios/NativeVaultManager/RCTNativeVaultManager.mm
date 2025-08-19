@@ -89,6 +89,10 @@
     [vaultManager setAutoLockTimeout:timeout resolver:resolve rejecter:reject];
 }
 
+- (void)clearClipboardAfterDelay:(double)delayInSeconds resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager clearClipboardAfterDelay:delayInSeconds resolver:resolve rejecter:reject];
+}
+
 - (void)storeDatabase:(NSString *)base64EncryptedDb resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
     [vaultManager storeDatabase:base64EncryptedDb resolver:resolve rejecter:reject];
 }

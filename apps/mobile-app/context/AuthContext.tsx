@@ -30,6 +30,8 @@ type AuthContextType = {
   getAuthMethodDisplayKey: () => Promise<string>;
   getAutoLockTimeout: () => Promise<number>;
   setAutoLockTimeout: (timeout: number) => Promise<void>;
+  getClipboardClearTimeout: () => Promise<number>;
+  setClipboardClearTimeout: (timeout: number) => Promise<void>;
   getBiometricDisplayNameKey: () => Promise<string>;
   isBiometricsEnabledOnDevice: () => Promise<boolean>;
   setOfflineMode: (isOffline: boolean) => void;
@@ -44,6 +46,7 @@ type AuthContextType = {
 }
 
 const AUTOFILL_CONFIGURED_KEY = 'autofill_configured';
+const CLIPBOARD_TIMEOUT_KEY = 'clipboard_clear_timeout';
 
 /**
  * Auth context.
@@ -266,6 +269,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
+   * Get the clipboard clear timeout from AsyncStorage
+   */
+  const getClipboardClearTimeout = useCallback(async (): Promise<number> => {
+    try {
+      const timeoutStr = await AsyncStorage.getItem(CLIPBOARD_TIMEOUT_KEY);
+      return timeoutStr ? parseInt(timeoutStr, 10) : 15;
+    } catch (error) {
+      console.error('Failed to get clipboard clear timeout:', error);
+      return 10;
+    }
+  }, []);
+
+  /**
+   * Set the clipboard clear timeout in AsyncStorage
+   */
+  const setClipboardClearTimeout = useCallback(async (timeout: number): Promise<void> => {
+    try {
+      await AsyncStorage.setItem(CLIPBOARD_TIMEOUT_KEY, timeout.toString());
+    } catch (error) {
+      console.error('Failed to set clipboard clear timeout:', error);
+    }
+  }, []);
+
+  /**
    * Check if the vault is unlocked.
    */
   const isVaultUnlocked = useCallback(async (): Promise<boolean> => {
@@ -406,6 +433,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isBiometricsEnabledOnDevice,
     getAutoLockTimeout,
     setAutoLockTimeout,
+    getClipboardClearTimeout,
+    setClipboardClearTimeout,
     getBiometricDisplayNameKey,
     markAutofillConfigured,
     setReturnUrl,
@@ -430,6 +459,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isBiometricsEnabledOnDevice,
     getAutoLockTimeout,
     setAutoLockTimeout,
+    getClipboardClearTimeout,
+    setClipboardClearTimeout,
     getBiometricDisplayNameKey,
     markAutofillConfigured,
     setReturnUrl,

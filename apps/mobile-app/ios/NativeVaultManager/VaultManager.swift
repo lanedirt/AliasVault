@@ -12,6 +12,8 @@ import VaultModels
 @objc(VaultManager)
 public class VaultManager: NSObject {
     private let vaultStore = VaultStore.shared
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+    private var clipboardClearTimer: DispatchSourceTimer?
 
     override init() {
         super.init()
@@ -253,8 +255,52 @@ public class VaultManager: NSObject {
     }
 
     @objc
-    func requiresMainQueueSetup() -> Bool {
-        return false
+    func clearClipboardAfterDelay(_ delayInSeconds: Double,
+                                 resolver resolve: @escaping RCTPromiseResolveBlock,
+                                 rejecter reject: @escaping RCTPromiseRejectBlock) {
+        NSLog("VaultManager: Scheduling clipboard clear after %.0f seconds", delayInSeconds)
+
+        if delayInSeconds <= 0 {
+            NSLog("VaultManager: Delay is 0 or negative, not scheduling clipboard clear")
+            resolve(nil)
+            return
+        }
+
+        // Cancel any existing clipboard clear operations
+        cancelClipboardClear()
+
+        // Start background task to keep app alive during clipboard clear
+        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "ClipboardClear") { [weak self] in
+            NSLog("VaultManager: Background task expired, cleaning up")
+            self?.endBackgroundTask()
+        }
+
+        clipboardClearTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
+        clipboardClearTimer?.schedule(deadline: .now() + delayInSeconds)
+        clipboardClearTimer?.setEventHandler { [weak self] in
+            NSLog("VaultManager: Clearing clipboard after %.0f seconds delay", delayInSeconds)
+            UIPasteboard.general.string = ""
+            NSLog("VaultManager: Clipboard cleared successfully")
+            self?.endBackgroundTask()
+            self?.clipboardClearTimer?.cancel()
+            self?.clipboardClearTimer = nil
+        }
+        clipboardClearTimer?.resume()
+
+        resolve(nil)
+    }
+
+    private func cancelClipboardClear() {
+        clipboardClearTimer?.cancel()
+        clipboardClearTimer = nil
+        endBackgroundTask()
+    }
+
+    private func endBackgroundTask() {
+        if backgroundTaskIdentifier != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+            backgroundTaskIdentifier = .invalid
+        }
     }
 
     @objc
@@ -301,7 +347,7 @@ public class VaultManager: NSObject {
 
     @objc
     func commitTransaction(_ resolve: @escaping RCTPromiseResolveBlock,
-                         rejecter reject: @escaping RCTPromiseRejectBlock) {
+                          rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             try vaultStore.commitTransaction()
             resolve(nil)
@@ -312,7 +358,7 @@ public class VaultManager: NSObject {
 
     @objc
     func rollbackTransaction(_ resolve: @escaping RCTPromiseResolveBlock,
-                           rejecter reject: @escaping RCTPromiseRejectBlock) {
+                            rejecter reject: @escaping RCTPromiseRejectBlock) {
         do {
             try vaultStore.rollbackTransaction()
             resolve(nil)
@@ -332,6 +378,11 @@ public class VaultManager: NSObject {
         } else {
             reject("SETTINGS_ERROR", "Cannot open settings", nil)
         }
+    }
+
+    @objc
+    func requiresMainQueueSetup() -> Bool {
+        return false
     }
 
     @objc
