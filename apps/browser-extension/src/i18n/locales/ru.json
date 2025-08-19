@@ -304,6 +304,13 @@
     "keyboardShortcuts": "Горячие клавиши",
     "configureKeyboardShortcuts": "Настройка горячих клавиш",
     "configure": "Настройка",
+    "security": "Security",
+    "clipboardClearTimeout": "Clear clipboard after copying",
+    "clipboardClearTimeoutDescription": "Automatically clear the clipboard after copying sensitive data",
+    "clipboardClearDisabled": "Never clear",
+    "clipboardClear5Seconds": "Clear after 5 seconds",
+    "clipboardClear10Seconds": "Clear after 10 seconds",
+    "clipboardClear15Seconds": "Clear after 15 seconds",
     "versionPrefix": "Версия ",
     "validation": {
       "apiUrlRequired": "Требуется URL-адрес API",
