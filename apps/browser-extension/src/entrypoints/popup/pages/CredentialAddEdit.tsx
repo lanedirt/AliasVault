@@ -9,6 +9,7 @@ import { sendMessage } from 'webext-bridge/popup';
 import * as Yup from 'yup';
 
 import AttachmentUploader from '@/entrypoints/popup/components/CredentialDetails/AttachmentUploader';
+import EmailDomainField from '@/entrypoints/popup/components/EmailDomainField';
 import { FormInput } from '@/entrypoints/popup/components/FormInput';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
@@ -593,11 +594,11 @@ const CredentialAddEdit: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{t('credentials.loginCredentials')}</h2>
               <div className="space-y-4">
-                <FormInput
+                <EmailDomainField
                   id="email"
                   label={t('common.email')}
                   value={watch('Alias.Email') ?? ''}
-                  onChange={(value) => setValue('Alias.Email', value)}
+                  onChange={(value: string) => setValue('Alias.Email', value)}
                   error={errors.Alias?.Email?.message}
                 />
                 <UsernameField
