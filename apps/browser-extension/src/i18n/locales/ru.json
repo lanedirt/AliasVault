@@ -242,7 +242,15 @@
       "serviceNameRequired": "Требуется указать название сервиса",
       "invalidEmail": "Неверный формат электронной почты",
       "invalidDateFormat": "Дата должна быть указана в формате ГГГГ-ММ-ДД"
-    }
+    },
+    "privateEmailTitle": "Private Email Domains",
+    "privateEmailDescription": "E2E encrypted, fully private.",
+    "publicEmailTitle": "Public Email Domains",
+    "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
+    "useDomainChooser": "Use domain chooser",
+    "enterCustomDomain": "Enter custom domain",
+    "enterFullEmail": "Enter full email address",
+    "enterEmailPrefix": "Enter email prefix"
   },
   "emails": {
     "title": "Письма",
