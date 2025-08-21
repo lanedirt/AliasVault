@@ -151,6 +151,8 @@ export const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
     }
   }, [isCustomDomain, value, localPart, showPrivateDomains, privateEmailDomains, onChange]);
 
+  const modalBackgroundColor = 'rgba(0, 0, 0, 0.5)';
+
   const styles = StyleSheet.create({
     container: {
       marginBottom: 16,
@@ -260,7 +262,7 @@ export const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
       paddingVertical: 12,
     },
     modalOverlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: modalBackgroundColor,
       flex: 1,
       justifyContent: 'flex-end',
     },
