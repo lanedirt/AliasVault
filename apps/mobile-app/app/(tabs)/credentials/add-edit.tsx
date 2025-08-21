@@ -22,6 +22,7 @@ import { useVaultMutate } from '@/hooks/useVaultMutate';
 
 import { AttachmentUploader } from '@/components/credentials/details/AttachmentUploader';
 import { AdvancedPasswordField } from '@/components/form/AdvancedPasswordField';
+import { EmailDomainField } from '@/components/form/EmailDomainField';
 import { ValidatedFormField, ValidatedFormFieldRef } from '@/components/form/ValidatedFormField';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import { ThemedContainer } from '@/components/themed/ThemedContainer';
@@ -650,9 +651,9 @@ export default function AddEditCredentialScreen() : React.ReactNode {
                 <View style={styles.section}>
                   <ThemedText style={styles.sectionTitle}>{t('credentials.loginCredentials')}</ThemedText>
 
-                  <ValidatedFormField
-                    control={control}
-                    name="Alias.Email"
+                  <EmailDomainField
+                    value={watch('Alias.Email') ?? ''}
+                    onChange={(newValue) => setValue('Alias.Email', newValue)}
                     label={t('credentials.email')}
                   />
                   <ValidatedFormField
