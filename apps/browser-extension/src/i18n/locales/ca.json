@@ -243,9 +243,10 @@
       "invalidEmail": "Invalid email format",
       "invalidDateFormat": "Date must be in YYYY-MM-DD format"
     },
-    "privateEmailTitle": "Private Email Domains",
+    "privateEmailTitle": "Private Email",
+    "privateEmailAliasVaultServer": "AliasVault server",
     "privateEmailDescription": "E2E encrypted, fully private.",
-    "publicEmailTitle": "Public Email Domains",
+    "publicEmailTitle": "Public Temp Email Providers",
     "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
     "useDomainChooser": "Use domain chooser",
     "enterCustomDomain": "Enter custom domain",
