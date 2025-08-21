@@ -209,7 +209,7 @@ const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
               {showPrivateDomains && (
                 <div className="mb-4">
                   <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {t('credentials.privateEmailTitle')}
+                    {t('credentials.privateEmailTitle')} <span className="text-xs text-gray-500 dark:text-gray-400">({t('credentials.privateEmailAliasVaultServer')})</span>
                   </h4>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                     {t('credentials.privateEmailDescription')}
