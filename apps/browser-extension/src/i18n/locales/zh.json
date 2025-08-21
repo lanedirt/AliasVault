@@ -243,9 +243,10 @@
       "invalidEmail": "无效的邮箱格式",
       "invalidDateFormat": "日期必须为 YYYY-MM-DD 格式"
     },
-    "privateEmailTitle": "Private Email Domains",
+    "privateEmailTitle": "Private Email",
+    "privateEmailAliasVaultServer": "AliasVault server",
     "privateEmailDescription": "E2E encrypted, fully private.",
-    "publicEmailTitle": "Public Email Domains",
+    "publicEmailTitle": "Public Temp Email Providers",
     "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
     "useDomainChooser": "Use domain chooser",
     "enterCustomDomain": "Enter custom domain",
