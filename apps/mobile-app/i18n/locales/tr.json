@@ -47,12 +47,12 @@
       "serverErrorSelfHosted": "Could not reach the API. For self-hosted instances, please verify the API endpoint is reachable by navigating to it in a browser: it should display 'OK'.",
       "networkError": "Network request failed. Please check your internet connection and try again.",
       "networkErrorSelfHosted": "Network request failed. Check your network connection and server availability. For self-hosted instances, please ensure you have a valid SSL certificate installed. Self-signed certificates are not supported on mobile devices for security reasons.",
-      "incorrectPasswordFallback": "Incorrect password. Please try again.",
-      "sessionExpired": "Your session has expired. Please login again.",
-      "tokenRefreshFailed": "Failed to refresh authentication token",
-      "httpError": "HTTP error: {{status}}"
+      "incorrectPasswordFallback": "Parola yanlış. Lütfen yeniden deneyin.",
+      "sessionExpired": "Oturumun zaman aşımına uğradı. Lütfen tekrar giriş yap.",
+      "tokenRefreshFailed": "Kimlik doğrulama anahtarı yenilenemedi",
+      "httpError": "HTTP hatası: {{status}}"
     },
-    "confirmLogout": "Are you sure you want to logout? You need to login again with your master password to access your vault.",
+    "confirmLogout": "Çıkış yapmak istediğinizden emin misiniz? Kasaya erişmek için tekrar ana parolanızla giriş yapmanız gerekecek.",
     "noAccountYet": "No account yet?",
     "createNewVault": "Create new vault",
     "connectingTo": "Connecting to",
