@@ -242,7 +242,15 @@
       "serviceNameRequired": "Palvelun nimi on pakollinen",
       "invalidEmail": "Virheellinen sähköpostiosoitteen muoto",
       "invalidDateFormat": "Päivämäärän on oltava muodossa VVVV-KK-PP."
-    }
+    },
+    "privateEmailTitle": "Private Email Domains",
+    "privateEmailDescription": "E2E encrypted, fully private.",
+    "publicEmailTitle": "Public Email Domains",
+    "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
+    "useDomainChooser": "Use domain chooser",
+    "enterCustomDomain": "Enter custom domain",
+    "enterFullEmail": "Enter full email address",
+    "enterEmailPrefix": "Enter email prefix"
   },
   "emails": {
     "title": "Sähköpostit",
