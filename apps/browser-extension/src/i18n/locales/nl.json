@@ -242,7 +242,15 @@
       "serviceNameRequired": "Servicenaam is verplicht",
       "invalidEmail": "Ongeldig e-mailformaat",
       "invalidDateFormat": "Datum moet in YYYY-MM-DD formaat zijn"
-    }
+    },
+    "privateEmailTitle": "Private Email Domains",
+    "privateEmailDescription": "E2E encrypted, fully private.",
+    "publicEmailTitle": "Public Email Domains",
+    "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
+    "useDomainChooser": "Use domain chooser",
+    "enterCustomDomain": "Enter custom domain",
+    "enterFullEmail": "Enter full email address",
+    "enterEmailPrefix": "Enter email prefix"
   },
   "emails": {
     "title": "E-mails",
