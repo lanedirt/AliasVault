@@ -140,7 +140,7 @@
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Klembord wissen in de webapp is alleen mogelijk als het tabblad actief is. Wanneer het tabblad de focus verliest, zal het klembord gewist worden wanneer het tabblad weer actief wordt.</value>
+    <value>Note: clearing the clipboard in the web app is only possible when the tab is active. If the tab loses focus, the clipboard will be cleared when it comes back into focus.</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
