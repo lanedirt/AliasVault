@@ -243,15 +243,15 @@
       "invalidEmail": "Virheellinen sähköpostiosoitteen muoto",
       "invalidDateFormat": "Päivämäärän on oltava muodossa VVVV-KK-PP."
     },
-    "privateEmailTitle": "Private Email",
-    "privateEmailAliasVaultServer": "AliasVault server",
-    "privateEmailDescription": "E2E encrypted, fully private.",
-    "publicEmailTitle": "Public Temp Email Providers",
-    "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
-    "useDomainChooser": "Use domain chooser",
-    "enterCustomDomain": "Enter custom domain",
-    "enterFullEmail": "Enter full email address",
-    "enterEmailPrefix": "Enter email prefix"
+    "privateEmailTitle": "Yksityinen sähköposti",
+    "privateEmailAliasVaultServer": "AliasVault-palvelin",
+    "privateEmailDescription": "E2E salattu, täysin yksityinen.",
+    "publicEmailTitle": "Julkiset väliaikaisen sähköpostiosoitteen tarjoajat",
+    "publicEmailDescription": "Anonyymi mutta rajoitettu yksityisyys. Käytettävissä kaikille, jotka tuntevat osoitteen.",
+    "useDomainChooser": "Käytä verkkotunnuksen valintaa",
+    "enterCustomDomain": "Anna oma verkkotunnus",
+    "enterFullEmail": "Syötä täysi sähköpostiosoite",
+    "enterEmailPrefix": "Syötä sähköpostin etuliite"
   },
   "emails": {
     "title": "Sähköpostit",
