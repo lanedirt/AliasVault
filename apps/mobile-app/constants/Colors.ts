@@ -30,6 +30,7 @@ export const Colors = {
     skeleton: 'rgba(98, 98, 98, 0.33)',
     red: '#ff0000',
     black: '#000000',
+    modalBackground: 'rgba(0, 0, 0, 0.5)',
   },
   dark: {
     white: '#ffffff',
@@ -58,6 +59,7 @@ export const Colors = {
     skeleton: '#rgba(255,255,255,0.2)',
     red: '#ff0000',
     black: '#000000',
+    modalBackground: 'rgba(88, 88, 88, 0.5)',
   },
 } as const;
 
