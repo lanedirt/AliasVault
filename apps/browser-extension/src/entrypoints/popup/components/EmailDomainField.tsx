@@ -220,7 +220,11 @@ const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
                         key={domain}
                         type="button"
                         onClick={() => selectDomain(domain)}
-                        className="px-3 py-1.5 text-sm bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-md hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
+                        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                          selectedDomain === domain
+                            ? 'bg-primary-600 text-white hover:bg-primary-700'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                        }`}
                       >
                         {domain}
                       </button>
@@ -242,7 +246,11 @@ const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
                       key={domain}
                       type="button"
                       onClick={() => selectDomain(domain)}
-                      className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                        selectedDomain === domain
+                          ? 'bg-primary-600 text-white hover:bg-primary-700'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                      }`}
                     >
                       {domain}
                     </button>
