@@ -140,7 +140,7 @@
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Clearing clipboard in the web app is only possible when the tab is active. When tab loses focus, it will clear clipboard when it comes into focus again.</value>
+    <value>Note: clearing the clipboard in the web app is only possible when the tab is active. If the tab loses focus, the clipboard will be cleared when it comes back into focus.</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
