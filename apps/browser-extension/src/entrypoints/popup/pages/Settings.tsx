@@ -299,9 +299,23 @@ const Settings: React.FC = () => {
               </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                title={t('settings.logout')}
+                className="p-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-md transition-colors"
               >
-                {t('settings.logout')}
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                  aria-label={t('settings.logout')}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
               </button>
             </div>
           </div>
@@ -316,7 +330,7 @@ const Settings: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autofillPopup')}</p>
-                <p className={`text-sm mt-1 ${settings.isGloballyEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+                <p className={`text-xs mt-1 ${settings.isGloballyEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
                   {settings.isGloballyEnabled ? t('settings.activeOnAllSites') : t('settings.disabledOnAllSites')}
                 </p>
               </div>
@@ -335,7 +349,7 @@ const Settings: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.rightClickContextMenu')}</p>
-                <p className={`text-sm mt-1 ${settings.isContextMenuEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+                <p className={`text-xs mt-1 ${settings.isContextMenuEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
                   {settings.isContextMenuEnabled ? t('settings.enabled') : t('settings.disabled')}
                 </p>
               </div>
@@ -363,7 +377,7 @@ const Settings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autofillPopupOn')}{settings.currentUrl}</p>
-                  <p className={`text-sm mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+                  <p className={`text-xs mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
                     {settings.isEnabled ? t('settings.enabledForThisSite') : t('settings.disabledForThisSite')}
                   </p>
                   {!settings.isEnabled && settings.temporaryDisabledUrls[settings.currentUrl] && (
@@ -445,7 +459,7 @@ const Settings: React.FC = () => {
                     onChange={() => setThemePreference('system')}
                     className="mr-2"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('settings.useDefault')}</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">{t('settings.useDefault')}</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -456,7 +470,7 @@ const Settings: React.FC = () => {
                     onChange={() => setThemePreference('light')}
                     className="mr-2"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('settings.light')}</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">{t('settings.light')}</span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -467,7 +481,7 @@ const Settings: React.FC = () => {
                     onChange={() => setThemePreference('dark')}
                     className="mr-2"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{t('settings.dark')}</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">{t('settings.dark')}</span>
                 </label>
               </div>
             </div>
