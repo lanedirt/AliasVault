@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slot-based Login Form Test</title>
+</head>
+<body>
+    <form>
+        <fieldset class="relative mt-0 mb-0 ml-0 mr-0 p-0 border-0 flex flex-col flex-grow bg-transparent">
+            <faceplate-text-input id="login-username" type="text" name="username" autocomplete="username" required="" helper-text-placeholder="&nbsp;" aria-disabled="false" helper-text-aria-live="polite" appearance="secondary" faceplate-validity="invalid">
+                <span slot="label">Email or username</span>
+            </faceplate-text-input>
+        </fieldset>
+
+        <fieldset class="relative mt-0 mb-0 ml-0 mr-0 p-0 border-0 flex flex-col flex-grow bg-transparent">
+            <faceplate-text-input id="login-password" type="password" name="password" autocomplete="current-password" required="" helper-text-placeholder="&nbsp;" aria-disabled="false" helper-text-aria-live="polite" appearance="secondary">
+                <span slot="label">Password</span>
+            </faceplate-text-input>
+        </fieldset>
+
+        <fieldset class="relative mt-0 mb-0 ml-0 mr-0 p-0 border-0 flex flex-col flex-grow bg-transparent">
+            <custom-input-element id="email-field" type="email" name="email" required="">
+                <span slot="label">Email address</span>
+                <span slot="helper-text">We'll never share your email</span>
+            </custom-input-element>
+        </fieldset>
+
+        <fieldset class="relative mt-0 mb-0 ml-0 mr-0 p-0 border-0 flex flex-col flex-grow bg-transparent">
+            <web-component-input id="firstname-field" type="text" name="first_name">
+                <span slot="label">First name</span>
+            </web-component-input>
+        </fieldset>
+
+        <fieldset class="relative mt-0 mb-0 ml-0 mr-0 p-0 border-0 flex flex-col flex-grow bg-transparent">
+            <web-component-input id="lastname-field" type="text" name="last_name">
+                <span slot="label">Last name</span>
+            </web-component-input>
+        </fieldset>
+    </form>
+</body>
+</html>
