@@ -199,11 +199,11 @@
       "openAutofillSettings": "Otomatik Doldurma Ayarlarını Aç",
       "buttonTip": "Eğer yukarıdaki buton çalışmazsa, güvenlik ayarları nedeniyle engellenmiş olabilir. Manuel olarak Android Ayarları → Genel Yönetim → Parolalar ve otomatik doldurma bölümüne gidebilirsiniz.",
       "step2": "2. Bazı uygulamalar, örneğin Google Chrome, üçüncü taraf otomatik doldurma uygulamalarına izin vermek için kendi ayarlarında manuel yapılandırma gerektirebilir. Ancak çoğu uygulama varsayılan olarak otomatik doldurma ile çalışmalıdır.",
-      "alreadyConfigured": "I already configured it"
+      "alreadyConfigured": "Yapılandırma tamamlandı"
     },
-    "vaultUnlock": "Vault Unlock Method",
-    "autoLock": "Auto-lock Timeout",
-    "clipboardClear": "Clear Clipboard",
+    "vaultUnlock": "Kasa Açma Yöntemi",
+    "autoLock": "Otomatik Kilit Süresi",
+    "clipboardClear": "Panoyu Temizle",
     "clipboardClearDescription": "Automatically clear copied passwords and sensitive information from your clipboard after a specified time period.",
     "clipboardClearAndroidWarning": "Note: some Android devices have clipboard history enabled, which may keep track of previously copied items, even after AliasVault clears the clipboard. AliasVault can only overwrite the most recent item, but older entries may remain visible in history. For security reasons, we recommend disabling any clipboard history features in your device settings.",
     "clipboardClearOptions": {
@@ -261,26 +261,26 @@
       "genderOptions": {
         "random": "Random",
         "male": "Male",
-        "female": "Female"
+        "female": "Kadın"
       },
       "errors": {
-        "loadFailed": "Failed to load identity generator settings.",
-        "languageUpdateFailed": "Failed to update language setting.",
-        "genderUpdateFailed": "Failed to update gender setting."
+        "loadFailed": "Kimlik oluşturucu ayarları yüklenemedi",
+        "languageUpdateFailed": "Dil ayarı güncellenemedi.",
+        "genderUpdateFailed": "Cinsiyet ayarı güncellenemedi."
       }
     },
     "securitySettings": {
-      "title": "Security",
-      "description": "Manage your account and vault security settings.",
-      "changeMasterPassword": "Change Master Password",
-      "activeSessionsTitle": "Active Sessions",
-      "recentAuthLogs": "Recent Auth Logs",
-      "deleteAccountTitle": "Delete Account",
+      "title": "Güvenlik",
+      "description": "Hesabınızı ve kasa güvenliği ayarlarınızı yönetin.",
+      "changeMasterPassword": "Ana Parolayı Değiştir",
+      "activeSessionsTitle": "Aktif Oturumlar",
+      "recentAuthLogs": "Son Kimlik Doğrulama Kayıtları",
+      "deleteAccountTitle": "Hesabı Sil",
       "changePassword": {
-        "headerText": "Changing your master password also changes the vault encryption keys. It is advised to periodically change your master password to keep your vaults secure.",
-        "currentPassword": "Current Password",
-        "newPassword": "New Password",
-        "confirmNewPassword": "Confirm New Password",
+        "headerText": "Ana parolanızı değiştirmek, kasa şifreleme anahtarlarını da değiştirir. Kasalarınızın güvenliğini sağlamak için ana parolanızı periyodik olarak değiştirmeniz önerilir.",
+        "currentPassword": "Geçerli Parola",
+        "newPassword": "Yeni Parola",
+        "confirmNewPassword": "Yeni Parolayı Onayla",
         "enterCurrentPassword": "Enter current password",
         "enterNewPassword": "Enter new password",
         "changePassword": "Change Password",
