@@ -140,7 +140,7 @@
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Note: clearing the clipboard in the web app is only possible when the tab is active. If the tab loses focus, the clipboard will be cleared when it comes back into focus.</value>
+    <value>Leikepöydän tyhjennys web-sovelluksessa on mahdollista vain, kun välilehti on aktiivinen. Kun välilehti menettää tarkennuksen, se tyhjentää leikepöydän, kun se tulee keskittyä uudelleen.</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
