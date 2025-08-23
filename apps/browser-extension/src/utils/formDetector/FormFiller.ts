@@ -30,12 +30,39 @@ export class FormFiller {
   }
 
   /**
+   * Set value on an input element, handling both regular inputs and custom elements with shadow DOM.
+   * @param element The element to set the value on
+   * @param value The value to set
+   */
+  private setElementValue(element: HTMLInputElement | HTMLSelectElement, value: string): void {
+    // Try to set value directly on the element
+    element.value = value;
+    
+    // If it's a custom element with shadow DOM, try to find and fill the actual input
+    if (element.shadowRoot) {
+      const shadowInput = element.shadowRoot.querySelector('input, textarea') as HTMLInputElement;
+      if (shadowInput) {
+        shadowInput.value = value;
+        // Trigger events on the shadow input as well
+        this.triggerInputEvents(shadowInput, false);
+      }
+    }
+    
+    // Also check if the element contains a regular child input (non-shadow DOM)
+    const childInput = element.querySelector('input, textarea') as HTMLInputElement;
+    if (childInput && childInput !== element) {
+      childInput.value = value;
+      this.triggerInputEvents(childInput, false);
+    }
+  }
+
+  /**
    * Fill the basic fields of the form.
    * @param credential The credential to fill the form with.
    */
   private fillBasicFields(credential: Credential): void {
     if (this.form.usernameField && credential.Username) {
-      this.form.usernameField.value = credential.Username;
+      this.setElementValue(this.form.usernameField, credential.Username);
       this.triggerInputEvents(this.form.usernameField);
     }
 
@@ -49,7 +76,7 @@ export class FormFiller {
 
     if (this.form.emailField && (credential.Alias?.Email !== undefined || credential.Username !== undefined)) {
       if (credential.Alias?.Email) {
-        this.form.emailField.value = credential.Alias.Email;
+        this.setElementValue(this.form.emailField, credential.Alias.Email);
         this.triggerInputEvents(this.form.emailField);
       } else if (credential.Username && !this.form.usernameField) {
         /*
@@ -62,28 +89,28 @@ export class FormFiller {
          * from a previous password manager that only had username/password fields
          * or where the user manually created a credential with only a username/password.
          */
-        this.form.emailField.value = credential.Username;
+        this.setElementValue(this.form.emailField, credential.Username);
         this.triggerInputEvents(this.form.emailField);
       }
     }
 
     if (this.form.emailConfirmField && credential.Alias?.Email) {
-      this.form.emailConfirmField.value = credential.Alias.Email;
+      this.setElementValue(this.form.emailConfirmField, credential.Alias.Email);
       this.triggerInputEvents(this.form.emailConfirmField);
     }
 
     if (this.form.fullNameField && credential.Alias?.FirstName && credential.Alias?.LastName) {
-      this.form.fullNameField.value = `${credential.Alias.FirstName} ${credential.Alias.LastName}`;
+      this.setElementValue(this.form.fullNameField, `${credential.Alias.FirstName} ${credential.Alias.LastName}`);
       this.triggerInputEvents(this.form.fullNameField);
     }
 
     if (this.form.firstNameField && credential.Alias?.FirstName) {
-      this.form.firstNameField.value = credential.Alias.FirstName;
+      this.setElementValue(this.form.firstNameField, credential.Alias.FirstName);
       this.triggerInputEvents(this.form.firstNameField);
     }
 
     if (this.form.lastNameField && credential.Alias?.LastName) {
-      this.form.lastNameField.value = credential.Alias.LastName;
+      this.setElementValue(this.form.lastNameField, credential.Alias.LastName);
       this.triggerInputEvents(this.form.lastNameField);
     }
   }
@@ -91,25 +118,56 @@ export class FormFiller {
   /**
    * Fill the password field with the given password. This uses a small delay between each character to simulate human typing.
    * Simulates actual keystroke behavior by appending characters one by one.
+   * Supports both regular inputs and custom elements with shadow DOM.
    *
    * @param field The password field to fill.
    * @param password The password to fill the field with.
    */
   private async fillPasswordField(field: HTMLInputElement, password: string): Promise<void> {
+    // Find the actual input element (could be in shadow DOM)
+    let actualInput = field;
+    let isCustomElement = false;
+    
+    // Check for shadow DOM input
+    if (field.shadowRoot) {
+      const shadowInput = field.shadowRoot.querySelector('input[type="password"], input') as HTMLInputElement;
+      if (shadowInput) {
+        actualInput = shadowInput;
+        isCustomElement = true;
+      }
+    } else if (field.tagName.toLowerCase() !== 'input') {
+      // Check for child input (non-shadow DOM) only if field is not already an input
+      const childInput = field.querySelector('input[type="password"], input') as HTMLInputElement;
+      if (childInput) {
+        actualInput = childInput;
+        isCustomElement = true;
+      }
+    }
+
     // Clear the field first
-    field.value = '';
-    this.triggerInputEvents(field, true);
+    actualInput.value = '';
+    if (isCustomElement) {
+      field.value = '';
+    }
+    this.triggerInputEvents(actualInput, true);
 
     // Type each character with a small delay
     for (const char of password) {
-      // Append the character to the current value instead of using substring
-      field.value += char;
+      // Append the character to the actual input
+      actualInput.value += char;
+      if (isCustomElement) {
+        // Also update the custom element's value property for compatibility
+        field.value += char;
+      }
       // Small random delay between 5-15ms to simulate human typing
-      this.triggerInputEvents(field, false);
+      this.triggerInputEvents(actualInput, false);
       await new Promise(resolve => setTimeout(resolve, Math.random() * 10 + 5));
     }
 
-    this.triggerInputEvents(field, false);
+    this.triggerInputEvents(actualInput, false);
+    if (isCustomElement) {
+      this.triggerInputEvents(field, false);
+    }
   }
 
   /**

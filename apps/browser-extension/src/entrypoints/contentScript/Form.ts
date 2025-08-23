@@ -32,6 +32,8 @@ export function hidePopupFor(ms: number) : void {
 
 /**
  * Validates if an element is a supported input field that can be processed for autofill.
+ * This function supports regular input elements, custom elements with type attributes,
+ * and custom web components that may contain shadow DOM.
  * @param element The element to validate
  * @returns An object containing validation result and the element cast as HTMLInputElement if valid
  */
@@ -42,14 +44,30 @@ export function validateInputField(element: Element | null): { isValid: boolean;
 
   const textInputTypes = ['text', 'email', 'tel', 'password', 'search', 'url', 'number'];
   const elementType = element.getAttribute('type');
-  const isInputElement = element.tagName.toLowerCase() === 'input';
+  const tagName = element.tagName.toLowerCase();
+  const isInputElement = tagName === 'input';
+
+  // Check if element has shadow DOM with input elements
+  const elementWithShadow = element as HTMLElement & { shadowRoot?: ShadowRoot };
+  const hasShadowDOMInput = elementWithShadow.shadowRoot &&
+    elementWithShadow.shadowRoot.querySelector('input, textarea');
+
+  // Check if it's a custom element that might be an input
+  const isLikelyCustomInputElement = tagName.includes('-') && (
+    tagName.includes('input') ||
+    tagName.includes('field') ||
+    tagName.includes('text') ||
+    hasShadowDOMInput
+  );
 
   // Check if it's a valid input field we should process
   const isValid = (
     // Case 1: It's an input element (with either explicit type or defaulting to "text")
     (isInputElement && (!elementType || textInputTypes.includes(elementType?.toLowerCase() ?? ''))) ||
     // Case 2: Non-input element but has valid type attribute
-    (!isInputElement && elementType && textInputTypes.includes(elementType.toLowerCase()))
+    (!isInputElement && elementType && textInputTypes.includes(elementType.toLowerCase())) ||
+    // Case 3: It's a custom element that likely contains an input
+    (isLikelyCustomInputElement)
   ) as boolean;
 
   return {
@@ -98,12 +116,23 @@ function findActualInput(element: HTMLElement): HTMLInputElement {
     return element as HTMLInputElement;
   }
 
-  // Try to find a visible child input
+  // Try to find a visible child input in regular DOM
   const childInput = element.querySelector('input');
   if (childInput) {
     const style = window.getComputedStyle(childInput);
     if (style.display !== 'none' && style.visibility !== 'hidden') {
       return childInput;
+    }
+  }
+
+  // Try to find input in shadow DOM if element has shadowRoot
+  if (element.shadowRoot) {
+    const shadowInput = element.shadowRoot.querySelector('input');
+    if (shadowInput) {
+      const style = window.getComputedStyle(shadowInput);
+      if (style.display !== 'none' && style.visibility !== 'hidden') {
+        return shadowInput as HTMLInputElement;
+      }
     }
   }
 

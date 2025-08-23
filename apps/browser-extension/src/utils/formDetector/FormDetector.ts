@@ -170,6 +170,37 @@ export class FormDetector {
   }
 
   /**
+   * Get the actual input element from a potentially custom element.
+   * This handles any element with shadow DOM containing input elements.
+   * @param element The element to check (could be a custom element or regular input)
+   * @returns The actual input element, or the original element if no nested input is found
+   */
+  private getActualInputElement(element: HTMLElement): HTMLElement {
+    // If it's already an input, return it
+    if (element.tagName.toLowerCase() === 'input') {
+      return element;
+    }
+
+    // Check for shadow DOM input (generic approach)
+    const elementWithShadow = element as HTMLElement & { shadowRoot?: ShadowRoot };
+    if (elementWithShadow.shadowRoot) {
+      const shadowInput = elementWithShadow.shadowRoot.querySelector('input, textarea') as HTMLElement;
+      if (shadowInput) {
+        return shadowInput;
+      }
+    }
+
+    // Check for regular child input (non-shadow DOM)
+    const childInput = element.querySelector('input, textarea') as HTMLElement;
+    if (childInput) {
+      return childInput;
+    }
+
+    // Return the original element if no nested input found
+    return element;
+  }
+
+  /**
    * Check if an element and all its parents are visible.
    * This checks for display:none, visibility:hidden, and opacity:0
    * Uses a cache to avoid redundant checks of the same elements.
@@ -257,10 +288,32 @@ export class FormDetector {
     types: string[],
     excludeElements: HTMLInputElement[] = []
   ): HTMLInputElement[] {
-    // Query for both standard input elements and any element with a type attribute
-    const candidates = form
-      ? form.querySelectorAll<HTMLElement>('input, select, [type]')
-      : this.document.querySelectorAll<HTMLElement>('input, select, [type]');
+    // Query for standard input elements, select elements, and elements with type attributes
+    const standardCandidates = form
+      ? Array.from(form.querySelectorAll<HTMLElement>('input, select, [type]'))
+      : Array.from(this.document.querySelectorAll<HTMLElement>('input, select, [type]'));
+
+    /**
+     * Also find any custom elements that might contain shadow DOM inputs
+     * Look for elements with shadow roots that contain input elements
+     */
+    const allElements = form
+      ? Array.from(form.querySelectorAll<HTMLElement>('*'))
+      : Array.from(this.document.querySelectorAll<HTMLElement>('*'));
+
+    const shadowDOMCandidates = allElements.filter(el => {
+      // Check if element has shadow DOM with input elements
+      const elementWithShadow = el as HTMLElement & { shadowRoot?: ShadowRoot };
+      if (elementWithShadow.shadowRoot) {
+        const shadowInput = elementWithShadow.shadowRoot.querySelector('input, textarea');
+        return shadowInput !== null;
+      }
+      return false;
+    });
+
+    // Combine and deduplicate candidates
+    const allCandidates = [...standardCandidates, ...shadowDOMCandidates];
+    const candidates = allCandidates.filter((el, index, arr) => arr.indexOf(el) === index);
 
     const matches: { input: HTMLInputElement; score: number }[] = [];
 
@@ -274,12 +327,32 @@ export class FormDetector {
       }
 
       // Get type from either the element's type property or its type attribute
-      const type = input.tagName.toLowerCase() === 'select'
+      const tagName = input.tagName.toLowerCase();
+      let type = tagName === 'select'
         ? 'select'
         : (input as HTMLInputElement).type?.toLowerCase() || input.getAttribute('type')?.toLowerCase() || '';
 
+      // Check if element has shadow DOM with input elements (generic detection)
+      const elementWithShadow = input as HTMLElement & { shadowRoot?: ShadowRoot };
+      const hasShadowDOMInput = elementWithShadow.shadowRoot &&
+        elementWithShadow.shadowRoot.querySelector('input, textarea');
+
+      // For elements with shadow DOM, get the type from the actual input inside
+      if (hasShadowDOMInput && !type) {
+        const shadowInput = elementWithShadow.shadowRoot!.querySelector('input, textarea') as HTMLInputElement;
+        if (shadowInput) {
+          type = shadowInput.type?.toLowerCase() || 'text';
+        }
+      }
+
+      // Check if this element should be considered based on type matching
       if (!types.includes(type)) {
-        continue;
+        // For shadow DOM elements, allow if we're looking for text and it contains an input
+        if (hasShadowDOMInput && types.includes('text') && !type) {
+          // This is a shadow DOM element without explicit type, treat as text input
+        } else {
+          continue;
+        }
       }
 
       if (types.includes('email') && type === 'email') {
@@ -301,6 +374,34 @@ export class FormDetector {
         if (label) {
           attributesToCheck.push(label.textContent?.toLowerCase() ?? '');
         }
+      }
+
+      /**
+       * Check for slot-based labels (e.g., <span slot="label">Email or username</span>)
+       * Look for slot elements within the input's parent hierarchy
+       */
+      let slotParent: HTMLElement | null = input;
+      for (let depth = 0; depth < 3 && slotParent; depth++) {
+        const slotElements = slotParent.querySelectorAll('[slot="label"], [slot="helper-text"]');
+        for (const slotEl of Array.from(slotElements)) {
+          const slotText = slotEl.textContent?.toLowerCase() ?? '';
+          if (slotText) {
+            attributesToCheck.push(slotText);
+          }
+        }
+        /** Also check if the parent itself is a custom element with slots */
+        if (slotParent.shadowRoot) {
+          const shadowSlots = slotParent.shadowRoot.querySelectorAll('slot[name="label"], slot[name="helper-text"]');
+          for (const slot of Array.from(shadowSlots)) {
+            const assignedNodes = (slot as HTMLSlotElement).assignedNodes();
+            for (const node of assignedNodes) {
+              if (node.textContent) {
+                attributesToCheck.push(node.textContent.toLowerCase());
+              }
+            }
+          }
+        }
+        slotParent = slotParent.parentElement;
       }
 
       // Check for sibling elements with class containing "label"
@@ -631,21 +732,34 @@ export class FormDetector {
     // Check if it's a username, email or password field by reusing the existing detection logic
     const formWrapper = this.getFormWrapper();
 
-    // Check if the clicked element is a username field.
+    if (!this.clickedElement) {
+      return false;
+    }
+
+    // Get the actual input element (handles shadow DOM)
+    const actualElement = this.getActualInputElement(this.clickedElement);
+
+    // Check both the clicked element and the actual input element
+    const elementsToCheck = [this.clickedElement, actualElement].filter((el, index, arr) =>
+      el && arr.indexOf(el) === index // Remove duplicates
+    );
+
+    // Check if any of the elements is a username field
     const usernameFields = this.findAllInputFields(formWrapper as HTMLFormElement | null, CombinedFieldPatterns.username, ['text']);
-    if (usernameFields.some(input => input === this.clickedElement)) {
+    if (usernameFields.some(input => elementsToCheck.includes(input))) {
       return true;
     }
 
-    // Check if the clicked element is a password field.
+    // Check if any of the elements is a password field
     const passwordField = this.findPasswordField(formWrapper as HTMLFormElement | null);
-    if (passwordField.primary === this.clickedElement || passwordField.confirm === this.clickedElement) {
+    if ((passwordField.primary && elementsToCheck.includes(passwordField.primary)) ||
+        (passwordField.confirm && elementsToCheck.includes(passwordField.confirm))) {
       return true;
     }
 
-    // Check if the clicked element is an email field.
+    // Check if any of the elements is an email field
     const emailFields = this.findAllInputFields(formWrapper as HTMLFormElement | null, CombinedFieldPatterns.email, ['text', 'email']);
-    if (emailFields.some(input => input === this.clickedElement)) {
+    if (emailFields.some(input => elementsToCheck.includes(input))) {
       return true;
     }
 
