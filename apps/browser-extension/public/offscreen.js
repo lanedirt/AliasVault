@@ -27,10 +27,8 @@ const textEl = document.querySelector('#text');
 async function clearClipboard() {
   try {
     // Use execCommand to clear clipboard
-    console.log(textEl);
     textEl.value = '\n';
     textEl.select();
-    console.log(textEl.value);
     document.execCommand('copy');
   } catch (error) {
     console.error('[OFFSCREEN] Error clearing clipboard:', error);
