@@ -30,6 +30,7 @@ const CredentialsList: React.FC = () => {
   const { setHeaderButtons } = useHeaderButtons();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { setIsInitialLoading } = useLoading();
 
   /**
@@ -172,14 +173,22 @@ const CredentialsList: React.FC = () => {
       </div>
 
       {credentials.length > 0 ? (
-        <input
-          type="text"
-          placeholder={t('credentials.searchPlaceholder')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          autoFocus
-          className="w-full p-2 mb-4 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-        />
+        <div className="relative mb-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+            autoFocus
+            className="w-full p-2 border dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+          />
+          {!isSearchFocused && !searchTerm && (
+            <div className="absolute inset-0 flex items-center px-2 pointer-events-none">
+              <span className="text-gray-400 dark:text-gray-500">Search vault...</span>
+            </div>
+          )}
+        </div>
       ) : (
         <></>
       )}

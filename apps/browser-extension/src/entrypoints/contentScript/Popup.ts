@@ -321,12 +321,39 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
   // Add click listener with capture and prevent removal.
   addReliableClickHandler(createButton, handleCreateClick);
 
+  // Create search container.
+  const searchContainer = document.createElement('div');
+  searchContainer.className = 'av-search-container';
+
   // Create search input.
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.dataset.avDisable = 'true';
-  searchInput.placeholder = searchPlaceholder;
   searchInput.className = 'av-search-input';
+
+  // Create placeholder label.
+  const placeholderLabel = document.createElement('div');
+  placeholderLabel.className = 'av-search-placeholder';
+  placeholderLabel.textContent = searchPlaceholder;
+
+  // Add focus and blur handlers for dynamic placeholder.
+  searchInput.addEventListener('focus', () => {
+    placeholderLabel.style.display = 'none';
+  });
+
+  searchInput.addEventListener('blur', () => {
+    if (!searchInput.value) {
+      placeholderLabel.style.display = 'flex';
+    }
+  });
+
+  // Hide placeholder if search already has value.
+  if (searchInput.value) {
+    placeholderLabel.style.display = 'none';
+  }
+
+  searchContainer.appendChild(searchInput);
+  searchContainer.appendChild(placeholderLabel);
 
   // Handle search input.
   let searchTimeout: NodeJS.Timeout | null = null;
@@ -417,7 +444,7 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
     handleCloseClick(e);
   });
 
-  actionContainer.appendChild(searchInput);
+  actionContainer.appendChild(searchContainer);
   actionContainer.appendChild(createButton);
   actionContainer.appendChild(closeButton);
   popup.appendChild(actionContainer);
