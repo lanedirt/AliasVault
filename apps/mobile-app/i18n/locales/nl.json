@@ -205,13 +205,13 @@
     "autoLock": "Automatisch vergrendelen",
     "clipboardClear": "Klembord leegmaken",
     "clipboardClearDescription": "Automatisch gekopieerde wachtwoorden en gevoelige informatie van je klembord wissen na een bepaalde tijdsperiode.",
-    "clipboardClearAndroidWarning": "Note: some Android devices have clipboard history enabled, which may keep track of previously copied items, even after AliasVault clears the clipboard. AliasVault can only overwrite the most recent item, but older entries may remain visible in history. For security reasons, we recommend disabling any clipboard history features in your device settings.",
+    "clipboardClearAndroidWarning": "Opmerking: sommige Android-apparaten hebben klembord geschiedenis ingeschakeld, waarmee eerder gekopieerde items kunnen worden bijgehouden, zelfs nadat AliasVault het klembord heeft gewist. AliasVault kan alleen het meest recente item overschrijven, maar oudere items kunnen zichtbaar blijven in de geschiedenis. Om veiligheidsredenen raden we aan om alle klembordgeschiedenis opties in je apparaatinstellingen uit te schakelen.",
     "clipboardClearOptions": {
-      "never": "Never",
-      "5seconds": "5 seconds",
-      "10seconds": "10 seconds",
-      "15seconds": "15 seconds",
-      "30seconds": "30 seconds"
+      "never": "Nooit",
+      "5seconds": "5 seconden",
+      "10seconds": "10 seconden",
+      "15seconds": "15 seconden",
+      "30seconds": "30 seconden"
     },
     "identityGenerator": "Identiteit generator",
     "security": "Beveiliging",
