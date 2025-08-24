@@ -363,22 +363,22 @@
     "time": {
       "justNow": "biraz önce",
       "minutesAgo_single": "{{count}} dakika önce",
-      "minutesAgo_plural": "{{count}} mins ago",
-      "hoursAgo_single": "{{count}} hr ago",
-      "hoursAgo_plural": "{{count}} hrs ago",
-      "yesterday": "yesterday"
+      "minutesAgo_plural": "{{count}} dakika önce",
+      "hoursAgo_single": "{{count}} saat önce",
+      "hoursAgo_plural": "{{count}} saat önce",
+      "yesterday": "dün"
     },
     "errors": {
-      "generic": "An error occurred",
-      "loadFailed": "Failed to load emails",
-      "deleteFailed": "Failed to delete email",
-      "dbNotAvailable": "Database context or email not available",
-      "decryptFailed": "Failed to decrypt attachment",
-      "downloadFailed": "Failed to download attachment"
+      "generic": "Bir hata oluştu",
+      "loadFailed": "E-postalar yüklenemedi",
+      "deleteFailed": "E-posta silinemedi",
+      "dbNotAvailable": "Veritabanı bağlamı veya e-posta kullanılamıyor",
+      "decryptFailed": "Ek dosya çözülemedi",
+      "downloadFailed": "Ek dosya indirilemedi"
     }
   },
   "validation": {
-    "required": "This field is required",
+    "required": "Bu alan zorunludur",
     "serviceNameRequired": "Service name is required",
     "invalidDateFormat": "Date must be in YYYY-MM-DD format",
     "invalidEmailFormat": "Invalid email format"
@@ -437,7 +437,7 @@
     },
     "appName": "AliasVault",
     "reinitialize": {
-      "vaultAutoLockedMessage": "Vault auto-locked after timeout.",
+      "vaultAutoLockedMessage": "Kasa zaman aşımının ardından otomatik olarak kilitlendi.",
       "attemptingToUnlockMessage": "Attempting to unlock."
     },
     "loginSettings": {
