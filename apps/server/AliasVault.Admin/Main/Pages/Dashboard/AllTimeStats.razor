@@ -87,7 +87,7 @@
     </div>
 
     <!-- Top Users Analysis -->
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <!-- Top Users by Storage -->
         <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
             <div class="flex items-center justify-between mb-4">
@@ -100,20 +100,68 @@
             {
                 <div class="overflow-x-auto">
                     <SortableTable Columns="@_storageTableColumns">
+                        @{
+                            var storageStartIndex = (_storageCurrentPage - 1) * _pageSize + 1;
+                            var storageIndex = storageStartIndex;
+                        }
                         @foreach (var user in _topUsersByStorage)
                         {
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center w-12">@storageIndex</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                     <a href="users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
                                         @user.Username
                                     </a>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@user.StorageDisplaySize</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right w-32">@user.StorageDisplaySize</td>
                             </tr>
+                            storageIndex++;
                         }
                     </SortableTable>
                 </div>
                 <Paginator CurrentPage="_storageCurrentPage" PageSize="_pageSize" TotalRecords="_storageTotalRecords" OnPageChanged="HandleStoragePageChanged" />
+            }
+            else
+            {
+                <div class="px-6 py-8 flex justify-center">
+                    <LoadingIndicator />
+                </div>
+            }
+        </div>
+
+
+        <!-- Top Users by Credentials -->
+        <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Users by Credentials</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Users with the most credentials stored in their vault</p>
+                </div>
+            </div>
+            @if (_topUsersByCredentials != null)
+            {
+                <div class="overflow-x-auto">
+                    <SortableTable Columns="@_credentialTableColumns">
+                        @{
+                            var credentialStartIndex = (_credentialCurrentPage - 1) * _pageSize + 1;
+                            var credentialIndex = credentialStartIndex;
+                        }
+                        @foreach (var user in _topUsersByCredentials)
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center w-12">@credentialIndex</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <a href="users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
+                                        @user.Username
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right w-24">@user.CredentialCount.ToString("N0")</td>
+                            </tr>
+                            credentialIndex++;
+                        }
+                    </SortableTable>
+                </div>
+                <Paginator CurrentPage="_credentialCurrentPage" PageSize="_pageSize" TotalRecords="_credentialTotalRecords" OnPageChanged="HandleCredentialPageChanged" />
             }
             else
             {
@@ -135,16 +183,22 @@
             {
                 <div class="overflow-x-auto">
                     <SortableTable Columns="@_aliasTableColumns">
+                        @{
+                            var aliasStartIndex = (_aliasCurrentPage - 1) * _pageSize + 1;
+                            var aliasIndex = aliasStartIndex;
+                        }
                         @foreach (var user in _topUsersByAliases)
                         {
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center w-12">@aliasIndex</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                     <a href="users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
                                         @user.Username
                                     </a>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@user.AliasCount.ToString("N0")</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right w-24">@user.AliasCount.ToString("N0")</td>
                             </tr>
+                            aliasIndex++;
                         }
                     </SortableTable>
                 </div>
@@ -163,23 +217,29 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Users by Emails</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Users with the most emails stored in their aliases</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Users with the most emails stored</p>
                 </div>
             </div>
             @if (_topUsersByEmails != null)
             {
                 <div class="overflow-x-auto">
                     <SortableTable Columns="@_emailTableColumns">
+                        @{
+                            var emailStartIndex = (_emailCurrentPage - 1) * _pageSize + 1;
+                            var emailIndex = emailStartIndex;
+                        }
                         @foreach (var user in _topUsersByEmails)
                         {
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-2 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center w-12">@emailIndex</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                     <a href="users/@user.UserId" class="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer">
                                         @user.Username
                                     </a>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right">@user.EmailCount.ToString("N0")</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-right w-24">@user.EmailCount.ToString("N0")</td>
                             </tr>
+                            emailIndex++;
                         }
                     </SortableTable>
                 </div>
@@ -195,6 +255,7 @@
     </div>
 
     <!-- Top IP Addresses -->
+    <div class="mt-6">
     @if (_topIpAddresses != null && _topIpAddresses.Any())
     {
         <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
@@ -248,6 +309,7 @@
             </div>
         </div>
     }
+    </div>
 
     @if (_loadingError)
     {
@@ -278,6 +340,7 @@
     private List<TopUserByStorage>? _topUsersByStorage;
     private List<TopUserByAliases>? _topUsersByAliases;
     private List<TopUserByEmails>? _topUsersByEmails;
+    private List<TopUserByCredentials>? _topUsersByCredentials;
     private List<TopIpAddress>? _topIpAddresses;
     private bool _ipAddressesLoading = true;
     private bool _loadingError = false;
@@ -287,26 +350,38 @@
     private int _storageCurrentPage = 1;
     private int _aliasCurrentPage = 1;
     private int _emailCurrentPage = 1;
+    private int _credentialCurrentPage = 1;
     private int _storageTotalRecords = 0;
     private int _aliasTotalRecords = 0;
     private int _emailTotalRecords = 0;
+    private int _credentialTotalRecords = 0;
 
     private readonly List<TableColumn> _storageTableColumns = new()
     {
+        new() { Title = "#", PropertyName = "Index", Sortable = false },
         new() { Title = "User", PropertyName = "Username", Sortable = false },
         new() { Title = "Storage", PropertyName = "StorageDisplaySize", Sortable = false }
     };
 
     private readonly List<TableColumn> _aliasTableColumns = new()
     {
+        new() { Title = "#", PropertyName = "Index", Sortable = false },
         new() { Title = "User", PropertyName = "Username", Sortable = false },
         new() { Title = "Aliases", PropertyName = "AliasCount", Sortable = false }
     };
 
     private readonly List<TableColumn> _emailTableColumns = new()
     {
+        new() { Title = "#", PropertyName = "Index", Sortable = false },
         new() { Title = "User", PropertyName = "Username", Sortable = false },
         new() { Title = "Emails", PropertyName = "EmailCount", Sortable = false }
+    };
+
+    private readonly List<TableColumn> _credentialTableColumns = new()
+    {
+        new() { Title = "#", PropertyName = "Index", Sortable = false },
+        new() { Title = "User", PropertyName = "Username", Sortable = false },
+        new() { Title = "Credentials", PropertyName = "CredentialCount", Sortable = false }
     };
 
     private readonly List<TableColumn> _ipTableColumns = new()
@@ -337,6 +412,7 @@
         _topUsersByStorage = null;
         _topUsersByAliases = null;
         _topUsersByEmails = null;
+        _topUsersByCredentials = null;
         _topIpAddresses = null;
         _ipAddressesLoading = true;
         _loadingError = false;
@@ -345,9 +421,11 @@
         _storageCurrentPage = 1;
         _aliasCurrentPage = 1;
         _emailCurrentPage = 1;
+        _credentialCurrentPage = 1;
         _storageTotalRecords = 0;
         _aliasTotalRecords = 0;
         _emailTotalRecords = 0;
+        _credentialTotalRecords = 0;
 
         StateHasChanged();
 
@@ -381,17 +459,19 @@
     {
         try
         {
-            // Load paginated data for all three tables
+            // Load paginated data for all four tables
             var storageTask = StatisticsService.GetTopUsersByStoragePaginatedAsync(_storageCurrentPage, _pageSize);
             var aliasTask = StatisticsService.GetTopUsersByAliasesPaginatedAsync(_aliasCurrentPage, _pageSize);
             var emailTask = StatisticsService.GetTopUsersByEmailsPaginatedAsync(_emailCurrentPage, _pageSize);
+            var credentialTask = StatisticsService.GetTopUsersByCredentialsPaginatedAsync(_credentialCurrentPage, _pageSize);
             var ipTask = StatisticsService.GetServerStatisticsAsync();
 
-            await Task.WhenAll(storageTask, aliasTask, emailTask, ipTask);
+            await Task.WhenAll(storageTask, aliasTask, emailTask, credentialTask, ipTask);
 
             var (storageUsers, storageTotalCount) = await storageTask;
             var (aliasUsers, aliasTotalCount) = await aliasTask;
             var (emailUsers, emailTotalCount) = await emailTask;
+            var (credentialUsers, credentialTotalCount) = await credentialTask;
             var stats = await ipTask;
 
             _topUsersByStorage = storageUsers;
@@ -402,6 +482,9 @@
 
             _topUsersByEmails = emailUsers;
             _emailTotalRecords = emailTotalCount;
+
+            _topUsersByCredentials = credentialUsers;
+            _credentialTotalRecords = credentialTotalCount;
 
             _topIpAddresses = stats.TopIpAddresses;
             _ipAddressesLoading = false;
@@ -433,6 +516,12 @@
     {
         _emailCurrentPage = newPage;
         await LoadEmailPageData();
+    }
+
+    private async Task HandleCredentialPageChanged(int newPage)
+    {
+        _credentialCurrentPage = newPage;
+        await LoadCredentialPageData();
     }
 
     private async Task LoadStoragePageData()
@@ -489,6 +578,25 @@
         catch (Exception ex)
         {
             GlobalNotificationService.AddErrorMessage($"Error loading email statistics: {ex.Message}");
+        }
+    }
+
+    private async Task LoadCredentialPageData()
+    {
+        try
+        {
+            _topUsersByCredentials = null;
+            StateHasChanged();
+
+            var (users, totalCount) = await StatisticsService.GetTopUsersByCredentialsPaginatedAsync(_credentialCurrentPage, _pageSize);
+            _topUsersByCredentials = users;
+            _credentialTotalRecords = totalCount;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            GlobalNotificationService.AddErrorMessage($"Error loading credential statistics: {ex.Message}");
         }
     }
 }

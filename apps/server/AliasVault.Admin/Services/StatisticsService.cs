@@ -87,9 +87,15 @@ public class StatisticsService
         stats.TotalEmailAttachments = results[3];
 
         // Get top users data
-        stats.TopUsersByStorage = await GetTopUsersByStorageAsync(10);
-        stats.TopUsersByAliases = await GetTopUsersByAliasesAsync(10);
-        stats.TopUsersByEmails = await GetTopUsersByEmailsAsync(10);
+        var (storageUsers, _) = await GetTopUsersByStoragePaginatedAsync(1, 10);
+        var (aliasUsers, _) = await GetTopUsersByAliasesPaginatedAsync(1, 10);
+        var (emailUsers, _) = await GetTopUsersByEmailsPaginatedAsync(1, 10);
+        var (credentialUsers, _) = await GetTopUsersByCredentialsPaginatedAsync(1, 10);
+
+        stats.TopUsersByStorage = storageUsers;
+        stats.TopUsersByAliases = aliasUsers;
+        stats.TopUsersByEmails = emailUsers;
+        stats.TopUsersByCredentials = credentialUsers;
         stats.TopIpAddresses = await GetTopIpAddressesAsync();
 
         return stats;
@@ -231,6 +237,45 @@ public class StatisticsService
             UserId = u.UserId!,
             Username = u.Username ?? UnknownUsername,
             EmailCount = u.EmailCount,
+        }).ToList();
+
+        return (users, totalCount);
+    }
+
+    /// <summary>
+    /// Gets paginated top users by number of credentials.
+    /// </summary>
+    /// <param name="page">Page number (1-based).</param>
+    /// <param name="pageSize">Number of items per page.</param>
+    /// <returns>Paginated list of top users by credentials with total count.</returns>
+    public async Task<(List<TopUserByCredentials> Users, int TotalCount)> GetTopUsersByCredentialsPaginatedAsync(int page, int pageSize)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        // Get total count - using latest vault for each user
+        var totalCount = await context.Vaults
+            .GroupBy(v => v.UserId)
+            .CountAsync();
+
+        // Get paginated data - using latest vault version for each user
+        var topUsers = await context.Vaults
+            .GroupBy(v => v.UserId)
+            .Select(g => new
+            {
+                UserId = g.Key,
+                Username = g.First().User.UserName,
+                CredentialCount = g.OrderByDescending(v => v.Version).First().CredentialsCount,
+            })
+            .OrderByDescending(u => u.CredentialCount)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var users = topUsers.Select(u => new TopUserByCredentials
+        {
+            UserId = u.UserId,
+            Username = u.Username ?? UnknownUsername,
+            CredentialCount = u.CredentialCount,
         }).ToList();
 
         return (users, totalCount);
@@ -385,94 +430,6 @@ public class StatisticsService
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         return await context.EmailAttachments.CountAsync();
-    }
-
-    /// <summary>
-    /// Gets the top users by vault storage size.
-    /// </summary>
-    /// <param name="limit">Number of top users to retrieve.</param>
-    /// <returns>List of top users by storage.</returns>
-    private async Task<List<TopUserByStorage>> GetTopUsersByStorageAsync(int limit = 10)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        // Get the latest vault for each user with their total storage
-        var topUsers = await context.Vaults
-            .GroupBy(v => v.UserId)
-            .Select(g => new
-            {
-                UserId = g.Key,
-                Username = g.First().User.UserName,
-                TotalStorageBytes = g.OrderByDescending(v => v.Version).First().FileSize,
-            })
-            .OrderByDescending(u => u.TotalStorageBytes)
-            .Take(limit)
-            .ToListAsync();
-
-        return topUsers.Select(u => new TopUserByStorage
-        {
-            UserId = u.UserId,
-            Username = u.Username ?? UnknownUsername,
-            StorageBytes = u.TotalStorageBytes,
-            StorageDisplaySize = FormatKilobytes(u.TotalStorageBytes),
-        }).ToList();
-    }
-
-    /// <summary>
-    /// Gets the top users by number of email aliases.
-    /// </summary>
-    /// <param name="limit">Number of top users to retrieve.</param>
-    /// <returns>List of top users by aliases.</returns>
-    private async Task<List<TopUserByAliases>> GetTopUsersByAliasesAsync(int limit = 10)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var topUsers = await context.UserEmailClaims
-            .Where(uec => uec.UserId != null)
-            .GroupBy(uec => uec.UserId)
-            .Select(g => new
-            {
-                UserId = g.Key,
-                Username = g.First().User!.UserName,
-                AliasCount = g.Count(),
-            })
-            .OrderByDescending(u => u.AliasCount)
-            .Take(limit)
-            .ToListAsync();
-
-        return topUsers.Select(u => new TopUserByAliases
-        {
-            UserId = u.UserId!,
-            Username = u.Username ?? UnknownUsername,
-            AliasCount = u.AliasCount,
-        }).ToList();
-    }
-
-    /// <summary>
-    /// Gets the top users by number of emails stored.
-    /// </summary>
-    /// <param name="limit">Number of top users to retrieve.</param>
-    /// <returns>List of top users by emails.</returns>
-    private async Task<List<TopUserByEmails>> GetTopUsersByEmailsAsync(int limit = 10)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
-        var topUsers = await context.Emails
-            .GroupBy(e => e.EncryptionKey.UserId)
-            .Select(g => new
-            {
-                UserId = g.Key,
-                Username = g.First().EncryptionKey.User!.UserName,
-                EmailCount = g.Count(),
-            })
-            .OrderByDescending(u => u.EmailCount)
-            .Take(limit)
-            .ToListAsync();
-
-        return topUsers.Select(u => new TopUserByEmails
-        {
-            UserId = u.UserId!,
-            Username = u.Username ?? UnknownUsername,
-            EmailCount = u.EmailCount,
-        }).ToList();
     }
 
     /// <summary>
