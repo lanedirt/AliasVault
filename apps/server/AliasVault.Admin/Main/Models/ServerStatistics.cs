@@ -48,6 +48,11 @@ public class ServerStatistics
     public List<TopUserByEmails> TopUsersByEmails { get; set; } = new();
 
     /// <summary>
+    /// Gets or sets the list of top users by number of credentials.
+    /// </summary>
+    public List<TopUserByCredentials> TopUsersByCredentials { get; set; } = new();
+
+    /// <summary>
     /// Gets or sets the list of top IP addresses by user activity.
     /// </summary>
     public List<TopIpAddress> TopIpAddresses { get; set; } = new();
