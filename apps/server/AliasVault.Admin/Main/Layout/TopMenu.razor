@@ -2,7 +2,7 @@
 @implements IDisposable
 
 <header>
-    <nav class="fixed z-30 w-full border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 py-3 px-4 bg-primary-100">
+    <nav class="fixed z-30 w-full border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 py-3 px-4 bg-white">
         <div class="flex justify-between items-center max-w-screen-2xl mx-auto relative">
             <div class="flex justify-start items-center">
                 <a href="@NavigationService.BaseUri" class="flex mr-14 flex-shrink-0">
@@ -47,9 +47,11 @@
                     <div class="tooltip-arrow" data-popper-arrow="" style="position: absolute; left: 0px; transform: translate3d(68.5px, 0px, 0px);"></div>
                 </div>
 
-                <button @onclick="ToggleMenu" type="button" class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 flex-shrink-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="userMenuDropdownButton" aria-expanded="false" data-dropdown-toggle="userMenuDropdown">
+                <button @onclick="ToggleMenu" type="button" class="flex mx-3 text-sm rounded-full md:mr-0 flex-shrink-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="userMenuDropdownButton" aria-expanded="false" data-dropdown-toggle="userMenuDropdown">
                     <span class="sr-only">Open user menu</span>
-                    <img class="w-8 h-8 rounded-full" src="/img/avatar.webp" alt="user photo">
+                      <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                             <span class="text-primary-600 dark:text-primary-300 text-lg font-medium">A</span>
+                    </div>
                 </button>
 
                 @if (isMenuOpen)
