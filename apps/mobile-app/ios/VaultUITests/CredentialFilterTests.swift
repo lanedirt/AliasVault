@@ -176,7 +176,7 @@ final class CredentialFilterTests: XCTestCase {
 
     // [#18] - Ensure only full words are matched
     func testOnlyFullWordsMatch() {
-        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "Title | Express Yourself | Description")
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "Express Yourself App | Description")
         XCTAssertTrue(matches.isEmpty)
     }
 
