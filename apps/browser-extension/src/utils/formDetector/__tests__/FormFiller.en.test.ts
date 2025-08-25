@@ -29,7 +29,7 @@ describe('FormFiller English', () => {
   });
 
   describe('fillBirthdateFields with English month names', () => {
-    it('should fill separate fields with English month names', () => {
+    it('should fill separate fields with English month names', async () => {
       const { daySelect, monthSelect, yearSelect } = createDateSelects(document);
 
       // Add month options with English month names
@@ -52,7 +52,7 @@ describe('FormFiller English', () => {
         year: yearSelect as unknown as HTMLInputElement
       };
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       expect(daySelect.value).toBe('03');
       expect(monthSelect.value).toBe('February');

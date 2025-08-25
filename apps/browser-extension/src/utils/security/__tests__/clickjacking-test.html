@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickValidator Security Test - Clickjacking Attack Vectors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            border: 2px solid #333;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .test-description {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .attack-button {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .legit-button {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .control-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 10000;
+        }
+        .control-panel button {
+            display: block;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .input-field {
+            width: 200px;
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Attack Vector Styles */
+        .body-opacity-attack {
+            /* This will be applied dynamically */
+        }
+
+        .overlay-attack {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.01);
+            z-index: 9999;
+            pointer-events: auto;
+            display: none;
+        }
+
+        .invisible-overlay {
+            position: absolute;
+            background: transparent;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .filter-attack {
+            /* This will be applied dynamically */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <h3>Attack Controls</h3>
+        <button onclick="toggleBodyOpacity()">Toggle Body Opacity Attack</button>
+        <button onclick="toggleHtmlOpacity()">Toggle HTML Opacity Attack</button>
+        <button onclick="toggleCssFilter()">Toggle CSS Filter Attack</button>
+        <button onclick="toggleInvisibleOverlay()">Toggle Invisible Overlay</button>
+        <button onclick="simulateRapidClicks()">Simulate Rapid Clicks</button>
+        <button onclick="simulatePreciseClicks()">Simulate Precise Clicks</button>
+        <button onclick="triggerUntrustedEvent()">Trigger Untrusted Event</button>
+        <button onclick="resetAllAttacks()">Reset All Attacks</button>
+    </div>
+
+    <!-- Invisible overlay for clickjacking -->
+    <div class="overlay-attack" id="invisibleOverlay"></div>
+
+    <h1>ClickValidator Security Test Suite</h1>
+    <p>This page contains various clickjacking attack vectors to test the AliasVault ClickValidator security measures.</p>
+
+    <!-- Test Section 1: Body Opacity Attack -->
+    <div class="test-section">
+        <div class="test-description">
+            <strong>Attack Vector 1: Body Opacity Reduction</strong><br>
+            This attack reduces the body element's opacity to make the entire page semi-transparent, potentially hiding malicious overlays.
+        </div>
+        <input type="text" class="input-field" placeholder="Enter username..." />
+        <input type="password" class="input-field" placeholder="Enter password..." />
+        <button class="attack-button">Fill Credentials (Should be blocked when opacity < 0.9)</button>
+        <button class="legit-button" onclick="logAction('Legitimate action')">Legitimate Action</button>
+    </div>
+
+    <!-- Test Section 2: HTML Element Opacity Attack -->
+    <div class="test-section">
+        <div class="test-description">
+            <strong>Attack Vector 2: HTML Element Opacity Reduction</strong><br>
+            This attack reduces the HTML root element's opacity to make the entire document semi-transparent.
+        </div>
+        <input type="text" class="input-field" placeholder="Enter email..." />
+        <button class="attack-button">Fill Email (Should be blocked when HTML opacity < 0.9)</button>
+        <button class="legit-button" onclick="logAction('Legitimate HTML test')">Legitimate Action</button>
+    </div>
+
+    <!-- Test Section 3: CSS Filter Attack -->
+    <div class="test-section">
+        <div class="test-description">
+            <strong>Attack Vector 3: CSS Filter Manipulation</strong><br>
+            This attack applies CSS filters (blur, brightness, etc.) to obscure content and hide malicious elements.
+        </div>
+        <input type="text" class="input-field" placeholder="Enter data..." />
+        <button class="attack-button">Submit Data (Should be blocked when filters applied)</button>
+        <button class="legit-button" onclick="logAction('Legitimate filter test')">Legitimate Action</button>
+    </div>
+
+    <!-- Test Section 4: Invisible Overlay Attack -->
+    <div class="test-section">
+        <div class="test-description">
+            <strong>Attack Vector 4: Invisible Overlay</strong><br>
+            This attack places an nearly invisible overlay over the entire page to intercept clicks.
+        </div>
+        <input type="text" class="input-field" placeholder="Enter credit card..." />
+        <button class="attack-button">Process Payment (Should be blocked when overlay active)</button>
+        <button class="legit-button" onclick="logAction('Legitimate overlay test')">Legitimate Action</button>
+    </div>
+
+
+    <!-- Log Display -->
+    <div class="test-section">
+        <h3>Action Log</h3>
+        <div id="actionLog" style="background: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; height: 200px; overflow-y: scroll;"></div>
+        <button onclick="clearLog()" class="legit-button">Clear Log</button>
+    </div>
+
+    <script>
+        let attackStates = {
+            bodyOpacity: false,
+            htmlOpacity: false,
+            cssFilter: false,
+            invisibleOverlay: false
+        };
+
+        function logAction(action) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${action}`;
+            const logDiv = document.getElementById('actionLog');
+            logDiv.innerHTML += logEntry + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(logEntry);
+        }
+
+        function clearLog() {
+            document.getElementById('actionLog').innerHTML = '';
+        }
+
+        function toggleBodyOpacity() {
+            const body = document.body;
+            if (!attackStates.bodyOpacity) {
+                body.style.opacity = '0.5';
+                attackStates.bodyOpacity = true;
+                logAction('✅ ATTACK: Body opacity reduced to 0.5 (should be detected)');
+            } else {
+                body.style.opacity = '1';
+                attackStates.bodyOpacity = false;
+                logAction('❌ Body opacity restored to 1.0');
+            }
+        }
+
+        function toggleHtmlOpacity() {
+            const html = document.documentElement;
+            if (!attackStates.htmlOpacity) {
+                html.style.opacity = '0.7';
+                attackStates.htmlOpacity = true;
+                logAction('✅ ATTACK: HTML opacity reduced to 0.7 (should be detected)');
+            } else {
+                html.style.opacity = '1';
+                attackStates.htmlOpacity = false;
+                logAction('❌ HTML opacity restored to 1.0');
+            }
+        }
+
+        function toggleCssFilter() {
+            const body = document.body;
+            if (!attackStates.cssFilter) {
+                body.style.filter = 'blur(1px) brightness(0.8)';
+                attackStates.cssFilter = true;
+                logAction('✅ ATTACK: CSS filter applied (should be detected)');
+            } else {
+                body.style.filter = 'none';
+                attackStates.cssFilter = false;
+                logAction('❌ CSS filter removed');
+            }
+        }
+
+        function toggleInvisibleOverlay() {
+            const overlay = document.getElementById('invisibleOverlay');
+            if (!attackStates.invisibleOverlay) {
+                overlay.style.display = 'block';
+                attackStates.invisibleOverlay = true;
+                logAction('✅ ATTACK: Invisible overlay activated (clicks should be intercepted)');
+            } else {
+                overlay.style.display = 'none';
+                attackStates.invisibleOverlay = false;
+                logAction('❌ Invisible overlay deactivated');
+            }
+        }
+
+
+        function resetAllAttacks() {
+            // Reset all visual attacks
+            document.body.style.opacity = '1';
+            document.body.style.filter = 'none';
+            document.documentElement.style.opacity = '1';
+            document.getElementById('invisibleOverlay').style.display = 'none';
+
+            // Reset attack states
+            attackStates = {
+                bodyOpacity: false,
+                htmlOpacity: false,
+                cssFilter: false,
+                invisibleOverlay: false
+            };
+
+            logAction('🔄 All attacks reset to normal state');
+        }
+
+        // Add click logging to all attack buttons
+        document.querySelectorAll('.attack-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                logAction(`🔴 Attack button clicked: "${this.textContent}"`);
+            });
+        });
+
+        document.querySelectorAll('.legit-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                logAction(`🟢 Legitimate button clicked: "${this.textContent}"`);
+            });
+        });
+
+        // Log initial state
+        logAction('📋 Clickjacking test page loaded - Ready for security testing');
+        logAction('💡 Install AliasVault browser extension and test autofill security');
+    </script>
+</body>
+</html>

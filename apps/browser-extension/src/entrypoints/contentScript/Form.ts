@@ -5,6 +5,7 @@ import { openAutofillPopup } from '@/entrypoints/contentScript/Popup';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
 import { FormFiller } from '@/utils/formDetector/FormFiller';
+import { ClickValidator } from '@/utils/security/ClickValidator';
 
 /**
  * Global timestamp to track popup debounce time.
@@ -13,6 +14,11 @@ import { FormFiller } from '@/utils/formDetector/FormFiller';
  * triggered browser events which can cause "focus" events to trigger.
  */
 let popupDebounceTime = 0;
+
+/**
+ * ClickValidator instance for form security validation
+ */
+const clickValidator = ClickValidator.getInstance();
 
 /**
  * Check if popup can be shown based on debounce time.
@@ -84,7 +90,7 @@ export function validateInputField(element: Element | null): { isValid: boolean;
  * @param credential - The credential to fill.
  * @param input - The input element that triggered the popup. Required when filling credentials to know which form to fill.
  */
-export function fillCredential(credential: Credential, input: HTMLInputElement) : void {
+export async function fillCredential(credential: Credential, input: HTMLInputElement): Promise<void> {
   // Set debounce time to 300ms to prevent the popup from being shown again within 300ms because of autofill events.
   hidePopupFor(300);
 
@@ -102,7 +108,7 @@ export function fillCredential(credential: Credential, input: HTMLInputElement) 
   }
 
   const formFiller = new FormFiller(form, triggerInputEvents);
-  formFiller.fillFields(credential);
+  await formFiller.fillFields(credential);
 }
 
 /**
@@ -215,9 +221,16 @@ export function injectIcon(input: HTMLInputElement, container: HTMLElement): voi
   window.addEventListener('resize', updateIconPosition);
 
   // Add click event to trigger the autofill popup and refocus the input
-  icon.addEventListener('click', (e: MouseEvent) => {
+  icon.addEventListener('click', async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Validate the click for security
+    if (!await clickValidator.validateClick(e)) {
+      console.warn('[AliasVault Security] Blocked autofill popup opening due to security validation failure');
+      return;
+    }
+
     setTimeout(() => actualInput.focus(), 0);
     openAutofillPopup(actualInput, container);
   });

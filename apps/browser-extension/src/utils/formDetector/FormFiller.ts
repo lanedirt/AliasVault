@@ -2,10 +2,13 @@ import { Gender, IdentityHelperUtils } from "@/utils/dist/shared/identity-genera
 import type { Credential } from "@/utils/dist/shared/models/vault";
 import { CombinedDateOptionPatterns, CombinedGenderOptionPatterns } from "@/utils/formDetector/FieldPatterns";
 import { FormFields } from "@/utils/formDetector/types/FormFields";
+import { ClickValidator } from "@/utils/security/ClickValidator";
 /**
  * Class to fill the fields of a form with the given credential.
  */
 export class FormFiller {
+  private readonly clickValidator = ClickValidator.getInstance();
+
   /**
    * Constructor.
    */
@@ -23,10 +26,221 @@ export class FormFiller {
    * Fill the fields of the form with the given credential.
    * @param credential The credential to fill the form with.
    */
-  public fillFields(credential: Credential): void {
+  public async fillFields(credential: Credential): Promise<void> {
+    // Perform security validation before filling any fields
+    if (!await this.validateFormSecurity()) {
+      console.warn('[AliasVault Security] Autofill blocked due to security validation failure');
+      return;
+    }
+
     this.fillBasicFields(credential);
     this.fillBirthdateFields(credential);
     this.fillGenderFields(credential);
+  }
+
+  /**
+   * Validate form security to prevent autofill in potential clickjacking scenarios.
+   * This method checks for various attack vectors including:
+   * - Page-wide opacity manipulation
+   * - Form field obstruction via overlays
+   * - Suspicious element positioning
+   * - Multiple forms with identical fields (potential decoy attacks)
+   */
+  private async validateFormSecurity(): Promise<boolean> {
+    try {
+      // Skip security validation in test environments where browser APIs may not be available
+      if (typeof window === 'undefined' || typeof MouseEvent === 'undefined') {
+        return true;
+      }
+
+      // 1. Check page-wide security using ClickValidator (detects body/HTML opacity tricks)
+      const dummyEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        clientX: window.innerWidth / 2,
+        clientY: window.innerHeight / 2
+      });
+      // Note: isTrusted is read-only and set by the browser
+      
+      if (!await this.clickValidator.validateClick(dummyEvent)) {
+        console.warn('[AliasVault Security] Form autofill blocked: Page-wide attack detected');
+        return false;
+      }
+
+      // 2. Check form field obstruction and positioning
+      const formFields = this.getAllFormFields();
+      for (const field of formFields) {
+        if (!this.validateFieldSecurity(field)) {
+          console.warn('[AliasVault Security] Form autofill blocked: Field obstruction detected', field);
+          return false;
+        }
+      }
+
+      // 3. Check for suspicious form duplication (decoy attack)
+      if (this.detectDecoyForms()) {
+        console.warn('[AliasVault Security] Form autofill blocked: Multiple suspicious forms detected');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('[AliasVault Security] Form security validation error:', error);
+      return false; // Fail safely - block autofill if validation fails
+    }
+  }
+
+  /**
+   * Get all form fields that will be filled.
+   */
+  private getAllFormFields(): HTMLElement[] {
+    const fields: HTMLElement[] = [];
+    
+    if (this.form.usernameField) {
+      fields.push(this.form.usernameField);
+    }
+    if (this.form.passwordField) {
+      fields.push(this.form.passwordField);
+    }
+    if (this.form.passwordConfirmField) {
+      fields.push(this.form.passwordConfirmField);
+    }
+    if (this.form.emailField) {
+      fields.push(this.form.emailField);
+    }
+    if (this.form.emailConfirmField) {
+      fields.push(this.form.emailConfirmField);
+    }
+    
+    return fields;
+  }
+
+  /**
+   * Validate individual field security to detect obstruction attacks.
+   */
+  private validateFieldSecurity(field: HTMLElement): boolean {
+    if (!field) {
+      return true;
+    }
+
+    // Skip field validation in test environments where browser APIs may not be available
+    if (typeof window === 'undefined' || typeof document === 'undefined' || !document.elementsFromPoint) {
+      return true;
+    }
+
+    const rect = field.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Check if field is within viewport
+    if (rect.width === 0 || rect.height === 0 || 
+        centerX < 0 || centerY < 0 || 
+        centerX > window.innerWidth || centerY > window.innerHeight) {
+      console.warn('[AliasVault Security] Field outside viewport or zero-sized:', rect);
+      return false;
+    }
+
+    // Use elementsFromPoint to check what's actually at the field center
+    try {
+      const elementsAtPoint = document.elementsFromPoint(centerX, centerY);
+      
+      if (elementsAtPoint.length === 0) {
+        console.warn('[AliasVault Security] No elements found at field center');
+        return false;
+      }
+
+      // Check if our field is in the element stack (or its parents/children)
+      const fieldFound = elementsAtPoint.some(element => 
+        element === field || 
+        field.contains(element) || 
+        element.contains(field)
+      );
+
+      if (!fieldFound) {
+        console.warn('[AliasVault Security] Field is obstructed by other elements');
+        return false;
+      }
+
+      // Check for suspicious covering elements
+      const suspiciousCovering = elementsAtPoint.slice(0, 3).some(element => {
+        if (element === field || field.contains(element) || element.contains(field)) {
+          return false; // This is our field or related element
+        }
+
+        const style = getComputedStyle(element);
+        
+        // Check for nearly transparent overlays
+        const opacity = parseFloat(style.opacity);
+        if (opacity > 0 && opacity < 0.1) {
+          console.warn('[AliasVault Security] Nearly transparent overlay detected:', element);
+          return true;
+        }
+
+        // Check for high z-index elements (potential overlays)
+        const zIndex = parseInt(style.zIndex) || 0;
+        if (zIndex > 1000000) {
+          console.warn('[AliasVault Security] Suspicious high z-index element:', element, zIndex);
+          return true;
+        }
+
+        // Check for elements covering large areas (potential clickjacking overlays)
+        const elementRect = element.getBoundingClientRect();
+        if (elementRect.width >= window.innerWidth * 0.8 && 
+            elementRect.height >= window.innerHeight * 0.8) {
+          console.warn('[AliasVault Security] Large covering element detected:', element);
+          return true;
+        }
+
+        return false;
+      });
+
+      return !suspiciousCovering;
+    } catch (error) {
+      console.warn('[AliasVault Security] Field validation error:', error);
+      return false; // Fail safely
+    }
+  }
+
+  /**
+   * Detect potential decoy forms (multiple forms with similar fields).
+   */
+  private detectDecoyForms(): boolean {
+    try {
+      // Find all forms on the page
+      const allForms = Array.from(document.querySelectorAll('form'));
+      
+      if (allForms.length <= 1) {
+        return false; // Only one form, no decoy risk
+      }
+
+      let suspiciousFormCount = 0;
+      
+      for (const form of allForms) {
+        const hasPasswordField = form.querySelector('input[type="password"]');
+        const hasEmailField = form.querySelector('input[type="email"], input[name*="email" i], input[placeholder*="email" i]');
+        const hasUsernameField = form.querySelector('input[type="text"], input[name*="user" i], input[placeholder*="user" i]');
+        
+        // Count forms with login-like patterns
+        if (hasPasswordField && (hasEmailField || hasUsernameField)) {
+          const formRect = form.getBoundingClientRect();
+          const isVisible = formRect.width > 0 && formRect.height > 0;
+          
+          if (isVisible) {
+            suspiciousFormCount++;
+          }
+        }
+      }
+      
+      // If more than 2 visible login forms, it's suspicious
+      if (suspiciousFormCount > 2) {
+        console.warn('[AliasVault Security] Multiple login forms detected:', suspiciousFormCount);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.warn('[AliasVault Security] Decoy form detection error:', error);
+      return false; // Don't block on detection errors
+    }
   }
 
   /**
@@ -324,13 +538,13 @@ export class FormFiller {
   private fillGenderFields(credential: Credential): void {
     switch (this.form.genderField.type) {
       case 'select':
-        this.fillGenderSelect(credential.Alias.Gender);
+        this.fillGenderSelect(credential.Alias.Gender as Gender | undefined);
         break;
       case 'radio':
-        this.fillGenderRadio(credential.Alias.Gender);
+        this.fillGenderRadio(credential.Alias.Gender as Gender | undefined);
         break;
       case 'text':
-        this.fillGenderText(credential.Alias.Gender);
+        this.fillGenderText(credential.Alias.Gender as Gender | undefined);
         break;
     }
   }
