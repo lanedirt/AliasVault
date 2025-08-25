@@ -279,6 +279,19 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches).toHaveLength(0);
   });
 
+  // [#19] - Ensure separators and punctuation are stripped for matching
+  it('should match service names when separated by commas and other punctuation', () => {
+    const matches = filterCredentials(
+      testCredentials,
+      'https://nomatch.com',
+      'Reddit, social media platform'
+    );
+
+    // Should match "Reddit" even though it's followed by a comma and description
+    expect(matches).toHaveLength(1);
+    expect(matches[0].ServiceName).toBe('Reddit');
+  });
+
   /**
    * Creates the shared test credential dataset used across all platforms.
    * Note: when making changes to this list, make sure to update the corresponding list for iOS and Android tests as well.
@@ -297,6 +310,7 @@ describe('Filter - Credential URL Matching', () => {
       createTestCredential('Title Only newyorktimes', '', ''),
       createTestCredential('Bank Account', 'https://secure-bank.com', 'user@bank.com'),
       createTestCredential('AliExpress', 'https://aliexpress.com', 'user@aliexpress.com'),
+      createTestCredential('Reddit', '', 'user@reddit.com'),
     ];
   }
 

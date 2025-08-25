@@ -282,6 +282,19 @@ class AutofillTest {
         assertTrue(matches.isEmpty())
     }
 
+    // [#19] - Ensure separators and punctuation are stripped for matching
+    @Test
+    fun testSeparatorsAndPunctuationStripped() {
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
+            testCredentials,
+            "Reddit, social media platform",
+        )
+
+        // Should match "Reddit" even though it's followed by a comma and description
+        assertEquals(1, matches.size)
+        assertEquals("Reddit", matches[0].service.name)
+    }
+
     /**
      * Creates the shared test credential dataset used across all platforms.
      * This ensures consistent testing across Browser Extension, iOS, and Android.
@@ -300,6 +313,7 @@ class AutofillTest {
             createTestCredential("Title Only newyorktimes", "", ""),
             createTestCredential("Bank Account", "https://secure-bank.com", "user@bank.com"),
             createTestCredential("AliExpress", "https://aliexpress.com", "user@aliexpress.com"),
+            createTestCredential("Reddit", "", "user@reddit.com"),
         )
     }
 

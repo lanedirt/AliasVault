@@ -180,6 +180,15 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertTrue(matches.isEmpty)
     }
 
+    // [#19] - Ensure separators and punctuation are stripped for matching
+    func testSeparatorsAndPunctuationStripped() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "Reddit, social media platform")
+
+        // Should match "Coolblue" even though it's followed by a comma and description
+        XCTAssertEqual(matches.count, 1)
+        XCTAssertEqual(matches.first?.service.name, "Reddit")
+    }
+
     // MARK: - Shared Test Data
 
     /**
@@ -200,6 +209,7 @@ final class CredentialFilterTests: XCTestCase {
             createTestCredential(serviceName: "Title Only newyorktimes", serviceUrl: "", username: ""),
             createTestCredential(serviceName: "Bank Account", serviceUrl: "https://secure-bank.com", username: "user@bank.com"),
             createTestCredential(serviceName: "AliExpress", serviceUrl: "https://aliexpress.com", username: "user@aliexpress.com"),
+            createTestCredential(serviceName: "Reddit", serviceUrl: "", username: "user@reddit.com"),
         ]
     }
 
