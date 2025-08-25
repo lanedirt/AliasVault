@@ -322,7 +322,7 @@
     "clipboardClear15Seconds": "Cancella dopo 15 secondi",
     "autoLockTimeout": "Auto-lock timeout",
     "autoLockTimeoutDescription": "Automatically lock the vault after a period of inactivity",
-    "autoLockTimeoutHelp": "The timer resets when you open the browser extension or use autofill on a webpage. The vault will only lock after the specified period of inactivity (no autofill usage or extension popup opened). The vault will always lock when the browser is closed, regardless of this setting.",
+    "autoLockTimeoutHelp": "The vault will only lock after the specified period of inactivity (no autofill usage or extension popup opened). The vault will always lock when the browser is closed, regardless of this setting.",
     "autoLockNever": "Never",
     "autoLock15Seconds": "15 seconds",
     "autoLock1Minute": "1 minute",
