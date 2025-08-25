@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { sendMessage } from 'webext-bridge/popup';
 
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import HelpModal from '@/entrypoints/popup/components/HelpModal';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LanguageSwitcher from '@/entrypoints/popup/components/LanguageSwitcher';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
@@ -14,7 +15,7 @@ import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY } from '@/utils/Constants';
+import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY, AUTO_LOCK_TIMEOUT_KEY } from '@/utils/Constants';
 
 import { storage, browser } from "#imports";
 
@@ -50,6 +51,7 @@ const Settings: React.FC = () => {
     isContextMenuEnabled: true
   });
   const [clipboardTimeout, setClipboardTimeout] = useState<number>(10);
+  const [autoLockTimeout, setAutoLockTimeout] = useState<number>(0);
 
   /**
    * Get current tab in browser.
@@ -127,6 +129,10 @@ const Settings: React.FC = () => {
     // Load clipboard clear timeout
     const timeout = await storage.getItem(CLIPBOARD_CLEAR_TIMEOUT_KEY) as number ?? 10;
     setClipboardTimeout(timeout);
+
+    // Load auto-lock timeout
+    const autoLockTimeoutValue = await storage.getItem(AUTO_LOCK_TIMEOUT_KEY) as number ?? 0;
+    setAutoLockTimeout(autoLockTimeoutValue);
 
     setSettings({
       disabledUrls,
@@ -241,6 +247,15 @@ const Settings: React.FC = () => {
     await storage.setItem(CLIPBOARD_CLEAR_TIMEOUT_KEY, timeout);
     await sendMessage('SET_CLIPBOARD_CLEAR_TIMEOUT', timeout, 'background');
     setClipboardTimeout(timeout);
+  };
+
+  /**
+   * Set auto-lock timeout.
+   */
+  const setAutoLockTimeoutSetting = async (timeout: number) : Promise<void> => {
+    await storage.setItem(AUTO_LOCK_TIMEOUT_KEY, timeout);
+    await sendMessage('SET_AUTO_LOCK_TIMEOUT', timeout, 'background');
+    setAutoLockTimeout(timeout);
   };
 
   /**
@@ -418,7 +433,7 @@ const Settings: React.FC = () => {
         <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.security')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4">
-            <div>
+            <div className="mb-6">
               <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.clipboardClearTimeout')}</p>
               <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.clipboardClearTimeoutDescription')}</p>
               <select
@@ -430,6 +445,34 @@ const Settings: React.FC = () => {
                 <option value="5">{t('settings.clipboardClear5Seconds')}</option>
                 <option value="10">{t('settings.clipboardClear10Seconds')}</option>
                 <option value="15">{t('settings.clipboardClear15Seconds')}</option>
+              </select>
+            </div>
+
+            <div>
+              <div className="flex items-center mb-2">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autoLockTimeout')}</p>
+                <HelpModal
+                  titleKey="settings.autoLockTimeout"
+                  contentKey="settings.autoLockTimeoutHelp"
+                  className="ml-2"
+                />
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.autoLockTimeoutDescription')}</p>
+              <select
+                value={autoLockTimeout}
+                onChange={(e) => setAutoLockTimeoutSetting(Number(e.target.value))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="0">{t('settings.autoLockNever')}</option>
+                <option value="5">{t('settings.autoLock5Seconds')}</option>
+                <option value="60">{t('settings.autoLock1Minute')}</option>
+                <option value="300">{t('settings.autoLock5Minutes')}</option>
+                <option value="900">{t('settings.autoLock15Minutes')}</option>
+                <option value="1800">{t('settings.autoLock30Minutes')}</option>
+                <option value="3600">{t('settings.autoLock1Hour')}</option>
+                <option value="14400">{t('settings.autoLock4Hours')}</option>
+                <option value="28800">{t('settings.autoLock8Hours')}</option>
+                <option value="86400">{t('settings.autoLock24Hours')}</option>
               </select>
             </div>
           </div>

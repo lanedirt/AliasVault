@@ -4,7 +4,7 @@ import { setupContextMenus } from '@/entrypoints/background/ContextMenu';
 import { handleOpenPopup, handlePopupWithCredential, handleToggleContextMenu } from '@/entrypoints/background/PopupMessageHandler';
 import { handleCheckAuthStatus, handleClearPersistedFormValues, handleClearVault, handleCreateIdentity, handleGetCredentials, handleGetDefaultEmailDomain, handleGetDefaultIdentitySettings, handleGetEncryptionKey, handleGetEncryptionKeyDerivationParams, handleGetPasswordSettings, handleGetPersistedFormValues, handleGetVault, handlePersistFormValues, handleStoreEncryptionKey, handleStoreEncryptionKeyDerivationParams, handleStoreVault, handleSyncVault, handleUploadVault } from '@/entrypoints/background/VaultMessageHandler';
 
-import { GLOBAL_CONTEXT_MENU_ENABLED_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY } from '@/utils/Constants';
+import { GLOBAL_CONTEXT_MENU_ENABLED_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY, AUTO_LOCK_TIMEOUT_KEY } from '@/utils/Constants';
 import type { EncryptionKeyDerivationParams } from '@/utils/dist/shared/models/metadata';
 
 import { defineBackground, storage, browser } from '#imports';
@@ -16,6 +16,8 @@ let currentCountdownId = 0;
 let totalCountdownTime = 0;
 let countdownStartTime = 0;
 let offscreenDocumentCreated = false;
+
+let autoLockTimer: NodeJS.Timeout | null = null;
 
 export default defineBackground({
   /**
@@ -59,13 +61,14 @@ export default defineBackground({
     onMessage('SET_CLIPBOARD_CLEAR_TIMEOUT', ({ data }) => handleSetClipboardClearTimeout(data as number));
     onMessage('GET_CLIPBOARD_COUNTDOWN_STATE', () => handleGetClipboardCountdownState());
 
-    // Also handle runtime messages from content scripts
-    browser.runtime.onMessage.addListener((message) => {
-      if (message.type === 'CLIPBOARD_COPIED_FROM_CONTEXT') {
-        // Trigger the same clipboard clear logic
-        handleClipboardCopied();
-      }
-    });
+    // Auto-lock management messages
+    onMessage('RESET_AUTO_LOCK_TIMER', () => handleResetAutoLockTimer());
+    onMessage('SET_AUTO_LOCK_TIMEOUT', ({ data }) => handleSetAutoLockTimeout(data as number));
+    onMessage('POPUP_OPENED', () => handlePopupOpened());
+    onMessage('POPUP_CLOSED', () => handlePopupClosed());
+
+    // Handle clipboard copied from context menu
+    onMessage('CLIPBOARD_COPIED_FROM_CONTEXT', () => handleClipboardCopied());
 
     // Setup context menus
     const isContextMenuEnabled = await storage.getItem(GLOBAL_CONTEXT_MENU_ENABLED_KEY) ?? true;
@@ -174,7 +177,7 @@ async function clearClipboardContent(): Promise<void> {
       throw new Error(response?.message || 'Failed to clear clipboard via offscreen');
     }
   } else {
-    // Firefox and Safari use mv2 and do not have offscreen document support, use direct clipboard access.
+    // Firefox and Safari use mv2 and can use direct clipboard access.
     await navigator.clipboard.writeText('');
   }
 }
@@ -317,4 +320,79 @@ function handleGetClipboardCountdownState(): { remaining: number; total: number;
     }
   }
   return null;
+}
+
+/**
+ * Reset the auto-lock timer.
+ */
+function handleResetAutoLockTimer(): void {
+  resetAutoLockTimer();
+}
+
+/**
+ * Handle popup opened - clear auto-lock timer.
+ */
+function handlePopupOpened(): void {
+  if (autoLockTimer) {
+    clearTimeout(autoLockTimer);
+    autoLockTimer = null;
+    console.info('[AUTO_LOCK] Timer cleared - popup opened');
+  }
+}
+
+/**
+ * Handle popup closed - restart auto-lock timer.
+ */
+function handlePopupClosed(): void {
+  resetAutoLockTimer();
+  console.info('[AUTO_LOCK] Timer restarted - popup closed');
+}
+
+/**
+ * Set the auto-lock timeout setting.
+ */
+async function handleSetAutoLockTimeout(timeout: number): Promise<boolean> {
+  await storage.setItem(AUTO_LOCK_TIMEOUT_KEY, timeout);
+  resetAutoLockTimer();
+  return true;
+}
+
+/**
+ * Reset the auto-lock timer based on current settings.
+ */
+async function resetAutoLockTimer(): Promise<void> {
+  // Clear existing timer
+  if (autoLockTimer) {
+    clearTimeout(autoLockTimer);
+    autoLockTimer = null;
+  }
+
+  // Get timeout setting
+  const timeout = await storage.getItem(AUTO_LOCK_TIMEOUT_KEY) as number ?? 0;
+
+  // Don't set timer if timeout is 0 (disabled) or if vault is already locked
+  if (timeout === 0) {
+    return;
+  }
+
+  // Check if vault is unlocked before setting timer
+  const encryptionKey = await storage.getItem('session:encryptionKey') as string | null;
+
+  if (!encryptionKey) {
+    // Vault is already locked, don't start timer
+    return;
+  }
+
+  // Set new timer
+  autoLockTimer = setTimeout(async () => {
+    try {
+      // Lock the vault using the existing handler
+      handleClearVault();
+
+      console.info('[AUTO_LOCK] Vault locked due to inactivity');
+      autoLockTimer = null;
+    } catch (error) {
+      console.error('[AUTO_LOCK] Error locking vault:', error);
+    }
+  }, timeout * 1000);
 }

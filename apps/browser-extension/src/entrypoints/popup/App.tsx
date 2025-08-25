@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { sendMessage } from 'webext-bridge/popup';
 
 import { ClipboardCountdownBar } from '@/entrypoints/popup/components/ClipboardCountdownBar';
 import BottomNav from '@/entrypoints/popup/components/Layout/BottomNav';
@@ -74,6 +75,23 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   }, [isInitialLoading, setIsLoading]);
+
+  /**
+   * Notify background when popup opens/closes.
+   */
+  useEffect(() => {
+    // Notify background that popup is open
+    sendMessage('POPUP_OPENED', {}, 'background').catch(() => {
+      // Ignore errors as background script might not be ready
+    });
+
+    // Cleanup: notify background when popup closes
+    return () : void => {
+      sendMessage('POPUP_CLOSED', {}, 'background').catch(() => {
+        // Ignore errors on cleanup
+      });
+    };
+  }, []);
 
   /**
    * Print global message if it exists.

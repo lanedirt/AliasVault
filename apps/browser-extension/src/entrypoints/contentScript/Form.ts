@@ -1,3 +1,5 @@
+import { sendMessage } from 'webext-bridge/content-script';
+
 import { openAutofillPopup } from '@/entrypoints/contentScript/Popup';
 
 import type { Credential } from '@/utils/dist/shared/models/vault';
@@ -85,6 +87,11 @@ export function validateInputField(element: Element | null): { isValid: boolean;
 export function fillCredential(credential: Credential, input: HTMLInputElement) : void {
   // Set debounce time to 300ms to prevent the popup from being shown again within 300ms because of autofill events.
   hidePopupFor(300);
+
+  // Reset auto-lock timer when autofilling
+  sendMessage('RESET_AUTO_LOCK_TIMER', {}, 'background').catch(() => {
+    // Ignore errors as background script might not be ready
+  });
 
   const formDetector = new FormDetector(document, input);
   const form = formDetector.getForm();
