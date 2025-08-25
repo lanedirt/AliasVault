@@ -133,7 +133,7 @@ final class CredentialFilterTests: XCTestCase {
     // [#12] - Priority ordering
     func testPriorityOrdering() {
         let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "coolblue.nl")
-        
+
         XCTAssertEqual(matches.count, 1)
         XCTAssertEqual(matches.first?.service.name, "Coolblue")
     }
@@ -174,6 +174,12 @@ final class CredentialFilterTests: XCTestCase {
         XCTAssertTrue(matches.isEmpty)
     }
 
+    // [#18] - Ensure only full words are matched
+    func testOnlyFullWordsMatch() {
+        let matches = CredentialFilter.filterCredentials(testCredentials, searchText: "Title | Express Yourself | Description")
+        XCTAssertTrue(matches.isEmpty)
+    }
+
     // MARK: - Shared Test Data
 
     /**
@@ -193,6 +199,7 @@ final class CredentialFilterTests: XCTestCase {
             createTestCredential(serviceName: "Subdomain Example", serviceUrl: "https://app.example.com", username: "user@example.com"),
             createTestCredential(serviceName: "Title Only newyorktimes", serviceUrl: "", username: ""),
             createTestCredential(serviceName: "Bank Account", serviceUrl: "https://secure-bank.com", username: "user@bank.com"),
+            createTestCredential(serviceName: "AliExpress", serviceUrl: "https://aliexpress.com", username: "user@aliexpress.com"),
         ]
     }
 
