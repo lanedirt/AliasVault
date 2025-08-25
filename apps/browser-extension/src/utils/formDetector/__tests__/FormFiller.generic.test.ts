@@ -29,17 +29,17 @@ describe('FormFiller', () => {
   });
 
   describe('fillBasicFields', () => {
-    it('should fill username', () => {
-      formFiller.fillFields(mockCredential);
+    it('should fill username', async () => {
+      await formFiller.fillFields(mockCredential);
 
       expect(formFields.usernameField?.value).toBe('testuser');
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.usernameField)).toBe(true);
     });
 
-    it('should fill email and confirmation fields', () => {
+    it('should fill email and confirmation fields', async () => {
       formFields.emailConfirmField = document.createElement('input');
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       expect(formFields.emailField?.value).toBe('test@example.com');
       expect(formFields.emailConfirmField?.value).toBe('test@example.com');
@@ -47,12 +47,12 @@ describe('FormFiller', () => {
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.emailConfirmField)).toBe(true);
     });
 
-    it('should use username as email when no email is provided and no username field exists', () => {
+    it('should use username as email when no email is provided and no username field exists', async () => {
       // Create a credential with an empty email string
       const credentialWithoutEmail = { ...mockCredential, Alias: { ...mockCredential.Alias, Email: '' } };
       formFields.usernameField = null;
 
-      formFiller.fillFields(credentialWithoutEmail);
+      await formFiller.fillFields(credentialWithoutEmail);
 
       expect(formFields.emailField?.value).toBe('testuser');
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.emailField)).toBe(true);
@@ -61,7 +61,7 @@ describe('FormFiller', () => {
     it('should fill password and confirmation fields', async () => {
       formFields.passwordConfirmField = document.createElement('input');
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       // Delay for 150ms to ensure the password field is filled as it uses a small delay between each character.
       await new Promise(resolve => setTimeout(resolve, 150));
@@ -72,8 +72,8 @@ describe('FormFiller', () => {
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.passwordConfirmField)).toBe(true);
     });
 
-    it('should fill name fields correctly', () => {
-      formFiller.fillFields(mockCredential);
+    it('should fill name fields correctly', async () => {
+      await formFiller.fillFields(mockCredential);
 
       expect(formFields.fullNameField?.value).toBe('John Doe');
       expect(formFields.firstNameField?.value).toBe('John');
@@ -85,38 +85,38 @@ describe('FormFiller', () => {
   });
 
   describe('fillBirthdateFields', () => {
-    it('should fill single birthdate field with correct format', () => {
-      formFiller.fillFields(mockCredential);
+    it('should fill single birthdate field with correct format', async () => {
+      await formFiller.fillFields(mockCredential);
 
       expect(formFields.birthdateField.single?.value).toBe('1991-02-03');
       expect(wasTriggerCalledFor(mockTriggerInputEvents, formFields.birthdateField.single)).toBe(true);
     });
 
-    it('should handle different date formats (mm/dd/yyyy)', () => {
+    it('should handle different date formats (mm/dd/yyyy)', async () => {
       formFields.birthdateField.format = 'mm/dd/yyyy';
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
       expect(formFields.birthdateField.single?.value).toBe('02/03/1991');
     });
 
-    it('should handle different date formats (dd/mm/yyyy)', () => {
+    it('should handle different date formats (dd/mm/yyyy)', async () => {
       formFields.birthdateField.format = 'dd/mm/yyyy';
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
       expect(formFields.birthdateField.single?.value).toBe('03/02/1991');
     });
 
-    it('should handle different date formats (dd-mm-yyyy)', () => {
+    it('should handle different date formats (dd-mm-yyyy)', async () => {
       formFields.birthdateField.format = 'dd-mm-yyyy';
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
       expect(formFields.birthdateField.single?.value).toBe('03-02-1991');
     });
 
-    it('should handle different date formats (mm-dd-yyyy)', () => {
+    it('should handle different date formats (mm-dd-yyyy)', async () => {
       formFields.birthdateField.format = 'mm-dd-yyyy';
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
       expect(formFields.birthdateField.single?.value).toBe('02-03-1991');
     });
 
-    it('should fill separate day/month/year select fields', () => {
+    it('should fill separate day/month/year select fields', async () => {
       const { daySelect, monthSelect, yearSelect } = createDateSelects(document);
 
       // Add month options (1-12)
@@ -136,7 +136,7 @@ describe('FormFiller', () => {
         year: yearSelect as unknown as HTMLInputElement
       };
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       expect(daySelect.value).toBe('03');
       expect(monthSelect.value).toBe('02');
@@ -148,7 +148,7 @@ describe('FormFiller', () => {
   });
 
   describe('fillGenderFields', () => {
-    it('should fill gender select field', () => {
+    it('should fill gender select field', async () => {
       const selectElement = document.createElement('select');
 
       // Add options using createElement
@@ -167,13 +167,13 @@ describe('FormFiller', () => {
         field: selectElement
       };
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       expect(selectElement.value).toBe('m');
       expect(wasTriggerCalledFor(mockTriggerInputEvents, selectElement)).toBe(true);
     });
 
-    it('should handle radio button gender fields', () => {
+    it('should handle radio button gender fields', async () => {
       const maleRadio = document.createElement('input');
       maleRadio.type = 'radio';
       const femaleRadio = document.createElement('input');
@@ -189,7 +189,7 @@ describe('FormFiller', () => {
         }
       };
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       expect(maleRadio.checked).toBe(true);
       expect(femaleRadio.checked).toBe(false);
