@@ -28,16 +28,17 @@ object CredentialMatcher {
             domain = domain.replace("https://", "").replace("http://", "")
         }
 
-        // Basic domain validation - must contain at least one dot and valid characters
-        if (!domain.contains(".") || !domain.matches(Regex("^[a-z0-9.-]+$"))) {
-            return ""
-        }
-
         // Remove www. prefix
         domain = domain.replace("www.", "")
 
         // Remove path, query, and fragment
         domain = domain.substringBefore("/").substringBefore("?").substringBefore("#")
+
+        // Basic domain validation - must contain at least one dot and valid characters
+        // Only validate after removing path/query/fragment
+        if (!domain.contains(".") || !domain.matches(Regex("^[a-z0-9.-]+$"))) {
+            return ""
+        }
 
         // Final validation - ensure we have a valid domain structure
         if (domain.isEmpty() || domain.startsWith(".") || domain.endsWith(".") || domain.contains("..")) {
@@ -81,7 +82,6 @@ object CredentialMatcher {
 
     /**
      * Extract meaningful words from text, removing punctuation and filtering stop words.
-     * Matches the browser extension's Filter.ts implementation.
      * @param text Text to extract words from
      * @return List of filtered words
      */

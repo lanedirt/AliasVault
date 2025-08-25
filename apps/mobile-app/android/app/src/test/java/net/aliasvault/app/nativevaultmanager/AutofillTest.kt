@@ -275,7 +275,7 @@ class AutofillTest {
     fun testOnlyFullWordsMatch() {
         val matches = CredentialMatcher.filterCredentialsByAppInfo(
             testCredentials,
-            "Title | Express Yourself | Description",
+            "Express Yourself App | Description",
         )
 
         // The string above should not match "AliExpress" service name
