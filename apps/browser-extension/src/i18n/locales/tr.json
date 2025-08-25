@@ -322,7 +322,7 @@
     "clipboardClear15Seconds": "Clear after 15 seconds",
     "autoLockTimeout": "Auto-lock timeout",
     "autoLockTimeoutDescription": "Automatically lock the vault after a period of inactivity",
-    "autoLockTimeoutHelp": "The vault will only lock after the specified period of inactivity (no autofill usage or extension popup opened). The vault will always lock when the browser is closed, regardless of this setting.",
+    "autoLockTimeoutHelp": "Kasa, yalnızca belirtilen süre boyunca herhangi bir işlem yapılmadığında (otomatik doldurma kullanılmadığında veya uzantı açılmadığında) kilitlenecektir. Ancak, bu ayardan bağımsız olarak tarayıcı kapatıldığında her zaman kilitlenir.",
     "autoLockNever": "Never",
     "autoLock15Seconds": "15 seconds",
     "autoLock1Minute": "1 minute",
