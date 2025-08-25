@@ -1,9 +1,9 @@
 import { sendMessage } from 'webext-bridge/content-script';
 
-import { filterCredentials } from '@/entrypoints/contentScript/Filter';
+import { filterCredentials, AutofillMatchingMode } from '@/entrypoints/contentScript/Filter';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 
-import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
+import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY, AUTOFILL_MATCHING_MODE_KEY } from '@/utils/Constants';
 import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator, PasswordGenerator, PasswordSettings } from '@/utils/dist/shared/password-generator';
@@ -187,10 +187,14 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
     credentials = [];
   }
 
+  // Load autofill matching mode setting
+  const matchingMode = await storage.getItem(AUTOFILL_MATCHING_MODE_KEY) as AutofillMatchingMode ?? AutofillMatchingMode.DEFAULT;
+
   const filteredCredentials = filterCredentials(
     credentials,
     window.location.href,
-    document.title
+    document.title,
+    matchingMode
   );
 
   updatePopupContent(filteredCredentials, credentialList, input, rootContainer, noMatchesText);
@@ -363,8 +367,8 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
 
   // Handle search input.
   let searchTimeout: NodeJS.Timeout | null = null;
-  searchInput.addEventListener('input', () => {
-    handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input, noMatchesText);
+  searchInput.addEventListener('input', async () => {
+    await handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input, noMatchesText);
   });
 
   // Close button
@@ -573,7 +577,7 @@ export async function createVaultLockedPopup(input: HTMLInputElement, rootContai
 /**
  * Handle popup search input by filtering credentials based on the search term.
  */
-function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement, noMatchesText?: string) : void {
+async function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement, noMatchesText?: string) : Promise<void> {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
@@ -584,11 +588,15 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
   let filteredCredentials;
 
   if (searchTerm === '') {
+    // Load autofill matching mode setting
+    const matchingMode = await storage.getItem(AUTOFILL_MATCHING_MODE_KEY) as AutofillMatchingMode ?? AutofillMatchingMode.DEFAULT;
+
     // If search is empty, use original URL-based filtering
     filteredCredentials = filterCredentials(
       uniqueCredentials,
       window.location.href,
-      document.title
+      document.title,
+      matchingMode
     ).sort((a, b) => {
       // First compare by service name
       const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');

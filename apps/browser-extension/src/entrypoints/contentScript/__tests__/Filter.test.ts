@@ -267,6 +267,18 @@ describe('Filter - Credential URL Matching', () => {
     expect(matches).toHaveLength(0);
   });
 
+  // [#18] - Ensure only full words are matched
+  it('should not match on string part of word', () => {
+    const matches = filterCredentials(
+      testCredentials,
+      'Title | Express Yourself | Description',
+      ''
+    );
+
+    // The string above should not match "AliExpress" service name
+    expect(matches).toHaveLength(0);
+  });
+
   /**
    * Creates the shared test credential dataset used across all platforms.
    * Note: when making changes to this list, make sure to update the corresponding list for iOS and Android tests as well.
@@ -284,6 +296,7 @@ describe('Filter - Credential URL Matching', () => {
       createTestCredential('Subdomain Example', 'https://app.example.com', 'user@example.com'),
       createTestCredential('Title Only newyorktimes', '', ''),
       createTestCredential('Bank Account', 'https://secure-bank.com', 'user@bank.com'),
+      createTestCredential('AliExpress', 'https://aliexpress.com', 'user@aliexpress.com'),
     ];
   }
 
