@@ -464,7 +464,7 @@ const Settings: React.FC = () => {
                 className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="0">{t('settings.autoLockNever')}</option>
-                <option value="5">{t('settings.autoLock5Seconds')}</option>
+                <option value="15">{t('settings.autoLock15Seconds')}</option>
                 <option value="60">{t('settings.autoLock1Minute')}</option>
                 <option value="300">{t('settings.autoLock5Minutes')}</option>
                 <option value="900">{t('settings.autoLock15Minutes')}</option>

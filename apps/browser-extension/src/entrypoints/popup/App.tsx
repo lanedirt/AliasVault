@@ -77,19 +77,25 @@ const App: React.FC = () => {
   }, [isInitialLoading, setIsLoading]);
 
   /**
-   * Notify background when popup opens/closes.
+   * Send heartbeat to background every 5 seconds while popup is open.
+   * This extends the auto-lock timer to prevent vault locking while popup is active.
    */
   useEffect(() => {
-    // Notify background that popup is open
-    sendMessage('POPUP_OPENED', {}, 'background').catch(() => {
+    // Send initial heartbeat
+    sendMessage('POPUP_HEARTBEAT', {}, 'background').catch(() => {
       // Ignore errors as background script might not be ready
     });
 
-    // Cleanup: notify background when popup closes
-    return () : void => {
-      sendMessage('POPUP_CLOSED', {}, 'background').catch(() => {
-        // Ignore errors on cleanup
+    // Set up heartbeat interval
+    const heartbeatInterval = setInterval(() => {
+      sendMessage('POPUP_HEARTBEAT', {}, 'background').catch(() => {
+        // Ignore errors as background script might not be ready
       });
+    }, 5000); // Send heartbeat every 5 seconds
+
+    // Cleanup: clear interval when popup closes
+    return () : void => {
+      clearInterval(heartbeatInterval);
     };
   }, []);
 
