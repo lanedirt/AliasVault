@@ -271,8 +271,8 @@ describe('Filter - Credential URL Matching', () => {
   it('should not match on string part of word', () => {
     const matches = filterCredentials(
       testCredentials,
-      'Title | Express Yourself | Description',
-      ''
+      '',
+      'Express Yourself App | Description'
     );
 
     // The string above should not match "AliExpress" service name
