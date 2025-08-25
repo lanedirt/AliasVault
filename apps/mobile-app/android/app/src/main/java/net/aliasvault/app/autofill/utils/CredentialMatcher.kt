@@ -11,18 +11,39 @@ object CredentialMatcher {
     /**
      * Extract domain from URL, handling both full URLs and partial domains.
      * @param urlString URL or domain string
-     * @return Normalized domain without protocol or www
+     * @return Normalized domain without protocol or www, or empty string if not a valid URL/domain
      */
     private fun extractDomain(urlString: String): String {
-        if (urlString.isBlank()) return ""
+        if (urlString.isBlank()) {
+            return ""
+        }
 
         var domain = urlString.lowercase().trim()
+
+        // Check if it starts with a protocol
+        val hasProtocol = domain.startsWith("http://") || domain.startsWith("https://")
+
         // Remove protocol if present
-        domain = domain.replace("https://", "").replace("http://", "")
+        if (hasProtocol) {
+            domain = domain.replace("https://", "").replace("http://", "")
+        }
+
+        // Basic domain validation - must contain at least one dot and valid characters
+        if (!domain.contains(".") || !domain.matches(Regex("^[a-z0-9.-]+$"))) {
+            return ""
+        }
+
         // Remove www. prefix
         domain = domain.replace("www.", "")
+
         // Remove path, query, and fragment
         domain = domain.substringBefore("/").substringBefore("?").substringBefore("#")
+
+        // Final validation - ensure we have a valid domain structure
+        if (domain.isEmpty() || domain.startsWith(".") || domain.endsWith(".") || domain.contains("..")) {
+            return ""
+        }
+
         return domain
     }
 
@@ -56,6 +77,26 @@ object CredentialMatcher {
         val d2Root = extractRootDomain(d2)
 
         return d1Root == d2Root
+    }
+
+    /**
+     * Extract meaningful words from text, removing punctuation and filtering stop words.
+     * Matches the browser extension's Filter.ts implementation.
+     * @param text Text to extract words from
+     * @return List of filtered words
+     */
+    private fun extractWords(text: String): List<String> {
+        if (text.isBlank()) {
+            return emptyList()
+        }
+
+        return text.lowercase()
+            // Replace common separators and punctuation with spaces
+            .replace(Regex("[|,;:\\-–—/\\\\()\\[\\]{}'\" ~!@#$%^&*+=<>?]"), " ")
+            .split(Regex("\\s+"))
+            .filter { word ->
+                word.length > 3 // Filter out short words
+            }
     }
 
     /**
@@ -99,8 +140,10 @@ object CredentialMatcher {
                 val domainWithoutExtension = domainParts.firstOrNull()?.lowercase() ?: searchDomain.lowercase()
 
                 val nameMatches = credentials.filter { credential ->
-                    // CRITICAL: Only search in credentials that have no service URL defined
-                    if (!credential.service.url.isNullOrEmpty()) return@filter false
+                    if (!credential.service.url.isNullOrEmpty()) {
+                        return@filter false
+                    }
+
                     val serviceNameMatch = credential.service.name?.lowercase()?.contains(domainWithoutExtension) ?: false
                     val notesMatch = credential.notes?.lowercase()?.contains(domainWithoutExtension) ?: false
                     serviceNameMatch || notesMatch
@@ -110,12 +153,31 @@ object CredentialMatcher {
 
             return matches.toList()
         } else {
-            // Non-URL fallback: simple text search in service name, username, or notes
-            val lowercasedSearch = searchText.lowercase()
+            // Non-URL fallback: Extract words from search text for better matching
+            val searchWords = extractWords(searchText)
+
+            if (searchWords.isEmpty()) {
+                // If no meaningful words after extraction, fall back to simple contains
+                val lowercasedSearch = searchText.lowercase()
+                return credentials.filter { credential ->
+                    (credential.service.name?.lowercase()?.contains(lowercasedSearch) ?: false) ||
+                        (credential.username?.lowercase()?.contains(lowercasedSearch) ?: false) ||
+                        (credential.notes?.lowercase()?.contains(lowercasedSearch) ?: false)
+                }
+            }
+
+            // Match using extracted words
             return credentials.filter { credential ->
-                (credential.service.name?.lowercase()?.contains(lowercasedSearch) ?: false) ||
-                    (credential.username?.lowercase()?.contains(lowercasedSearch) ?: false) ||
-                    (credential.notes?.lowercase()?.contains(lowercasedSearch) ?: false)
+                val serviceNameWords = credential.service.name?.let { extractWords(it) } ?: emptyList()
+                val usernameWords = credential.username?.let { extractWords(it) } ?: emptyList()
+                val notesWords = credential.notes?.let { extractWords(it) } ?: emptyList()
+
+                // Check if any search word matches any credential word exactly
+                searchWords.any { searchWord ->
+                    serviceNameWords.contains(searchWord) ||
+                        usernameWords.contains(searchWord) ||
+                        notesWords.contains(searchWord)
+                }
             }
         }
     }

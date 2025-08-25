@@ -29,7 +29,7 @@ describe('FormFiller Dutch', () => {
   });
 
   describe('fillBirthdateFields with Dutch month names', () => {
-    it('should fill separate fields with Dutch month names', () => {
+    it('should fill separate fields with Dutch month names', async () => {
       const { daySelect, monthSelect, yearSelect } = createDateSelects(document);
 
       // Add month options with Dutch month names
@@ -52,7 +52,7 @@ describe('FormFiller Dutch', () => {
         year: yearSelect as unknown as HTMLInputElement
       };
 
-      formFiller.fillFields(mockCredential);
+      await formFiller.fillFields(mockCredential);
 
       expect(daySelect.value).toBe('03');
       expect(monthSelect.value).toBe('Februari');

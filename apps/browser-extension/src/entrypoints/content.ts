@@ -34,6 +34,7 @@ export default defineContentScript({
       name: 'aliasvault-ui',
       position: 'inline',
       anchor: 'body',
+      mode: 'closed',
       /**
        * Handle mount.
        */

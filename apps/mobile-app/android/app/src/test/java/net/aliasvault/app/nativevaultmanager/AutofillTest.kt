@@ -270,6 +270,31 @@ class AutofillTest {
         assertTrue(matches.isEmpty())
     }
 
+    // [#18] - Ensure only full words are matched
+    @Test
+    fun testOnlyFullWordsMatch() {
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
+            testCredentials,
+            "Title | Express Yourself | Description",
+        )
+
+        // The string above should not match "AliExpress" service name
+        assertTrue(matches.isEmpty())
+    }
+
+    // [#19] - Ensure separators and punctuation are stripped for matching
+    @Test
+    fun testSeparatorsAndPunctuationStripped() {
+        val matches = CredentialMatcher.filterCredentialsByAppInfo(
+            testCredentials,
+            "Reddit, social media platform",
+        )
+
+        // Should match "Reddit" even though it's followed by a comma and description
+        assertEquals(1, matches.size)
+        assertEquals("Reddit", matches[0].service.name)
+    }
+
     /**
      * Creates the shared test credential dataset used across all platforms.
      * This ensures consistent testing across Browser Extension, iOS, and Android.
@@ -287,6 +312,8 @@ class AutofillTest {
             createTestCredential("Subdomain Example", "https://app.example.com", "user@example.com"),
             createTestCredential("Title Only newyorktimes", "", ""),
             createTestCredential("Bank Account", "https://secure-bank.com", "user@bank.com"),
+            createTestCredential("AliExpress", "https://aliexpress.com", "user@aliexpress.com"),
+            createTestCredential("Reddit", "", "user@reddit.com"),
         )
     }
 

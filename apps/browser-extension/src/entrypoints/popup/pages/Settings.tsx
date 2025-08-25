@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { sendMessage } from 'webext-bridge/popup';
 
+import { AutofillMatchingMode } from '@/entrypoints/contentScript/Filter';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
 import HelpModal from '@/entrypoints/popup/components/HelpModal';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
@@ -15,7 +16,7 @@ import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY, AUTO_LOCK_TIMEOUT_KEY } from '@/utils/Constants';
+import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY, AUTO_LOCK_TIMEOUT_KEY, AUTOFILL_MATCHING_MODE_KEY } from '@/utils/Constants';
 
 import { storage, browser } from "#imports";
 
@@ -52,6 +53,7 @@ const Settings: React.FC = () => {
   });
   const [clipboardTimeout, setClipboardTimeout] = useState<number>(10);
   const [autoLockTimeout, setAutoLockTimeout] = useState<number>(0);
+  const [autofillMatchingMode, setAutofillMatchingMode] = useState<AutofillMatchingMode>(AutofillMatchingMode.DEFAULT);
 
   /**
    * Get current tab in browser.
@@ -133,6 +135,10 @@ const Settings: React.FC = () => {
     // Load auto-lock timeout
     const autoLockTimeoutValue = await storage.getItem(AUTO_LOCK_TIMEOUT_KEY) as number ?? 0;
     setAutoLockTimeout(autoLockTimeoutValue);
+
+    // Load autofill matching mode
+    const matchingModeValue = await storage.getItem(AUTOFILL_MATCHING_MODE_KEY) as AutofillMatchingMode ?? AutofillMatchingMode.DEFAULT;
+    setAutofillMatchingMode(matchingModeValue);
 
     setSettings({
       disabledUrls,
@@ -256,6 +262,14 @@ const Settings: React.FC = () => {
     await storage.setItem(AUTO_LOCK_TIMEOUT_KEY, timeout);
     await sendMessage('SET_AUTO_LOCK_TIMEOUT', timeout, 'background');
     setAutoLockTimeout(timeout);
+  };
+
+  /**
+   * Set autofill matching mode.
+   */
+  const setAutofillMatchingModeSetting = async (mode: AutofillMatchingMode) : Promise<void> => {
+    await storage.setItem(AUTOFILL_MATCHING_MODE_KEY, mode);
+    setAutofillMatchingMode(mode);
   };
 
   /**
@@ -427,6 +441,28 @@ const Settings: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Autofill Matching Settings Section */}
+      <section>
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.autofillMatching')}</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-4">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.autofillMatchingMode')}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.autofillMatchingModeDescription')}</p>
+              <select
+                value={autofillMatchingMode}
+                onChange={(e) => setAutofillMatchingModeSetting(e.target.value as AutofillMatchingMode)}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value={AutofillMatchingMode.DEFAULT}>{t('settings.autofillMatchingDefault')}</option>
+                <option value={AutofillMatchingMode.URL_SUBDOMAIN}>{t('settings.autofillMatchingUrlSubdomain')}</option>
+                <option value={AutofillMatchingMode.URL_EXACT}>{t('settings.autofillMatchingUrlExact')}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Security Settings Section */}
       <section>

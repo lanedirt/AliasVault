@@ -1,6 +1,12 @@
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CombinedStopWords } from '@/utils/formDetector/FieldPatterns';
 
+export enum AutofillMatchingMode {
+  DEFAULT = 'default',
+  URL_EXACT = 'url_exact',
+  URL_SUBDOMAIN = 'url_subdomain'
+}
+
 type CredentialWithPriority = Credential & {
   priority: number;
 }
@@ -66,91 +72,141 @@ function domainsMatch(domain1: string, domain2: string): boolean {
 }
 
 /**
- * Filter credentials based on current URL and page context with anti-phishing protection.
- * 
- * **Security Note**: When searching with a URL, text search fallback only applies to 
- * credentials with no service URL defined. This prevents phishing attacks where a 
- * malicious site might match credentials intended for the legitimate site.
- * 
- * Credentials are sorted by priority:
- * 1. Exact domain match (highest priority)
- * 2. Partial domain match (root domain match)
- * 3. Page title word match (only for credentials without service URLs)
+ * Extract meaningful words from text, removing punctuation and filtering stop words
+ * @param text - Text to extract words from
+ * @returns Array of filtered words
  */
-export function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string): Credential[] {
+function extractWords(text: string): string[] {
+  if (!text || text.length === 0) {
+    return [];
+  }
+
+  return text.toLowerCase()
+    // Replace common separators and punctuation with spaces
+    .replace(/[|,;:\-–—/\\()[\]{}'"`~!@#$%^&*+=<>?]/g, ' ')
+    // Split on whitespace and filter
+    .split(/\s+/)
+    .filter(word =>
+      word.length > 3 &&
+      !CombinedStopWords.has(word)
+    );
+}
+
+/**
+ * Filter credentials based on current URL and page context with anti-phishing protection.
+ *
+ * **Security Note**: When searching with a URL, text search fallback only applies to
+ * credentials with no service URL defined. This prevents phishing attacks where a
+ * malicious site might match credentials intended for the legitimate site.
+ *
+ * Credentials are sorted by priority:
+ * 1. Exact domain match (priority 1 - highest)
+ * 2. Partial/subdomain match (priority 2)
+ * 3. Service name fallback match (priority 5 - lowest, only for credentials without URLs)
+ */
+export function filterCredentials(credentials: Credential[], currentUrl: string, pageTitle: string, matchingMode: AutofillMatchingMode = AutofillMatchingMode.DEFAULT): Credential[] {
   const filtered: CredentialWithPriority[] = [];
   const currentDomain = extractDomain(currentUrl);
 
-  // Check each credential for matches
+  // Determine feature flags based on matching mode
+  let enableExactMatch = false;
+  let enableSubdomainMatch = false;
+  let enableServiceNameFallback = false;
+
+  switch (matchingMode) {
+    case AutofillMatchingMode.URL_EXACT:
+      enableExactMatch = true;
+      enableSubdomainMatch = false;
+      enableServiceNameFallback = false;
+      break;
+
+    case AutofillMatchingMode.URL_SUBDOMAIN:
+      enableExactMatch = true;
+      enableSubdomainMatch = true;
+      enableServiceNameFallback = false;
+      break;
+
+    case AutofillMatchingMode.DEFAULT:
+      enableExactMatch = true;
+      enableSubdomainMatch = true;
+      enableServiceNameFallback = true;
+      break;
+  }
+
+  // Process credentials with service URLs
   credentials.forEach(cred => {
     if (!cred.ServiceUrl || cred.ServiceUrl.length === 0) {
-      return;
+      return; // Handle these in service name fallback
     }
 
     const credDomain = extractDomain(cred.ServiceUrl);
 
-    // Check for domain match (exact or partial)
-    if (domainsMatch(currentDomain, credDomain)) {
-      // Exact match gets higher priority
-      const priority = currentDomain === credDomain ? 1 : 2;
-      filtered.push({ ...cred, priority });
+    // Check for exact match (priority 1)
+    if (enableExactMatch && currentDomain === credDomain) {
+      filtered.push({ ...cred, priority: 1 });
+      return;
+    }
+
+    // Check for subdomain/partial match (priority 2)
+    if (enableSubdomainMatch && domainsMatch(currentDomain, credDomain)) {
+      filtered.push({ ...cred, priority: 2 });
+      return;
     }
   });
 
-  // If we have domain matches, return them sorted by priority
-  if (filtered.length > 0) {
-    return filtered
-      .sort((a, b) => a.priority - b.priority)
-      .slice(0, 3);
+  // Service name fallback for credentials without URLs (priority 5)
+  if (enableServiceNameFallback) {
+    /*
+     * SECURITY: Service name matching only applies to credentials with no service URL.
+     * This prevents phishing attacks where a malicious site might match credentials
+     * intended for a legitimate site.
+     */
+
+    // Extract words from page title
+    const titleWords = extractWords(pageTitle);
+
+    if (titleWords.length > 0) {
+      credentials.forEach(cred => {
+        // CRITICAL: Only check credentials that have NO service URL defined
+        if (cred.ServiceUrl && cred.ServiceUrl.length > 0) {
+          return;
+        }
+
+        // Skip if already in filtered list
+        if (filtered.some(f => f.Id === cred.Id)) {
+          return;
+        }
+
+        // Check page title match with service name
+        if (cred.ServiceName) {
+          const credNameWords = extractWords(cred.ServiceName);
+
+          /*
+           * Match only complete words, not substrings
+           * For example: "Express" should match "My Express Account" but not "AliExpress"
+           */
+          const hasTitleMatch = titleWords.some(titleWord =>
+            credNameWords.some(credWord =>
+              titleWord === credWord // Exact word match only
+            )
+          );
+
+          if (hasTitleMatch) {
+            filtered.push({ ...cred, priority: 5 });
+          }
+        }
+      });
+    }
   }
 
-  /*
-   * SECURITY: Fallback to page title matching, but ONLY for credentials with no service URL
-   * This prevents phishing attacks by ensuring URL-based credentials only match their domains
-   */
-  const titleWords = pageTitle.length > 0
-    ? pageTitle.toLowerCase()
-      .split(/\s+/)
-      .filter(word =>
-        word.length > 3 &&
-          !CombinedStopWords.has(word.toLowerCase())
-      )
-    : [];
-
-  // Check for page title matches as fallback
-  credentials.forEach(cred => {
-    // CRITICAL: Only check credentials that have NO service URL defined
-    if (cred.ServiceUrl && cred.ServiceUrl.length > 0) {
-      return;
-    }
-
-    // Skip if already in filtered list
-    if (filtered.some(f => f.Id === cred.Id)) {
-      return;
-    }
-
-    // Check page title match
-    if (titleWords.length > 0 && cred.ServiceName) {
-      const credNameWords = cred.ServiceName.toLowerCase()
-        .split(/\s+/)
-        .filter(word => word.length > 3 && !CombinedStopWords.has(word));
-      const hasTitleMatch = titleWords.some(word =>
-        credNameWords.some(credWord => credWord.includes(word))
-      );
-
-      if (hasTitleMatch) {
-        filtered.push({ ...cred, priority: 5 });
-      }
-    }
-  });
-
-  // Sort by priority and then take unique credentials
+  // Sort by priority and return unique credentials (max 3)
   const uniqueCredentials = Array.from(
-    new Map(filtered
-      .sort((a, b) => a.priority - b.priority)
-      .map(cred => [cred.Id, cred]))
-      .values()
+    new Map(
+      filtered
+        .sort((a, b) => a.priority - b.priority)
+        .map(cred => [cred.Id, cred])
+    ).values()
   );
-  // Show max 3 results
+
   return uniqueCredentials.slice(0, 3);
 }

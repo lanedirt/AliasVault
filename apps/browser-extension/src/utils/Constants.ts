@@ -6,6 +6,7 @@ export const VAULT_LOCKED_DISMISS_UNTIL_KEY = 'local:aliasvault_vault_locked_dis
 export const TEMPORARY_DISABLED_SITES_KEY = 'local:aliasvault_temporary_disabled_sites';
 export const CLIPBOARD_CLEAR_TIMEOUT_KEY = 'local:aliasvault_clipboard_clear_timeout';
 export const AUTO_LOCK_TIMEOUT_KEY = 'local:aliasvault_auto_lock_timeout';
+export const AUTOFILL_MATCHING_MODE_KEY = 'local:aliasvault_autofill_matching_mode';
 
 // TODO: store these settings in the actual vault when updating the datamodel for roadmap v1.0.
 export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';

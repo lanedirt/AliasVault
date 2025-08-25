@@ -1,13 +1,14 @@
 import { sendMessage } from 'webext-bridge/content-script';
 
-import { filterCredentials } from '@/entrypoints/contentScript/Filter';
+import { filterCredentials, AutofillMatchingMode } from '@/entrypoints/contentScript/Filter';
 import { fillCredential } from '@/entrypoints/contentScript/Form';
 
-import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY } from '@/utils/Constants';
+import { DISABLED_SITES_KEY, TEMPORARY_DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY, LAST_CUSTOM_EMAIL_KEY, LAST_CUSTOM_USERNAME_KEY, AUTOFILL_MATCHING_MODE_KEY } from '@/utils/Constants';
 import { CreateIdentityGenerator } from '@/utils/dist/shared/identity-generator';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 import { CreatePasswordGenerator, PasswordGenerator, PasswordSettings } from '@/utils/dist/shared/password-generator';
 import { FormDetector } from '@/utils/formDetector/FormDetector';
+import { ClickValidator } from '@/utils/security/ClickValidator';
 import { SqliteClient } from '@/utils/SqliteClient';
 import { CredentialsResponse } from '@/utils/types/messaging/CredentialsResponse';
 import { IdentitySettingsResponse } from '@/utils/types/messaging/IdentitySettingsResponse';
@@ -22,6 +23,11 @@ import { storage } from '#imports';
  * WeakMap to store event listeners for popup containers
  */
 let popupListeners = new WeakMap<HTMLElement, EventListener>();
+
+/**
+ * Global ClickValidator instance for content script security
+ */
+const clickValidator = ClickValidator.getInstance();
 
 /**
  * Open (or refresh) the autofill popup including check if vault is locked.
@@ -181,10 +187,14 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
     credentials = [];
   }
 
+  // Load autofill matching mode setting
+  const matchingMode = await storage.getItem(AUTOFILL_MATCHING_MODE_KEY) as AutofillMatchingMode ?? AutofillMatchingMode.DEFAULT;
+
   const filteredCredentials = filterCredentials(
     credentials,
     window.location.href,
-    document.title
+    document.title,
+    matchingMode
   );
 
   updatePopupContent(filteredCredentials, credentialList, input, rootContainer, noMatchesText);
@@ -318,7 +328,7 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
     }
   };
 
-  // Add click listener with capture and prevent removal.
+  // Add click listener with capture and prevent removal and security validation.
   addReliableClickHandler(createButton, handleCreateClick);
 
   // Create search container.
@@ -357,8 +367,8 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
 
   // Handle search input.
   let searchTimeout: NodeJS.Timeout | null = null;
-  searchInput.addEventListener('input', () => {
-    handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input, noMatchesText);
+  searchInput.addEventListener('input', async () => {
+    await handleSearchInput(searchInput, credentials, rootContainer, searchTimeout, credentialList, input, noMatchesText);
   });
 
   // Close button
@@ -439,7 +449,7 @@ export async function createAutofillPopup(input: HTMLInputElement, credentials: 
     addReliableClickHandler(contextMenu, handleContextMenuClick);
   };
 
-  // Add click handlers
+  // Add click handlers with security validation
   addReliableClickHandler(closeButton, (e: Event) => {
     handleCloseClick(e);
   });
@@ -492,7 +502,7 @@ export async function createVaultLockedPopup(input: HTMLInputElement, rootContai
   const container = document.createElement('div');
   container.className = 'av-vault-locked-container';
 
-  // Make the entire container clickable
+  // Make the entire container clickable with security validation
   addReliableClickHandler(container, handleUnlockClick);
   container.style.cursor = 'pointer';
 
@@ -534,7 +544,7 @@ export async function createVaultLockedPopup(input: HTMLInputElement, rootContai
   closeButton.style.top = '50%';
   closeButton.style.transform = 'translateY(-50%)';
 
-  // Handle close button click
+  // Handle close button click with security validation
   addReliableClickHandler(closeButton, async (e) => {
     e.stopPropagation(); // Prevent opening the unlock popup
     await dismissVaultLockedPopup();
@@ -567,7 +577,7 @@ export async function createVaultLockedPopup(input: HTMLInputElement, rootContai
 /**
  * Handle popup search input by filtering credentials based on the search term.
  */
-function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement, noMatchesText?: string) : void {
+async function handleSearchInput(searchInput: HTMLInputElement, credentials: Credential[], rootContainer: HTMLElement, searchTimeout: NodeJS.Timeout | null, credentialList: HTMLElement | null, input: HTMLInputElement, noMatchesText?: string) : Promise<void> {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
@@ -578,11 +588,15 @@ function handleSearchInput(searchInput: HTMLInputElement, credentials: Credentia
   let filteredCredentials;
 
   if (searchTerm === '') {
+    // Load autofill matching mode setting
+    const matchingMode = await storage.getItem(AUTOFILL_MATCHING_MODE_KEY) as AutofillMatchingMode ?? AutofillMatchingMode.DEFAULT;
+
     // If search is empty, use original URL-based filtering
     filteredCredentials = filterCredentials(
       uniqueCredentials,
       window.location.href,
-      document.title
+      document.title,
+      matchingMode
     ).sort((a, b) => {
       // First compare by service name
       const serviceNameComparison = (a.ServiceName ?? '').localeCompare(b.ServiceName ?? '');
@@ -681,7 +695,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
           </svg>
         `;
 
-      // Handle popout click
+      // Handle popout click with security validation
       addReliableClickHandler(popoutIcon, (e) => {
         e.stopPropagation(); // Prevent credential fill
         sendMessage('OPEN_POPUP_WITH_CREDENTIAL', { credentialId: cred.Id }, 'background');
@@ -691,7 +705,7 @@ function createCredentialList(credentials: Credential[], input: HTMLInputElement
       item.appendChild(credentialInfo);
       item.appendChild(popoutIcon);
 
-      // Update click handler to only trigger on credentialInfo
+      // Update click handler to only trigger on credentialInfo with security validation
       addReliableClickHandler(credentialInfo, () => {
         fillCredential(cred, input);
         removeExistingPopup(rootContainer);
@@ -1706,14 +1720,32 @@ function getValidServiceUrl(): string {
 
 /**
  * Add click handler with mousedown/mouseup backup for better click reliability in shadow DOM.
+ * Now includes optional security validation.
  *
  * Some websites due to their design cause the AliasVault autofill to re-trigger when clicking
  * outside of the input field, which causes the AliasVault popup to close before the click event
  * is registered. This is a workaround to ensure the click event is always registered.
  */
-function addReliableClickHandler(element: HTMLElement, handler: (e: Event) => void): void {
+function addReliableClickHandler(
+  element: HTMLElement,
+  handler: (e: Event) => void
+): void {
+  /**
+   * Secure wrapper that validates clicks before executing handler
+   */
+  const secureHandler = async (e: Event): Promise<void> => {
+    const mouseEvent = e as MouseEvent;
+
+    if (!await clickValidator.validateClick(mouseEvent)) {
+      console.warn(`[AliasVault Security] Blocked click action due to security validation failure`);
+      return;
+    }
+
+    handler(e);
+  };
+
   // Add primary click listener with capture and prevent removal
-  element.addEventListener('click', handler, {
+  element.addEventListener('click', secureHandler, {
     capture: true,
     passive: false
   });
@@ -1726,11 +1758,11 @@ function addReliableClickHandler(element: HTMLElement, handler: (e: Event) => vo
     isMouseDown = true;
   }, { capture: true });
 
-  element.addEventListener('mouseup', (e) => {
+  element.addEventListener('mouseup', async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isMouseDown) {
-      handler(e);
+      await secureHandler(e);
     }
     isMouseDown = false;
   }, { capture: true });
@@ -1755,7 +1787,6 @@ export async function createUpgradeRequiredPopup(input: HTMLInputElement, rootCo
   const container = document.createElement('div');
   container.className = 'av-upgrade-required-container';
 
-  // Make the entire container clickable
   addReliableClickHandler(container, handleUpgradeClick);
   container.style.cursor = 'pointer';
 
