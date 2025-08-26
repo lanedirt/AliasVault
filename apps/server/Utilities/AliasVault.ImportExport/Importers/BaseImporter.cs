@@ -32,7 +32,6 @@ public static class BaseImporter
             {
                 // Log bad data but don't throw, allowing the parser to continue
                 // This helps with malformed CSV entries
-                return;
             },
             MissingFieldFound = null, // Ignore missing fields
             HeaderValidated = null, // Don't validate header names
@@ -100,7 +99,9 @@ public static class BaseImporter
     /// <param name="customDecoder">Optional custom decoder function for importer-specific decoding.</param>
     private static void DecodeFields<T>(T record, Func<string, string>? customDecoder = null)
     {
-        if (record == null) return;
+        if (record.Equals(default(T))) {
+            return;
+        }
 
         var type = typeof(T);
         var properties = type.GetProperties();
