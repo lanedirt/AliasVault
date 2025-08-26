@@ -99,7 +99,7 @@ public static class BaseImporter
     /// <param name="customDecoder">Optional custom decoder function for importer-specific decoding.</param>
     private static void DecodeFields<T>(T record, Func<string, string>? customDecoder = null)
     {
-        if (record.Equals(default(T))) {
+        if (record?.Equals(default(T)) ?? true) {
             return;
         }
 
