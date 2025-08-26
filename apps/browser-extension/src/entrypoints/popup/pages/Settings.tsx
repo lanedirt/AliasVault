@@ -1,13 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { sendMessage } from 'webext-bridge/popup';
 
-import { AutofillMatchingMode } from '@/entrypoints/contentScript/Filter';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
-import HelpModal from '@/entrypoints/popup/components/HelpModal';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
-import LanguageSwitcher from '@/entrypoints/popup/components/LanguageSwitcher';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useHeaderButtons } from '@/entrypoints/popup/context/HeaderButtonsContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
@@ -16,21 +12,8 @@ import { useApiUrl } from '@/entrypoints/popup/utils/ApiUrlUtility';
 import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { DISABLED_SITES_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, GLOBAL_CONTEXT_MENU_ENABLED_KEY, TEMPORARY_DISABLED_SITES_KEY, CLIPBOARD_CLEAR_TIMEOUT_KEY, AUTO_LOCK_TIMEOUT_KEY, AUTOFILL_MATCHING_MODE_KEY } from '@/utils/Constants';
 
-import { storage, browser } from "#imports";
-
-/**
- * Popup settings type.
- */
-type PopupSettings = {
-  disabledUrls: string[];
-  temporaryDisabledUrls: Record<string, number>;
-  currentUrl: string;
-  isEnabled: boolean;
-  isGloballyEnabled: boolean;
-  isContextMenuEnabled: boolean;
-}
+import { browser } from "#imports";
 
 /**
  * Settings page component.
@@ -43,35 +26,15 @@ const Settings: React.FC = () => {
   const { setIsInitialLoading } = useLoading();
   const { loadApiUrl, getDisplayUrl } = useApiUrl();
   const navigate = useNavigate();
-  const [settings, setSettings] = useState<PopupSettings>({
-    disabledUrls: [],
-    temporaryDisabledUrls: {},
-    currentUrl: '',
-    isEnabled: true,
-    isGloballyEnabled: true,
-    isContextMenuEnabled: true
-  });
-  const [clipboardTimeout, setClipboardTimeout] = useState<number>(10);
-  const [autoLockTimeout, setAutoLockTimeout] = useState<number>(0);
-  const [autofillMatchingMode, setAutofillMatchingMode] = useState<AutofillMatchingMode>(AutofillMatchingMode.DEFAULT);
-
-  /**
-   * Get current tab in browser.
-   */
-  const getCurrentTab = async () : Promise<chrome.tabs.Tab> => {
-    const queryOptions = { active: true, currentWindow: true };
-    const [tab] = await browser.tabs.query(queryOptions);
-    return tab;
-  };
 
   /**
    * Open the client tab.
    */
   const openClientTab = async () : Promise<void> => {
-    const settingClientUrl = await storage.getItem('local:clientUrl') as string;
+    const settingClientUrl = await browser.storage.local.get('clientUrl');
     let clientUrl = AppInfo.DEFAULT_CLIENT_URL;
-    if (settingClientUrl && settingClientUrl.length > 0) {
-      clientUrl = settingClientUrl;
+    if (settingClientUrl?.clientUrl && settingClientUrl.clientUrl.length > 0) {
+      clientUrl = settingClientUrl.clientUrl;
     }
 
     window.open(clientUrl, '_blank');
@@ -106,48 +69,8 @@ const Settings: React.FC = () => {
    * Load settings.
    */
   const loadSettings = useCallback(async () : Promise<void> => {
-    const tab = await getCurrentTab();
-    const currentUrl = new URL(tab.url ?? '').hostname;
-
-    // Load settings local storage.
-    const disabledUrls = await storage.getItem(DISABLED_SITES_KEY) as string[] ?? [];
-    const temporaryDisabledUrls = await storage.getItem(TEMPORARY_DISABLED_SITES_KEY) as Record<string, number> ?? {};
-    const isGloballyEnabled = await storage.getItem(GLOBAL_AUTOFILL_POPUP_ENABLED_KEY) !== false; // Default to true if not set
-    const isContextMenuEnabled = await storage.getItem(GLOBAL_CONTEXT_MENU_ENABLED_KEY) !== false; // Default to true if not set
-
-    // Clean up expired temporary disables
-    const now = Date.now();
-    const cleanedTemporaryDisabledUrls = Object.fromEntries(
-      Object.entries(temporaryDisabledUrls).filter(([_, expiry]) => expiry > now)
-    );
-
-    if (Object.keys(cleanedTemporaryDisabledUrls).length !== Object.keys(temporaryDisabledUrls).length) {
-      await storage.setItem(TEMPORARY_DISABLED_SITES_KEY, cleanedTemporaryDisabledUrls);
-    }
-
     // Load API URL
     await loadApiUrl();
-
-    // Load clipboard clear timeout
-    const timeout = await storage.getItem(CLIPBOARD_CLEAR_TIMEOUT_KEY) as number ?? 10;
-    setClipboardTimeout(timeout);
-
-    // Load auto-lock timeout
-    const autoLockTimeoutValue = await storage.getItem(AUTO_LOCK_TIMEOUT_KEY) as number ?? 0;
-    setAutoLockTimeout(autoLockTimeoutValue);
-
-    // Load autofill matching mode
-    const matchingModeValue = await storage.getItem(AUTOFILL_MATCHING_MODE_KEY) as AutofillMatchingMode ?? AutofillMatchingMode.DEFAULT;
-    setAutofillMatchingMode(matchingModeValue);
-
-    setSettings({
-      disabledUrls,
-      temporaryDisabledUrls: cleanedTemporaryDisabledUrls,
-      currentUrl,
-      isEnabled: !disabledUrls.includes(currentUrl) && !(currentUrl in cleanedTemporaryDisabledUrls),
-      isGloballyEnabled,
-      isContextMenuEnabled
-    });
     setIsInitialLoading(false);
   }, [setIsInitialLoading, loadApiUrl]);
 
@@ -156,120 +79,11 @@ const Settings: React.FC = () => {
   }, [loadSettings]);
 
   /**
-   * Toggle current site.
-   */
-  const toggleCurrentSite = async () : Promise<void> => {
-    const { currentUrl, disabledUrls, temporaryDisabledUrls, isEnabled } = settings;
-
-    let newDisabledUrls = [...disabledUrls];
-    let newTemporaryDisabledUrls = { ...temporaryDisabledUrls };
-
-    if (isEnabled) {
-      // When disabling, add to permanent disabled list
-      if (!newDisabledUrls.includes(currentUrl)) {
-        newDisabledUrls.push(currentUrl);
-      }
-      // Also remove from temporary disabled list if present
-      delete newTemporaryDisabledUrls[currentUrl];
-    } else {
-      // When enabling, remove from both permanent and temporary disabled lists
-      newDisabledUrls = newDisabledUrls.filter(url => url !== currentUrl);
-      delete newTemporaryDisabledUrls[currentUrl];
-    }
-
-    await storage.setItem(DISABLED_SITES_KEY, newDisabledUrls);
-    await storage.setItem(TEMPORARY_DISABLED_SITES_KEY, newTemporaryDisabledUrls);
-
-    setSettings(prev => ({
-      ...prev,
-      disabledUrls: newDisabledUrls,
-      temporaryDisabledUrls: newTemporaryDisabledUrls,
-      isEnabled: !isEnabled
-    }));
-  };
-
-  /**
-   * Reset settings.
-   */
-  const resetSettings = async () : Promise<void> => {
-    await storage.setItem(DISABLED_SITES_KEY, []);
-    await storage.setItem(TEMPORARY_DISABLED_SITES_KEY, {});
-
-    setSettings(prev => ({
-      ...prev,
-      disabledUrls: [],
-      temporaryDisabledUrls: {},
-      isEnabled: true
-    }));
-  };
-
-  /**
-   * Toggle global popup.
-   */
-  const toggleGlobalPopup = async () : Promise<void> => {
-    const newGloballyEnabled = !settings.isGloballyEnabled;
-
-    await storage.setItem(GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, newGloballyEnabled);
-
-    setSettings(prev => ({
-      ...prev,
-      isGloballyEnabled: newGloballyEnabled
-    }));
-  };
-
-  /**
-   * Toggle context menu.
-   */
-  const toggleContextMenu = async () : Promise<void> => {
-    const newContextMenuEnabled = !settings.isContextMenuEnabled;
-
-    await storage.setItem(GLOBAL_CONTEXT_MENU_ENABLED_KEY, newContextMenuEnabled);
-    await sendMessage('TOGGLE_CONTEXT_MENU', { enabled: newContextMenuEnabled }, 'background');
-
-    setSettings(prev => ({
-      ...prev,
-      isContextMenuEnabled: newContextMenuEnabled
-    }));
-  };
-
-  /**
    * Set theme preference.
    */
   const setThemePreference = async (newTheme: 'system' | 'light' | 'dark') : Promise<void> => {
     // Use the ThemeContext to apply the theme
     setTheme(newTheme);
-
-    // Update local state
-    setSettings(prev => ({
-      ...prev,
-      theme: newTheme
-    }));
-  };
-
-  /**
-   * Set clipboard clear timeout.
-   */
-  const setClipboardClearTimeout = async (timeout: number) : Promise<void> => {
-    await storage.setItem(CLIPBOARD_CLEAR_TIMEOUT_KEY, timeout);
-    await sendMessage('SET_CLIPBOARD_CLEAR_TIMEOUT', timeout, 'background');
-    setClipboardTimeout(timeout);
-  };
-
-  /**
-   * Set auto-lock timeout.
-   */
-  const setAutoLockTimeoutSetting = async (timeout: number) : Promise<void> => {
-    await storage.setItem(AUTO_LOCK_TIMEOUT_KEY, timeout);
-    await sendMessage('SET_AUTO_LOCK_TIMEOUT', timeout, 'background');
-    setAutoLockTimeout(timeout);
-  };
-
-  /**
-   * Set autofill matching mode.
-   */
-  const setAutofillMatchingModeSetting = async (mode: AutofillMatchingMode) : Promise<void> => {
-    await storage.setItem(AUTOFILL_MATCHING_MODE_KEY, mode);
-    setAutofillMatchingMode(mode);
   };
 
   /**
@@ -296,6 +110,41 @@ const Settings: React.FC = () => {
    */
   const handleLogout = async () : Promise<void> => {
     navigate('/logout', { replace: true });
+  };
+
+  /**
+   * Navigate to autofill settings.
+   */
+  const navigateToAutofillSettings = () : void => {
+    navigate('/settings/autofill');
+  };
+
+  /**
+   * Navigate to clipboard settings.
+   */
+  const navigateToClipboardSettings = () : void => {
+    navigate('/settings/clipboard');
+  };
+
+  /**
+   * Navigate to language settings.
+   */
+  const navigateToLanguageSettings = () : void => {
+    navigate('/settings/language');
+  };
+
+  /**
+   * Navigate to auto-lock settings.
+   */
+  const navigateToAutoLockSettings = () : void => {
+    navigate('/settings/auto-lock');
+  };
+
+  /**
+   * Navigate to context menu settings.
+   */
+  const navigateToContextMenuSettings = () : void => {
+    navigate('/settings/context-menu');
   };
 
   return (
@@ -351,166 +200,170 @@ const Settings: React.FC = () => {
         </div>
       </section>
 
-      {/* Global Settings Section */}
+      {/* Settings Navigation Section */}
       <section>
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.globalSettings')}</h3>
+        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.preferences')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autofillPopup')}</p>
-                <p className={`text-xs mt-1 ${settings.isGloballyEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {settings.isGloballyEnabled ? t('settings.activeOnAllSites') : t('settings.disabledOnAllSites')}
-                </p>
-              </div>
-              <button
-                onClick={toggleGlobalPopup}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  settings.isGloballyEnabled
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-red-500 hover:bg-red-600 text-white'
-                }`}
-              >
-                {settings.isGloballyEnabled ? t('settings.enabled') : t('settings.disabled')}
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.rightClickContextMenu')}</p>
-                <p className={`text-xs mt-1 ${settings.isContextMenuEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {settings.isContextMenuEnabled ? t('settings.enabled') : t('settings.disabled')}
-                </p>
-              </div>
-              <button
-                onClick={toggleContextMenu}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  settings.isContextMenuEnabled
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-red-500 hover:bg-red-600 text-white'
-                }`}
-              >
-                {settings.isContextMenuEnabled ? t('settings.enabled') : t('settings.disabled')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Site-Specific Settings Section */}
-      {settings.isGloballyEnabled && (
-        <section>
-          <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.siteSpecificSettings')}</h3>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autofillPopupOn')}{settings.currentUrl}</p>
-                  <p className={`text-xs mt-1 ${settings.isEnabled ? 'text-gray-600 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {settings.isEnabled ? t('settings.enabledForThisSite') : t('settings.disabledForThisSite')}
-                  </p>
-                  {!settings.isEnabled && settings.temporaryDisabledUrls[settings.currentUrl] && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {t('settings.temporarilyDisabledUntil')}{new Date(settings.temporaryDisabledUrls[settings.currentUrl]).toLocaleTimeString()}
-                    </p>
-                  )}
-                </div>
-                {settings.isGloballyEnabled && (
-                  <button
-                    onClick={toggleCurrentSite}
-                    className={`px-4 py-2 ml-1 rounded-md transition-colors ${
-                      settings.isEnabled
-                        ? 'bg-green-500 hover:bg-green-600 text-white'
-                        : 'bg-red-500 hover:bg-red-600 text-white'
-                    }`}
-                  >
-                    {settings.isEnabled ? t('settings.enabled') : t('settings.disabled')}
-                  </button>
-                )}
-              </div>
-
-              <div className="mt-4">
-                <button
-                  onClick={resetSettings}
-                  className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-gray-700 dark:text-gray-300 transition-colors text-sm"
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {/* Autofill Settings */}
+            <button
+              onClick={navigateToAutofillSettings}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
                 >
-                  {t('settings.resetAllSiteSettings')}
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="text-sm text-gray-900 dark:text-white">{t('settings.autofillSettings')}</span>
               </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Autofill Matching Settings Section */}
-      <section>
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.autofillMatching')}</h3>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-4">
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.autofillMatchingMode')}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.autofillMatchingModeDescription')}</p>
-              <select
-                value={autofillMatchingMode}
-                onChange={(e) => setAutofillMatchingModeSetting(e.target.value as AutofillMatchingMode)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
               >
-                <option value={AutofillMatchingMode.DEFAULT}>{t('settings.autofillMatchingDefault')}</option>
-                <option value={AutofillMatchingMode.URL_SUBDOMAIN}>{t('settings.autofillMatchingUrlSubdomain')}</option>
-                <option value={AutofillMatchingMode.URL_EXACT}>{t('settings.autofillMatchingUrlExact')}</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </section>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
 
-      {/* Security Settings Section */}
-      <section>
-        <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.security')}</h3>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-4">
-            <div className="mb-6">
-              <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.clipboardClearTimeout')}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.clipboardClearTimeoutDescription')}</p>
-              <select
-                value={clipboardTimeout}
-                onChange={(e) => setClipboardClearTimeout(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
-              >
-                <option value="0">{t('settings.clipboardClearDisabled')}</option>
-                <option value="5">{t('settings.clipboardClear5Seconds')}</option>
-                <option value="10">{t('settings.clipboardClear10Seconds')}</option>
-                <option value="15">{t('settings.clipboardClear15Seconds')}</option>
-              </select>
-            </div>
-
-            <div>
-              <div className="flex items-center mb-2">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.autoLockTimeout')}</p>
-                <HelpModal
-                  titleKey="settings.autoLockTimeout"
-                  contentKey="settings.autoLockTimeoutHelp"
-                  className="ml-2"
-                />
+            {/* Context Menu Settings */}
+            <button
+              onClick={navigateToContextMenuSettings}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 6h16M4 12h16m-7 6h7"
+                  />
+                </svg>
+                <span className="text-sm text-gray-900 dark:text-white">{t('settings.contextMenuSettings')}</span>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{t('settings.autoLockTimeoutDescription')}</p>
-              <select
-                value={autoLockTimeout}
-                onChange={(e) => setAutoLockTimeoutSetting(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
               >
-                <option value="0">{t('settings.autoLockNever')}</option>
-                <option value="15">{t('settings.autoLock15Seconds')}</option>
-                <option value="60">{t('settings.autoLock1Minute')}</option>
-                <option value="300">{t('settings.autoLock5Minutes')}</option>
-                <option value="900">{t('settings.autoLock15Minutes')}</option>
-                <option value="1800">{t('settings.autoLock30Minutes')}</option>
-                <option value="3600">{t('settings.autoLock1Hour')}</option>
-                <option value="14400">{t('settings.autoLock4Hours')}</option>
-                <option value="28800">{t('settings.autoLock8Hours')}</option>
-                <option value="86400">{t('settings.autoLock24Hours')}</option>
-              </select>
-            </div>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Auto-lock Settings */}
+            <button
+              onClick={navigateToAutoLockSettings}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+                <span className="text-sm text-gray-900 dark:text-white">{t('settings.autoLockTimeout')}</span>
+              </div>
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Clipboard Settings */}
+            <button
+              onClick={navigateToClipboardSettings}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                  />
+                </svg>
+                <span className="text-sm text-gray-900 dark:text-white">{t('settings.clipboardSettings')}</span>
+              </div>
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Language Settings */}
+            <button
+              onClick={navigateToLanguageSettings}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                  />
+                </svg>
+                <span className="text-sm text-gray-900 dark:text-white">{t('settings.language')}</span>
+              </div>
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </section>
@@ -520,12 +373,6 @@ const Settings: React.FC = () => {
         <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{t('settings.appearance')}</h3>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="p-4">
-            <div className="mb-4">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-white mb-3">{t('settings.language')}</p>
-                <LanguageSwitcher variant="dropdown" size="sm" />
-              </div>
-            </div>
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">{t('settings.theme')}</p>
               <div className="flex flex-col space-y-2">

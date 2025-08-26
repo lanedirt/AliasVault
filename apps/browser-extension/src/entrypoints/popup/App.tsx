@@ -22,6 +22,11 @@ import Login from '@/entrypoints/popup/pages/Login';
 import Logout from '@/entrypoints/popup/pages/Logout';
 import Reinitialize from '@/entrypoints/popup/pages/Reinitialize';
 import Settings from '@/entrypoints/popup/pages/Settings';
+import AutofillSettings from '@/entrypoints/popup/pages/settings/AutofillSettings';
+import AutoLockSettings from '@/entrypoints/popup/pages/settings/AutoLockSettings';
+import ClipboardSettings from '@/entrypoints/popup/pages/settings/ClipboardSettings';
+import ContextMenuSettings from '@/entrypoints/popup/pages/settings/ContextMenuSettings';
+import LanguageSettings from '@/entrypoints/popup/pages/settings/LanguageSettings';
 import Unlock from '@/entrypoints/popup/pages/Unlock';
 import UnlockSuccess from '@/entrypoints/popup/pages/UnlockSuccess';
 import Upgrade from '@/entrypoints/popup/pages/Upgrade';
@@ -67,6 +72,11 @@ const App: React.FC = () => {
     { path: '/emails', element: <EmailsList />, showBackButton: false },
     { path: '/emails/:id', element: <EmailDetails />, showBackButton: true, title: t('emails.title') },
     { path: '/settings', element: <Settings />, showBackButton: false },
+    { path: '/settings/autofill', element: <AutofillSettings />, showBackButton: true, title: t('settings.autofillSettings') },
+    { path: '/settings/context-menu', element: <ContextMenuSettings />, showBackButton: true, title: t('settings.contextMenuSettings') },
+    { path: '/settings/clipboard', element: <ClipboardSettings />, showBackButton: true, title: t('settings.clipboardSettings') },
+    { path: '/settings/language', element: <LanguageSettings />, showBackButton: true, title: t('settings.language') },
+    { path: '/settings/auto-lock', element: <AutoLockSettings />, showBackButton: true, title: t('settings.autoLockTimeout') },
     { path: '/logout', element: <Logout />, showBackButton: false },
   ], [t]);
 
