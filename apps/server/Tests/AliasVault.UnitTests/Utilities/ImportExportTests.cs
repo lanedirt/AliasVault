@@ -320,6 +320,82 @@ public class ImportExportTests
     }
 
     /// <summary>
+    /// Test case for importing credentials from KeePass CSV with special characters and double quotes.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromKeePassCsvWithSpecialChars()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.keepass_special_chars.csv");
+
+        // Act
+        var importedCredentials = await KeePassImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(3));
+
+        // Test the entry with special characters and double quotes
+        var specialEntry = importedCredentials.First(c => c.ServiceName == "Entry with notes special chars");
+        Assert.Multiple(() =>
+        {
+            Assert.That(specialEntry.ServiceName, Is.EqualTo("Entry with notes special chars"));
+            Assert.That(specialEntry.ServiceUrl, Is.Empty);
+            Assert.That(specialEntry.Username, Is.Empty);
+            Assert.That(specialEntry.Password, Is.EqualTo("DVfIsb4TGkL7oKCwyiet"));
+            Assert.That(specialEntry.Notes, Does.Contain("\"Note with double quotes\""));
+            Assert.That(specialEntry.Notes, Does.Contain("as'd as/d/asd/ z"));
+            Assert.That(specialEntry.Notes, Does.Contain("asd;á'sd"));
+        });
+
+        // Test other entries still work correctly
+        var sampleEntry = importedCredentials.First(c => c.ServiceName == "Sample Entry");
+        Assert.Multiple(() =>
+        {
+            Assert.That(sampleEntry.ServiceName, Is.EqualTo("Sample Entry"));
+            Assert.That(sampleEntry.ServiceUrl, Is.EqualTo("https://keepass.info/"));
+            Assert.That(sampleEntry.Username, Is.EqualTo("User Name"));
+            Assert.That(sampleEntry.Password, Is.EqualTo("Password"));
+            Assert.That(sampleEntry.Notes, Is.EqualTo("Notes"));
+        });
+    }
+
+    /// <summary>
+    /// Test case for importing credentials from KeePass CSV with backslash-escaped quotes.
+    /// </summary>
+    /// <returns>Async task.</returns>
+    [Test]
+    public async Task ImportCredentialsFromKeePassCsvWithEscapedQuotes()
+    {
+        // Arrange
+        var fileContent = await ResourceReaderUtility.ReadEmbeddedResourceStringAsync("AliasVault.UnitTests.TestData.Exports.keepass_escaped_quotes.csv");
+
+        // Act
+        var importedCredentials = await KeePassImporter.ImportFromCsvAsync(fileContent);
+
+        // Assert
+        Assert.That(importedCredentials, Has.Count.EqualTo(2));
+
+        // Test the entry with escaped quotes
+        var escapedQuotesEntry = importedCredentials.First(c => c.ServiceName == "Entry with backslash quotes");
+        Assert.Multiple(() =>
+        {
+            Assert.That(escapedQuotesEntry.ServiceName, Is.EqualTo("Entry with backslash quotes"));
+            Assert.That(escapedQuotesEntry.ServiceUrl, Is.EqualTo("https://example.com"));
+            Assert.That(escapedQuotesEntry.Username, Is.EqualTo("testuser"));
+            Assert.That(escapedQuotesEntry.Password, Is.EqualTo("mypass123"));
+
+            // The CSV decoding should have converted \" to " properly
+            Assert.That(escapedQuotesEntry.Notes, Does.Contain("This note has"));
+            Assert.That(escapedQuotesEntry.Notes, Does.Contain("\"escaped quotes\""));
+            Assert.That(escapedQuotesEntry.Notes, Does.Contain("and other stuff"));
+
+            // Verify that the backslashes before quotes have been properly decoded
+            Assert.That(escapedQuotesEntry.Notes, Does.Not.Contain("\\\""));
+        });
+    }
+
+    /// <summary>
     /// Test case for importing credentials from KeePassXC CSV and ensuring all values are present.
     /// </summary>
     /// <returns>Async task.</returns>

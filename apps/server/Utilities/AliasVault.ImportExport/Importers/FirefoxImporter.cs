@@ -25,11 +25,10 @@ public static class FirefoxImporter
     /// <returns>The imported list of ImportedCredential objects.</returns>
     public static async Task<List<ImportedCredential>> ImportFromCsvAsync(string fileContent)
     {
-        using var reader = new StringReader(fileContent);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        var records = await BaseImporter.ImportCsvDataAsync<FirefoxCsvRecord>(fileContent);
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<FirefoxCsvRecord>())
+        foreach (var record in records)
         {
             // Extract service name from URL, e.g. https://example.com/path -> example.com.
             var uri = new Uri(record.Url);
@@ -44,11 +43,6 @@ public static class FirefoxImporter
             };
 
             credentials.Add(credential);
-        }
-
-        if (credentials.Count == 0)
-        {
-            throw new InvalidOperationException("No records found in the CSV file.");
         }
 
         return credentials;

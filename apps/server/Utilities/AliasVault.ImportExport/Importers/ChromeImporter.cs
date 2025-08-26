@@ -25,11 +25,10 @@ public static class ChromeImporter
     /// <returns>The imported list of ImportedCredential objects.</returns>
     public static async Task<List<ImportedCredential>> ImportFromCsvAsync(string fileContent)
     {
-        using var reader = new StringReader(fileContent);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        var records = await BaseImporter.ImportCsvDataAsync<ChromeCsvRecord>(fileContent);
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<ChromeCsvRecord>())
+        foreach (var record in records)
         {
             var credential = new ImportedCredential
             {
@@ -41,11 +40,6 @@ public static class ChromeImporter
             };
 
             credentials.Add(credential);
-        }
-
-        if (credentials.Count == 0)
-        {
-            throw new InvalidOperationException("No records found in the CSV file.");
         }
 
         return credentials;

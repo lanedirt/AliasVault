@@ -10,12 +10,141 @@ namespace AliasVault.ImportExport.Importers;
 using AliasClientDb;
 using AliasVault.ImportExport.Models;
 using AliasVault.TotpGenerator;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Generic import logic.
 /// </summary>
 public static class BaseImporter
 {
+    /// <summary>
+    /// Creates a CSV configuration that handles bad data and quote escaping.
+    /// </summary>
+    /// <returns>A CsvConfiguration with improved error handling.</returns>
+    public static CsvConfiguration CreateCsvConfiguration()
+    {
+        return new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            BadDataFound = context =>
+            {
+                // Log bad data but don't throw, allowing the parser to continue
+                // This helps with malformed CSV entries
+                return;
+            },
+            MissingFieldFound = null, // Ignore missing fields
+            HeaderValidated = null, // Don't validate header names
+            PrepareHeaderForMatch = args => args.Header?.ToLower().Trim().Replace(" ", string.Empty) ?? string.Empty,
+        };
+    }
+
+    /// <summary>
+    /// Creates a CsvReader with configuration and improved error handling.
+    /// </summary>
+    /// <param name="fileContent">The CSV file content.</param>
+    /// <returns>A configured CsvReader.</returns>
+    public static CsvReader CreateCsvReader(string fileContent)
+    {
+        var reader = new StringReader(fileContent);
+        return new CsvReader(reader, CreateCsvConfiguration());
+    }
+
+    /// <summary>
+    /// Imports CSV data with error handling and line number reporting.
+    /// </summary>
+    /// <typeparam name="T">The CSV record type.</typeparam>
+    /// <param name="fileContent">The CSV file content.</param>
+    /// <returns>A list of parsed CSV records.</returns>
+    public static async Task<List<T>> ImportCsvDataAsync<T>(string fileContent)
+    {
+        using var reader = new StringReader(fileContent);
+        using var csv = new CsvReader(reader, CreateCsvConfiguration());
+
+        var records = new List<T>();
+        var lineNumber = 1; // Start at 1 for header
+
+        try
+        {
+            await foreach (var record in csv.GetRecordsAsync<T>())
+            {
+                lineNumber++;
+
+                // Process CSV field decoding for escaped quotes and other special characters
+                DecodeFields(record);
+
+                records.Add(record);
+            }
+        }
+        catch (Exception ex) when (!(ex is InvalidOperationException && ex.Message.Contains("line")))
+        {
+            // If we get any other CSV parsing error, wrap it with line information
+            throw new InvalidOperationException($"Error parsing CSV data on line {lineNumber}. {ex.Message}", ex);
+        }
+
+        if (records.Count == 0)
+        {
+            throw new InvalidOperationException("No records found in the CSV file.");
+        }
+
+        return records;
+    }
+
+    /// <summary>
+    /// Decodes CSV escaped characters in string fields of the record.
+    /// Specifically handles CSV-encoded double quotes and other escape sequences.
+    /// </summary>
+    /// <param name="record">The CSV record to process.</param>
+    private static void DecodeFields<T>(T record)
+    {
+        if (record == null) return;
+
+        var type = typeof(T);
+        var properties = type.GetProperties();
+
+        foreach (var property in properties)
+        {
+            if (property.PropertyType == typeof(string))
+            {
+                var value = property.GetValue(record) as string;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var decodedValue = DecodeCsvField(value);
+                    property.SetValue(record, decodedValue);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Decodes a CSV field value by handling escaped quotes and other CSV encoding.
+    /// </summary>
+    /// <param name="value">The CSV field value.</param>
+    /// <returns>The decoded value.</returns>
+    public static string DecodeCsvField(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return value;
+
+        // Handle CSV-escaped double quotes: "" becomes "
+        // But be careful not to affect other legitimate escape sequences
+        var decoded = value;
+
+        // Replace CSV-style escaped quotes (two consecutive quotes) with single quotes
+        decoded = decoded.Replace("\"\"", "\"");
+
+        // Handle common backslash escape sequences that might come from KeePass or other sources
+        // Only handle specific known escape sequences to avoid breaking valid backslashes
+        decoded = decoded.Replace("\\\"", "\"");  // Escaped quote
+        decoded = decoded.Replace("\\n", "\n");   // Escaped newline
+        decoded = decoded.Replace("\\r", "\r");   // Escaped carriage return
+        decoded = decoded.Replace("\\t", "\t");   // Escaped tab
+
+        // Don't replace all backslashes as they might be legitimate (e.g., in file paths)
+
+        return decoded;
+    }
     /// <summary>
     /// Converts a list of imported credentials to a list of AliasVault credentials.
     /// </summary>

@@ -9,9 +9,6 @@ namespace AliasVault.ImportExport.Importers;
 
 using AliasVault.ImportExport.Models;
 using AliasVault.ImportExport.Models.Imports;
-using CsvHelper;
-using CsvHelper.Configuration;
-using System.Globalization;
 
 /// <summary>
 /// Imports credentials from LastPass.
@@ -25,11 +22,10 @@ public static class LastPassImporter
     /// <returns>The imported list of ImportedCredential objects.</returns>
     public static async Task<List<ImportedCredential>> ImportFromCsvAsync(string fileContent)
     {
-        using var reader = new StringReader(fileContent);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        var records = await BaseImporter.ImportCsvDataAsync<LastPassCsvRecord>(fileContent);
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<LastPassCsvRecord>())
+        foreach (var record in records)
         {
             // Skip empty records (records with no name/title)
             if (string.IsNullOrWhiteSpace(record.Title))
@@ -48,11 +44,6 @@ public static class LastPassImporter
             };
 
             credentials.Add(credential);
-        }
-
-        if (credentials.Count == 0)
-        {
-            throw new InvalidOperationException("No records found in the CSV file.");
         }
 
         return credentials;
