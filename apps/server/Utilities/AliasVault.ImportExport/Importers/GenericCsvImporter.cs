@@ -9,9 +9,6 @@ namespace AliasVault.ImportExport.Importers;
 
 using AliasVault.ImportExport.Models;
 using AliasVault.ImportExport.Models.Imports;
-using CsvHelper;
-using CsvHelper.Configuration;
-using System.Globalization;
 using System.Text;
 
 /// <summary>
@@ -55,11 +52,10 @@ public static class GenericCsvImporter
     /// <returns>The imported list of ImportedCredential objects.</returns>
     public static async Task<List<ImportedCredential>> ImportFromCsvAsync(string fileContent)
     {
-        using var reader = new StringReader(fileContent);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        var records = await BaseImporter.ImportCsvDataAsync<GenericCsvRecord>(fileContent);
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<GenericCsvRecord>())
+        foreach (var record in records)
         {
             // Skip records with no service name
             if (string.IsNullOrWhiteSpace(record.ServiceName))

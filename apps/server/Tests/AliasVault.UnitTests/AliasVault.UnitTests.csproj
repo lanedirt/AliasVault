@@ -67,6 +67,8 @@
       <EmbeddedResource Include="TestData\Exports\firefox.csv" />
       <EmbeddedResource Include="TestData\Exports\strongbox.csv" />
       <EmbeddedResource Include="TestData\Exports\keepass.csv" />
+      <EmbeddedResource Include="TestData\Exports\keepass_special_chars.csv" />
+      <EmbeddedResource Include="TestData\Exports\keepass_escaped_quotes.csv" />
       <EmbeddedResource Include="TestData\Exports\keepassxc.csv" />
       <EmbeddedResource Include="TestData\Exports\1password_8.csv" />
       <EmbeddedResource Include="TestData\Exports\protonpass.csv" />

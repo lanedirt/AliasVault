@@ -25,15 +25,14 @@ public static class KeePassImporter
     /// <returns>The imported list of ImportedCredential objects.</returns>
     public static async Task<List<ImportedCredential>> ImportFromCsvAsync(string fileContent)
     {
-        using var reader = new StringReader(fileContent);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        var records = await BaseImporter.ImportCsvDataAsync<KeePassCsvRecord>(fileContent);
 
         var credentials = new List<ImportedCredential>();
-        await foreach (var record in csv.GetRecordsAsync<KeePassCsvRecord>())
+        foreach (var record in records)
         {
             var credential = new ImportedCredential
             {
-                ServiceName = record.Account,
+                ServiceName = record.Account ?? string.Empty,
                 ServiceUrl = record.Website,
                 Username = record.LoginName,
                 Password = record.Password,
@@ -41,11 +40,6 @@ public static class KeePassImporter
             };
 
             credentials.Add(credential);
-        }
-
-        if (credentials.Count == 0)
-        {
-            throw new InvalidOperationException("No records found in the CSV file.");
         }
 
         return credentials;
