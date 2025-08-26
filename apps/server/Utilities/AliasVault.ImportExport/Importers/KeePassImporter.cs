@@ -53,6 +53,18 @@ public static class KeePassImporter
             decoded = Regex.Replace(decoded, @"\\(?![\\\""])", "\"");
         }
 
+        // Handle edge case where CSV parser incorrectly includes trailing quotes
+        // This happens when the CSV parser gets confused by escaped quotes inside quoted fields
+        if (decoded.EndsWith("\""))
+        {
+            // Check if this is likely a CSV parsing error (trailing quote that shouldn't be there)
+            // Look for patterns like: some content" at the end
+            if (decoded.Length > 1 && !decoded.EndsWith("\"\""))
+            {
+                decoded = decoded.Substring(0, decoded.Length - 1);
+            }
+        }
+
         return decoded;
     }
 
