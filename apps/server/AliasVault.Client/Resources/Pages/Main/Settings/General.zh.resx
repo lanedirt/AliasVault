@@ -108,39 +108,39 @@
   </data>
   <!-- Clipboard Settings Section -->
   <data name="ClipboardSettingsTitle">
-    <value>Clipboard Settings</value>
+    <value>剪切板设置</value>
     <comment>Title for clipboard settings section</comment>
   </data>
   <data name="ClipboardClearSecondsLabel">
-    <value>Auto-clear clipboard after copying</value>
+    <value>复制后自动清除剪切板</value>
     <comment>Label for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearSecondsDescription">
-    <value>Automatically clear clipboard contents after copying passwords or other sensitive data.</value>
+    <value>复制密码或其他敏感数据后自动清除剪贴板内容。</value>
     <comment>Description for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearDisabledOption">
-    <value>Disabled</value>
+    <value>禁用</value>
     <comment>Option to disable clipboard clearing</comment>
   </data>
   <data name="ClipboardClear5SecondsOption">
-    <value>5 seconds</value>
+    <value>5秒</value>
     <comment>Option to clear clipboard after 5 seconds</comment>
   </data>
   <data name="ClipboardClear10SecondsOption">
-    <value>10 seconds</value>
+    <value>10秒</value>
     <comment>Option to clear clipboard after 10 seconds</comment>
   </data>
   <data name="ClipboardClear15SecondsOption">
-    <value>15 seconds</value>
+    <value>15秒</value>
     <comment>Option to clear clipboard after 15 seconds</comment>
   </data>
   <data name="NoteLabel">
-    <value>Note</value>
+    <value>注意</value>
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Note: clearing the clipboard in the web app is only possible when the tab is active. If the tab loses focus, the clipboard will be cleared when it comes back into focus.</value>
+    <value>注意：网页应用中清除剪贴板内容的操作仅在当前标签页处于激活状态时有效。若标签页失去焦点，剪贴板内容将在标签页重新获得焦点时被清除。</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
