@@ -21,7 +21,7 @@ public static class KeePassImporter
 {
     /// <summary>
     /// Decodes KeePass 1.x specific field encoding.
-    /// KeePass 1.x rules: Quotes (") in strings are encoded as \" (two characters). 
+    /// KeePass 1.x rules: Quotes (") in strings are encoded as \" (two characters).
     /// Backslashes (\) are encoded as \\ (two characters).
     /// </summary>
     /// <param name="value">The field value to decode.</param>
@@ -37,7 +37,7 @@ public static class KeePassImporter
         decoded = decoded.Replace("\"\"", "\"");
 
         // Handle KeePass 1.x specific encoding rules
-        // Backslashes (\) are encoded as \\ -> \  
+        // Backslashes (\) are encoded as \\ -> \
         decoded = decoded.Replace("\\\\", "\\");
 
         // Quotes (") in strings are encoded as \" -> "
@@ -46,23 +46,20 @@ public static class KeePassImporter
         // Special handling for the case where the CSV parser has already partially processed
         // the escaped quotes, leaving single backslashes that should be quotes
         // This handles the case where \with should become "with
-        if (decoded.Contains("\\"))
+        if (decoded.Contains('\\'))
         {
             // Look for standalone backslashes that should be quotes
             // This is a fallback for malformed or partially-parsed KeePass data
-            decoded = Regex.Replace(decoded, @"\\(?![\\\""])", "\"");
+            decoded = Regex.Replace(decoded, @"\\(?![\\\""])", "\"", RegexOptions.None, TimeSpan.FromMilliseconds(100));
         }
 
         // Handle edge case where CSV parser incorrectly includes trailing quotes
         // This happens when the CSV parser gets confused by escaped quotes inside quoted fields
-        if (decoded.EndsWith("\""))
+        if (decoded.EndsWith('"') && decoded.Length > 1 && !decoded.EndsWith("\"\""))
         {
             // Check if this is likely a CSV parsing error (trailing quote that shouldn't be there)
             // Look for patterns like: some content" at the end
-            if (decoded.Length > 1 && !decoded.EndsWith("\"\""))
-            {
-                decoded = decoded.Substring(0, decoded.Length - 1);
-            }
+            decoded = decoded.Substring(0, decoded.Length - 1);
         }
 
         return decoded;
