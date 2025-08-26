@@ -2,7 +2,7 @@ version: "3"
 
 services:
   aliasvault:
-    image: cr.xivi.nl/aliasvault/aliasvault-all-in-one:latest
+    image: ghcr.io/lanedirt/aliasvault:latest
     container_name: aliasvault
     restart: unless-stopped
 

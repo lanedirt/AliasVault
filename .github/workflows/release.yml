@@ -111,80 +111,95 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Postgres image
+      # TODO: enable again when testing that docker hub login works
+      # - name: Build and push Postgres image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/Databases/AliasServerDb/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:${{ github.ref_name }}
+
+      # - name: Build and push API image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/AliasVault.Api/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:${{ github.ref_name }}
+
+      # - name: Build and push Client image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/AliasVault.Client/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:${{ github.ref_name }}
+
+      # - name: Build and push Admin image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/AliasVault.Admin/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:${{ github.ref_name }}
+
+      # - name: Build and push Reverse Proxy image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
+
+      # - name: Build and push SMTP image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/Services/AliasVault.SmtpService/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
+
+      # - name: Build and push TaskRunner image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/Services/AliasVault.TaskRunner/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:${{ github.ref_name }}
+
+      # - name: Build and push InstallCli image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: apps/server/Utilities/AliasVault.InstallCli/Dockerfile
+      #     platforms: linux/amd64,linux/arm64/v8
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}
+
+      - name: Build and push all-in-one image (aliasvault)
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/server/Databases/AliasServerDb/Dockerfile
+          file: dockerfiles/all-in-one/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:${{ github.ref_name }}
+          tags: |
+            aliasvault/aliasvault:latest
+            aliasvault/aliasvault:${{ github.ref_name }}
 
-      - name: Build and push API image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/AliasVault.Api/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:${{ github.ref_name }}
-
-      - name: Build and push Client image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/AliasVault.Client/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:${{ github.ref_name }}
-
-      - name: Build and push Admin image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/AliasVault.Admin/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:${{ github.ref_name }}
-
-      - name: Build and push Reverse Proxy image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
-
-      - name: Build and push SMTP image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Services/AliasVault.SmtpService/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
-
-      - name: Build and push TaskRunner image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Services/AliasVault.TaskRunner/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:${{ github.ref_name }}
-
-      - name: Build and push InstallCli image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/server/Utilities/AliasVault.InstallCli/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}
+    # ${{ env.REGISTRY }}/${{ env.REPO_LOWER }:latest
+    # ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}:${{ github.ref_name }}
