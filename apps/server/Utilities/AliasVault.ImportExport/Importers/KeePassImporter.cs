@@ -12,6 +12,7 @@ using AliasVault.ImportExport.Models.Imports;
 using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Imports credentials from KeePass.
@@ -19,13 +20,51 @@ using System.Globalization;
 public static class KeePassImporter
 {
     /// <summary>
+    /// Decodes KeePass 1.x specific field encoding.
+    /// KeePass 1.x rules: Quotes (") in strings are encoded as \" (two characters). 
+    /// Backslashes (\) are encoded as \\ (two characters).
+    /// </summary>
+    /// <param name="value">The field value to decode.</param>
+    /// <returns>The decoded value.</returns>
+    private static string DecodeKeePassField(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return value;
+
+        var decoded = value;
+
+        // Handle standard CSV-style escaped quotes first (two consecutive quotes) -> single quote
+        decoded = decoded.Replace("\"\"", "\"");
+
+        // Handle KeePass 1.x specific encoding rules
+        // Backslashes (\) are encoded as \\ -> \  
+        decoded = decoded.Replace("\\\\", "\\");
+
+        // Quotes (") in strings are encoded as \" -> "
+        decoded = decoded.Replace("\\\"", "\"");
+
+        // Special handling for the case where the CSV parser has already partially processed
+        // the escaped quotes, leaving single backslashes that should be quotes
+        // This handles the case where \with should become "with
+        if (decoded.Contains("\\"))
+        {
+            // Look for standalone backslashes that should be quotes
+            // This is a fallback for malformed or partially-parsed KeePass data
+            decoded = Regex.Replace(decoded, @"\\(?![\\\""])", "\"");
+        }
+
+        return decoded;
+    }
+
+    /// <summary>
     /// Imports KeePass CSV file and converts contents to list of ImportedCredential model objects.
     /// </summary>
     /// <param name="fileContent">The content of the CSV file.</param>
     /// <returns>The imported list of ImportedCredential objects.</returns>
     public static async Task<List<ImportedCredential>> ImportFromCsvAsync(string fileContent)
     {
-        var records = await BaseImporter.ImportCsvDataAsync<KeePassCsvRecord>(fileContent);
+        // Use KeePass-specific field decoder for proper handling of KeePass 1.x encoding
+        var records = await BaseImporter.ImportCsvDataAsync<KeePassCsvRecord>(fileContent, DecodeKeePassField);
 
         var credentials = new List<ImportedCredential>();
         foreach (var record in records)

@@ -56,8 +56,9 @@ public static class BaseImporter
     /// </summary>
     /// <typeparam name="T">The CSV record type.</typeparam>
     /// <param name="fileContent">The CSV file content.</param>
+    /// <param name="customDecoder">Optional custom field decoder function.</param>
     /// <returns>A list of parsed CSV records.</returns>
-    public static async Task<List<T>> ImportCsvDataAsync<T>(string fileContent)
+    public static async Task<List<T>> ImportCsvDataAsync<T>(string fileContent, Func<string, string>? customDecoder = null)
     {
         using var reader = new StringReader(fileContent);
         using var csv = new CsvReader(reader, CreateCsvConfiguration());
@@ -72,7 +73,7 @@ public static class BaseImporter
                 lineNumber++;
 
                 // Process CSV field decoding for escaped quotes and other special characters
-                DecodeFields(record);
+                DecodeFields(record, customDecoder);
 
                 records.Add(record);
             }
@@ -96,7 +97,8 @@ public static class BaseImporter
     /// Specifically handles CSV-encoded double quotes and other escape sequences.
     /// </summary>
     /// <param name="record">The CSV record to process.</param>
-    private static void DecodeFields<T>(T record)
+    /// <param name="customDecoder">Optional custom decoder function for importer-specific decoding.</param>
+    private static void DecodeFields<T>(T record, Func<string, string>? customDecoder = null)
     {
         if (record == null) return;
 
@@ -110,7 +112,7 @@ public static class BaseImporter
                 var value = property.GetValue(record) as string;
                 if (!string.IsNullOrEmpty(value))
                 {
-                    var decodedValue = DecodeCsvField(value);
+                    var decodedValue = customDecoder?.Invoke(value) ?? DecodeCsvField(value);
                     property.SetValue(record, decodedValue);
                 }
             }
@@ -118,7 +120,7 @@ public static class BaseImporter
     }
 
     /// <summary>
-    /// Decodes a CSV field value by handling escaped quotes and other CSV encoding.
+    /// Decodes a CSV field value by handling standard CSV escaped quotes.
     /// </summary>
     /// <param name="value">The CSV field value.</param>
     /// <returns>The decoded value.</returns>
@@ -127,21 +129,10 @@ public static class BaseImporter
         if (string.IsNullOrEmpty(value))
             return value;
 
-        // Handle CSV-escaped double quotes: "" becomes "
-        // But be careful not to affect other legitimate escape sequences
         var decoded = value;
 
-        // Replace CSV-style escaped quotes (two consecutive quotes) with single quotes
+        // Handle standard CSV-style escaped quotes (two consecutive quotes) -> single quote
         decoded = decoded.Replace("\"\"", "\"");
-
-        // Handle common backslash escape sequences that might come from KeePass or other sources
-        // Only handle specific known escape sequences to avoid breaking valid backslashes
-        decoded = decoded.Replace("\\\"", "\"");  // Escaped quote
-        decoded = decoded.Replace("\\n", "\n");   // Escaped newline
-        decoded = decoded.Replace("\\r", "\r");   // Escaped carriage return
-        decoded = decoded.Replace("\\t", "\t");   // Escaped tab
-
-        // Don't replace all backslashes as they might be legitimate (e.g., in file paths)
 
         return decoded;
     }
