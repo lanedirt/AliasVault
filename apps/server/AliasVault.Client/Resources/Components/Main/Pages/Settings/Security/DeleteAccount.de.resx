@@ -64,7 +64,7 @@
     <comment>Page title for the delete account page</comment>
   </data>
   <data name="BreadcrumbSecuritySettings" xml:space="preserve">
-    <value>Security settings</value>
+    <value>Sicherheitseinstellungen</value>
     <comment>Breadcrumb text for security settings</comment>
   </data>
   <data name="BreadcrumbDeleteAccount" xml:space="preserve">
@@ -82,7 +82,7 @@
   </data>
   <!-- Note sections -->
   <data name="PleaseNote" xml:space="preserve">
-    <value>Please note:</value>
+    <value>Bitte beachten:</value>
     <comment>Header for note section</comment>
   </data>
   <data name="VaultsDeletedNote" xml:space="preserve">
@@ -90,11 +90,11 @@
     <comment>Note about vault deletion</comment>
   </data>
   <data name="EmailAliasesOrphanedNote" xml:space="preserve">
-    <value>Your email aliases will be orphaned and cannot be claimed by other users</value>
+    <value>Deine E-Mail-Aliase bleiben ohne Besitzer und können von anderen nicht wiederverwendet werden</value>
     <comment>Note about email aliases being orphaned</comment>
   </data>
   <data name="AccountCannotBeRecoveredNote" xml:space="preserve">
-    <value>Your account cannot be recovered after deletion</value>
+    <value>Dein Konto kann nach dem Löschen nicht wiederhergestellt werden</value>
     <comment>Note about account recovery</comment>
   </data>
   <data name="DeletionIrreversibleNote" xml:space="preserve">
@@ -103,16 +103,16 @@
   </data>
   <!-- Form labels -->
   <data name="ConfirmUsernameLabel" xml:space="preserve">
-    <value>Confirm your username</value>
+    <value>Bestätige Deinen Benutzernamen</value>
     <comment>Label for username confirmation input field</comment>
   </data>
   <data name="EnterPasswordLabel" xml:space="preserve">
-    <value>Enter your password</value>
+    <value>Gib Dein Passwort ein</value>
     <comment>Label for password input field</comment>
   </data>
   <!-- Button text -->
   <data name="ContinueWithAccountDeletion" xml:space="preserve">
-    <value>Continue with Account Deletion</value>
+    <value>Mit der Kontolöschung fortfahren</value>
     <comment>Button text to continue with account deletion</comment>
   </data>
   <data name="DeleteMyAccount" xml:space="preserve">
@@ -121,19 +121,19 @@
   </data>
   <!-- Loading and status messages -->
   <data name="DeletingAccountMessage" xml:space="preserve">
-    <value>Deleting account...</value>
+    <value>Konto wird gelöscht...</value>
     <comment>Loading message displayed while deleting account</comment>
   </data>
   <data name="UsernameRequired" xml:space="preserve">
-    <value>Username is required</value>
+    <value>Der Benutzername ist erforderlich.</value>
     <comment>Error message when username is not provided</comment>
   </data>
   <data name="UsernameDoesNotMatch" xml:space="preserve">
-    <value>The username you entered does not match your current username. Please try again.</value>
+    <value>Der eingegebene Benutzername stimmt nicht mit dem aktuellen Benutzernamen überein. Bitte versuche es erneut.</value>
     <comment>Error message when username doesn't match</comment>
   </data>
   <data name="ErrorProcessingRequest" xml:space="preserve">
-    <value>An error occurred while processing the request.</value>
+    <value>Beim Ausführen der Abfrage ist ein Fehler aufgetreten.</value>
     <comment>Generic error message for request processing</comment>
   </data>
 </root>
