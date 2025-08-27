@@ -71,7 +71,7 @@
     <comment>Title of the create new alias popup</comment>
   </data>
   <data name="ServiceNameLabel" xml:space="preserve">
-    <value>Service Name</value>
+    <value>Name des Dienstes</value>
     <comment>Label for service name field</comment>
   </data>
   <data name="ServiceNamePlaceholder" xml:space="preserve">
@@ -79,23 +79,23 @@
     <comment>Placeholder text for service name field</comment>
   </data>
   <data name="ServiceUrlLabel" xml:space="preserve">
-    <value>Service URL</value>
+    <value>URL des Dienstes</value>
     <comment>Label for service URL field</comment>
   </data>
   <data name="CreateButton" xml:space="preserve">
-    <value>Create</value>
+    <value>Erstellen</value>
     <comment>Create button text</comment>
   </data>
   <data name="AdvancedModeLink" xml:space="preserve">
-    <value>Create via advanced mode</value>
+    <value>Über erweiterten Modus erstellen</value>
     <comment>Link text to advanced creation mode</comment>
   </data>
   <data name="CreatingNewAliasMessage" xml:space="preserve">
-    <value>Creating new alias...</value>
+    <value>Neuen Alias erstellen...</value>
     <comment>Loading message while creating alias</comment>
   </data>
   <data name="CreateCredentialErrorMessage" xml:space="preserve">
-    <value>Error creating a new credential. Please try again (later) or log-out and in again.</value>
+    <value>Fehler beim Erstellen des Zugangs. Bitte versuche es (später) noch einmal oder melde dich erneut an.</value>
     <comment>Error message when credential creation fails</comment>
   </data>
   <data name="CredentialCreatedSuccessMessage" xml:space="preserve">
