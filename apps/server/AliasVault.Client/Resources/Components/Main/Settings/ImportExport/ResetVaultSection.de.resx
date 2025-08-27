@@ -59,15 +59,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Reset Vault</value>
+    <value>Tresor zurücksetzen</value>
     <comment>Reset vault section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>This option allows you to completely empty your vault while keeping your account and email aliases. Use this if you want to start fresh after importing data from another password manager or if you want to clear all existing credentials to start over.</value>
+    <value>Mit dieser Option kannst Du Deinen Tresor komplett leeren und gleichzeitig Deinen Account und E-Mail-Aliase beibehalten. Verwende dies, wenn Du nach dem Importieren von Daten von einem anderen Passwort-Manager neu starten möchten oder wenn Du alle vorhandenen Zugangsdaten löschen möchten, um neu zu starten.</value>
     <comment>Reset vault section description</comment>
   </data>
   <data name="ResetVaultButton" xml:space="preserve">
-    <value>Reset vault</value>
+    <value>Tresor zurücksetzen</value>
     <comment>Reset vault button</comment>
   </data>
 </root>
