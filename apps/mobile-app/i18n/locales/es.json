@@ -11,7 +11,7 @@
     "error": "Error",
     "success": "Success",
     "never": "Never",
-    "copied": "Copied",
+    "copied": "Copied to clipboard",
     "loadMore": "Load more",
     "use": "Use"
   },
@@ -44,7 +44,13 @@
       "incorrectPassword": "Incorrect password. Please try again.",
       "enterPassword": "Please enter your password",
       "serverError": "Could not reach AliasVault server. Please try again later or contact support if the problem persists.",
-      "incorrectPasswordFallback": "Incorrect password. Please try again."
+      "serverErrorSelfHosted": "Could not reach the API. For self-hosted instances, please verify the API endpoint is reachable by navigating to it in a browser: it should display 'OK'.",
+      "networkError": "Network request failed. Please check your internet connection and try again.",
+      "networkErrorSelfHosted": "Network request failed. Check your network connection and server availability. For self-hosted instances, please ensure you have a valid SSL certificate installed. Self-signed certificates are not supported on mobile devices for security reasons.",
+      "incorrectPasswordFallback": "Incorrect password. Please try again.",
+      "sessionExpired": "Your session has expired. Please login again.",
+      "tokenRefreshFailed": "Failed to refresh authentication token",
+      "httpError": "HTTP error: {{status}}"
     },
     "confirmLogout": "Are you sure you want to logout? You need to login again with your master password to access your vault.",
     "noAccountYet": "No account yet?",
@@ -74,7 +80,8 @@
       "versionNotSupported": "This version of the AliasVault mobile app is not supported by the server anymore. Please update your app to the latest version.",
       "serverNeedsUpdate": "The AliasVault server needs to be updated to a newer version in order to use this mobile app. Please contact support if you need help.",
       "vaultDecryptFailed": "Vault could not be decrypted, if the problem persists please logout and login again.",
-      "unknownErrorDuringSync": "Unknown error during vault sync"
+      "unknownErrorDuringSync": "Unknown error during vault sync",
+      "passwordChanged": "Your password has changed since the last time you logged in. Please login again for security reasons."
     }
   },
   "credentials": {
@@ -102,6 +109,16 @@
     "randomAlias": "Random Alias",
     "manual": "Manual",
     "generateRandomAlias": "Generate Random Alias",
+    "enterFullEmail": "Enter full email address",
+    "enterEmailPrefix": "Enter email prefix",
+    "useDomainChooser": "Use domain chooser",
+    "enterCustomDomain": "Enter custom domain",
+    "selectEmailDomain": "Select Email Domain",
+    "privateEmailTitle": "Private Email",
+    "privateEmailAliasVaultServer": "AliasVault server",
+    "privateEmailDescription": "E2E encrypted, fully private.",
+    "publicEmailTitle": "Public Temp Email Providers",
+    "publicEmailDescription": "Anonymous but limited privacy. Email content is readable by anyone that knows the address.",
     "searchPlaceholder": "Search credentials...",
     "noMatchingCredentials": "No matching credentials found",
     "noCredentialsFound": "No credentials found. Create one to get started. Tip: you can also login to the AliasVault web app to import credentials from other password managers.",
@@ -140,6 +157,7 @@
       "credentialUpdated": "Credential updated successfully",
       "credentialCreated": "Credential created successfully"
     },
+    "createNewAliasFor": "Create new alias for",
     "errors": {
       "loadFailed": "Failed to load credential",
       "generateUsernameFailed": "Failed to generate username",
@@ -185,6 +203,16 @@
     },
     "vaultUnlock": "Vault Unlock Method",
     "autoLock": "Auto-lock Timeout",
+    "clipboardClear": "Clear Clipboard",
+    "clipboardClearDescription": "Automatically clear copied passwords and sensitive information from your clipboard after a specified time period.",
+    "clipboardClearAndroidWarning": "Note: some Android devices have clipboard history enabled, which may keep track of previously copied items, even after AliasVault clears the clipboard. AliasVault can only overwrite the most recent item, but older entries may remain visible in history. For security reasons, we recommend disabling any clipboard history features in your device settings.",
+    "clipboardClearOptions": {
+      "never": "Never",
+      "5seconds": "5 seconds",
+      "10seconds": "10 seconds",
+      "15seconds": "15 seconds",
+      "30seconds": "30 seconds"
+    },
     "identityGenerator": "Identity Generator",
     "security": "Security",
     "appVersion": "App version {{version}} ({{url}})",
@@ -204,6 +232,10 @@
     "openSettings": "Open Settings",
     "vaultUnlockSettings": {
       "description": "Choose how you want to unlock your vault.",
+      "biometrics": "Biometrics",
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "faceIdTouchId": "Face ID / Touch ID",
       "biometricEnabled": "{{biometric}} is now successfully enabled",
       "biometricNotAvailable": "{{biometric}} Not Available",
       "biometricDisabledMessage": "{{biometric}} is disabled for AliasVault. In order to use it, please enable it in your device settings first.",
@@ -348,7 +380,6 @@
   "validation": {
     "required": "This field is required",
     "serviceNameRequired": "Service name is required",
-    "invalidUrlFormat": "Invalid URL format",
     "invalidDateFormat": "Date must be in YYYY-MM-DD format",
     "invalidEmailFormat": "Invalid email format"
   },
@@ -362,8 +393,6 @@
     "INVALID_AUTHENTICATOR_CODE": "Invalid authenticator code. Please try again.",
     "INVALID_RECOVERY_CODE": "Invalid recovery code. Please try again.",
     "REFRESH_TOKEN_REQUIRED": "Refresh token is required.",
-    "USER_NOT_FOUND_IN_TOKEN": "User not found in token.",
-    "USER_NOT_FOUND_IN_DATABASE": "User not found in database.",
     "INVALID_REFRESH_TOKEN": "Invalid refresh token.",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refresh token revoked successfully.",
     "PUBLIC_REGISTRATION_DISABLED": "New account registration is currently disabled on this server. Please contact the administrator.",
