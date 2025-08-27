@@ -83,7 +83,7 @@
     <comment>Button to enable quick vault unlock</comment>
   </data>
   <data name="SuccessEnabledMessage" xml:space="preserve">
-    <value>Schnellentsperrung des Tresors wurde erfolgreich aktiviert. Wenn der Tresor das nächste Mal gesperrt wird, kannst du ihn mit deinem erstellten Passkey wieder entsperren.</value>
+    <value>Schnellentsperrung des Tresors wurde erfolgreich aktiviert. Wenn der Tresor das nächste Mal gesperrt wird, kannst Du ihn mit Deinem erstellten Passkey wieder entsperren.</value>
     <comment>Success message when quick unlock is enabled</comment>
   </data>
   <data name="SuccessDisabledMessage" xml:space="preserve">
