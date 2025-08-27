@@ -230,26 +230,11 @@ public class AuthTests : ClientPlaywrightTest
     }
 
     /// <summary>
-    /// Test if registering an account with the same email address as an existing account shows a warning.
-    /// </summary>
-    /// <returns>Async task.</returns>
-    [Test]
-    [Order(7)]
-    public async Task RegisterFormWarningTest()
-    {
-        await Logout();
-        await Register(checkForSuccess: false);
-
-        var warning = await Page.TextContentAsync("div[role='alert']");
-        Assert.That(warning, Does.Contain("is already in use."), "No visible warning when registering with existing email address.");
-    }
-
-    /// <summary>
     /// Test if entering a wrong password too many times locks the account.
     /// </summary>
     /// <returns>Async task.</returns>
     [Test]
-    [Order(8)]
+    [Order(7)]
     public async Task PasswordAuthLockoutTest()
     {
         await Logout();

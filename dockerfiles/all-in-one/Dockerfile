@@ -21,26 +21,19 @@ WORKDIR /src/apps/server
 RUN dotnet workload install wasm-tools && \
     dotnet restore aliasvault.sln
 
-# Build all applications in parallel where possible
-RUN mkdir -p /app/{api,client,admin,smtp,taskrunner,installcli} && \
-    # Build projects in parallel (independent projects first)
-    dotnet publish AliasVault.Api/AliasVault.Api.csproj \
-        -c Release -o /app/api --no-restore & \
-    dotnet publish Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj \
-        -c Release -o /app/smtp --no-restore & \
-    dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj \
-        -c Release -o /app/taskrunner --no-restore & \
-    dotnet publish Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj \
-        -c Release -o /app/installcli --no-restore & \
-    # Wait for the above builds to complete
-    wait && \
-    # Build remaining projects (Admin and Client can run in parallel)
-    dotnet publish AliasVault.Admin/AliasVault.Admin.csproj \
-        -c Release -o /app/admin --no-restore & \
+# Build all applications
+RUN dotnet publish AliasVault.Api/AliasVault.Api.csproj \
+        -c Release -o /app/api --no-restore && \
     dotnet publish AliasVault.Client/AliasVault.Client.csproj \
-        -c Release -o /app/client --no-restore & \
-    # Wait for all builds to complete
-    wait && \
+        -c Release -o /app/client --no-restore && \
+    dotnet publish AliasVault.Admin/AliasVault.Admin.csproj \
+        -c Release -o /app/admin --no-restore && \
+    dotnet publish Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj \
+        -c Release -o /app/smtp --no-restore && \
+    dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj \
+        -c Release -o /app/taskrunner --no-restore && \
+    dotnet publish Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj \
+        -c Release -o /app/installcli --no-restore && \
     # Clean up .NET debug files and unnecessary files
     find /app -name "*.pdb" -delete && \
     find /app -name "*.xml" -not -name "*.deps.json" -delete && \
