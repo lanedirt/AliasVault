@@ -21,36 +21,36 @@
   </xsd:schema>
   <!-- Page title and description -->
   <data name="PageTitle">
-    <value>General settings</value>
+    <value>Allgemeine Einstellungen</value>
     <comment>Page title for general settings</comment>
   </data>
   <data name="PageDescription">
-    <value>Configure general AliasVault settings.</value>
+    <value>Allgemeine AliasVault-Einstellungen anpassen.</value>
     <comment>Page description for general settings</comment>
   </data>
   <data name="BreadcrumbTitle">
-    <value>General settings</value>
+    <value>Allgemeine Einstellungen</value>
     <comment>Breadcrumb title for general settings</comment>
   </data>
   <!-- Email Settings Section -->
   <data name="EmailSettingsTitle">
-    <value>Email Settings</value>
+    <value>E-Mail-Einstellungen</value>
     <comment>Title for email settings section</comment>
   </data>
   <data name="DefaultEmailDomainLabel">
-    <value>Default email domain</value>
+    <value>Standard E-Mail-Domain</value>
     <comment>Label for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescription">
-    <value>Set the default email domain that will be used when creating new credentials.</value>
+    <value>Lege die Standard-E-Mail-Domain fest, die beim Erstellen neuer Zugansdaten verwendet wird.</value>
     <comment>Description for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescriptionNote">
-    <value>Note: Email received on private domains are end-to-end encrypted and can only be read by you, while email received on public domains can be read by anyone that knows the receiving email address.</value>
+    <value>Hinweis: Die von privaten Domains empfangenen E-Mails sind Ende-zu-Ende verschlüsselt und können nur von Dir gelesen werden, während auf öffentlichen Domains erhaltene E-Mails von jedem gelesen werden können, der die empfangende E-Mail-Adresse kennt.</value>
     <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
   </data>
   <data name="DefaultEmailDomainLearnMore">
-    <value>Learn more about the difference</value>
+    <value>Erfahre mehr über den Unterschied</value>
     <comment>Link to documentation for default email domain setting</comment>
   </data>
   <data name="PrivateDomainsLabel">
@@ -58,111 +58,111 @@
     <comment>Label for private domains group</comment>
   </data>
   <data name="PrivateDomainsDisabledLabel">
-    <value>No private email domains configured</value>
+    <value>Keine privaten E-Mail-Domains konfiguriert</value>
     <comment>Label for private domains group when no private email domains are configured</comment>
   </data>
   <data name="PublicDomainsLabel">
-    <value>Public Domains</value>
+    <value>Öffentliche Domains</value>
     <comment>Label for public domains group</comment>
   </data>
   <data name="AutoEmailRefreshLabel">
-    <value>Auto refresh emails content when new ones arrive</value>
+    <value>E-Mail-Inhalt automatisch aktualisieren, wenn neue eintreffen</value>
     <comment>Label for auto email refresh setting</comment>
   </data>
   <!-- Alias Settings Section -->
   <data name="AliasSettingsTitle">
-    <value>Alias Settings</value>
+    <value>Alias-Einstellungen</value>
     <comment>Title for alias settings section</comment>
   </data>
   <data name="AliasGenerationLanguageLabel">
-    <value>Alias generation language</value>
+    <value>Sprache für die Erstellung von Aliasen</value>
     <comment>Label for alias generation language setting</comment>
   </data>
   <data name="AliasGenerationLanguageDescription">
-    <value>Set the default language that will be used when generating new identities.</value>
+    <value>Lege die Sprache fest, die bei der Erstellung neuer Identitäten verwendet wird.</value>
     <comment>Description for alias generation language setting</comment>
   </data>
   <data name="EnglishOption">
-    <value>English</value>
+    <value>Englisch</value>
     <comment>English language option</comment>
   </data>
   <data name="DutchOption">
-    <value>Dutch</value>
+    <value>Niederländisch</value>
     <comment>Dutch language option</comment>
   </data>
   <data name="AliasGenerationGenderLabel">
-    <value>Alias generation gender</value>
+    <value>Geschlecht des zu generierenden Aliases</value>
     <comment>Label for alias generation gender setting</comment>
   </data>
   <data name="AliasGenerationGenderDescription">
-    <value>Set the default gender preference for generating new identities.</value>
+    <value>Lege die Geschlechtspräferenz für die Erstellung neuer Identitäten fest.</value>
     <comment>Description for alias generation gender setting</comment>
   </data>
   <data name="RandomOption">
-    <value>Random</value>
+    <value>Zufällig</value>
     <comment>Random gender option</comment>
   </data>
   <data name="MaleOption">
-    <value>Male</value>
+    <value>Männlich</value>
     <comment>Male gender option</comment>
   </data>
   <data name="FemaleOption">
-    <value>Female</value>
+    <value>Weiblich</value>
     <comment>Female gender option</comment>
   </data>
   <!-- Clipboard Settings Section -->
   <data name="ClipboardSettingsTitle">
-    <value>Clipboard Settings</value>
+    <value>Zwischenablage-Einstellungen</value>
     <comment>Title for clipboard settings section</comment>
   </data>
   <data name="ClipboardClearSecondsLabel">
-    <value>Auto-clear clipboard after copying</value>
+    <value>Zwischenablage nach dem Kopieren automatisch löschen</value>
     <comment>Label for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearSecondsDescription">
-    <value>Automatically clear clipboard contents after copying passwords or other sensitive data.</value>
+    <value>Zwischenablage nach dem Kopieren von Passwörtern oder anderen sensiblen Daten automatisch löschen.</value>
     <comment>Description for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearDisabledOption">
-    <value>Disabled</value>
+    <value>Deaktiviert</value>
     <comment>Option to disable clipboard clearing</comment>
   </data>
   <data name="ClipboardClear5SecondsOption">
-    <value>5 seconds</value>
+    <value>5 Sekunden</value>
     <comment>Option to clear clipboard after 5 seconds</comment>
   </data>
   <data name="ClipboardClear10SecondsOption">
-    <value>10 seconds</value>
+    <value>10 Sekunden</value>
     <comment>Option to clear clipboard after 10 seconds</comment>
   </data>
   <data name="ClipboardClear15SecondsOption">
-    <value>15 seconds</value>
+    <value>15 Sekunden</value>
     <comment>Option to clear clipboard after 15 seconds</comment>
   </data>
   <data name="NoteLabel">
-    <value>Note</value>
+    <value>Notiz</value>
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Note: clearing the clipboard in the web app is only possible when the tab is active. If the tab loses focus, the clipboard will be cleared when it comes back into focus.</value>
+    <value>Hinweis: Das Löschen der Zwischenablage in der Web-App ist nur möglich, wenn der Tab aktiv ist. Wenn die Registerkarte den Fokus verliert, wird die Zwischenablage gelöscht, wenn sie wieder in den Fokus rückt.</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
-    <value>Password Settings</value>
+    <value>Passworteinstellungen</value>
     <comment>Title for password settings section</comment>
   </data>
   <!-- App Language Settings Section -->
   <data name="AppLanguageTitle">
-    <value>Application Language</value>
+    <value>Sprache der Anwendung</value>
     <comment>Title for app language settings section</comment>
   </data>
   <data name="AppLanguageLabel">
-    <value>Language</value>
+    <value>Sprache</value>
     <comment>Label for app language setting</comment>
   </data>
   <data name="AppLanguageDescription">
-    <value>Set the language for the application interface.</value>
+    <value>Lege die Sprache für die Anwendung fest.</value>
     <comment>Description for app language setting</comment>
   </data>
 </root>
