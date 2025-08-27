@@ -21,32 +21,32 @@
   </xsd:schema>
   <!-- Page title and description -->
   <data name="PageTitle">
-    <value>Extensions &amp; Apps</value>
+    <value>Erweiterungen &amp; Apps</value>
     <comment>Page title for extensions and apps</comment>
   </data>
   <data name="PageDescription">
-    <value>Install browser extensions and mobile apps to access your vault from all your devices and automatically fill credentials on websites.</value>
+    <value>Installiere Browsererweiterungen und mobile Apps, um auf Deinen Tresor zuzugreifen und automatisch Anmeldedaten auf der Websites auszufüllen.</value>
     <comment>Page description for extensions and apps</comment>
   </data>
   <data name="BreadcrumbTitle">
-    <value>Extensions &amp; Apps</value>
+    <value>Erweiterungen &amp; Apps</value>
     <comment>Breadcrumb title for extensions and apps</comment>
   </data>
   <!-- Browser Extensions Section -->
   <data name="BrowserExtensionsTitle">
-    <value>Browser Extensions</value>
+    <value>Browser-Erweiterungen</value>
     <comment>Title for browser extensions section</comment>
   </data>
   <data name="BrowserExtensionsDescription">
-    <value>The AliasVault browser extension allows you to autofill existing credentials on any website. It also allows you to generate new aliases during registration, access received emails on all of your aliases, and view your aliases and identities.</value>
+    <value>Mit der AliasVault-Browser-Erweiterung kannst Du bestehende Anmeldedaten auf jeder Webseite automatisch eintragen. Außerdem kannst Du während der Registrierung neue Aliase generieren, auf alle Deine Aliase zugreifen und Aliase und Identitäten anzeigen.</value>
     <comment>Description for browser extensions</comment>
   </data>
   <data name="InstallButton">
-    <value>Install</value>
+    <value>Installieren</value>
     <comment>Install button text</comment>
   </data>
   <data name="ComingSoonText">
-    <value>Coming soon</value>
+    <value>Bald verfügbar</value>
     <comment>Coming soon text for unavailable extensions</comment>
   </data>
   <!-- Mobile Apps Section -->
@@ -55,11 +55,11 @@
     <comment>Title for mobile apps section</comment>
   </data>
   <data name="MobileAppsDescription">
-    <value>The AliasVault mobile app allows you to access your aliases and identities on the go, view and manage received emails, and generate new aliases anytime. Your data is fully protected with on-device biometric authentication.</value>
+    <value>Mit der mobilen AliasVault-App kannst Du unterwegs auf Deine Aliase und Identitäten zugreifen, empfangene E-Mails ansehen und verwalten und jederzeit neue Aliase generieren. Deine Daten sind vollständig durch die biometrische Authentifizierung Deines Gerätes geschützt.</value>
     <comment>Description for mobile apps</comment>
   </data>
   <data name="DownloadButton">
-    <value>Download</value>
+    <value>Herunterladen</value>
     <comment>Download button text</comment>
   </data>
 </root>
