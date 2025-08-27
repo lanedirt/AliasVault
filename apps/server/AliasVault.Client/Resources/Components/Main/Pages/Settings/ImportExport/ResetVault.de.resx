@@ -115,7 +115,7 @@
     <comment>Reset vault final confirmation button</comment>
   </data>
   <data name="ResetVaultUsernameRequired" xml:space="preserve">
-    <value>Username is required.</value>
+    <value>Der Benutzername ist erforderlich.</value>
     <comment>Reset vault username required error</comment>
   </data>
   <data name="ResetVaultUsernameDoesNotMatch" xml:space="preserve">
