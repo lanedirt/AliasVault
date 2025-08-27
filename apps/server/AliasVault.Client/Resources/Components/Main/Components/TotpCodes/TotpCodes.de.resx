@@ -87,11 +87,11 @@
     <comment>Label for optional name field</comment>
   </data>
   <data name="SecretKeyLabel" xml:space="preserve">
-    <value>Secret Key</value>
+    <value>Secret-Key</value>
     <comment>Label for secret key field</comment>
   </data>
   <data name="SecretKeyPlaceholder" xml:space="preserve">
-    <value>Enter secret key (manual entry)</value>
+    <value>Secret-Key eintrage (manueller Eintrag)</value>
     <comment>Placeholder text for secret key input</comment>
   </data>
   <data name="SaveButton" xml:space="preserve">
