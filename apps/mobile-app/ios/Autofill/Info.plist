@@ -4,12 +4,12 @@
 <dict>
 	<key>CFBundleLocalizations</key>
 	<array>
+		<string>de</string>
 		<string>en</string>
 		<string>fi</string>
-		<string>ru</string>
 		<string>it</string>
-		<string>zh</string>
 		<string>nl</string>
+		<string>zh</string>
 	</array>
 	<key>NSExtension</key>
 	<dict>
