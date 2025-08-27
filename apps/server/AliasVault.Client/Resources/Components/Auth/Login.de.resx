@@ -136,11 +136,11 @@
     <comment>Text before registration link</comment>
   </data>
   <data name="DontHaveAuthenticatorText" xml:space="preserve">
-    <value>Don't have access to your authenticator device? You can</value>
+    <value>Du hast keinen Zugriff auf Dein Authentifizierungsgerät? Du kannst</value>
     <comment>Text before recovery code link</comment>
   </data>
   <data name="RegainedAccessText" xml:space="preserve">
-    <value>Regained access to your authenticator device? You can</value>
+    <value>Du hast den Zugriff auf Dein Authentifizierungsgerät wiedergewonnen? Du kannst</value>
     <comment>Text before authenticator login link</comment>
   </data>
   <!-- Loading and status messages -->
