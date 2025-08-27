@@ -63,7 +63,7 @@
     <comment>Title for quick vault unlock section</comment>
   </data>
   <data name="EnabledDescription" xml:space="preserve">
-    <value>The vault decryption key is saved via a passkey. This means that when you reload the AliasVault page or tab, you can login with your face, fingerprint or built-in browser security keys. If you with to disable the quick vault unlock, you can do so with the button below.</value>
+    <value>Der Tresor-Schlüssel ist in einem Passkey gespeichert. Wenn Du die AliasVault-Webseite oder den Tab neu lädst, kannst Du Dich mit Deinem Gesicht, Fingerabdruck oder mit dem eingebauten Browser-Schlüssel anmelden. Wenn Du diese Schnellanmeldung deaktivieren möchtest, kannst Du dies über die folgende Schaltfläche tun.</value>
     <comment>Description when quick unlock is enabled</comment>
   </data>
   <data name="DisableButton" xml:space="preserve">
@@ -71,11 +71,11 @@
     <comment>Button to disable quick vault unlock</comment>
   </data>
   <data name="DisabledDescription" xml:space="preserve">
-    <value>By default when you reload the AliasVault page or tab, you will be prompted to enter your master password again. Alternatively, you can choose to use a browser passkey (or hardware authenticator such as YubiKey) instead of your master password. This will allow you to unlock your vault with your face, fingerprint or built-in browser security keys. This only applies to the current device and browser.</value>
+    <value>Standardmäßig wirst Du, wenn Du die AliasVault-Seite oder den Tab neu lädst, aufgefordert, Dein Master-Passwort erneut einzugeben. Alternativ kannst Du einen Browser-Passkey (oder einen Hardware-Authentifikator wie YubiKey) anstelle Deines Master-Passworts verwenden. Dadurch kannst Du Deinen Tresor mit Deinem Gesicht, Fingerabdruck oder eingebauten Browser-Sicherheitsschlüssel entsperren. Dies betrifft nur das aktuelle Gerät und den Browser.</value>
     <comment>Description when quick unlock is disabled</comment>
   </data>
   <data name="ExperimentalWarning" xml:space="preserve">
-    <value>Please note that this feature is experimental and may not work on all devices or browsers. Your browser must support WebAuthn and the PRF extension in order for this to work. If you experience any issues, you can disable this feature at any time.</value>
+    <value>Bitte beachte, dass diese Funktion experimentell ist und möglicherweise nicht auf allen Geräten oder Browsern funktioniert. Dein Browser muss WebAuthn und die PRF-Erweiterung unterstützen, damit dies funktioniert. Wenn Du irgendwelche Probleme haben solltest, kannst Du diese Funktion jederzeit deaktivieren.</value>
     <comment>Warning about experimental nature of the feature</comment>
   </data>
   <data name="EnableButton" xml:space="preserve">
@@ -91,7 +91,7 @@
     <comment>Success message when quick unlock is disabled</comment>
   </data>
   <data name="WebAuthnNotSupportedError" xml:space="preserve">
-    <value>Your current browser does not support the WebAuthn PRF extension. Please try again with a different browser.</value>
+    <value>Dein aktueller Browser unterstützt die WebAuthn-PRF-Erweiterung nicht. Bitte versuche es mit einem anderen Browser erneut.</value>
     <comment>Error when WebAuthn is not supported</comment>
   </data>
   <data name="EnableErrorMessage" xml:space="preserve">
