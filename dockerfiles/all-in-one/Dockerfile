@@ -103,7 +103,6 @@ RUN apt-get update && \
         /app/installcli \
         /database \
         /certificates/ssl \
-        /certificates/app \
         /logs/postgres \
         /etc/nginx/ssl \
         /var/run/postgresql \

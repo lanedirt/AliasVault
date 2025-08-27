@@ -34,7 +34,6 @@ services:
             - "3001"
         volumes:
             - ./database:/database:rw
-            - ./certificates/app:/certificates/app:rw
             - ./logs:/logs:rw
             - ./secrets:/secrets:ro
         restart: always
@@ -50,7 +49,6 @@ services:
             - "3002"
         volumes:
             - ./database:/database:rw
-            - ./certificates/app:/certificates/app:rw
             - ./logs:/logs:rw
             - ./secrets:/secrets:ro
         restart: always
