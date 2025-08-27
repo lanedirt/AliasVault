@@ -57,6 +57,10 @@
     <value>Privé Domeinen</value>
     <comment>Label for private domains group</comment>
   </data>
+  <data name="PrivateDomainsDisabledLabel">
+    <value>No private email domains configured</value>
+    <comment>Label for private domains group when no private email domains are configured</comment>
+  </data>
   <data name="PublicDomainsLabel">
     <value>Publieke Domeinen</value>
     <comment>Label for public domains group</comment>
