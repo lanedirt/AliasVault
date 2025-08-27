@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="LoggingInWithWebAuthn" xml:space="preserve">
-    <value>Logging in with WebAuthn...</value>
+    <value>Mit WebAuthn anmelden...</value>
     <comment>Message shown while WebAuthn authentication is in progress</comment>
   </data>
   <data name="QuickUnlockDescription" xml:space="preserve">
@@ -67,43 +67,43 @@
     <comment>Description explaining WebAuthn unlock options</comment>
   </data>
   <data name="UnlockWithWebAuthn" xml:space="preserve">
-    <value>Unlock with WebAuthn</value>
+    <value>Mit WebAuthn entsperren</value>
     <comment>Button text for WebAuthn unlock</comment>
   </data>
   <data name="UnlockWithPassword" xml:space="preserve">
-    <value>Unlock with password</value>
+    <value>Mit Passwort entsperren</value>
     <comment>Button text for password unlock</comment>
   </data>
   <data name="EnterMasterPasswordDescription" xml:space="preserve">
-    <value>Enter your master password to unlock your vault.</value>
+    <value>Gib Dein Master-Passwort zum Entsperren des Tresors ein.</value>
     <comment>Description for password unlock form</comment>
   </data>
   <data name="YourPasswordLabel" xml:space="preserve">
-    <value>Your password</value>
+    <value>Dein Passwort</value>
     <comment>Label for password input field</comment>
   </data>
   <data name="UnlockButton" xml:space="preserve">
-    <value>Unlock</value>
+    <value>Entsperren</value>
     <comment>Button text for unlock submission</comment>
   </data>
   <data name="SwitchAccountsText" xml:space="preserve">
-    <value>Switch accounts?</value>
+    <value>Konto wechseln</value>
     <comment>Text before logout link</comment>
   </data>
   <data name="LogOutLink" xml:space="preserve">
-    <value>Log out</value>
+    <value>Abmelden</value>
     <comment>Link text for logout</comment>
   </data>
   <data name="UnlockingVaultMessage" xml:space="preserve">
-    <value>Unlocking vault...</value>
+    <value>Tresor wird entsperrt...</value>
     <comment>Loading message while unlocking vault</comment>
   </data>
   <data name="UnlockRequestError" xml:space="preserve">
-    <value>An error occurred while processing the unlock request.</value>
+    <value>Beim Verarbeiten der Entsperrungsanfrage ist ein Fehler aufgetreten.</value>
     <comment>Error message for unlock request processing</comment>
   </data>
   <data name="IncorrectPasswordError" xml:space="preserve">
-    <value>The password is incorrect. Please try entering your password again, or log out and log in again.</value>
+    <value>Das Passwort ist falsch. Bitte gib Dein Passwort erneut ein oder melde Dich erneut an.</value>
     <comment>Error message for incorrect password</comment>
   </data>
   <data name="SessionTimedOutError" xml:space="preserve">
@@ -111,15 +111,15 @@
     <comment>Error message for session timeout</comment>
   </data>
   <data name="ConnectionFailedError" xml:space="preserve">
-    <value>Connection with the AliasVault servers failed. Please try again (later).</value>
+    <value>Die Verbindung mit dem AliasVault-Server ist fehlgeschlagen. Bitte versuche es (später) erneut.</value>
     <comment>Error message for server connection failure</comment>
   </data>
   <data name="WebAuthnNotSupportedError" xml:space="preserve">
-    <value>Your current browser does not support the WebAuthn PRF extension. Please login with your password instead.</value>
+    <value>Dein aktueller Browser unterstützt die WebAuthn-PRF-Erweiterung nicht. Bitte melde Dich stattdessen mit Deinem Passwort an.</value>
     <comment>Error message when WebAuthn is not supported</comment>
   </data>
   <data name="GenericUnlockError" xml:space="preserve">
-    <value>An error occurred while processing the login request. Try again (later).</value>
+    <value>Beim Verarbeiten der Anmelde-Anfrage ist ein Fehler aufgetreten. Bitte versuche es (später) erneut.</value>
     <comment>Generic error message for unlock failures</comment>
   </data>
 </root>
