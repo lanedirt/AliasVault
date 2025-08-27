@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">AliasVault</string>
+  <string name="autofill_service_description" translatable="true">Riempimento Automatico AliasVault</string>
+  <string name="aliasvault_icon">AliasVault icona</string>
+  <!-- AutofillService strings -->
+  <string name="autofill_failed_to_retrieve">Impossibile recuperare, aprire l\'app</string>
+  <string name="autofill_no_match_found">Nessuna corrispondenza trovata, crearne una nuova?</string>
+  <string name="autofill_open_app">Apri app</string>
+  <string name="autofill_vault_locked">Cassaforte bloccata</string>
+  <!-- Biometric prompts -->
+  <string name="biometric_store_key_title">Memorizza Chiave Di Cifratura</string>
+  <string name="biometric_store_key_subtitle">Autenticati per memorizzare in modo sicuro la tua chiave di crittografia nel Keystore Android. Questo consente l\'accesso sicuro alla tua cassaforte.</string>
+  <string name="biometric_unlock_vault_title">Sblocca Cassaforte</string>
+  <string name="biometric_unlock_vault_subtitle">Autenticati per accedere alla tua cassaforte</string>
+</resources>
