@@ -55,6 +55,8 @@ config.IpLoggingEnabled = bool.Parse(ipLoggingEnabled);
 builder.Services.AddSingleton(config);
 builder.Services.AddSingleton<SharedConfig>(sp => sp.GetRequiredService<Config>());
 
+builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddAliasVaultDataProtection("AliasVault.Admin");
 
 // Add services to the container.
@@ -88,8 +90,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/user/login";
 });
 
-builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddIdentityCore<AdminUser>(options =>
     {
         options.Password.RequireDigit = false;

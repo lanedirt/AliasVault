@@ -105,6 +105,8 @@ public sealed class CredentialService(HttpClient httpClient, DbService dbService
         var defaultDomain = dbService.Settings.DefaultEmailDomain;
 
         // Function to check if a domain is valid
+        // TODO: "DISABLED.TLD" was a placeholder used < 0.22.0 that has been replaced by an empty string.
+        // That value is still here for legacy purposes, but it can be removed from the codebase in a future release.
         bool IsValidDomain(string domain) =>
             !string.IsNullOrEmpty(domain) &&
             domain != "DISABLED.TLD" &&

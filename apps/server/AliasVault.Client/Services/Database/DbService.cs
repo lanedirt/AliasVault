@@ -506,8 +506,22 @@ public sealed class DbService : IDisposable
 
         if (_config.PrivateEmailDomains.Count == 0)
         {
-            // No private email domains known, so there are no email claims.
             return [];
+        }
+
+        if (_config.PrivateEmailDomains.Count == 1)
+        {
+            if (string.IsNullOrWhiteSpace(_config.PrivateEmailDomains[0]))
+            {
+                return [];
+            }
+
+            // TODO: "DISABLED.TLD" was a placeholder used < 0.22.0 that has been replaced by an empty string.
+            // That value is still here for legacy purposes, but it can be removed from the codebase in a future release.
+            if (_config.PrivateEmailDomains[0] == "DISABLED.TLD")
+            {
+                return [];
+            }
         }
 
         // Filter the list of email addresses to only include those that are in the supported private email domains.

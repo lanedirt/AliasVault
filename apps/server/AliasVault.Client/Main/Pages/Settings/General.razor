@@ -18,13 +18,18 @@
     <div class="mb-4">
         <label for="defaultEmailDomain" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">@Localizer["DefaultEmailDomainLabel"]</label>
         <select @bind="DefaultEmailDomain" @bind:after="UpdateDefaultEmailDomain" id="defaultEmailDomain" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            @if (ShowPrivateDomains)
+            @if (HasValidPrivateDomains())
             {
                 <optgroup label="@Localizer["PrivateDomainsLabel"]">
                     @foreach (var domain in PrivateDomains)
                     {
                         <option value="@domain">@domain</option>
                     }
+                </optgroup>
+            }
+            else {
+                <optgroup label="@Localizer["PrivateDomainsLabel"]">
+                    <option disabled value="_">@Localizer["PrivateDomainsDisabledLabel"]</option>
                 </optgroup>
             }
             <optgroup label="@Localizer["PublicDomainsLabel"]">
@@ -34,7 +39,7 @@
                 }
             </optgroup>
         </select>
-        <span class="block text-sm font-normal text-gray-500 dark:text-gray-400">
+        <span class="block text-sm font-normal text-gray-500 dark:text-gray-400 mt-2">
             @Localizer["DefaultEmailDomainDescription"] @Localizer["DefaultEmailDomainDescriptionNote"] <a href="https://docs.aliasvault.net/misc/private-vs-public-email.html" class="text-primary-500 hover:text-primary-700 hover:underline" target="_blank" rel="noopener">@Localizer["DefaultEmailDomainLearnMore"]</a>.
         </span>
     </div>
@@ -122,7 +127,6 @@
 
     private List<string> PrivateDomains => Config.PrivateEmailDomains;
     private List<string> PublicDomains => Config.PublicEmailDomains;
-    private bool ShowPrivateDomains => PrivateDomains.Count > 0 && !(PrivateDomains.Count == 1 && PrivateDomains[0] == "DISABLED.TLD");
 
     private string DefaultEmailDomain { get; set; } = string.Empty;
     private bool AutoEmailRefresh { get; set; }
@@ -140,7 +144,7 @@
         DefaultEmailDomain = DbService.Settings.DefaultEmailDomain;
         if (DefaultEmailDomain == string.Empty)
         {
-            if (PrivateDomains.Count > 0)
+            if (HasValidPrivateDomains())
             {
                 DefaultEmailDomain = PrivateDomains[0];
             }
@@ -208,5 +212,37 @@
     {
         await DbService.Settings.SetClipboardClearSeconds(ClipboardClearSeconds);
         StateHasChanged();
+    }
+
+    /// <summary>
+    /// Checks if the private domains are valid.
+    /// </summary>
+    private bool HasValidPrivateDomains()
+    {
+        if (PrivateDomains.Count == 0) {
+            return false;
+        }
+
+        if (PrivateDomains.Count == 1)
+        {
+            var singleDomain = PrivateDomains[0];
+
+            // If the domain is empty, return false.
+            if (string.IsNullOrWhiteSpace(singleDomain))
+            {
+                return false;
+            }
+
+            // TODO: "DISABLED.TLD" was a placeholder used < 0.22.0 that has been replaced by an empty string.
+            // That value is still here for legacy purposes, but it can be removed from the codebase in a future release.
+            if (singleDomain == "DISABLED.TLD")
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        return true;
     }
 }
