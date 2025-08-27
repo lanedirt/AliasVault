@@ -42,7 +42,7 @@ Follow these steps to manually install AliasVault on your own server.
    Create the following directories in your project root:
    ```bash
    # Create required directories
-   mkdir -p certificates/ssl certificates/app database/postgres
+   mkdir -p certificates/ssl database/postgres
    ```
 
 3. **Create .env file**
