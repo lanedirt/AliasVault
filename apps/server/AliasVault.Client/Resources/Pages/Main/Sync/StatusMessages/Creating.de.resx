@@ -63,7 +63,7 @@
     <comment>Welcome title for new vault creation</comment>
   </data>
   <data name="CreatingDescription" xml:space="preserve">
-    <value>Your new encrypted vault is being initialized. This process may take a moment. Please wait.</value>
+    <value>Dein neuer verschlüsselter Tresor wird initialisiert. Dieser Vorgang kann einen Moment dauern. Bitte warten.</value>
     <comment>Description for vault creation process</comment>
   </data>
   <data name="SaveFailedError" xml:space="preserve">
