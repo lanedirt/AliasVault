@@ -280,7 +280,7 @@
     <comment>Error message when secret key is required</comment>
   </data>
   <data name="ErrorUsernameRequired" xml:space="preserve">
-    <value>Benutzername ist erforderlich</value>
+    <value>Der Benutzername ist erforderlich.</value>
     <comment>Error message when username is required</comment>
   </data>
   <data name="ErrorPasswordRequired" xml:space="preserve">
