@@ -90,7 +90,7 @@
     <comment>Description for LastPass import service</comment>
   </data>
   <data name="LastPassInstructionsPart1" xml:space="preserve">
-    <value>Um  Deinen LastPass-Tresor zu importieren, musst Du ihn zuerst als CSV-Datei exportieren. Melde Dich dazu in Deinem LastPass-Konto an, gehe in der linken Seitenleiste zu "Erweitere Optionen" und wähle "Exportieren" > " LastPass CSV-Datei".</value>
+    <value>Um Deinen LastPass-Tresor zu importieren, musst Du ihn zuerst als CSV-Datei exportieren. Melde Dich dazu in Deinem LastPass-Konto an, gehe in der linken Seitenleiste zu "Erweitere Optionen" und wähle "Exportieren" > " LastPass CSV-Datei".</value>
     <comment>LastPass export instructions part 1</comment>
   </data>
   <data name="LastPassInstructionsPart2" xml:space="preserve">
@@ -103,7 +103,7 @@
     <comment>Description for Chrome import service</comment>
   </data>
   <data name="ChromeInstructionsPart1" xml:space="preserve">
-    <value>Um  Deinen Chrome-Passwort-Manager zu importieren, musst Du ihn zuerst als CSV-Datei exportieren. Melde Dich dazu in Deinem Chrome-Browser an, gehe ins Menü "Einstellungen" > "Passwörter und Autofill" > "Google Passwort Manager". Klicke anschließend auf "Passwörter exportieren".</value>
+    <value>Um Deinen Chrome-Passwort-Manager zu importieren, musst Du ihn zuerst als CSV-Datei exportieren. Melde Dich dazu in Deinem Chrome-Browser an, gehe ins Menü "Einstellungen" > "Passwörter und Autofill" > "Google Passwort Manager". Klicke anschließend auf "Passwörter exportieren".</value>
     <comment>Chrome export instructions part 1</comment>
   </data>
   <data name="ChromeInstructionsPart2" xml:space="preserve">
@@ -160,7 +160,7 @@
     <comment>Description for Firefox import service</comment>
   </data>
   <data name="FirefoxInstructionsPart1" xml:space="preserve">
-    <value>Um  Deinen Firefox-Passwort-Manager zu importieren, musst Du ihn zuerst als CSV-Datei exportieren. Gehe dazu ins Menü "Passwörter". Klicke anschließend auf das Menü-Symbol in der rechten oberen Ecke und wähle "Passwörter exportieren".</value>
+    <value>Um Deinen Firefox-Passwort-Manager zu importieren, musst Du ihn zuerst als CSV-Datei exportieren. Gehe dazu ins Menü "Passwörter". Klicke anschließend auf das Menü-Symbol in der rechten oberen Ecke und wähle "Passwörter exportieren".</value>
     <comment>Firefox export instructions part 1</comment>
   </data>
   <data name="FirefoxInstructionsPart2" xml:space="preserve">
@@ -230,11 +230,11 @@
   </data>
   <!-- Dropbox -->
   <data name="DropboxDescription" xml:space="preserve">
-    <value>Import passwords from Dropbox Passwords</value>
+    <value>Importiere Deine Passwörter aus Dropbox Passwords.</value>
     <comment>Description for Dropbox import service</comment>
   </data>
   <data name="DropboxInstructionsPart1" xml:space="preserve">
-    <value>In order to import your Dropbox Passwords, you need to export them as a CSV file. You can do this by opening Dropbox Passwords, going to 'Account' > 'Export' (to .CSV).</value>
+    <value>Um Deine Dropbox-Passwörter zu importieren, musst Du diese zuerst als CSV-Datei exportieren. Melde Dich dazu in Deinem Dropbox-Konto an und wähle "Account" > "Exportieren" (als CSV-Datei).</value>
     <comment>Dropbox export instructions part 1</comment>
   </data>
   <!-- Common text that can be reused -->
