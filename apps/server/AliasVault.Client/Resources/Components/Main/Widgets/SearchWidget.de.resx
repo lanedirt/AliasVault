@@ -24,23 +24,23 @@
     <comment>Placeholder text for search input field</comment>
   </data>
   <data name="SearchHelpText">
-    <value>Type a term to search for, this can be the service name, description or email address.</value>
+    <value>Gib einen Suchbegriff ein. Dies kann der Name eines Dienstes, die Beschreibung oder die E-Mail-Adresse sein.</value>
     <comment>Help text explaining what can be searched</comment>
   </data>
   <data name="SearchTooShortMessage">
-    <value>Please type more chars</value>
+    <value>Bitte gib mehr Zeichen ein</value>
     <comment>Message when search term is too short</comment>
   </data>
   <data name="SearchingForMessage">
-    <value>Searching for "{0}"</value>
+    <value>Suche nach "{0}"</value>
     <comment>Message showing current search term</comment>
   </data>
   <data name="NoResultsFoundMessage">
-    <value>No results found</value>
+    <value>Keine Ergebnisse gefunden</value>
     <comment>Message when no search results are found</comment>
   </data>
   <data name="SearchingMessage">
-    <value>Searching...</value>
+    <value>Suche läuft...</value>
     <comment>Message when search is in progress</comment>
   </data>
 </root>
