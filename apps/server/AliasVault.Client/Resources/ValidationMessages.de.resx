@@ -85,7 +85,7 @@
     <comment>Error message when password is required</comment>
   </data>
   <data name="SecretKeyRequired" xml:space="preserve">
-    <value>Secret key is required</value>
+    <value>Schlüssel ist erforderlich</value>
     <comment>Error message when secret key is required</comment>
   </data>
   <!-- Terms and conditions -->
