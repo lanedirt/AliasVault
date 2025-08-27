@@ -11,7 +11,7 @@
     "error": "Fout",
     "success": "Succes",
     "never": "Nooit",
-    "copied": "Gekopieerd",
+    "copied": "Gekopieerd naar klembord",
     "loadMore": "Laad meer",
     "use": "Gebruik"
   },
@@ -44,7 +44,13 @@
       "incorrectPassword": "Onjuist wachtwoord. Probeer het opnieuw.",
       "enterPassword": "Voer je wachtwoord in",
       "serverError": "Kon de AliasVault server niet bereiken. Probeer het later opnieuw of neem contact op met support als het probleem aanhoudt.",
-      "incorrectPasswordFallback": "Incorrect password. Please try again."
+      "serverErrorSelfHosted": "Kan de API niet bereiken. Voor self-hosted instances, controleer of de API URL werkt door er via de browser handmatig naartoe te navigeren: de pagina moet \"OK\" weergeven.",
+      "networkError": "Netwerkfout. Controleer de verbinding en probeer het opnieuw.",
+      "networkErrorSelfHosted": "Netwerkfout. Controleer de verbinding en probeer het opnieuw. Voor self-hosted instances, controleer dat er een geldig SSL-certificaat is geconfigureerd. Self-signed SSL-certificaten worden niet ondersteund door de app wegens veiligheidsredenen.",
+      "incorrectPasswordFallback": "Onjuist wachtwoord. Probeer het opnieuw.",
+      "sessionExpired": "Je sessie is verlopen. Log opnieuw in.",
+      "tokenRefreshFailed": "Authenticatietoken vernieuwen mislukt",
+      "httpError": "HTTP fout: {{status}}"
     },
     "confirmLogout": "Weet je zeker dat je wilt uitloggen? Je moet opnieuw inloggen met je hoofdwachtwoord om toegang te krijgen tot je vault.",
     "noAccountYet": "Nog geen account?",
@@ -74,7 +80,8 @@
       "versionNotSupported": "Deze versie van de mobiele app van AliasVault wordt niet meer ondersteund door de server. Update de app naar de nieuwste versie.",
       "serverNeedsUpdate": "De AliasVault server moet bijgewerkt worden naar een nieuwere versie om deze mobiele app te kunnen gebruiken. Neem contact op met support als je hulp nodig hebt.",
       "vaultDecryptFailed": "Vault kon niet worden gedecrypt, probeer uit- en opnieuw in te loggen.",
-      "unknownErrorDuringSync": "Onbekende fout tijdens synchroniseren van vault"
+      "unknownErrorDuringSync": "Onbekende fout tijdens synchroniseren van vault",
+      "passwordChanged": "Je wachtwoord is veranderd sinds de laatste keer dat je bent ingelogd. Log opnieuw in."
     }
   },
   "credentials": {
@@ -102,6 +109,16 @@
     "randomAlias": "Alias",
     "manual": "Handmatig",
     "generateRandomAlias": "Genereer willekeurige alias",
+    "enterFullEmail": "Voer volledig e-mailadres in",
+    "enterEmailPrefix": "Emailvoorvoegsel invoeren",
+    "useDomainChooser": "Domein kiezen",
+    "enterCustomDomain": "Ander e-mailadres gebruiken",
+    "selectEmailDomain": "Selecteer e-maildomein",
+    "privateEmailTitle": "Privé e-mail",
+    "privateEmailAliasVaultServer": "AliasVault server",
+    "privateEmailDescription": "E2E versleuteld, volledig privé.",
+    "publicEmailTitle": "Publieke tijdelijke e-mailproviders",
+    "publicEmailDescription": "Anoniem maar beperkte privacy. E-mail inhoud is leesbaar door iedereen die het adres kent.",
     "searchPlaceholder": "Zoek credentials...",
     "noMatchingCredentials": "Geen credentials gevonden",
     "noCredentialsFound": "Geen credentials gevonden. Maak er een aan om te beginnen. Tip: je kunt ook inloggen op de AliasVault webapp om credentials te importeren uit andere wachtwoord-managers.",
@@ -140,19 +157,20 @@
       "credentialUpdated": "Credential succesvol bijgewerkt",
       "credentialCreated": "Credential succesvol aangemaakt"
     },
+    "createNewAliasFor": "Nieuwe alias maken voor",
     "errors": {
       "loadFailed": "Laden van credential mislukt",
       "generateUsernameFailed": "Genereren van gebruikersnaam mislukt",
       "generatePasswordFailed": "Genereren van wachtwoord mislukt",
-      "generic": "Error"
+      "generic": "Fout"
     },
     "contextMenu": {
-      "title": "Credential Options",
-      "edit": "Edit",
-      "delete": "Delete",
-      "copyUsername": "Copy Username",
-      "copyEmail": "Copy Email",
-      "copyPassword": "Copy Password"
+      "title": "Credential opties",
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "copyUsername": "Kopieer gebruikersnaam",
+      "copyEmail": "Kopieer e-mail",
+      "copyPassword": "Kopieer wachtwoord"
     }
   },
   "settings": {
@@ -172,19 +190,29 @@
     },
     "androidAutofill": "Android autofill",
     "androidAutofillSettings": {
-      "warningTitle": "⚠️ Experimental Feature",
-      "warningDescription": "Autofill support for Android is currently in an experimental state.",
-      "warningLink": "Read more about it here",
-      "headerText": "You can configure AliasVault to provide native password autofill functionality in Android. Follow the instructions below to enable it.",
-      "howToEnable": "How to enable:",
-      "step1": "1. Open Android Settings via the button below, and change the \"autofill preferred service\" to \"AliasVault\"",
-      "openAutofillSettings": "Open Autofill Settings",
-      "buttonTip": "If the button above doesn't work it might be blocked because of security settings. You can manually go to Android Settings → General Management → Passwords and autofill.",
-      "step2": "2. Some apps, e.g. Google Chrome, may require manual configuration in their settings to allow third-party autofill apps. However, most apps should work with autofill by default.",
-      "alreadyConfigured": "I already configured it"
+      "warningTitle": "⚠️ Experimentele functie",
+      "warningDescription": "Autofill support voor Android is momenteel in een experimentele staat.",
+      "warningLink": "Lees er hier meer over",
+      "headerText": "Je kunt AliasVault instellen als autofill provider in Android. Volg de instructies hieronder om deze in te schakelen.",
+      "howToEnable": "Hoe in te schakelen:",
+      "step1": "1. Open Android Instellingen via de onderstaande knop en verander de \"Autofill preferred service\" naar \"AliasVault\"",
+      "openAutofillSettings": "Open Autofill Instellingen",
+      "buttonTip": "Als bovenstaande knop niet werkt, dan zou deze geblokkeerd kunnen worden vanwege beveiligingsinstellingen. Open in dit geval handmatig Android Instellingen → Algemeen → Wachtwoorden en Automatisch invullen.",
+      "step2": "2. Sommige apps, bijvoorbeeld Google Chrome, vereisen handmatige configuratie om third-party apps toe te staan voor autofill. De meeste apps zouden echter standaard met autofill moeten werken.",
+      "alreadyConfigured": "Al geconfigureerd"
     },
     "vaultUnlock": "Vault ontgrendelmethode",
     "autoLock": "Automatisch vergrendelen",
+    "clipboardClear": "Klembord leegmaken",
+    "clipboardClearDescription": "Automatisch gekopieerde wachtwoorden en gevoelige informatie van je klembord wissen na een bepaalde tijdsperiode.",
+    "clipboardClearAndroidWarning": "Opmerking: sommige Android-apparaten hebben klembord geschiedenis ingeschakeld, waarmee eerder gekopieerde items kunnen worden bijgehouden, zelfs nadat AliasVault het klembord heeft gewist. AliasVault kan alleen het meest recente item overschrijven, maar oudere items kunnen zichtbaar blijven in de geschiedenis. Om veiligheidsredenen raden we aan om alle klembordgeschiedenis opties in je apparaatinstellingen uit te schakelen.",
+    "clipboardClearOptions": {
+      "never": "Nooit",
+      "5seconds": "5 seconden",
+      "10seconds": "10 seconden",
+      "15seconds": "15 seconden",
+      "30seconds": "30 seconden"
+    },
     "identityGenerator": "Identiteit generator",
     "security": "Beveiliging",
     "appVersion": "App versie {{version}} ({{url}})",
@@ -204,6 +232,10 @@
     "openSettings": "Open Instellingen",
     "vaultUnlockSettings": {
       "description": "Kies hoe je je vault wilt ontgrendelen.",
+      "biometrics": "Biometrie",
+      "faceId": "Face ID",
+      "touchId": "Touch ID",
+      "faceIdTouchId": "Face ID / Touch ID",
       "biometricEnabled": "{{biometric}} is nu succesvol ingeschakeld",
       "biometricNotAvailable": "{{biometric}} Niet Beschikbaar",
       "biometricDisabledMessage": "{{biometric}} is uitgeschakeld voor AliasVault. Ga naar de app instellingen om dit in te schakelen.",
@@ -348,7 +380,6 @@
   "validation": {
     "required": "Dit veld is verplicht",
     "serviceNameRequired": "Servicenaam is verplicht",
-    "invalidUrlFormat": "Ongeldig URL-formaat",
     "invalidDateFormat": "Datum moet in YYYY-MM-DD formaat zijn",
     "invalidEmailFormat": "Ongeldig e-mailformaat"
   },
@@ -362,8 +393,6 @@
     "INVALID_AUTHENTICATOR_CODE": "Ongeldige authenticator code. Probeer het opnieuw.",
     "INVALID_RECOVERY_CODE": "Ongeldige herstelcode. Probeer het opnieuw.",
     "REFRESH_TOKEN_REQUIRED": "Refreshtoken is vereist.",
-    "USER_NOT_FOUND_IN_TOKEN": "Gebruiker niet gevonden in token.",
-    "USER_NOT_FOUND_IN_DATABASE": "Gebruiker niet gevonden in database.",
     "INVALID_REFRESH_TOKEN": "Ongeldige refreshtoken.",
     "REFRESH_TOKEN_REVOKED_SUCCESSFULLY": "Refreshtoken succesvol gerevoked.",
     "PUBLIC_REGISTRATION_DISABLED": "Registratie van nieuwe accounts is momenteel uitgeschakeld op deze server. Neem contact op met de beheerder.",
@@ -402,9 +431,9 @@
       "notFound": "Niet gevonden"
     },
     "notFound": {
-      "title": "Page not found",
-      "message": "This page has been moved or deleted.",
-      "goHome": "Go back to the start"
+      "title": "Pagina niet gevonden",
+      "message": "Deze pagina is verplaatst of verwijderd.",
+      "goHome": "Ga terug naar het begin"
     },
     "appName": "AliasVault",
     "reinitialize": {
