@@ -59,23 +59,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Recent Auth Logs</value>
+    <value>Letzte Anmelde-Logs</value>
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Below you can find an overview of recent login attempts to your account.</value>
+    <value>Nachfolgend findest Du eine Übersicht der letzten Anmeldeversuche für Dein Konto.</value>
     <comment>Description of auth logs section</comment>
   </data>
   <data name="NoLogsMessage" xml:space="preserve">
-    <value>No authentication logs found.</value>
+    <value>Keine Anmelde-Logs gefunden.</value>
     <comment>Message when no auth logs are available</comment>
   </data>
   <data name="TimestampColumn" xml:space="preserve">
-    <value>Timestamp</value>
+    <value>Zeitstempel</value>
     <comment>Table column header</comment>
   </data>
   <data name="EventTypeColumn" xml:space="preserve">
-    <value>Event Type</value>
+    <value>Ereignistyp</value>
     <comment>Table column header</comment>
   </data>
   <data name="ClientColumn" xml:space="preserve">
@@ -83,23 +83,23 @@
     <comment>Table column header</comment>
   </data>
   <data name="IpAddressColumn" xml:space="preserve">
-    <value>IP Address</value>
+    <value>IP-Adresse</value>
     <comment>Table column header</comment>
   </data>
   <data name="DeviceColumn" xml:space="preserve">
-    <value>Device</value>
+    <value>Gerät</value>
     <comment>Table column header</comment>
   </data>
   <data name="SuccessColumn" xml:space="preserve">
-    <value>Success</value>
+    <value>Aktion erfolgreich</value>
     <comment>Table column header</comment>
   </data>
   <data name="SuccessStatus" xml:space="preserve">
-    <value>Success</value>
+    <value>Aktion erfolgreich</value>
     <comment>Status indicator for successful login</comment>
   </data>
   <data name="FailedStatus" xml:space="preserve">
-    <value>Failed</value>
+    <value>Fehlgeschlagen</value>
     <comment>Status indicator for failed login</comment>
   </data>
 </root>
