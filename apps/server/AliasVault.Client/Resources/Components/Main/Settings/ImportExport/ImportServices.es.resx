@@ -226,6 +226,15 @@
     <value>If you have a CSV file back-up of your AliasVault database (from a different AliasVault server), you can import it here.</value>
     <comment>AliasVault import instructions</comment>
   </data>
+  <!-- Dropbox -->
+  <data name="DropboxDescription" xml:space="preserve">
+    <value>Import passwords from Dropbox Passwords</value>
+    <comment>Description for Dropbox import service</comment>
+  </data>
+  <data name="DropboxInstructionsPart1" xml:space="preserve">
+    <value>In order to import your Dropbox Passwords, you need to export them as a CSV file. You can do this by opening Dropbox Passwords, going to 'Account' > 'Export' (to .CSV).</value>
+    <comment>Dropbox export instructions part 1</comment>
+  </data>
   <!-- Common text that can be reused -->
   <data name="UploadFileInstructionCommon" xml:space="preserve">
     <value>Once you have exported the file, you can upload it below.</value>
