@@ -81,6 +81,7 @@ class SqliteClient {
       const isValidDomain = (domain: string): boolean => {
         return Boolean(domain &&
                domain !== 'DISABLED.TLD' &&
+               domain !== '' &&
                (privateEmailDomains?.includes(domain) || publicEmailDomains?.includes(domain)));
       };
 

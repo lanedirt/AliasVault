@@ -71,7 +71,7 @@ export const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
   // Check if private domains are available and valid
   const showPrivateDomains = useMemo(() => {
     return privateEmailDomains.length > 0 &&
-           !(privateEmailDomains.length === 1 && privateEmailDomains[0] === 'DISABLED.TLD');
+           !(privateEmailDomains.length === 1 && (privateEmailDomains[0] === 'DISABLED.TLD' || privateEmailDomains[0] === ''));
   }, [privateEmailDomains]);
 
   // Initialize state from value prop

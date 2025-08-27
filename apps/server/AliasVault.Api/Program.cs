@@ -56,6 +56,7 @@ builder.Services.AddSingleton<SharedConfig>(sp => sp.GetRequiredService<Config>(
 
 builder.Services.ConfigureLogging(builder.Configuration, Assembly.GetExecutingAssembly().GetName().Name!, "../../logs");
 
+builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
 builder.Services.AddAliasVaultDataProtection("AliasVault.Api");
 builder.Services.AddSingleton<ITimeProvider, SystemTimeProvider>();
 builder.Services.AddScoped<TimeValidationJwtBearerEvents>();
@@ -71,7 +72,6 @@ builder.Services.AddLogging(logging =>
     logging.AddFilter("Microsoft.AspNetCore.Identity.UserManager", LogLevel.Error);
 });
 
-builder.Services.AddAliasVaultDatabaseConfiguration(builder.Configuration);
 builder.Services.AddIdentity<AliasVaultUser, AliasVaultRole>(options =>
     {
         options.Password.RequireDigit = false;
