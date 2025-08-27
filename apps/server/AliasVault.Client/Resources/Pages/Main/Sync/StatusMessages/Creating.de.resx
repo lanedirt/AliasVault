@@ -71,7 +71,7 @@
     <comment>Error message when vault creation succeeds but save fails</comment>
   </data>
   <data name="CreationFailedError" xml:space="preserve">
-    <value>Vault creation failed. Please try again or contact support.</value>
+    <value>Erstellung des Tresors fehlgeschlagen. Bitte versuchen es erneut oder kontaktiere den Support.</value>
     <comment>Error message when vault creation fails</comment>
   </data>
 </root>
