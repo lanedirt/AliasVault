@@ -658,19 +658,13 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
-				nl,
-				fi,
-				fr,
-				es,
-				uk,
 				de,
-				sv,
-				ru,
+				en,
 				fi,
-				zh,
 				it,
+				nl,
+				zh,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;

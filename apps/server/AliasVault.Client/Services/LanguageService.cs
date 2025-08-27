@@ -30,15 +30,15 @@ public class LanguageService(
     /// </summary>
     private static readonly List<LanguageConfig> SupportedLanguages = new()
     {
+        new LanguageConfig("de", "Deutsch", "🇩🇪"),
         new LanguageConfig("en", "English", "🇺🇸"),
-        new LanguageConfig("nl", "Nederlands", "🇳🇱"),
         new LanguageConfig("fi", "Suomi", "🇫🇮"),
         new LanguageConfig("it", "Italiano", "🇮🇹"),
+        new LanguageConfig("nl", "Nederlands", "🇳🇱"),
         new LanguageConfig("zh", "简体中文", "🇨🇳"),
-        new LanguageConfig("ru", "Русский", "🇷🇺"),
 
         // Add new languages here:
-        // new LanguageConfig("de", "Deutsch", "🇩🇪"),
+        // new LanguageConfig("ru", "Русский", "🇷🇺"),
         // new LanguageConfig("fr", "Français", "🇫🇷"),
         // new LanguageConfig("es", "Español", "🇪🇸"),
     };
