@@ -4,6 +4,27 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      build_browser_extensions:
+        description: 'Build browser extensions'
+        required: false
+        default: true
+        type: boolean
+      build_mobile_apps:
+        description: 'Build mobile apps'
+        required: false
+        default: true
+        type: boolean
+      build_multi_container:
+        description: 'Build and push multi-container images'
+        required: false
+        default: true
+        type: boolean
+      build_all_in_one:
+        description: 'Build and push all-in-one image'
+        required: false
+        default: true
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -19,12 +40,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Upload install.sh to release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: install.sh
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-chrome-extension:
+    if: github.event_name == 'release' || inputs.build_browser_extensions
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,11 +57,12 @@ jobs:
         uses: ./.github/actions/build-browser-extension
         with:
           browser: chrome
-          upload_to_release: true
+          upload_to_release: ${{ github.event_name == 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-firefox-extension:
+    if: github.event_name == 'release' || inputs.build_browser_extensions
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -48,11 +72,12 @@ jobs:
         uses: ./.github/actions/build-browser-extension
         with:
           browser: firefox
-          upload_to_release: true
+          upload_to_release: ${{ github.event_name == 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-edge-extension:
+    if: github.event_name == 'release' || inputs.build_browser_extensions
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -62,11 +87,12 @@ jobs:
         uses: ./.github/actions/build-browser-extension
         with:
           browser: edge
-          upload_to_release: true
+          upload_to_release: ${{ github.event_name == 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-android-release:
+    if: github.event_name == 'release' || inputs.build_mobile_apps
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -76,7 +102,7 @@ jobs:
         uses: ./.github/actions/build-android-app
         with:
           signed: true
-          upload_to_release: true
+          upload_to_release: ${{ github.event_name == 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -84,7 +110,8 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-  build-and-push-docker:
+  build-and-push-docker-multi-container:
+    if: github.event_name == 'release' || inputs.build_multi_container
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -111,95 +138,169 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata for multi-container images
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.release.prerelease == false }}
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            type=ref,event=branch,enable=${{ github.ref_type == 'branch' }}
+            type=raw,value={{branch}}-{{sha}},enable=${{ github.ref_type == 'branch' }}
+
+      - name: Generate tags for containers
+        id: tags
+        run: |
+          # Transform base tags to include suffixes for each container
+          TAGS="${{ steps.meta.outputs.tags }}"
+
+          # Generate tags for each container by replacing the base image name with suffixed versions
+          echo "postgres=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-postgres|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "api=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-api|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "client=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-client|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "admin=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-admin|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "reverse-proxy=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-reverse-proxy|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "smtp=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-smtp|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "task-runner=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-task-runner|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          echo "installcli=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-installcli|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+
+      - name: Build and push Postgres image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Databases/AliasServerDb/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.postgres }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/AliasVault.Api/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.api }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push Client image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/AliasVault.Client/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.client }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push Admin image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/AliasVault.Admin/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.admin }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push Reverse Proxy image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.reverse-proxy }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push SMTP image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Services/AliasVault.SmtpService/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.smtp }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push TaskRunner image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Services/AliasVault.TaskRunner/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.task-runner }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push InstallCli image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/server/Utilities/AliasVault.InstallCli/Dockerfile
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ${{ steps.tags.outputs.installcli }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-and-push-docker-all-in-one:
+    if: github.event_name == 'release' || inputs.build_all_in_one
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Convert repository name to lowercase
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # TODO: enable again when testing that docker hub login works
-      # - name: Build and push Postgres image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/Databases/AliasServerDb/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-postgres:${{ github.ref_name }}
+      - name: Extract metadata for all-in-one image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ env.REPO_LOWER }}
+            aliasvault/aliasvault
+          tags: |
+            # For release events with latest tag (only for non-prerelease)
+            type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.release.prerelease == false }}
+            # semver tags for releases (works for prerelease and normal release)
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            # For branches, use branch name and branch name + short SHA for uniqueness
+            type=ref,event=branch,enable=${{ github.ref_type == 'branch' }}
+            type=raw,value={{branch}}-{{sha}},enable=${{ github.ref_type == 'branch' }}
 
-      # - name: Build and push API image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/AliasVault.Api/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-api:${{ github.ref_name }}
-
-      # - name: Build and push Client image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/AliasVault.Client/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-client:${{ github.ref_name }}
-
-      # - name: Build and push Admin image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/AliasVault.Admin/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-admin:${{ github.ref_name }}
-
-      # - name: Build and push Reverse Proxy image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-reverse-proxy:${{ github.ref_name }}
-
-      # - name: Build and push SMTP image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/Services/AliasVault.SmtpService/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-smtp:${{ github.ref_name }}
-
-      # - name: Build and push TaskRunner image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/Services/AliasVault.TaskRunner/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-task-runner:${{ github.ref_name }}
-
-      # - name: Build and push InstallCli image
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: apps/server/Utilities/AliasVault.InstallCli/Dockerfile
-      #     platforms: linux/amd64,linux/arm64/v8
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:latest,${{ env.REGISTRY }}/${{ env.REPO_LOWER }}-installcli:${{ github.ref_name }}
-
-      - name: Build and push all-in-one image (aliasvault)
+      - name: Build and push all-in-one image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: dockerfiles/all-in-one/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: |
-            aliasvault/aliasvault:latest
-            aliasvault/aliasvault:${{ github.ref_name }}
-
-    # ${{ env.REGISTRY }}/${{ env.REPO_LOWER }:latest
-    # ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}:${{ github.ref_name }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
