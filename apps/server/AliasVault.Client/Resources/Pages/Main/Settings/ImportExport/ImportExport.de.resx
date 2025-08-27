@@ -59,57 +59,59 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>Import / Export</value>
+    <value>Import und Export</value>
     <comment>Page title</comment>
   </data>
   <data name="PageDescription" xml:space="preserve">
-    <value>On this page you can import and export your vault.</value>
+    <value>Auf dieser Seite kannst Du Deinen Tresor importieren und exportieren.</value>
     <comment>Page description</comment>
   </data>
   <data name="ImportSectionTitle" xml:space="preserve">
-    <value>Import passwords</value>
+    <value>Passwörter importieren</value>
     <comment>Import section title</comment>
   </data>
   <data name="ImportSectionDescription" xml:space="preserve">
-    <value>Select a service to import from. If you are using a service that is not listed here and would like to see it supported, please raise an issue on &lt;a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700"&gt;GitHub&lt;/a&gt; or contact us.</value>
+    <value>Wähle einen Dienst aus, von dem Du importieren möchtest. Wenn Du einen Dienst verwendest, der hier nicht aufgelistet ist, erstelle bitte ein Ticket auf &lt;a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700"&gt;GitHub&lt;/a&gt; oder kontaktiere uns.</value>
     <comment>Import section description with HTML link</comment>
   </data>
   <data name="ExportSectionTitle" xml:space="preserve">
-    <value>Export vault</value>
+    <value>Tresor exportieren</value>
     <comment>Export section title</comment>
   </data>
   <data name="ExportSectionDescription" xml:space="preserve">
-    <value>If you want to export your AliasVault credentials to another AliasVault server (e.g. from cloud to self-hosted or vice-versa) or to another service altogether, you can export it here. Note that all exports are unencrypted so store it in a safe place and delete it when you no longer need it.</value>
+    <value>Wenn Du Deine AliasVault-Zugangsdaten auf einen anderen AliasVault-Server (z. B. von der Cloud zu einer selbst gehosteten Version oder umgekehrt) oder zu einem anderen Dienst exportieren möchtest, kannst Du das hier tun.
+Beachte: Alle Exporte sind unverschlüsselt – speichere die Datei daher an einem sicheren Ort und lösche sie, sobald Du sie nicht mehr brauchst.</value>
     <comment>Export section description</comment>
   </data>
   <data name="ExportCsvButton" xml:space="preserve">
-    <value>Export vault to unencrypted CSV file</value>
+    <value>Tresor als unverschlüsselte CSV-Datei exportieren</value>
     <comment>Button to export as CSV</comment>
   </data>
   <data name="ExportSqliteButton" xml:space="preserve">
-    <value>Export vault to unencrypted SQLite file</value>
+    <value>Tresor als unverschlüsselte SQLite-Datei exportieren</value>
     <comment>Button to export as SQLite</comment>
   </data>
   <data name="ExportConfirmTitle" xml:space="preserve">
-    <value>Export vault</value>
+    <value>Tresor exportieren</value>
     <comment>Export confirmation dialog title</comment>
   </data>
   <data name="ExportWarningMessage" xml:space="preserve">
-    <value>Warning: Exporting your vault to an unencrypted file will expose all of your passwords and sensitive information in plain text. Only do this on trusted computers and ensure you:
+    <value>Warnung: Beim Exportieren Deines Tresors in eine unverschlüsselte Datei werden alle Deine Passwörter und sensiblen Daten im Klartext sichtbar.
+Führe diesen Vorgang nur auf vertrauenswürdigen Geräten aus und stelle sicher, dass Du:
 
-• Store the exported file in a secure location
-• Delete the file when you no longer need it
-• Never share the exported file with others
+• die exportierte Datei an einem sicheren Ort speicherst.
+• die Datei löschst, sobald Du sie nicht mehr brauchst.
+• die Datei niemals mit anderen teilst.
 
-Are you sure you want to continue with the export?</value>
+Bist Du sicher, dass Du mit dem Export fortfahren möchtest?</value>
     <comment>Export warning confirmation message</comment>
   </data>
   <data name="ResetVaultSectionTitle" xml:space="preserve">
-    <value>Reset Vault</value>
+    <value>Tresor zurücksetzen</value>
     <comment>Reset vault section title</comment>
   </data>
   <data name="ResetVaultSectionDescription" xml:space="preserve">
-    <value>This option allows you to completely empty your vault while keeping your account and email aliases. Use this if you want to start fresh after importing data from another password manager or if you want to clear all existing credentials to start over.</value>
+    <value>Mit dieser Option kannst Du Deinen Tresor komplett leeren und gleichzeitig Deinen Account und E-Mail-Aliase beibehalten. Verwende dies, wenn Du nach dem Importieren von Daten von einem anderen Passwort-Manager neu starten möchten oder wenn Du alle vorhandenen Zugangsdaten löschen möchten, um neu zu starten.</value>
     <comment>Reset vault section description</comment>
   </data>
 </root>
