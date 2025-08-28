@@ -1171,6 +1171,20 @@ video {
   animation: spin 1s linear infinite;
 }
 
+@keyframes spin-ccw {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-spin-ccw {
+  animation: spin-ccw 1s linear infinite;
+}
+
 .cursor-not-allowed {
   cursor: not-allowed;
 }
