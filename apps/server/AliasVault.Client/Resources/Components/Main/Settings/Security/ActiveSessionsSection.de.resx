@@ -63,7 +63,7 @@
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Unten findest Du eine Liste der Geräte, auf denen Du aktuell eingeloggt bist oder eine aktive Sitzung hast. Hier kannst Du Dich von jeder dieser Sitzungen abmelden.</value>
+    <value>Nachfolgend findest Du eine Liste der Geräte, auf denen Du aktuell angemeldet bist oder eine aktive Sitzung hast. Hier kannst Du Dich von jeder dieser Sitzungen abmelden.</value>
     <comment>Description of active sessions</comment>
   </data>
   <data name="NoSessionsMessage" xml:space="preserve">
