@@ -1,8 +1,10 @@
-﻿@implements IDisposable
+﻿@using Microsoft.Extensions.Localization
+@implements IDisposable
 @inject DbService DbService
+@inject IStringLocalizerFactory LocalizerFactory
 
 <div class="ms-1 items-center flex">
-    <SmallLoadingIndicator Title="Sync vault data" Spinning="@Loading">
+    <SmallLoadingIndicator Title="@SharedLocalizer["SyncVaultData"]" Spinning="@Loading">
         @if (!Loading)
         {
             <button class="absolute p-2 hover:bg-gray-200 rounded-2xl" id="vault-refresh-btn" @onclick="OnRefreshClick">
@@ -15,6 +17,8 @@
 </div>
 
 @code {
+    private IStringLocalizer SharedLocalizer => LocalizerFactory.Create("SharedResources", "AliasVault.Client");
+
     private bool Loading { get; set; } = false;
     private string LoadingIndicatorMessage { get; set; } = "";
     private bool DatabaseLoading { get; set; } = false;
