@@ -6,6 +6,7 @@
 @using System.Text.Json
 @using AliasVault.Shared.Models.WebApi.Auth
 @using AliasVault.Client.Auth.Components
+@using AliasVault.Client.Auth.Models
 @using AliasVault.Client.Utilities
 @using AliasVault.Cryptography.Client
 @using SecureRemotePassword
@@ -118,7 +119,7 @@ else
 }
 
 @code {
-    private readonly LoginModel _loginModel = new();
+    private readonly LoginFormModel _loginModel = new();
     private readonly LoginModel2Fa _loginModel2Fa = new();
     private readonly LoginModelRecoveryCode _loginModelRecoveryCode = new();
     private FullScreenLoadingIndicator _loadingIndicator = new();
