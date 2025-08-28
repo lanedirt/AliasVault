@@ -5,18 +5,19 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi.Auth;
+namespace AliasVault.Client.Auth.Models;
 
 using System.ComponentModel.DataAnnotations;
+using AliasVault.Client.Resources;
 
 /// <summary>
-/// Unlock model.
+/// Unlock model with localized validation.
 /// </summary>
 public class UnlockModel
 {
     /// <summary>
     /// Gets or sets the password.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     public string Password { get; set; } = null!;
 }

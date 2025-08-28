@@ -46,7 +46,9 @@
     </div>
     <p class="mt-6 text-sm text-gray-700 dark:text-gray-300">
         @Localizer["DontHaveAuthenticatorText"]
-        <button @onclick="LoginWithRecoveryCode" class="text-primary-600 hover:underline dark:text-primary-500">@Localizer["LoginWithRecoveryCodeLink"]</button>.
+    </p>
+    <p class="text-sm text-gray-700 dark:text-gray-300">
+        <button @onclick="LoginWithRecoveryCode" class="text-primary-600 hover:underline dark:text-primary-500">@Localizer["LoginWithRecoveryCodeLink"]</button>
     </p>
 }
 else if (_showLoginWithRecoveryCodeStep)
@@ -73,7 +75,9 @@ else if (_showLoginWithRecoveryCodeStep)
     </div>
     <p class="mt-6 text-sm text-gray-700 dark:text-gray-300">
         @Localizer["RegainedAccessText"]
-        <button @onclick="LoginWithAuthenticator" class="text-primary-600 hover:underline dark:text-primary-500">@Localizer["LoginWithAuthenticatorLink"]</button> instead.
+    </p>
+    <p class="text-sm text-gray-700 dark:text-gray-300">
+        <button @onclick="LoginWithAuthenticator" class="text-primary-600 hover:underline dark:text-primary-500">@Localizer["LoginWithAuthenticatorLink"]</button>
     </p>
 }
 else
@@ -448,4 +452,5 @@ else
             _serverValidationErrors.Clear();
         }
     }
+
 }
