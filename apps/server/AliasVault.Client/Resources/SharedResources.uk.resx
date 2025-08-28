@@ -287,4 +287,21 @@
     <value>Потрібен пароль</value>
     <comment>Error message when password is required</comment>
   </data>
+  <!-- General UI text -->
+  <data name="LockVault" xml:space="preserve">
+    <value>Lock vault</value>
+    <comment>Tooltip text for lock vault button</comment>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+    <comment>Home breadcrumb text</comment>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Notes section heading</comment>
+  </data>
+  <data name="SyncVaultData" xml:space="preserve">
+    <value>Sync vault data</value>
+    <comment>Tooltip text for sync vault data button</comment>
+  </data>
 </root>
