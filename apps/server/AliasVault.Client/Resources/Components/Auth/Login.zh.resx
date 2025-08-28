@@ -115,11 +115,11 @@
     <comment>Link text for creating a new vault</comment>
   </data>
   <data name="LoginWithRecoveryCodeLink" xml:space="preserve">
-    <value>使用恢复码登录</value>
+    <value>Log in with a recovery code instead.</value>
     <comment>Link text for logging in with recovery code</comment>
   </data>
   <data name="LoginWithAuthenticatorLink" xml:space="preserve">
-    <value>使用认证器代码登录</value>
+    <value>Log in with an authenticator code instead.</value>
     <comment>Link text for logging in with authenticator</comment>
   </data>
   <!-- Descriptions and help text -->
@@ -136,12 +136,12 @@
     <comment>Text before registration link</comment>
   </data>
   <data name="DontHaveAuthenticatorText" xml:space="preserve">
-    <value>无法访问你的认证器设备？你可以</value>
-    <comment>Text before recovery code link</comment>
+    <value>Don't have access to your authenticator device?</value>
+    <comment>Question text about not having access to authenticator</comment>
   </data>
   <data name="RegainedAccessText" xml:space="preserve">
-    <value>重新获得了认证器设备的访问权限？你可以</value>
-    <comment>Text before authenticator login link</comment>
+    <value>Regained access to your authenticator device?</value>
+    <comment>Question text about regaining access to authenticator</comment>
   </data>
   <!-- Loading and status messages -->
   <data name="LoggingInMessage" xml:space="preserve">
