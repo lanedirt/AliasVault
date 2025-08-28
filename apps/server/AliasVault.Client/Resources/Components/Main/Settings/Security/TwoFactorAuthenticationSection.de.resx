@@ -67,7 +67,7 @@
     <comment>Status message when 2FA is enabled</comment>
   </data>
   <data name="DisabledMessage" xml:space="preserve">
-    <value>Zwei-Faktor-Authentifizierung ist derzeit deaktiviert. Es wird empfohlen, diese zu aktivieren, um die Sicherheit Deines Kontos zu verbessern.</value>
+    <value>Die Zwei-Faktor-Authentifizierung ist derzeit deaktiviert. Es wird empfohlen, diese zu aktivieren, um die Sicherheit Deines Kontos zu verbessern.</value>
     <comment>Status message when 2FA is disabled</comment>
   </data>
   <data name="EnableButton" xml:space="preserve">
