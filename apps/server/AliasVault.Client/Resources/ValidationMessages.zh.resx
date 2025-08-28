@@ -88,6 +88,14 @@
     <value>密钥不能为空</value>
     <comment>Error message when secret key is required</comment>
   </data>
+  <data name="ServiceNameRequired" xml:space="preserve">
+    <value>Service name is required</value>
+    <comment>Error message when service name is required</comment>
+  </data>
+  <data name="FieldRequired" xml:space="preserve">
+    <value>This field is required</value>
+    <comment>Generic error message when a field is required</comment>
+  </data>
   <!-- Terms and conditions -->
   <data name="MustAcceptTerms" xml:space="preserve">
     <value>必须接受条款和条件。</value>
