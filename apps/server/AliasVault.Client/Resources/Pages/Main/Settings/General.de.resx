@@ -38,7 +38,7 @@
     <comment>Title for email settings section</comment>
   </data>
   <data name="DefaultEmailDomainLabel">
-    <value>Standard E-Mail-Domain</value>
+    <value>Standard-E-Mail-Domain</value>
     <comment>Label for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescription">
@@ -144,7 +144,7 @@
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
-    <value>Hinweis: Das Löschen der Zwischenablage in der Web-App ist nur möglich, wenn der Tab aktiv ist. Wenn die Registerkarte den Fokus verliert, wird die Zwischenablage gelöscht, wenn sie wieder in den Fokus rückt.</value>
+    <value>Hinweis: Das Löschen der Zwischenablage in der Web-App ist nur möglich, wenn die Registerkarte aktiv ist. Wenn die Registerkarte den Fokus verliert, wird die Zwischenablage gelöscht, wenn sie wieder in den Fokus rückt.</value>
     <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
