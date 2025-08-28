@@ -221,7 +221,7 @@
     <comment>Validation error message</comment>
   </data>
   <data name="ErrorRequired" xml:space="preserve">
-    <value>Dies ist ein Pflichtfeld.</value>
+    <value>Dieses Feld ist ein Pflichtfeld</value>
     <comment>Required field validation error</comment>
   </data>
   <data name="ErrorInvalidEmail" xml:space="preserve">
@@ -251,7 +251,7 @@
   </data>
   <!-- Loading screen messages -->
   <data name="RefreshPageText" xml:space="preserve">
-    <value>Wenn das Laden festzustecken scheint, kannst du auf die Schaltfläche unten klicken, um die Seite zu aktualisieren.</value>
+    <value>Wenn das Laden festzustecken scheint, kannst Du auf die Schaltfläche unten klicken, um die Seite zu aktualisieren.</value>
     <comment>Text shown above refresh button on loading screen</comment>
   </data>
   <!-- Validation error messages for forms -->
