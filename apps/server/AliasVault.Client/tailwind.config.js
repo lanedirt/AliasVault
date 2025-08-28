@@ -52,6 +52,15 @@ module.exports = {
             minWidth: {
                 'kanban': '28rem'
             },
+            animation: {
+                'spin-ccw': 'spin-ccw 1s linear infinite',
+            },
+            keyframes: {
+                'spin-ccw': {
+                    'from': { transform: 'rotate(0deg)' },
+                    'to': { transform: 'rotate(-360deg)' }
+                }
+            },
         },
     },
     plugins: [
