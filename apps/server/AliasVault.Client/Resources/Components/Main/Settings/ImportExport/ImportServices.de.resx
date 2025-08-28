@@ -99,7 +99,7 @@
   </data>
   <!-- Chrome -->
   <data name="ChromeDescription" xml:space="preserve">
-    <value>Importiere Deine Passwörter aus dem Chrome-Passwort-Manager</value>
+    <value>Importiere Deine Passwörter aus dem Chrome-Passwort-Manager.</value>
     <comment>Description for Chrome import service</comment>
   </data>
   <data name="ChromeInstructionsPart1" xml:space="preserve">
@@ -125,7 +125,7 @@
   </data>
   <!-- Generic CSV -->
   <data name="GenericCsvDescription" xml:space="preserve">
-    <value>Importiere Deine Zugangsdaten mithilfe einer CSV-Vorlage.</value>
+    <value>Importiere Deine Passwörter mithilfe einer CSV-Vorlage.</value>
     <comment>Description for Generic CSV import service</comment>
   </data>
   <data name="GenericCsvInstructionsPart1" xml:space="preserve">
@@ -156,7 +156,7 @@
   </data>
   <!-- Firefox -->
   <data name="FirefoxDescription" xml:space="preserve">
-    <value>Importiere Deine Passwörter aus dem Firefox-Passwort-Manager</value>
+    <value>Importiere Deine Passwörter aus dem Firefox-Passwort-Manager.</value>
     <comment>Description for Firefox import service</comment>
   </data>
   <data name="FirefoxInstructionsPart1" xml:space="preserve">
