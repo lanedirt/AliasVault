@@ -61,6 +61,16 @@ public static class ValidationMessages
     public static string MustAcceptTerms => GetResourceValue("MustAcceptTerms");
 
     /// <summary>
+    /// Gets the error message when service name is required.
+    /// </summary>
+    public static string ServiceNameRequired => GetResourceValue("ServiceNameRequired");
+
+    /// <summary>
+    /// Gets the generic error message when a field is required.
+    /// </summary>
+    public static string FieldRequired => GetResourceValue("FieldRequired");
+
+    /// <summary>
     /// Gets the resource value for the specified key.
     /// </summary>
     /// <param name="key">The resource key.</param>

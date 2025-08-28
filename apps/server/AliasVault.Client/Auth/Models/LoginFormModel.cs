@@ -1,29 +1,30 @@
 //-----------------------------------------------------------------------
-// <copyright file="LoginModel.cs" company="lanedirt">
+// <copyright file="LoginFormModel.cs" company="lanedirt">
 // Copyright (c) lanedirt. All rights reserved.
 // Licensed under the AGPLv3 license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi.Auth;
+namespace AliasVault.Client.Auth.Models;
 
 using System.ComponentModel.DataAnnotations;
+using AliasVault.Client.Resources;
 
 /// <summary>
-/// Login model.
+/// Login form model with localized validation.
 /// </summary>
-public class LoginModel
+public class LoginFormModel
 {
     /// <summary>
     /// Gets or sets the username.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.UsernameRequired))]
     public string Username { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     public string Password { get; set; } = null!;
 
     /// <summary>

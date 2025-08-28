@@ -5,9 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi.Auth;
+namespace AliasVault.Client.Auth.Models;
 
 using System.ComponentModel.DataAnnotations;
+using AliasVault.Client.Resources;
 
 /// <summary>
 /// Login model for two factor authentication step using a recovery code.
@@ -17,6 +18,6 @@ public class LoginModelRecoveryCode
     /// <summary>
     /// Gets or sets the recovery code.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.FieldRequired))]
     public string RecoveryCode { get; set; } = null!;
 }

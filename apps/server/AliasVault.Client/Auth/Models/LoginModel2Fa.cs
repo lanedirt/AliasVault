@@ -5,9 +5,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace AliasVault.Shared.Models.WebApi.Auth;
+namespace AliasVault.Client.Auth.Models;
 
 using System.ComponentModel.DataAnnotations;
+using AliasVault.Client.Resources;
 
 /// <summary>
 /// Login model for 2-factor authentication step using an authenticator code.
@@ -17,7 +18,7 @@ public class LoginModel2Fa
     /// <summary>
     /// Gets or sets the 2-factor code.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.FieldRequired))]
     [Display(Name = "Authenticator Code")]
     public int? TwoFactorCode { get; set; }
 
