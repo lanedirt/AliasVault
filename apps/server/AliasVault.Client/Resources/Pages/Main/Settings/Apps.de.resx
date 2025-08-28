@@ -38,7 +38,7 @@
     <comment>Title for browser extensions section</comment>
   </data>
   <data name="BrowserExtensionsDescription">
-    <value>Mit der AliasVault-Browser-Erweiterung kannst Du bestehende Anmeldedaten auf jeder Webseite automatisch eintragen. Außerdem kannst Du während der Registrierung neue Aliase generieren, auf alle Deine Aliase zugreifen und Aliase und Identitäten anzeigen.</value>
+    <value>Mit der AliasVault-Browser-Erweiterung kannst Du bestehende Zugangsdaten auf jeder Webseite automatisch eintragen. Außerdem kannst Du während der Registrierung neue Aliase generieren, auf alle Deine Aliase zugreifen und Aliase und Identitäten anzeigen.</value>
     <comment>Description for browser extensions</comment>
   </data>
   <data name="InstallButton">
