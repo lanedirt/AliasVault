@@ -79,11 +79,11 @@
     <comment>Warning about experimental nature of the feature</comment>
   </data>
   <data name="EnableButton" xml:space="preserve">
-    <value>Schnellentsperrung des Tresors deaktivieren</value>
+    <value>Schnellentsperrung des Tresors aktivieren</value>
     <comment>Button to enable quick vault unlock</comment>
   </data>
   <data name="SuccessEnabledMessage" xml:space="preserve">
-    <value>Schnellentsperrung des Tresors wurde erfolgreich aktiviert. Wenn der Tresor das nächste Mal gesperrt wird, kannst Du ihn mit Deinem erstellten Passkey wieder entsperren.</value>
+    <value>Die Schnellentsperrung des Tresors wurde erfolgreich aktiviert. Wenn der Tresor das nächste Mal gesperrt wird, kannst Du ihn mit Deinem erstellten Passkey wieder entsperren.</value>
     <comment>Success message when quick unlock is enabled</comment>
   </data>
   <data name="SuccessDisabledMessage" xml:space="preserve">
