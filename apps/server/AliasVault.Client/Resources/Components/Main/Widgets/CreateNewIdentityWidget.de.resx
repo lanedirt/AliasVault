@@ -87,7 +87,7 @@
     <comment>Create button text</comment>
   </data>
   <data name="AdvancedModeLink" xml:space="preserve">
-    <value>Über erweiterten Modus erstellen</value>
+    <value>Erweiterte Eingabemaske verwenden</value>
     <comment>Link text to advanced creation mode</comment>
   </data>
   <data name="CreatingNewAliasMessage" xml:space="preserve">
