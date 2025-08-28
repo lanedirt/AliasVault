@@ -79,11 +79,11 @@
     <comment>Reset vault note about credentials being deleted</comment>
   </data>
   <data name="ResetVaultEmailAliasesKeptNote" xml:space="preserve">
-    <value>Deine E-Mail-Aliase werden erhalten und können nach dem Zurücksetzen Deines Tresors wiederverwendet werden</value>
+    <value>Deine E-Mail-Aliase werden erhalten und können nach dem Zurücksetzen Deines Tresors wiederverwendet werden.</value>
     <comment>Reset vault note about email aliases being kept</comment>
   </data>
   <data name="ResetVaultSettingsKeptNote" xml:space="preserve">
-    <value>Deine Kontoeinstellungen werden beibehalten</value>
+    <value>Deine Kontoeinstellungen werden beibehalten.</value>
     <comment>Reset vault note about settings being kept</comment>
   </data>
   <data name="ResetVaultIrreversibleNote" xml:space="preserve">
@@ -95,11 +95,11 @@
     <comment>Reset vault username confirmation label</comment>
   </data>
   <data name="ResetVaultContinueButton" xml:space="preserve">
-    <value>Weiter mit Tresor-Rücksetzung</value>
+    <value>Mit dem Zurücksetzen des Tresors fortfahren</value>
     <comment>Reset vault continue button</comment>
   </data>
   <data name="ResetVaultFinalWarning" xml:space="preserve">
-    <value>Achtung: Du bist dabei, alle Deine Zugangsdaten unwiderruflich löschen.</value>
+    <value>Achtung: Du bist dabei, alle Deine Zugangsdaten unwiderruflich zu löschen.</value>
     <comment>Reset vault final warning message</comment>
   </data>
   <data name="ResetVaultDeletionIrreversibleNote" xml:space="preserve">
