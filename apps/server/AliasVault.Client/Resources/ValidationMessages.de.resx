@@ -81,7 +81,7 @@
     <comment>Error message when username is required</comment>
   </data>
   <data name="PasswordRequired" xml:space="preserve">
-    <value>Passwort ist erforderlich</value>
+    <value>Das Passwort ist erforderlich</value>
     <comment>Error message when password is required</comment>
   </data>
   <data name="SecretKeyRequired" xml:space="preserve">
