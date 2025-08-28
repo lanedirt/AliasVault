@@ -63,7 +63,7 @@
     <comment>Page title</comment>
   </data>
   <data name="PageDescription" xml:space="preserve">
-    <value>Nachfolgend kannst Du alle von Deinen privaten E-Mail-Adressen erhaltenen erhaltenen E-Mails anzeigen.</value>
+    <value>Nachfolgend kannst Du alle von Deinen privaten E-Mail-Adressen erhaltenen E-Mails anzeigen.</value>
     <comment>Page description</comment>
   </data>
   <data name="AutoRefreshEnabledTooltip" xml:space="preserve">
