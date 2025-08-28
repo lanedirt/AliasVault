@@ -86,15 +86,15 @@
     <comment>Header for note section</comment>
   </data>
   <data name="VaultsDeletedNote" xml:space="preserve">
-    <value>Alle verschlüsselten Tresore mit allen Zugangsdaten werden dauerhaft gelöscht</value>
+    <value>Alle verschlüsselten Tresore mit allen Zugangsdaten werden dauerhaft gelöscht.</value>
     <comment>Note about vault deletion</comment>
   </data>
   <data name="EmailAliasesOrphanedNote" xml:space="preserve">
-    <value>Deine E-Mail-Aliase bleiben ohne Besitzer und können von anderen nicht wiederverwendet werden</value>
+    <value>Deine E-Mail-Aliase bleiben ohne Besitzer und können von anderen nicht wiederverwendet werden.</value>
     <comment>Note about email aliases being orphaned</comment>
   </data>
   <data name="AccountCannotBeRecoveredNote" xml:space="preserve">
-    <value>Dein Konto kann nach dem Löschen nicht wiederhergestellt werden</value>
+    <value>Dein Konto kann nach dem Löschen nicht wiederhergestellt werden.</value>
     <comment>Note about account recovery</comment>
   </data>
   <data name="DeletionIrreversibleNote" xml:space="preserve">
@@ -129,7 +129,7 @@
     <comment>Error message when username is not provided</comment>
   </data>
   <data name="UsernameDoesNotMatch" xml:space="preserve">
-    <value>Der eingegebene Benutzername stimmt nicht mit dem aktuellen Benutzernamen überein. Bitte versuche es erneut.</value>
+    <value>Der eingegebene Benutzername stimmt nicht mit Deinem Benutzernamen überein. Bitte versuche es erneut.</value>
     <comment>Error message when username doesn't match</comment>
   </data>
   <data name="ErrorProcessingRequest" xml:space="preserve">
