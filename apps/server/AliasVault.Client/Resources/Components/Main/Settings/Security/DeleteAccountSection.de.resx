@@ -63,7 +63,7 @@
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Dein Konto und alle zugehörigen Daten unwiderruflich löschen. Diese Aktion kann nicht rückgängig gemacht werden.</value>
+    <value>Nachfolgend kannst Du Dein Konto und alle zugehörigen Daten unwiderruflich löschen. Diese Aktion kann nicht rückgängig gemacht werden.</value>
     <comment>Warning description for account deletion</comment>
   </data>
   <data name="DeleteButton" xml:space="preserve">
