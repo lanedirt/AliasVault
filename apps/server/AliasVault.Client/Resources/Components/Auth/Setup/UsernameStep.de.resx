@@ -29,7 +29,7 @@
     <comment>Instructions for entering username</comment>
   </data>
   <data name="RememberUsernameNote">
-    <value>Denk daran: Damit wirst Du Dich später anmelden, also wähle etwas, das Du Dir gut merken kannst!</value>
+    <value>Denke daran: Damit wirst Du Dich später anmelden, also wähle etwas, das Du Dir gut merken kannst!</value>
     <comment>Important note about remembering username</comment>
   </data>
   <!-- Form labels -->
