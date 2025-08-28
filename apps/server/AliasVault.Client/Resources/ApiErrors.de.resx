@@ -141,7 +141,7 @@
     <value>Benutzername ist bereits vergeben.</value>
   </data>
   <data name="USERNAME_AVAILABLE" xml:space="preserve">
-    <value>Benutzername ist verfügbar.</value>
+    <value>Der Benutzername ist verfügbar.</value>
   </data>
   <data name="USERNAME_MISMATCH" xml:space="preserve">
     <value>Der Benutzername stimmt nicht mit dem aktuellen Benutzer überein.</value>
