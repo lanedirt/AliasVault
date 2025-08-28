@@ -63,7 +63,7 @@
     <comment>Main title of the application</comment>
   </data>
   <data name="TaglineText" xml:space="preserve">
-    <value>Deine Privatsphäre - immer geschützt.</value>
+    <value>Deine Privatsphäre. Immer geschützt.</value>
     <comment>Tagline emphasizing privacy protection</comment>
   </data>
   <data name="CreateNewVaultButton" xml:space="preserve">
