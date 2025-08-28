@@ -1,5 +1,6 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using Microsoft.Extensions.Localization
+@using AliasVault.Client.Resources
 @inherits AliasVault.Client.Main.Pages.MainBase
 @inject IJSRuntime JSRuntime
 @inject CredentialService CredentialService
@@ -234,7 +235,7 @@
         /// <summary>
         /// The service name.
         /// </summary>
-        [Required]
+        [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.ServiceNameRequired))]
         [Display(Name = "Service Name")]
         public string ServiceName { get; set; } = string.Empty;
 
