@@ -42,7 +42,7 @@
     <comment>Label for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescription">
-    <value>Lege die Standard-E-Mail-Domain fest, die beim Erstellen neuer Zugansdaten verwendet wird.</value>
+    <value>Lege die Standard-E-Mail-Domain fest, die beim Erstellen neuer Zugangsdaten verwendet wird.</value>
     <comment>Description for default email domain setting</comment>
   </data>
   <data name="DefaultEmailDomainDescriptionNote">
@@ -66,7 +66,7 @@
     <comment>Label for public domains group</comment>
   </data>
   <data name="AutoEmailRefreshLabel">
-    <value>E-Mail-Inhalt automatisch aktualisieren, wenn neue eintreffen</value>
+    <value>E-Mail-Übersicht automatisch aktualisieren, wenn neue E-Mails eintreffen</value>
     <comment>Label for auto email refresh setting</comment>
   </data>
   <!-- Alias Settings Section -->
@@ -140,7 +140,7 @@
     <comment>Option to clear clipboard after 15 seconds</comment>
   </data>
   <data name="NoteLabel">
-    <value>Notiz</value>
+    <value>Beachte</value>
     <comment>Label for note/warning text</comment>
   </data>
   <data name="ClipboardClearLimitationNote">
