@@ -20,20 +20,20 @@ public class RegisterFormModel : RegisterModel
     /// <summary>
     /// Gets or sets the username.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.UsernameRequired))]
     public new string Username { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     [MinLength(8, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordMinLengthGeneric))]
     public new string Password { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password confirmation.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     [Compare("Password", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordsDoNotMatchGeneric))]
     public new string PasswordConfirm { get; set; } = null!;
 

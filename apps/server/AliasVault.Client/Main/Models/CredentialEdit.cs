@@ -15,6 +15,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AliasClientDb;
 using AliasVault.Client.Main.Models.FormValidation;
+using AliasVault.Client.Resources;
 
 /// <summary>
 /// Credential edit model.
@@ -39,7 +40,7 @@ public sealed class CredentialEdit
     /// <summary>
     /// Gets or sets the name of the service.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.ServiceNameRequired))]
     [Display(Name = "Service Name")]
     public string ServiceName { get; set; } = string.Empty;
 

@@ -19,20 +19,20 @@ public class PasswordChangeFormModel : PasswordChangeModel
     /// <summary>
     /// Gets or sets the current password.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     public new string CurrentPassword { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the new password.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     [MinLength(10, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordMinLength))]
     public new string NewPassword { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the password confirmation.
     /// </summary>
-    [Required]
+    [Required(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordRequired))]
     [Compare("NewPassword", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.PasswordsDoNotMatch))]
     public new string NewPasswordConfirm { get; set; } = null!;
 
