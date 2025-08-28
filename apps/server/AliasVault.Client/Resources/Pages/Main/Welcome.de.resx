@@ -43,7 +43,7 @@
   <!-- Welcome step content -->
   <data name="WelcomeMessage">
     <value>Glückwunsch – Dein Tresor ist jetzt eingerichtet!
-Erhöhe Deine Online-Privatsphäre, indem Du für jeden Dienst einen individuellen Alias nutzt. Lass uns jetzt gemeinsam lernen, wie AliasVault funktioniert – und anschließend Deinen ersten sicheren Alias anlegen.</value>
+Erhöhe Deine Online-Privatsphäre, indem Du für jeden Dienst einen individuellen Alias nutzt. Lass uns jetzt gemeinsam lernen, wie AliasVault funktioniert und anschließend Deinen ersten sicheren Alias anlegen.</value>
     <comment>Welcome message on the first tutorial step</comment>
   </data>
   <!-- How it works step content -->
@@ -52,24 +52,24 @@ Erhöhe Deine Online-Privatsphäre, indem Du für jeden Dienst einen individuell
     <comment>Introduction text for how it works step</comment>
   </data>
   <data name="HowItWorksStep1">
-    <value>AliasVault erzeugt eine zufällige Identität mit einer sicheren privaten E-Mail-Adresse</value>
+    <value>AliasVault erzeugt eine zufällige Identität mit einer sicheren privaten E-Mail-Adresse.</value>
     <comment>First step in how it works explanation</comment>
   </data>
   <data name="HowItWorksStep2">
-    <value>Benutze diese Informationen, um Dich für den Dienst anzumelden</value>
+    <value>Benutze diese Informationen, um Dich für den Dienst anzumelden.</value>
     <comment>Second step in how it works explanation</comment>
   </data>
   <data name="HowItWorksStep3">
-    <value>Empfangene E-Mails werden in dieser App angezeigt und können in Deinem Browser geöffnet werden</value>
+    <value>Empfangene E-Mails werden in dieser App angezeigt und können in Deinem Browser geöffnet werden.</value>
     <comment>Third step in how it works explanation</comment>
   </data>
   <data name="HowItWorksStep4">
-    <value>Deine echte E-Mail-Adresse und andere persönliche Informationen bleiben privat</value>
+    <value>Deine echte E-Mail-Adresse und andere persönliche Informationen bleiben privat.</value>
     <comment>Fourth step in how it works explanation</comment>
   </data>
   <!-- Tips step content -->
   <data name="MasterPasswordTipTitle">
-    <value>Halten Dein Master-Passwort sicher</value>
+    <value>Halte Dein Master-Passwort sicher</value>
     <comment>Title for master password tip</comment>
   </data>
   <data name="MasterPasswordTipContent">
