@@ -43,11 +43,11 @@
   </data>
   <!-- Validation messages -->
   <data name="ValidatingUsernameMessage">
-    <value>Benutzername wird überprüft...</value>
+    <value>Der Benutzername wird überprüft...</value>
     <comment>Message shown while validating username</comment>
   </data>
   <data name="UsernameAvailableMessage">
-    <value>Benutzername ist verfügbar!</value>
+    <value>Der Benutzername ist verfügbar!</value>
     <comment>Message shown when username is available</comment>
   </data>
   <data name="UsernameRequiredError">
