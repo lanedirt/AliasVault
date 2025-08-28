@@ -73,7 +73,7 @@
   </data>
   <!-- Form labels -->
   <data name="UsernameOrEmailLabel" xml:space="preserve">
-    <value>Dein Benutzername oder deine E-Mail-Adresse</value>
+    <value>Dein Benutzername oder Deine E-Mail-Adresse</value>
     <comment>Label for username/email input field</comment>
   </data>
   <data name="PasswordLabel" xml:space="preserve">
@@ -102,7 +102,7 @@
     <comment>Login button text</comment>
   </data>
   <data name="LoginToAccountButton" xml:space="preserve">
-    <value>In Konto anmelden</value>
+    <value>Anmelden</value>
     <comment>Extended login button text</comment>
   </data>
   <!-- Links -->
@@ -115,11 +115,11 @@
     <comment>Link text for creating a new vault</comment>
   </data>
   <data name="LoginWithRecoveryCodeLink" xml:space="preserve">
-    <value>Log in with a recovery code instead.</value>
+    <value>Stattdessen mit einem Wiederherstellungscode anmelden.</value>
     <comment>Link text for logging in with recovery code</comment>
   </data>
   <data name="LoginWithAuthenticatorLink" xml:space="preserve">
-    <value>Log in with an authenticator code instead.</value>
+    <value>Stattdessen mit einem Authentifizierungscode anmelden.</value>
     <comment>Link text for logging in with authenticator</comment>
   </data>
   <!-- Descriptions and help text -->
@@ -136,11 +136,11 @@
     <comment>Text before registration link</comment>
   </data>
   <data name="DontHaveAuthenticatorText" xml:space="preserve">
-    <value>Don't have access to your authenticator device?</value>
+    <value>Du hast keinen Zugriff auf Dein Authentifizierungsgerät?</value>
     <comment>Question text about not having access to authenticator</comment>
   </data>
   <data name="RegainedAccessText" xml:space="preserve">
-    <value>Regained access to your authenticator device?</value>
+    <value>Du hast den Zugriff auf Dein Authentifizierungsgerät wiedergewonnen?</value>
     <comment>Question text about regaining access to authenticator</comment>
   </data>
   <!-- Loading and status messages -->
