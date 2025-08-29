@@ -63,7 +63,7 @@
     <comment>Section title</comment>
   </data>
   <data name="EnabledMessage" xml:space="preserve">
-    <value>Zwei-Faktor-Authentifizierung ist derzeit aktiviert.</value>
+    <value>Die Zwei-Faktor-Authentifizierung ist derzeit aktiviert.</value>
     <comment>Status message when 2FA is enabled</comment>
   </data>
   <data name="DisabledMessage" xml:space="preserve">
