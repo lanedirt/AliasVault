@@ -156,7 +156,7 @@
     "toasts": {
       "credentialUpdated": "Credential succesvol bijgewerkt",
       "credentialCreated": "Credential succesvol aangemaakt",
-      "credentialDeleted": "Credential deleted successfully"
+      "credentialDeleted": "Credential succesvol verwijderd"
     },
     "createNewAliasFor": "Nieuwe alias maken voor",
     "errors": {
@@ -214,11 +214,11 @@
       "15seconds": "15 seconden",
       "30seconds": "30 seconden"
     },
-    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
-    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
-    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
-    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
-    "disableBatteryOptimization": "Disable battery optimization",
+    "batteryOptimizationHelpTitle": "Achtergrond klembord wissen inschakelen",
+    "batteryOptimizationActive": "Batterij optimalisatie blokkeert achtergrondtaken",
+    "batteryOptimizationDisabled": "Achtergrond klembord wissen ingeschakeld",
+    "batteryOptimizationHelpDescription": "Batterij optimalisatie van Android voorkomt dat de app op de achtergrond taken uit kan voeren. Het uitschakelen van deze batterij optimalisatie voor AliasVault zorgt ervoor dat het wissen van het klembord zo nauwkeurig mogelijk werkt.",
+    "disableBatteryOptimization": "Batterij optimalisatie uitschakelen",
     "identityGenerator": "Identiteit generator",
     "security": "Beveiliging",
     "appVersion": "App versie {{version}} ({{url}})",
