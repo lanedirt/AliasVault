@@ -156,7 +156,7 @@
     "toasts": {
       "credentialUpdated": "Zugang erfolgreich aktualisiert",
       "credentialCreated": "Zugang erfolgreich erstellt",
-      "credentialDeleted": "Credential deleted successfully"
+      "credentialDeleted": "Zugang erfolgreich gelöscht"
     },
     "createNewAliasFor": "Neuen Alias für",
     "errors": {
@@ -214,11 +214,11 @@
       "15seconds": "15 Sekunden",
       "30seconds": "30 Sekunden"
     },
-    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
-    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
-    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
-    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
-    "disableBatteryOptimization": "Disable battery optimization",
+    "batteryOptimizationHelpTitle": "Löschen der Zwischenablage im Hintergrund aktivieren",
+    "batteryOptimizationActive": "Die Akkuoptimierung blockiert die Hintergrundprozesse",
+    "batteryOptimizationDisabled": "Das Löschen der Zwischenablage im Hintergrund ist aktiviert",
+    "batteryOptimizationHelpDescription": "Die Akkuoptimierung von Android verhindert, dass die Zwischenablage zuverlässig gelöscht wird, wenn die App im Hintergrund ist. Das Deaktivieren der Akkuoptimierung für AliasVault ermöglicht das zuverlässige Löschen der Zwischenablage und gewährt automatisch die notwendigen Alarmberechtigungen.",
+    "disableBatteryOptimization": "Akkuoptimierung deaktivieren",
     "identityGenerator": "Identitätsgenerator",
     "security": "Sicherheit",
     "appVersion": "App-Version {{version}} ({{url}})",
