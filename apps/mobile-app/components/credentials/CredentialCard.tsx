@@ -1,17 +1,16 @@
-import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } from 'react-native';
 import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import Toast from 'react-native-toast-message';
 
+import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useAuth } from '@/context/AuthContext';
-import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type CredentialCardProps = {
   credential: Credential;
@@ -66,15 +65,11 @@ export function CredentialCard({ credential, onCredentialDelete }: CredentialCar
    */
   const copyToClipboard = async (text: string): Promise<void> => {
     try {
-      await Clipboard.setStringAsync(text);
-      
       // Get clipboard clear timeout from settings
       const timeoutSeconds = await getClipboardClearTimeout();
 
-      // Schedule clipboard clear if timeout is set
-      if (timeoutSeconds > 0) {
-        await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
-      }
+      // Use centralized clipboard utility
+      await copyToClipboardWithExpiration(text, timeoutSeconds);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
     }

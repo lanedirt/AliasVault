@@ -1,15 +1,15 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, Easing } from 'react-native';
 import Toast from 'react-native-toast-message';
 
+import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
+
 import { useColors } from '@/hooks/useColorScheme';
 
 import { useAuth } from '@/context/AuthContext';
 import { useClipboardCountdown } from '@/context/ClipboardCountdownContext';
-import NativeVaultManager from '@/specs/NativeVaultManager';
 
 type FormInputCopyToClipboardProps = {
   label: string;
@@ -30,7 +30,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const { t } = useTranslation();
   const { getClipboardClearTimeout } = useAuth();
   const { activeFieldId, setActiveField } = useClipboardCountdown();
-  
+
   const animatedWidth = useRef(new Animated.Value(0)).current;
   // Create a stable unique ID based on label and value
   const fieldId = useRef(`${label}-${value}-${Math.random().toString(36).substring(2, 11)}`).current;
@@ -49,7 +49,7 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       // This field is now active - reset and start animation
       animatedWidth.stopAnimation();
       animatedWidth.setValue(100);
-      
+
       // Get timeout and start animation
       getClipboardClearTimeout().then((timeoutSeconds) => {
         if (timeoutSeconds > 0 && activeFieldId === fieldId) {
@@ -78,20 +78,17 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
   const copyToClipboard = async () : Promise<void> => {
     if (value) {
       try {
-        // Copy to clipboard using expo-clipboard
-        await Clipboard.setStringAsync(value);
-
         // Get clipboard clear timeout from settings
         const timeoutSeconds = await getClipboardClearTimeout();
 
-        // Schedule clipboard clear if timeout is set
+        // Use centralized clipboard utility
+        await copyToClipboardWithExpiration(value, timeoutSeconds);
+
+        // Handle animation state
         if (timeoutSeconds > 0) {
           // Clear any existing active field first (this will cancel its animation)
           setActiveField(null);
-          
-          // Schedule the clipboard clear
-          await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
-          
+
           /*
            * Now set this field as active - animation will be handled by the effect
            * Use setTimeout to ensure state update happens in next tick

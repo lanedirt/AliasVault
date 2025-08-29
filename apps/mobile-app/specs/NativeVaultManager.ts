@@ -40,6 +40,15 @@ export interface Spec extends TurboModule {
   
   // Clipboard management
   clearClipboardAfterDelay(delayInSeconds: number): Promise<void>;
+  copyToClipboardWithExpiration(text: string, expirationSeconds: number): Promise<void>;
+  
+  // Exact alarm permission management
+  canScheduleExactAlarms(): Promise<boolean>;
+  requestExactAlarmPermission(): Promise<string>;
+  
+  // Battery optimization management
+  isIgnoringBatteryOptimizations(): Promise<boolean>;
+  requestIgnoreBatteryOptimizations(): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('NativeVaultManager');

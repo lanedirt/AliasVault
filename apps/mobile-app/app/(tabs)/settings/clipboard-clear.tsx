@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Platform } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, Platform, AppState } from 'react-native';
 
 import { useColors } from '@/hooks/useColorScheme';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -9,6 +9,7 @@ import { ThemedContainer } from '@/components/themed/ThemedContainer';
 import { ThemedScrollView } from '@/components/themed/ThemedScrollView';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useAuth } from '@/context/AuthContext';
+import NativeVaultManager from '@/specs/NativeVaultManager';
 
 const TIMEOUT_OPTIONS = [
   { value: 0, label: 'settings.clipboardClearOptions.never' },
@@ -26,6 +27,8 @@ export default function ClipboardClearScreen(): React.ReactNode {
   const { t } = useTranslation();
   const { getClipboardClearTimeout, setClipboardClearTimeout } = useAuth();
   const [selectedTimeout, setSelectedTimeout] = useState<number>(10);
+  const [isIgnoringBatteryOptimizations, setIsIgnoringBatteryOptimizations] = useState<boolean>(true);
+  const appState = useRef(AppState.currentState);
 
   useEffect(() => {
     /**
@@ -36,7 +39,39 @@ export default function ClipboardClearScreen(): React.ReactNode {
       setSelectedTimeout(timeout);
     };
 
+    /**
+     * Check battery optimization exemption status on Android.
+     */
+    const checkBatteryOptimization = async (): Promise<void> => {
+      if (Platform.OS === 'android') {
+        try {
+          const isIgnoring = await NativeVaultManager.isIgnoringBatteryOptimizations();
+          setIsIgnoringBatteryOptimizations(isIgnoring);
+        } catch (error) {
+          console.error('Error checking battery optimization status:', error);
+          // Default to true to avoid showing the help section unnecessarily
+          setIsIgnoringBatteryOptimizations(true);
+        }
+      }
+    };
+
     loadCurrentTimeout();
+    checkBatteryOptimization();
+
+    // Listen for app state changes to re-check permission when app comes to foreground
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App coming to foreground, re-check battery optimization
+        if (Platform.OS === 'android') {
+          await checkBatteryOptimization();
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return (): void => {
+      subscription.remove();
+    };
   }, [getClipboardClearTimeout]);
 
   /**
@@ -47,10 +82,57 @@ export default function ClipboardClearScreen(): React.ReactNode {
     setSelectedTimeout(timeout);
   };
 
+  /**
+   * Handle battery optimization exemption request.
+   */
+  const handleRequestBatteryOptimizationExemption = async (): Promise<void> => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    try {
+      await NativeVaultManager.requestIgnoreBatteryOptimizations();
+    } catch (error) {
+      console.error('Error handling battery optimization exemption request:', error);
+    }
+  };
+
   const styles = StyleSheet.create({
     headerText: {
       color: colors.textMuted,
       fontSize: 13,
+    },
+    helpButton: {
+      alignItems: 'center',
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      paddingVertical: 12,
+    },
+    helpButtonText: {
+      color: colors.background,
+      fontSize: 14,
+      fontWeight: '600',
+      marginLeft: 8,
+    },
+    helpContainer: {
+      backgroundColor: colors.accentBackground,
+      borderRadius: 10,
+      marginTop: 16,
+      padding: 16,
+    },
+    helpDescription: {
+      color: colors.textMuted,
+      fontSize: 13,
+      lineHeight: 20,
+      marginBottom: 12,
+    },
+    helpTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
     },
     option: {
       alignItems: 'center',
@@ -72,6 +154,20 @@ export default function ClipboardClearScreen(): React.ReactNode {
       color: colors.text,
       flex: 1,
       fontSize: 16,
+    },
+    permissionDenied: {
+      color: colors.destructive || '#EF4444',
+    },
+    permissionGranted: {
+      color: colors.success || '#10B981',
+    },
+    permissionStatusContainer: {
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+    permissionStatusText: {
+      fontSize: 13,
+      marginLeft: 8,
     },
     selectedIcon: {
       color: colors.primary,
@@ -115,6 +211,49 @@ export default function ClipboardClearScreen(): React.ReactNode {
             <ThemedText style={styles.warningDescription}>
               {t('settings.clipboardClearAndroidWarning')}
             </ThemedText>
+          </View>
+        )}
+        {Platform.OS === 'android' && !isIgnoringBatteryOptimizations && selectedTimeout > 0 && (
+          <View style={styles.helpContainer}>
+            <ThemedText style={styles.helpTitle}>
+              {t('settings.batteryOptimizationHelpTitle')}
+            </ThemedText>
+            <View style={styles.permissionStatusContainer}>
+              <Ionicons
+                name="warning"
+                size={16}
+                color={colors.destructive || '#EF4444'}
+              />
+              <ThemedText style={[styles.permissionStatusText, styles.permissionDenied]}>
+                {t('settings.batteryOptimizationActive')}
+              </ThemedText>
+            </View>
+            <ThemedText style={styles.helpDescription}>
+              {t('settings.batteryOptimizationHelpDescription')}
+            </ThemedText>
+            <TouchableOpacity
+              style={styles.helpButton}
+              onPress={handleRequestBatteryOptimizationExemption}
+            >
+              <Ionicons name="battery-charging" size={16} color={colors.background} />
+              <ThemedText style={styles.helpButtonText}>
+                {t('settings.disableBatteryOptimization')}
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        )}
+        {Platform.OS === 'android' && isIgnoringBatteryOptimizations && selectedTimeout > 0 && (
+          <View style={styles.helpContainer}>
+            <View style={styles.permissionStatusContainer}>
+              <Ionicons
+                name="checkmark-circle"
+                size={16}
+                color={colors.success || '#10B981'}
+              />
+              <ThemedText style={[styles.permissionStatusText, styles.permissionGranted]}>
+                {t('settings.batteryOptimizationDisabled')}
+              </ThemedText>
+            </View>
           </View>
         )}
       </ThemedScrollView>

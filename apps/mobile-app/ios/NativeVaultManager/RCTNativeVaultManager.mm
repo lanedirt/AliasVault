@@ -137,4 +137,30 @@
     [vaultManager openAutofillSettingsPage:resolve rejecter:reject];
 }
 
+- (void)copyToClipboardWithExpiration:(NSString *)text expirationSeconds:(double)expirationSeconds resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager copyToClipboardWithExpiration:text expirationSeconds:expirationSeconds resolver:resolve rejecter:reject];
+}
+
+// MARK: - Android-specific methods (stubs for iOS)
+
+- (void)canScheduleExactAlarms:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    // Only used by Android, return true.
+    resolve(@(YES));
+}
+
+- (void)requestExactAlarmPermission:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    // Only used by Android, return true.
+    resolve(@"Not applicable on iOS");
+}
+
+- (void)isIgnoringBatteryOptimizations:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    // Only used by Android, return true.
+    resolve(@(YES));
+}
+
+- (void)requestIgnoreBatteryOptimizations:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    // Only used by Android, return true.
+    resolve(@"Not applicable on iOS");
+}
+
 @end

@@ -381,6 +381,37 @@ public class VaultManager: NSObject {
     }
 
     @objc
+    func copyToClipboardWithExpiration(_ text: String,
+                                      expirationSeconds: Double,
+                                      resolver resolve: @escaping RCTPromiseResolveBlock,
+                                      rejecter reject: @escaping RCTPromiseRejectBlock) {
+        NSLog("VaultManager: Copying to clipboard with expiration of %.0f seconds", expirationSeconds)
+        
+        DispatchQueue.main.async {
+            if expirationSeconds > 0 {
+                // Create expiration date
+                let expirationDate = Date().addingTimeInterval(expirationSeconds)
+                
+                // Set clipboard with expiration and local-only options
+                UIPasteboard.general.setItems(
+                    [[UIPasteboard.typeAutomatic: text]],
+                    options: [
+                        .expirationDate: expirationDate,
+                        .localOnly: true  // Prevent sync to Universal Clipboard/iCloud
+                    ]
+                )
+                
+                NSLog("VaultManager: Text copied to clipboard with expiration at %@", expirationDate.description)
+            } else {
+                // No expiration, just copy normally
+                UIPasteboard.general.string = text
+                NSLog("VaultManager: Text copied to clipboard without expiration")
+            }
+            resolve(nil)
+        }
+    }
+
+    @objc
     func requiresMainQueueSetup() -> Bool {
         return false
     }

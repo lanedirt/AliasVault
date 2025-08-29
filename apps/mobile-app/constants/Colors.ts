@@ -31,6 +31,8 @@ export const Colors = {
     red: '#ff0000',
     black: '#000000',
     modalBackground: 'rgba(0, 0, 0, 0.5)',
+    success: '#10B981',
+    destructive: '#EF4444',
   },
   dark: {
     white: '#ffffff',
@@ -60,6 +62,8 @@ export const Colors = {
     red: '#ff0000',
     black: '#000000',
     modalBackground: 'rgba(88, 88, 88, 0.5)',
+    success: '#10B981',
+    destructive: '#EF4444',
   },
 } as const;
 
