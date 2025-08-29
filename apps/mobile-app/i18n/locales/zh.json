@@ -155,7 +155,8 @@
     "deleteAttachment": "删除",
     "toasts": {
       "credentialUpdated": "凭证更新成功",
-      "credentialCreated": "凭证创建成功"
+      "credentialCreated": "凭证创建成功",
+      "credentialDeleted": "Credential deleted successfully"
     },
     "createNewAliasFor": "创建新别名",
     "errors": {
@@ -213,6 +214,11 @@
       "15seconds": "15秒",
       "30seconds": "30秒"
     },
+    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
+    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
+    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
+    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
+    "disableBatteryOptimization": "Disable battery optimization",
     "identityGenerator": "身份生成器",
     "security": "安全",
     "appVersion": "应用版本 {{version}}（{{url}}）",
