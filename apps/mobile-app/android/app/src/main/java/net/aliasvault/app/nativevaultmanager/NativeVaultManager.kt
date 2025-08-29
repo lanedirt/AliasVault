@@ -6,7 +6,6 @@ import android.provider.Settings
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
-import com.aliasvault.nativevaultmanager.NativeVaultManagerSpec
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.Promise
@@ -19,6 +18,7 @@ import com.facebook.react.turbomodule.core.interfaces.TurboModule
 import net.aliasvault.app.vaultstore.VaultStore
 import net.aliasvault.app.vaultstore.keystoreprovider.AndroidKeystoreProvider
 import net.aliasvault.app.vaultstore.storageprovider.AndroidStorageProvider
+import net.aliasvault.nativevaultmanager.NativeVaultManagerSpec
 import org.json.JSONArray
 
 /**
