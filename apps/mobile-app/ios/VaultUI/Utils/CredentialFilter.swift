@@ -39,7 +39,7 @@ public class CredentialFilter {
         // Basic domain validation - must contain at least one dot and valid characters
         do {
             let domainRegex = try NSRegularExpression(pattern: "^[a-z0-9.-]+$")
-            
+
             let range = NSRange(location: 0, length: domain.utf16.count)
             if !domain.contains(".") || domainRegex.firstMatch(in: domain, options: [], range: range) == nil {
                 return ""
@@ -47,7 +47,7 @@ public class CredentialFilter {
         } catch {
             return ""
         }
-        
+
         // Ensure we have a valid domain structure
         if domain.isEmpty || domain.hasPrefix(".") || domain.hasSuffix(".") || domain.contains("..") {
             return ""
