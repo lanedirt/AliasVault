@@ -155,7 +155,8 @@
     "deleteAttachment": "Löschen",
     "toasts": {
       "credentialUpdated": "Zugang erfolgreich aktualisiert",
-      "credentialCreated": "Zugang erfolgreich erstellt"
+      "credentialCreated": "Zugang erfolgreich erstellt",
+      "credentialDeleted": "Credential deleted successfully"
     },
     "createNewAliasFor": "Neuen Alias für",
     "errors": {
@@ -201,7 +202,7 @@
       "step2": "2. Manche Apps wie Google Chrome erfordern möglicherweise eine manuelle Konfiguration in ihren Einstellungen, um Drittanbieter-Autofill-Apps zuzulassen. Die meisten Apps sollten jedoch standardmäßig mit Autofill funktionieren.",
       "alreadyConfigured": "Ich habe es bereits konfiguriert"
     },
-    "vaultUnlock": "Method zum Entsperren des Tresors",
+    "vaultUnlock": "Methode zum Entsperren des Tresors",
     "autoLock": "Sperr-Timeout",
     "clipboardClear": "Zwischenablage leeren",
     "clipboardClearDescription": "Kopierte Passwörter und vertrauliche Informationen nach einem bestimmten Zeitraum automatisch aus der Zwischenablage löschen.",
@@ -213,6 +214,11 @@
       "15seconds": "15 Sekunden",
       "30seconds": "30 Sekunden"
     },
+    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
+    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
+    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
+    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
+    "disableBatteryOptimization": "Disable battery optimization",
     "identityGenerator": "Identitätsgenerator",
     "security": "Sicherheit",
     "appVersion": "App-Version {{version}} ({{url}})",
