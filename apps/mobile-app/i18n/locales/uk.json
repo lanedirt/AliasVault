@@ -155,7 +155,8 @@
     "deleteAttachment": "Видалити",
     "toasts": {
       "credentialUpdated": "Облікові дані успішно оновлено",
-      "credentialCreated": "Облікові дані успішно створено"
+      "credentialCreated": "Облікові дані успішно створено",
+      "credentialDeleted": "Credential deleted successfully"
     },
     "createNewAliasFor": "Створити новий псевдонім для",
     "errors": {
@@ -213,6 +214,11 @@
       "15seconds": "15 секунд",
       "30seconds": "30 секунд"
     },
+    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
+    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
+    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
+    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
+    "disableBatteryOptimization": "Disable battery optimization",
     "identityGenerator": "Генератор ідентифікаційних даних",
     "security": "Безпека",
     "appVersion": "Версія додатку {{version}} ({{url}})",
