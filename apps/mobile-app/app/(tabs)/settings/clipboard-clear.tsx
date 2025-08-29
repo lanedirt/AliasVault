@@ -110,9 +110,6 @@ export default function ClipboardClearScreen(): React.ReactNode {
       justifyContent: 'center',
       paddingVertical: 12,
     },
-    helpButtonDisabled: {
-      backgroundColor: colors.textMuted,
-    },
     helpButtonText: {
       color: colors.background,
       fontSize: 14,
