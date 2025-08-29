@@ -1,11 +1,13 @@
-import * as Clipboard from 'expo-clipboard';
-import { Platform } from 'react-native';
-
 import NativeVaultManager from '@/specs/NativeVaultManager';
 
 /**
  * Copy text to clipboard with automatic expiration based on platform capabilities.
- * On iOS, uses native clipboard expiration. On Android, schedules manual clear.
+ * 
+ * On iOS: Uses native clipboard expiration via UIPasteboard.setItems with expirationDate.
+ * On Android: Uses native method that combines clipboard copy with automatic clearing:
+ *   - For delays ≤10 seconds: Uses Handler (reliable for short delays)
+ *   - For delays >10 seconds: Uses AlarmManager (works even when app is backgrounded)
+ *   - Android 13+: Also marks clipboard content as sensitive
  * 
  * @param text - The text to copy to clipboard
  * @param expirationSeconds - Number of seconds after which clipboard should be cleared (0 = no expiration)
@@ -14,18 +16,8 @@ export async function copyToClipboardWithExpiration(
   text: string,
   expirationSeconds: number
 ): Promise<void> {
-  if (Platform.OS === 'ios') {
-    // Use native iOS method with built-in expiration
-    await NativeVaultManager.copyToClipboardWithExpiration(text, expirationSeconds);
-  } else {
-    // For Android, use expo-clipboard and schedule manual clear
-    await Clipboard.setStringAsync(text);
-    
-    // Schedule clipboard clear if timeout is set
-    if (expirationSeconds > 0) {
-      await NativeVaultManager.clearClipboardAfterDelay(expirationSeconds);
-    }
-  }
+  // Both platforms now use native methods for reliable clipboard management
+  await NativeVaultManager.copyToClipboardWithExpiration(text, expirationSeconds);
 }
 
 /**

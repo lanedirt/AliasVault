@@ -213,6 +213,12 @@
       "15seconds": "15 seconds",
       "30seconds": "30 seconds"
     },
+    "exactAlarmHelpTitle": "Improve Clipboard Clearing Accuracy",
+    "exactAlarmPermissionDenied": "Missing permission",
+    "exactAlarmPermissionGranted": "Permission granted",
+    "exactAlarmHelpDescription": "Some Android devices require special permission for precise background clipboard clearing. Without this permission, AliasVault uses approximate timing which may be less reliable when the app is in the background.",
+    "exactAlarmEnabledDescription": "AliasVault can clear your clipboard with precise timing, even when the app is in the background.",
+    "enableExactAlarms": "Open app settings",
     "identityGenerator": "Identity Generator",
     "security": "Security",
     "appVersion": "App version {{version}} ({{url}})",
