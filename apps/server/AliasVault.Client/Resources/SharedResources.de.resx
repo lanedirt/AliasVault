@@ -289,7 +289,7 @@
   </data>
   <!-- General UI text -->
   <data name="LockVault" xml:space="preserve">
-    <value>Tresor abschließen</value>
+    <value>Tresor sperren</value>
     <comment>Tooltip text for lock vault button</comment>
   </data>
   <data name="Home" xml:space="preserve">
@@ -301,7 +301,7 @@
     <comment>Notes section heading</comment>
   </data>
   <data name="SyncVaultData" xml:space="preserve">
-    <value>Tresor-Daten synchronisieren</value>
+    <value>Tresor synchronisieren</value>
     <comment>Tooltip text for sync vault data button</comment>
   </data>
 </root>
