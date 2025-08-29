@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 
+import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
 import type { Credential, TotpCode } from '@/utils/dist/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
@@ -12,7 +13,6 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
-import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
 
 type TotpSectionProps = {
   credential: Credential;

@@ -4,13 +4,13 @@ import { StyleSheet, View, Text, TouchableOpacity, Keyboard, Platform, Alert } f
 import ContextMenu, { OnPressMenuItemEvent } from 'react-native-context-menu-view';
 import Toast from 'react-native-toast-message';
 
+import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
 import type { Credential } from '@/utils/dist/shared/models/vault';
 
 import { useColors } from '@/hooks/useColorScheme';
 
 import { CredentialIcon } from '@/components/credentials/CredentialIcon';
 import { useAuth } from '@/context/AuthContext';
-import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
 
 type CredentialCardProps = {
   credential: Credential;

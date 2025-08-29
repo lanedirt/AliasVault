@@ -5,6 +5,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, Easing } 
 import Toast from 'react-native-toast-message';
 
 import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
+
 import { useColors } from '@/hooks/useColorScheme';
 
 import { useAuth } from '@/context/AuthContext';
