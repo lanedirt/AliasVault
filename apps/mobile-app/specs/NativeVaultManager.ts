@@ -45,6 +45,10 @@ export interface Spec extends TurboModule {
   // Exact alarm permission management
   canScheduleExactAlarms(): Promise<boolean>;
   requestExactAlarmPermission(): Promise<string>;
+  
+  // Battery optimization management
+  isIgnoringBatteryOptimizations(): Promise<boolean>;
+  requestIgnoreBatteryOptimizations(): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('NativeVaultManager');

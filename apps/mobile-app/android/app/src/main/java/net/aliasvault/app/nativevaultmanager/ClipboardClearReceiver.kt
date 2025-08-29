@@ -19,7 +19,6 @@ class ClipboardClearReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         try {
             Log.d(TAG, "Received broadcast to clear clipboard")
-
             val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             clipboardManager.clearPrimaryClip()
 
