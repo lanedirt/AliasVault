@@ -155,7 +155,8 @@
     "deleteAttachment": "Delete",
     "toasts": {
       "credentialUpdated": "Credential updated successfully",
-      "credentialCreated": "Credential created successfully"
+      "credentialCreated": "Credential created successfully",
+      "credentialDeleted": "Credential deleted successfully"
     },
     "createNewAliasFor": "Create new alias for",
     "errors": {
