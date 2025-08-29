@@ -176,6 +176,7 @@ const Unlock: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t('auth.passwordPlaceholder')}
             required
+            autoFocus
           />
         </div>
 
