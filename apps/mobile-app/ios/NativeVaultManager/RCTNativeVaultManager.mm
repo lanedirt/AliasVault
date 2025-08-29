@@ -137,4 +137,8 @@
     [vaultManager openAutofillSettingsPage:resolve rejecter:reject];
 }
 
+- (void)copyToClipboardWithExpiration:(NSString *)text expirationSeconds:(double)expirationSeconds resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    [vaultManager copyToClipboardWithExpiration:text expirationSeconds:expirationSeconds resolver:resolve rejecter:reject];
+}
+
 @end

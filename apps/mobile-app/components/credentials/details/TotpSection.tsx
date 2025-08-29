@@ -1,4 +1,3 @@
-import * as Clipboard from 'expo-clipboard';
 import * as OTPAuth from 'otpauth';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +12,7 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useAuth } from '@/context/AuthContext';
 import { useDb } from '@/context/DbContext';
-import NativeVaultManager from '@/specs/NativeVaultManager';
+import { copyToClipboardWithExpiration } from '@/utils/ClipboardUtility';
 
 type TotpSectionProps = {
   credential: Credential;
@@ -74,15 +73,11 @@ export const TotpSection: React.FC<TotpSectionProps> = ({ credential }) : React.
    */
   const copyToClipboardWithClear = async (code: string): Promise<void> => {
     try {
-      await Clipboard.setStringAsync(code);
-      
       // Get clipboard clear timeout from settings
       const timeoutSeconds = await getClipboardClearTimeout();
 
-      // Schedule clipboard clear if timeout is set
-      if (timeoutSeconds > 0) {
-        await NativeVaultManager.clearClipboardAfterDelay(timeoutSeconds);
-      }
+      // Use centralized clipboard utility
+      await copyToClipboardWithExpiration(code, timeoutSeconds);
 
       if (Platform.OS !== 'android') {
         // Only show toast on iOS, Android already shows a native toast on clipboard interactions.
