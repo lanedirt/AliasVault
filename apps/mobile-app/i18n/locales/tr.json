@@ -155,7 +155,8 @@
     "deleteAttachment": "Sil",
     "toasts": {
       "credentialUpdated": "Kimlik bilgisi başarıyla güncellendi",
-      "credentialCreated": "Kimlik bilgisi başarıyla oluşturuldu"
+      "credentialCreated": "Kimlik bilgisi başarıyla oluşturuldu",
+      "credentialDeleted": "Credential deleted successfully"
     },
     "createNewAliasFor": "Create new alias for",
     "errors": {
@@ -213,6 +214,11 @@
       "15seconds": "15 saniye",
       "30seconds": "30 saniye"
     },
+    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
+    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
+    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
+    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
+    "disableBatteryOptimization": "Disable battery optimization",
     "identityGenerator": "Kimlik Oluşturucu",
     "security": "Güvenlik",
     "appVersion": "Uygulama sürümü {{version}} ({{url}})",
