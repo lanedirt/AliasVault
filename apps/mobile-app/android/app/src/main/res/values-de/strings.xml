@@ -12,5 +12,5 @@
   <string name="biometric_store_key_title">Schlüssel speichern</string>
   <string name="biometric_store_key_subtitle">Authentifiziere Dich, um Deinen Schlüssel sicher im Android Keystore zu speichern. Dies ermöglicht einen sicheren Zugriff auf Deinen Tresor.</string>
   <string name="biometric_unlock_vault_title">Tresor entsperren</string>
-  <string name="biometric_unlock_vault_subtitle">Authentifiziere Dich, um auf Ddeinen Tresor zuzugreifen</string>
+  <string name="biometric_unlock_vault_subtitle">Authentifiziere Dich, um auf Deinen Tresor zuzugreifen</string>
 </resources>
