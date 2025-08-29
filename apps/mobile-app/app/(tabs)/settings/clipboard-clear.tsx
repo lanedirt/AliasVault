@@ -27,7 +27,7 @@ export default function ClipboardClearScreen(): React.ReactNode {
   const { t } = useTranslation();
   const { getClipboardClearTimeout, setClipboardClearTimeout } = useAuth();
   const [selectedTimeout, setSelectedTimeout] = useState<number>(10);
-  const [canScheduleExactAlarms, setCanScheduleExactAlarms] = useState<boolean>(true);
+  const [isIgnoringBatteryOptimizations, setIsIgnoringBatteryOptimizations] = useState<boolean>(true);
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -40,30 +40,30 @@ export default function ClipboardClearScreen(): React.ReactNode {
     };
 
     /**
-     * Check exact alarm permission status on Android.
+     * Check battery optimization exemption status on Android.
      */
-    const checkExactAlarmPermission = async (): Promise<void> => {
+    const checkBatteryOptimization = async (): Promise<void> => {
       if (Platform.OS === 'android') {
         try {
-          const canSchedule = await NativeVaultManager.canScheduleExactAlarms();
-          setCanScheduleExactAlarms(canSchedule);
+          const isIgnoring = await NativeVaultManager.isIgnoringBatteryOptimizations();
+          setIsIgnoringBatteryOptimizations(isIgnoring);
         } catch (error) {
-          console.error('Error checking exact alarm permission:', error);
+          console.error('Error checking battery optimization status:', error);
           // Default to true to avoid showing the help section unnecessarily
-          setCanScheduleExactAlarms(true);
+          setIsIgnoringBatteryOptimizations(true);
         }
       }
     };
 
     loadCurrentTimeout();
-    checkExactAlarmPermission();
+    checkBatteryOptimization();
 
     // Listen for app state changes to re-check permission when app comes to foreground
     const subscription = AppState.addEventListener('change', async (nextAppState) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App coming to foreground, re-check exact alarm permission
+        // App coming to foreground, re-check battery optimization
         if (Platform.OS === 'android') {
-          await checkExactAlarmPermission();
+          await checkBatteryOptimization();
         }
       }
       appState.current = nextAppState;
@@ -83,17 +83,17 @@ export default function ClipboardClearScreen(): React.ReactNode {
   };
 
   /**
-   * Handle exact alarm permission request.
+   * Handle battery optimization exemption request.
    */
-  const handleRequestExactAlarmPermission = async (): Promise<void> => {
+  const handleRequestBatteryOptimizationExemption = async (): Promise<void> => {
     if (Platform.OS !== 'android') {
       return;
     }
 
     try {
-      await NativeVaultManager.requestExactAlarmPermission();
+      await NativeVaultManager.requestIgnoreBatteryOptimizations();
     } catch (error) {
-      console.error('Error handling exact alarm permission request:', error);
+      console.error('Error handling battery optimization exemption request:', error);
     }
   };
 
@@ -167,7 +167,6 @@ export default function ClipboardClearScreen(): React.ReactNode {
     permissionStatusContainer: {
       alignItems: 'center',
       flexDirection: 'row',
-      marginBottom: 12,
     },
     permissionStatusText: {
       fontSize: 13,
@@ -217,36 +216,36 @@ export default function ClipboardClearScreen(): React.ReactNode {
             </ThemedText>
           </View>
         )}
-        {Platform.OS === 'android' && !canScheduleExactAlarms && selectedTimeout > 0 && (
+        {Platform.OS === 'android' && !isIgnoringBatteryOptimizations && selectedTimeout > 0 && (
           <View style={styles.helpContainer}>
             <ThemedText style={styles.helpTitle}>
-              {t('settings.exactAlarmHelpTitle')}
+              {t('settings.batteryOptimizationHelpTitle')}
             </ThemedText>
             <View style={styles.permissionStatusContainer}>
               <Ionicons
-                name="alert-circle"
+                name="warning"
                 size={16}
                 color={colors.destructive || '#EF4444'}
               />
               <ThemedText style={[styles.permissionStatusText, styles.permissionDenied]}>
-                {t('settings.exactAlarmPermissionDenied')}
+                {t('settings.batteryOptimizationActive')}
               </ThemedText>
             </View>
             <ThemedText style={styles.helpDescription}>
-              {t('settings.exactAlarmHelpDescription')}
+              {t('settings.batteryOptimizationHelpDescription')}
             </ThemedText>
             <TouchableOpacity
               style={styles.helpButton}
-              onPress={handleRequestExactAlarmPermission}
+              onPress={handleRequestBatteryOptimizationExemption}
             >
-              <Ionicons name="settings" size={16} color={colors.background} />
+              <Ionicons name="battery-charging" size={16} color={colors.background} />
               <ThemedText style={styles.helpButtonText}>
-                {t('settings.enableExactAlarms')}
+                {t('settings.disableBatteryOptimization')}
               </ThemedText>
             </TouchableOpacity>
           </View>
         )}
-        {Platform.OS === 'android' && canScheduleExactAlarms && selectedTimeout > 0 && (
+        {Platform.OS === 'android' && isIgnoringBatteryOptimizations && selectedTimeout > 0 && (
           <View style={styles.helpContainer}>
             <View style={styles.permissionStatusContainer}>
               <Ionicons
@@ -255,12 +254,9 @@ export default function ClipboardClearScreen(): React.ReactNode {
                 color={colors.success || '#10B981'}
               />
               <ThemedText style={[styles.permissionStatusText, styles.permissionGranted]}>
-                {t('settings.exactAlarmPermissionGranted')}
+                {t('settings.batteryOptimizationDisabled')}
               </ThemedText>
             </View>
-            <ThemedText style={styles.helpDescription}>
-              {t('settings.exactAlarmEnabledDescription')}
-            </ThemedText>
           </View>
         )}
       </ThemedScrollView>

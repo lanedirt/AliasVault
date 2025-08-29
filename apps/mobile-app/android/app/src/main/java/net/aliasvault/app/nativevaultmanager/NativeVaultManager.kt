@@ -2,6 +2,7 @@ package net.aliasvault.app.nativevaultmanager
 
 import android.content.Intent
 import android.net.Uri
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.core.net.toUri
@@ -698,6 +699,60 @@ class NativeVaultManager(reactContext: ReactApplicationContext) :
         } catch (e: Exception) {
             Log.e(TAG, "Error requesting exact alarm permission", e)
             promise?.reject("ERR_EXACT_ALARM_REQUEST", "Failed to request exact alarm permission: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Check if the app is ignoring battery optimizations.
+     * @param promise The promise to resolve with boolean result
+     */
+    @ReactMethod
+    override fun isIgnoringBatteryOptimizations(promise: Promise?) {
+        try {
+            val isIgnoring = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                val powerManager = reactApplicationContext.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
+                powerManager.isIgnoringBatteryOptimizations(reactApplicationContext.packageName)
+            } else {
+                true // Pre-Android 6.0 doesn't have battery optimization
+            }
+            Log.d(TAG, "Is ignoring battery optimizations: $isIgnoring")
+            promise?.resolve(isIgnoring)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking battery optimization status", e)
+            promise?.reject("ERR_BATTERY_OPTIMIZATION_CHECK", "Failed to check battery optimization status: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Request battery optimization exemption by opening system settings.
+     * @param promise The promise to resolve
+     */
+    @ReactMethod
+    override fun requestIgnoreBatteryOptimizations(promise: Promise?) {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                val powerManager = reactApplicationContext.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
+
+                if (!powerManager.isIgnoringBatteryOptimizations(reactApplicationContext.packageName)) {
+                    Log.d(TAG, "Requesting battery optimization exemption via system settings")
+                    val intent = Intent().apply {
+                        action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                        data = Uri.parse("package:${reactApplicationContext.packageName}")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    reactApplicationContext.startActivity(intent)
+                    promise?.resolve("Battery optimization exemption request sent - user will be taken to settings")
+                } else {
+                    Log.d(TAG, "App is already ignoring battery optimizations")
+                    promise?.resolve("App is already ignoring battery optimizations")
+                }
+            } else {
+                Log.d(TAG, "Battery optimization not applicable on this Android version")
+                promise?.resolve("Battery optimization not applicable on this Android version")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting battery optimization exemption", e)
+            promise?.reject("ERR_BATTERY_OPTIMIZATION_REQUEST", "Failed to request battery optimization exemption: ${e.message}", e)
         }
     }
 
