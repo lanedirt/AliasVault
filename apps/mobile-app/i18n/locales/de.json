@@ -29,7 +29,7 @@
     "verifyingAuthCode": "Sicherheits-Code wird überprüft",
     "verify": "Bestätige",
     "unlockVault": "Tresor entsperren",
-    "enterPassword": "Gebe Dein Passwort zum Entsperren des Tresors ein",
+    "enterPassword": "Bitte gib Dein Passwort zum Entsperren des Tresors ein",
     "enterPasswordPlaceholder": "Passwort",
     "enterAuthCode": "Gib den 6-stelligen Sicherheits-Code ein.",
     "usernamePlaceholder": "Name / name@unternehmen.com",
@@ -246,7 +246,7 @@
       "keystoreAndroid": "Android-Schlüsselspeicher"
     },
     "autoLockSettings": {
-      "description": "Lege fest, wie lange die App im Hintergrund aktiv bleiben darf, bevor Du Dich erneut authentifizieren musst. Zum Entsperren des Tresors ist dann Face ID oder die Passworteingabe notwendig."
+      "description": "Lege fest, wie lange die App im Hintergrund aktiv bleiben darf, bevor Du Dich erneut authentifizieren musst. Die Entsperrung kannst Du dann mittels Biometrie oder Passworteingabe durchführen."
     },
     "identityGeneratorSettings": {
       "description": "Lege die Standardsprache und Geschlechtspräferenz für die Erstellung neuer Identitäten fest.",
