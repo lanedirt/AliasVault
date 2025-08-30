@@ -2,10 +2,15 @@
 <resources>
   <string name="app_name">AliasVault</string>
   <string name="autofill_service_description" translatable="true">AliasVault AutoFill</string>
-  <string name="aliasvault_icon">AliasVault icon</string>
+  <string name="aliasvault_icon">AliasVault-Icon</string>
   <!-- AutofillService strings -->
-  <string name="autofill_failed_to_retrieve">Failed to retrieve, open app</string>
-  <string name="autofill_no_match_found">No match found, create new?</string>
-  <string name="autofill_open_app">Open app</string>
-  <string name="autofill_vault_locked">Vault locked</string>
+  <string name="autofill_failed_to_retrieve">Abruf der Daten fehlgeschlagen. Öffne die App</string>
+  <string name="autofill_no_match_found">Keine Übereinstimmung gefunden, neun Eintrag erstellen?</string>
+  <string name="autofill_open_app">App öffnen</string>
+  <string name="autofill_vault_locked">Der Tresor ist gesperrt.</string>
+  <!-- Biometric prompts -->
+  <string name="biometric_store_key_title">Schlüssel speichern</string>
+  <string name="biometric_store_key_subtitle">Authentifiziere Dich, um Deinen Schlüssel sicher im Android Keystore zu speichern. Dies ermöglicht einen sicheren Zugriff auf Deinen Tresor.</string>
+  <string name="biometric_unlock_vault_title">Tresor entsperren</string>
+  <string name="biometric_unlock_vault_subtitle">Authentifiziere Dich, um auf Deinen Tresor zuzugreifen</string>
 </resources>

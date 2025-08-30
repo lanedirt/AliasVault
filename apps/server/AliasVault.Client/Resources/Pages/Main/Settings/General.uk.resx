@@ -45,9 +45,21 @@
     <value>Set the default email domain that will be used when creating new credentials.</value>
     <comment>Description for default email domain setting</comment>
   </data>
+  <data name="DefaultEmailDomainDescriptionNote">
+    <value>Note: Email received on private domains are end-to-end encrypted and can only be read by you, while email received on public domains can be read by anyone that knows the receiving email address.</value>
+    <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
+  </data>
+  <data name="DefaultEmailDomainLearnMore">
+    <value>Learn more about the difference</value>
+    <comment>Link to documentation for default email domain setting</comment>
+  </data>
   <data name="PrivateDomainsLabel">
     <value>Private Domains</value>
     <comment>Label for private domains group</comment>
+  </data>
+  <data name="PrivateDomainsDisabledLabel">
+    <value>No private email domains configured</value>
+    <comment>Label for private domains group when no private email domains are configured</comment>
   </data>
   <data name="PublicDomainsLabel">
     <value>Public Domains</value>
@@ -97,6 +109,43 @@
   <data name="FemaleOption">
     <value>Female</value>
     <comment>Female gender option</comment>
+  </data>
+  <!-- Clipboard Settings Section -->
+  <data name="ClipboardSettingsTitle">
+    <value>Clipboard Settings</value>
+    <comment>Title for clipboard settings section</comment>
+  </data>
+  <data name="ClipboardClearSecondsLabel">
+    <value>Auto-clear clipboard after copying</value>
+    <comment>Label for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearSecondsDescription">
+    <value>Automatically clear clipboard contents after copying passwords or other sensitive data.</value>
+    <comment>Description for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearDisabledOption">
+    <value>Disabled</value>
+    <comment>Option to disable clipboard clearing</comment>
+  </data>
+  <data name="ClipboardClear5SecondsOption">
+    <value>5 seconds</value>
+    <comment>Option to clear clipboard after 5 seconds</comment>
+  </data>
+  <data name="ClipboardClear10SecondsOption">
+    <value>10 seconds</value>
+    <comment>Option to clear clipboard after 10 seconds</comment>
+  </data>
+  <data name="ClipboardClear15SecondsOption">
+    <value>15 seconds</value>
+    <comment>Option to clear clipboard after 15 seconds</comment>
+  </data>
+  <data name="NoteLabel">
+    <value>Note</value>
+    <comment>Label for note/warning text</comment>
+  </data>
+  <data name="ClipboardClearLimitationNote">
+    <value>Note: clearing the clipboard in the web app is only possible when the tab is active. If the tab loses focus, the clipboard will be cleared when it comes back into focus.</value>
+    <comment>Note explaining limitations of clipboard clearing feature</comment>
   </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">

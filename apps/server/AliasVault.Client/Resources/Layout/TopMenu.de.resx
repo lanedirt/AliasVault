@@ -21,20 +21,20 @@
   </xsd:schema>
   <!-- Main navigation links -->
   <data name="CredentialsNav">
-    <value>Credentials</value>
+    <value>Zugangsdaten</value>
     <comment>Main navigation link for credentials section</comment>
   </data>
   <data name="EmailsNav">
-    <value>Emails</value>
+    <value>E-Mails</value>
     <comment>Main navigation link for emails section</comment>
   </data>
   <!-- Settings menu items -->
   <data name="GeneralSettingsNav">
-    <value>General settings</value>
+    <value>Allgemeine Einstellungen</value>
     <comment>Navigation link for general settings</comment>
   </data>
   <data name="SecuritySettingsNav">
-    <value>Security settings</value>
+    <value>Sicherheitseinstellungen</value>
     <comment>Navigation link for security settings</comment>
   </data>
   <data name="ImportExportNav">
@@ -42,26 +42,26 @@
     <comment>Navigation link for import/export settings</comment>
   </data>
   <data name="ExtensionsAppsNav">
-    <value>Extensions &amp; Apps</value>
+    <value>Erweiterungen &amp; Apps</value>
     <comment>Navigation link for extensions and apps settings</comment>
   </data>
   <!-- Menu actions -->
   <data name="ToggleDarkMode">
-    <value>Toggle dark mode</value>
+    <value>Helles/Dunkles Layout umschalten</value>
     <comment>Button text for toggling dark/light theme</comment>
   </data>
   <data name="LogOut">
-    <value>Log out</value>
+    <value>Abmelden</value>
     <comment>Button text for logging out</comment>
   </data>
   <!-- Accessibility labels -->
   <data name="OpenMenuLabel">
-    <value>Open menu</value>
+    <value>Menü öffnen</value>
     <comment>Screen reader label for mobile menu button</comment>
   </data>
   <!-- Status labels -->
   <data name="NewLabel">
-    <value>NEW</value>
+    <value>NEU</value>
     <comment>Label for new features or menu items</comment>
   </data>
   <data name="BetaLabel">

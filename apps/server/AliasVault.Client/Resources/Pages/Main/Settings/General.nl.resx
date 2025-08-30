@@ -45,9 +45,21 @@
     <value>Stel het standaard e-maildomein in dat wordt gebruikt bij het aanmaken van nieuwe inloggegevens.</value>
     <comment>Description for default email domain setting</comment>
   </data>
+  <data name="DefaultEmailDomainDescriptionNote">
+    <value>Let op: e-mails die worden ontvangen op privédomeinen zijn beveiligd met end-to-end versleuteling en uitsluitend door jou te lezen. E-mails die worden ontvangen op openbare domeinen kunnen daarentegen door iedereen worden gelezen die het ontvangende e-mailadres kent.</value>
+    <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
+  </data>
+  <data name="DefaultEmailDomainLearnMore">
+    <value>Lees meer over het verschil</value>
+    <comment>Link to documentation for default email domain setting</comment>
+  </data>
   <data name="PrivateDomainsLabel">
     <value>Privé Domeinen</value>
     <comment>Label for private domains group</comment>
+  </data>
+  <data name="PrivateDomainsDisabledLabel">
+    <value>Geen privé e-maildomeinen geconfigureerd</value>
+    <comment>Label for private domains group when no private email domains are configured</comment>
   </data>
   <data name="PublicDomainsLabel">
     <value>Publieke Domeinen</value>
@@ -98,9 +110,46 @@
     <value>Vrouw</value>
     <comment>Female gender option</comment>
   </data>
+  <!-- Clipboard Settings Section -->
+  <data name="ClipboardSettingsTitle">
+    <value>Klembord instellingen</value>
+    <comment>Title for clipboard settings section</comment>
+  </data>
+  <data name="ClipboardClearSecondsLabel">
+    <value>Automatisch klembord legen na kopiëren</value>
+    <comment>Label for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearSecondsDescription">
+    <value>Automatisch de inhoud van klembord wissen na het kopiëren van wachtwoorden of andere gevoelige gegevens.</value>
+    <comment>Description for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearDisabledOption">
+    <value>Uitgeschakeld</value>
+    <comment>Option to disable clipboard clearing</comment>
+  </data>
+  <data name="ClipboardClear5SecondsOption">
+    <value>5 seconden</value>
+    <comment>Option to clear clipboard after 5 seconds</comment>
+  </data>
+  <data name="ClipboardClear10SecondsOption">
+    <value>10 seconden</value>
+    <comment>Option to clear clipboard after 10 seconds</comment>
+  </data>
+  <data name="ClipboardClear15SecondsOption">
+    <value>15 seconden</value>
+    <comment>Option to clear clipboard after 15 seconds</comment>
+  </data>
+  <data name="NoteLabel">
+    <value>Opmerking</value>
+    <comment>Label for note/warning text</comment>
+  </data>
+  <data name="ClipboardClearLimitationNote">
+    <value>Klembord wissen in de webapp is alleen mogelijk als het tabblad actief is. Wanneer het tabblad de focus verliest, zal het klembord gewist worden wanneer het tabblad weer actief wordt.</value>
+    <comment>Note explaining limitations of clipboard clearing feature</comment>
+  </data>
   <!-- Password Settings Section -->
   <data name="PasswordSettingsTitle">
-    <value>Wachtwoord Instellingen</value>
+    <value>Wachtwoord instellingen</value>
     <comment>Title for password settings section</comment>
   </data>
   <!-- App Language Settings Section -->

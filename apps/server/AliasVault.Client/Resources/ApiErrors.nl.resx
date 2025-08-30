@@ -119,12 +119,6 @@
   <data name="REFRESH_TOKEN_REQUIRED" xml:space="preserve">
     <value>Refreshtoken is vereist.</value>
   </data>
-  <data name="USER_NOT_FOUND_IN_TOKEN" xml:space="preserve">
-    <value>Gebruiker bestaat niet (name-1)</value>
-  </data>
-  <data name="USER_NOT_FOUND_IN_DATABASE" xml:space="preserve">
-    <value>Gebruiker bestaat niet (name-2)</value>
-  </data>
   <data name="ACCOUNT_BLOCKED" xml:space="preserve">
     <value>Je account is uitgeschakeld. Als je denkt dat dit een vergissing is, neem dan contact op met de ondersteuning.</value>
   </data>
