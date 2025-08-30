@@ -156,7 +156,7 @@
     "toasts": {
       "credentialUpdated": "Käyttäjätunnus päivitetty onnistuneesti",
       "credentialCreated": "Käyttäjätunnus luotu onnistuneesti",
-      "credentialDeleted": "Credential deleted successfully"
+      "credentialDeleted": "Käyttäjätunnus poistettu onnistuneesti."
     },
     "createNewAliasFor": "Luo uusi alias käyttäjälle",
     "errors": {
@@ -214,11 +214,11 @@
       "15seconds": "15 sekuntia",
       "30seconds": "30 sekuntia"
     },
-    "batteryOptimizationHelpTitle": "Enable Background Clipboard Clearing",
-    "batteryOptimizationActive": "Battery optimization is blocking background tasks",
-    "batteryOptimizationDisabled": "Background clipboard clearing enabled",
-    "batteryOptimizationHelpDescription": "Android's battery optimization prevents reliable clipboard clearing when the app is in the background. Disabling battery optimization for AliasVault allows precise background clipboard clearing and automatically grants necessary alarm permissions.",
-    "disableBatteryOptimization": "Disable battery optimization",
+    "batteryOptimizationHelpTitle": "Leikepöydän tyhjennyksen taustalla käyttöönotto.",
+    "batteryOptimizationActive": "Akun optimointi estää taustatehtävien suorittamisen.",
+    "batteryOptimizationDisabled": "Leikepöydän tyhjennys taustalla otettu käyttöön.",
+    "batteryOptimizationHelpDescription": "Androidin akun optimointi estää luotettavan leikepöydän tyhjennyksen, kun sovellus on taustalla. Akun optimoinnin poistaminen AliasVaultilta mahdollistaa tarkan taustaleikepöydältä ja antaa automaattisesti tarvittavat hälytysoikeudet.",
+    "disableBatteryOptimization": "Poista akkuvirran optimointi käytöstä",
     "identityGenerator": "Henkilöllisyyden luonti",
     "security": "Turvallisuus",
     "appVersion": "Sovelluksen versio {{version}} ({{url}})",
