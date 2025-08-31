@@ -130,6 +130,8 @@ const ValidatedFormFieldComponent = forwardRef<ValidatedFormFieldRef, ValidatedF
                 clearButtonMode={Platform.OS === 'ios' ? "while-editing" : "never"}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
+                multiline={false}
+                numberOfLines={1}
                 {...props}
               />
               {showClearButton && (

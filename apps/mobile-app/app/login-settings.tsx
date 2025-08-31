@@ -195,6 +195,8 @@ export default function SettingsScreen() : React.ReactNode {
                     placeholderTextColor={colors.textMuted}
                     autoCapitalize="none"
                     autoCorrect={false}
+                    multiline={false}
+                    numberOfLines={1}
                   />
                 </View>
               )}

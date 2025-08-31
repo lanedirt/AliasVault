@@ -399,6 +399,8 @@ export default function CredentialsScreen() : React.ReactNode {
                   value={searchQuery}
                   autoCorrect={false}
                   autoCapitalize="none"
+                  multiline={false}
+                  numberOfLines={1}
                   onChangeText={setSearchQuery}
                   clearButtonMode={Platform.OS === 'ios' ? 'while-editing' : 'never'}
                 />

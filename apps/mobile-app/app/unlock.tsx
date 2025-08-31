@@ -310,6 +310,8 @@ export default function UnlockScreen() : React.ReactNode {
                       onChangeText={setPassword}
                       autoCapitalize="none"
                       autoCorrect={false}
+                      multiline={false}
+                      numberOfLines={1}
                     />
                   </View>
 

@@ -41,6 +41,8 @@ export const ThemedTextInput: React.FC<ThemedTextInputProps> = ({ error, style, 
           autoCapitalize="none"
           autoComplete="off"
           autoCorrect={false}
+          multiline={false}
+          numberOfLines={1}
           {...props}
         />
       </View>
