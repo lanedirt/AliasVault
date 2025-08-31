@@ -2,12 +2,20 @@ import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import de from './locales/de.json';
 import en from './locales/en.json';
+import fi from './locales/fi.json';
+import it from './locales/it.json';
 import nl from './locales/nl.json';
+import zh from './locales/zh.json';
 
 const resources = {
+  de: { translation: de },
   en: { translation: en },
+  fi: { translation: fi },
   nl: { translation: nl },
+  it: { translation: it },
+  zh: { translation: zh },
 };
 
 /**

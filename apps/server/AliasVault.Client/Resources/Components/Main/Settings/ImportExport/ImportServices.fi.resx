@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- 1Password -->
+  <data name="OnePasswordDescription" xml:space="preserve">
+    <value>Tuo salasanoja 1Password holvistasi</value>
+    <comment>Description for 1Password import service</comment>
+  </data>
+  <data name="OnePasswordInstructionsPart1" xml:space="preserve">
+    <value>Jotta voit tuoda 1Password holvin, sinun täytyy viedä se CSV tiedosto. Voit tehdä tämän kirjautumalla 1Password tilillesi 1Password 8 työpöytäsovelluksessa (Windows / MacOS / Linux), menossa 'Tiedosto' valikkoon ja valitse 'Vie' (CSV).</value>
+    <comment>1Password export instructions part 1</comment>
+  </data>
+  <data name="OnePasswordInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>1Password export instructions part 2</comment>
+  </data>
+  <!-- Bitwarden -->
+  <data name="BitwardenDescription" xml:space="preserve">
+    <value>Tuo salasanat Bitwarden holvistasi</value>
+    <comment>Description for Bitwarden import service</comment>
+  </data>
+  <data name="BitwardenInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi Bitwarden-holvin, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen kirjautumumalla Bitwarden-tilillesi. menemällä "Tools" valikkoon ja valitsemalla "Export vault (to CSV)".</value>
+    <comment>Bitwarden export instructions part 1</comment>
+  </data>
+  <data name="BitwardenInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>Bitwarden export instructions part 2</comment>
+  </data>
+  <!-- LastPass -->
+  <data name="LastPassDescription" xml:space="preserve">
+    <value>Tuo salasanat LastPass-holvistasi</value>
+    <comment>Description for LastPass import service</comment>
+  </data>
+  <data name="LastPassInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi LastPass-holvin, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen kirjautumumalla LastPass-tilillesi. menemällä "Advanced Options" valikkoon työkaluvalikossa ja valitsemalla "Export" > "LastPass CSV File".</value>
+    <comment>LastPass export instructions part 1</comment>
+  </data>
+  <data name="LastPassInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>LastPass export instructions part 2</comment>
+  </data>
+  <!-- Chrome -->
+  <data name="ChromeDescription" xml:space="preserve">
+    <value>Tuo salasanat Chrome Password Managerista</value>
+    <comment>Description for Chrome import service</comment>
+  </data>
+  <data name="ChromeInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi salasanasi Chrome Password Managerista, sinun tarvitsee tallentaa ne CSV tiedostona. Voit tehdä sen kirjautumalla Chrome-selaimeen. Siirrty "Settings" ja "Password and AutoFill". Tämän jälkeen valitse tiedostomuodoksi "Google Password Manager". Suorita "Export Passwords" toiminto.</value>
+    <comment>Chrome export instructions part 1</comment>
+  </data>
+  <data name="ChromeInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>Chrome export instructions part 2</comment>
+  </data>
+  <!-- KeePass -->
+  <data name="KeePassDescription" xml:space="preserve">
+    <value>Tuo salasanat KeePassista</value>
+    <comment>Description for KeePass import service</comment>
+  </data>
+  <data name="KeePassInstructionsPart1" xml:space="preserve">
+    <value>Jotta voit tuoda KeePass holvin, sinun täytyy viedä se CSV-tiedostoksi. Voit tehdä tämän menemällä 'File' -valikkoon ja valitsemalla 'Export' (CSV).</value>
+    <comment>KeePass export instructions part 1</comment>
+  </data>
+  <data name="KeePassInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>KeePass export instructions part 2</comment>
+  </data>
+  <!-- Generic CSV -->
+  <data name="GenericCsvDescription" xml:space="preserve">
+    <value>Tuo käyttäjätunnukset käyttäen mallin CSV-muotoa</value>
+    <comment>Description for Generic CSV import service</comment>
+  </data>
+  <data name="GenericCsvInstructionsPart1" xml:space="preserve">
+    <value>Eikä käyttämääsi salasananhallintaohjelmaa tueta? Voit aina tuoda käyttäjätunnuksesi ja salasanasi AliasVaultiin käyttämällä sen sijaan yleistä CSV-mallia. </value>
+    <comment>Generic CSV instructions part 1</comment>
+  </data>
+  <data name="GenericCsvStep1" xml:space="preserve">
+    <value>Lataa AliasVault CSV-tuontitiedosto</value>
+    <comment>Generic CSV step 1</comment>
+  </data>
+  <data name="GenericCsvStep2" xml:space="preserve">
+    <value>Avaa se taulukkolaskentaohjelmassa (Microsoft Excel, Google Sheets tms.)</value>
+    <comment>Generic CSV step 2</comment>
+  </data>
+  <data name="GenericCsvStep3" xml:space="preserve">
+    <value>Täytä käyttäjätunnuksesi (korvaa esimerkkitiedot)</value>
+    <comment>Generic CSV step 3</comment>
+  </data>
+  <data name="GenericCsvStep4" xml:space="preserve">
+    <value>Tallenna CSV-muodossa ja lataa se alapuolelle</value>
+    <comment>Generic CSV step 4</comment>
+  </data>
+  <data name="GenericCsvTemplateDownloadError" xml:space="preserve">
+    <value>CSV- mallin lataaminen epäonnistui. Yritä uudelleen.</value>
+    <comment>Error message for template download failure</comment>
+  </data>
+  <!-- Firefox -->
+  <data name="FirefoxDescription" xml:space="preserve">
+    <value>Tuo salasanoja Firefox Password Managerista</value>
+    <comment>Description for Firefox import service</comment>
+  </data>
+  <data name="FirefoxInstructionsPart1" xml:space="preserve">
+    <value>Tuodakseni Firefoxin salasanat, sinun täytyy tallentaa ne CSV-tiedostoksi. Voit tehdä send avaamalla Firefox-selaimen, menemällä valikkoon > "Salasanat". Klikkaa sitten valikon kuvaketta oikeasta yläkulmasta ja valitse "Vie salasanat"..</value>
+    <comment>Firefox export instructions part 1</comment>
+  </data>
+  <data name="FirefoxInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>Firefox export instructions part 2</comment>
+  </data>
+  <!-- Dashlane -->
+  <data name="DashlaneDescription" xml:space="preserve">
+    <value>Tuo salasanat Dashlane tililtä</value>
+    <comment>Description for Dashlane import service</comment>
+  </data>
+  <data name="DashlaneInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi Dashlane-salasanat, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen kirjautumumalla LastPass-tilillesi. menemällä  > "Account" > "Asetukset" valikkoon ja valitsemalla "Export ti CSV".</value>
+    <comment>Dashlane export instructions part 1</comment>
+  </data>
+  <data name="DashlaneInstructionsPart2" xml:space="preserve">
+    <value>Huomaa: .zip tiedosto, jonka lataat, sisältää "credentials.csv" tiedosto. Sinun täytyy ensin purkaa arkisto ja sitten ladata "credentials.csv" CSV-tiedosto.</value>
+    <comment>Dashlane export instructions part 2</comment>
+  </data>
+  <!-- KeePassXC -->
+  <data name="KeePassXCDescription" xml:space="preserve">
+    <value>Tuo salasanat KeePassXC:stä</value>
+    <comment>Description for KeePassXC import service</comment>
+  </data>
+  <data name="KeePassXCInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi KeePassXC holvisi, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen menemällä valikkoon > "File" > "Export" ja valitsemalla "Export (to CSV".</value>
+    <comment>KeePassXC export instructions part 1</comment>
+  </data>
+  <data name="KeePassXCInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>KeePassXC export instructions part 2</comment>
+  </data>
+  <!-- Proton Pass -->
+  <data name="ProtonPassDescription" xml:space="preserve">
+    <value>Tuo salasanat Proton Passista</value>
+    <comment>Description for Proton Pass import service</comment>
+  </data>
+  <data name="ProtonPassInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi Proton Pass -salasanasi, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen kirjautumalla Proton Pass-verkkoversioon ja valitsemalla sieltä Settings valikosta > "Export" > "File Format CSV". Tämän jälkeen valitse "Export". </value>
+    <comment>Proton Pass export instructions part 1</comment>
+  </data>
+  <data name="ProtonPassInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>Proton Pass export instructions part 2</comment>
+  </data>
+  <!-- Strongbox -->
+  <data name="StrongboxDescription" xml:space="preserve">
+    <value>Tuo salasanat Strongboxista</value>
+    <comment>Description for Strongbox import service</comment>
+  </data>
+  <data name="StrongboxInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi StrongBox holvisi, sinun pitää tallentaa se CSV-tiedostona. Voit tehdä sen menemällä valikkoon > "File" ja valitsemalla "Export Database (to CSV".</value>
+    <comment>Strongbox export instructions part 1</comment>
+  </data>
+  <data name="StrongboxInstructionsPart2" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>Strongbox export instructions part 2</comment>
+  </data>
+  <!-- AliasVault -->
+  <data name="AliasVaultDescription" xml:space="preserve">
+    <value>Tuo salasanat toisesta AliasVault palvelimesta tai manuaalisesta varmuuskopiosta</value>
+    <comment>Description for AliasVault import service</comment>
+  </data>
+  <data name="AliasVaultInstructionsPart1" xml:space="preserve">
+    <value>Jos sinulla on AliasVault-tietokantasi varmuuskopio CSV-tiedostosta (eri AliasVault-palvelimelta), voit tuoda sen tänne.</value>
+    <comment>AliasVault import instructions</comment>
+  </data>
+  <!-- Dropbox -->
+  <data name="DropboxDescription" xml:space="preserve">
+    <value>Tuo salasanat Dropboxin salasanoista</value>
+    <comment>Description for Dropbox import service</comment>
+  </data>
+  <data name="DropboxInstructionsPart1" xml:space="preserve">
+    <value>Tuodaksesi Dropbox Passwords -salasanat, sinun pitää tallentaa ne CSV-tiedostona.Tee se käynnistämällä Dropbox Passwords ja mene > "Accoutn" > "Export (to CSV)."</value>
+    <comment>Dropbox export instructions part 1</comment>
+  </data>
+  <!-- Common text that can be reused -->
+  <data name="UploadFileInstructionCommon" xml:space="preserve">
+    <value>Kun olet tallentanut tiedoston, voit ladata sen alta.</value>
+    <comment>Common instruction for file upload</comment>
+  </data>
+</root>

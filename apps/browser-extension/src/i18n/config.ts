@@ -3,20 +3,36 @@
  * Add new languages here to make them available throughout the application
  */
 
+import deTranslations from './locales/de.json';
 import enTranslations from './locales/en.json';
+import fiTranslations from './locales/fi.json';
+import itTranslations from './locales/it.json';
 import nlTranslations from './locales/nl.json';
+import zhTranslations from './locales/zh.json';
 
 /**
  * Create a map of all available languages and their resources for i18n.
  * When adding a new language, add the translation JSON file to the locales folder and add the language to the map here.
  */
 export const LANGUAGE_RESOURCES = {
+  de: {
+    translation: deTranslations
+  },
   en: {
     translation: enTranslations
   },
+  fi: {
+    translation: fiTranslations
+  },
+  it: {
+    translation: itTranslations
+  },
   nl: {
     translation: nlTranslations
-  }
+  },
+  zh: {
+    translation: zhTranslations
+  },
 };
 
 /**
@@ -25,16 +41,40 @@ export const LANGUAGE_RESOURCES = {
  */
 export const AVAILABLE_LANGUAGES: ILanguageConfig[] = [
   {
+    code: 'de',
+    name: 'German',
+    nativeName: 'Deutsch',
+    flag: '🇩🇪'
+  },
+  {
     code: 'en',
     name: 'English',
     nativeName: 'English',
     flag: '🇺🇸'
   },
   {
+    code: 'fi',
+    name: 'Finnish',
+    nativeName: 'Suomi',
+    flag: '🇫🇮'
+  },
+  {
+    code: 'it',
+    name: 'Italian',
+    nativeName: 'Italiano',
+    flag: '🇮🇹'
+  },
+  {
     code: 'nl',
     name: 'Dutch',
     nativeName: 'Nederlands',
     flag: '🇳🇱'
+  },
+  {
+    code: 'zh',
+    name: 'Chinese',
+    nativeName: '简体中文',
+    flag: '🇨🇳'
   },
   /*
    * {

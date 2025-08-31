@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <!-- Page title and description -->
+  <data name="PageTitle">
+    <value>Yleiset asetukset</value>
+    <comment>Page title for general settings</comment>
+  </data>
+  <data name="PageDescription">
+    <value>Määritä yleiset AliasVault-asetukset.</value>
+    <comment>Page description for general settings</comment>
+  </data>
+  <data name="BreadcrumbTitle">
+    <value>Yleiset asetukset</value>
+    <comment>Breadcrumb title for general settings</comment>
+  </data>
+  <!-- Email Settings Section -->
+  <data name="EmailSettingsTitle">
+    <value>Sähköpostiasetukset</value>
+    <comment>Title for email settings section</comment>
+  </data>
+  <data name="DefaultEmailDomainLabel">
+    <value>Oletussähköpostin domain</value>
+    <comment>Label for default email domain setting</comment>
+  </data>
+  <data name="DefaultEmailDomainDescription">
+    <value>Aseta oletussähköpostin domain, jota haluat käyttää uusillle käyttäjätunnuksille. </value>
+    <comment>Description for default email domain setting</comment>
+  </data>
+  <data name="DefaultEmailDomainDescriptionNote">
+    <value>Huomautus: Yksityisillä verkkotunnuksilla vastaanotettu sähköpostiosoite on salattu, ja vain sinä voit lukea sen kun taas sähköposti vastaanotettu julkisella verkkotunnuksella voi lukea kuka tahansa, joka tietää vastaanottavan sähköpostiosoitteen.</value>
+    <comment>Note for default email domain setting explaining the difference between private and public domains.</comment>
+  </data>
+  <data name="DefaultEmailDomainLearnMore">
+    <value>Lue lisää eroista</value>
+    <comment>Link to documentation for default email domain setting</comment>
+  </data>
+  <data name="PrivateDomainsLabel">
+    <value>Yksityiset verkkotunnukset</value>
+    <comment>Label for private domains group</comment>
+  </data>
+  <data name="PrivateDomainsDisabledLabel">
+    <value>Yksityisiä sähköposti verkkotunnuksia ei ole määritelty</value>
+    <comment>Label for private domains group when no private email domains are configured</comment>
+  </data>
+  <data name="PublicDomainsLabel">
+    <value>Julkiset verkkotunnukset</value>
+    <comment>Label for public domains group</comment>
+  </data>
+  <data name="AutoEmailRefreshLabel">
+    <value>Päivitä sähköpostien sisältö automaattisesti, kun uudet saapuvat</value>
+    <comment>Label for auto email refresh setting</comment>
+  </data>
+  <!-- Alias Settings Section -->
+  <data name="AliasSettingsTitle">
+    <value>Aliaksen asetukset</value>
+    <comment>Title for alias settings section</comment>
+  </data>
+  <data name="AliasGenerationLanguageLabel">
+    <value>Alias-generaattorin kieli</value>
+    <comment>Label for alias generation language setting</comment>
+  </data>
+  <data name="AliasGenerationLanguageDescription">
+    <value>Aseta oletuskieli, jota käytetään luotaessa uusia henkilöllisyyksiä.</value>
+    <comment>Description for alias generation language setting</comment>
+  </data>
+  <data name="EnglishOption">
+    <value>Englanti</value>
+    <comment>English language option</comment>
+  </data>
+  <data name="DutchOption">
+    <value>Hollanti</value>
+    <comment>Dutch language option</comment>
+  </data>
+  <data name="AliasGenerationGenderLabel">
+    <value>Aliaksen sukupuoli</value>
+    <comment>Label for alias generation gender setting</comment>
+  </data>
+  <data name="AliasGenerationGenderDescription">
+    <value>Aseta oletussukupuoli uusille henkilöllisyyksille.</value>
+    <comment>Description for alias generation gender setting</comment>
+  </data>
+  <data name="RandomOption">
+    <value>Satunnainen</value>
+    <comment>Random gender option</comment>
+  </data>
+  <data name="MaleOption">
+    <value>Mies</value>
+    <comment>Male gender option</comment>
+  </data>
+  <data name="FemaleOption">
+    <value>Nainen</value>
+    <comment>Female gender option</comment>
+  </data>
+  <!-- Clipboard Settings Section -->
+  <data name="ClipboardSettingsTitle">
+    <value>Leikepöydän asetukset</value>
+    <comment>Title for clipboard settings section</comment>
+  </data>
+  <data name="ClipboardClearSecondsLabel">
+    <value>Tyhjennä leikepöytä automaattisesti kopioinnin jälkeen</value>
+    <comment>Label for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearSecondsDescription">
+    <value>Tyhjennä leikepöydän sisältö automaattisesti salasanojen tai muiden arkaluonteisten tietojen kopioinnin jälkeen.</value>
+    <comment>Description for clipboard clear seconds setting</comment>
+  </data>
+  <data name="ClipboardClearDisabledOption">
+    <value>Pois käytöstä</value>
+    <comment>Option to disable clipboard clearing</comment>
+  </data>
+  <data name="ClipboardClear5SecondsOption">
+    <value>5 sekuntia</value>
+    <comment>Option to clear clipboard after 5 seconds</comment>
+  </data>
+  <data name="ClipboardClear10SecondsOption">
+    <value>10 sekuntia</value>
+    <comment>Option to clear clipboard after 10 seconds</comment>
+  </data>
+  <data name="ClipboardClear15SecondsOption">
+    <value>15 sekuntia</value>
+    <comment>Option to clear clipboard after 15 seconds</comment>
+  </data>
+  <data name="NoteLabel">
+    <value>Muistiinpanot</value>
+    <comment>Label for note/warning text</comment>
+  </data>
+  <data name="ClipboardClearLimitationNote">
+    <value>Leikepöydän tyhjennys web-sovelluksessa on mahdollista vain, kun välilehti on aktiivinen. Kun välilehti menettää tarkennuksen, se tyhjentää leikepöydän, kun se tulee keskittyä uudelleen.</value>
+    <comment>Note explaining limitations of clipboard clearing feature</comment>
+  </data>
+  <!-- Password Settings Section -->
+  <data name="PasswordSettingsTitle">
+    <value>Salasana-asetukset</value>
+    <comment>Title for password settings section</comment>
+  </data>
+  <!-- App Language Settings Section -->
+  <data name="AppLanguageTitle">
+    <value>Sovelluksen kieli</value>
+    <comment>Title for app language settings section</comment>
+  </data>
+  <data name="AppLanguageLabel">
+    <value>Kieli</value>
+    <comment>Label for app language setting</comment>
+  </data>
+  <data name="AppLanguageDescription">
+    <value>Aseta kieli sovelluksen käyttöliittymälle.</value>
+    <comment>Description for app language setting</comment>
+  </data>
+</root>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">AliasVault</string>
+  <string name="autofill_service_description" translatable="true">Автозаполнение AliasVault</string>
+  <string name="aliasvault_icon">Значок AliasVault</string>
+  <!-- AutofillService strings -->
+  <string name="autofill_failed_to_retrieve">Не удалось извлечь, открыть приложение</string>
+  <string name="autofill_no_match_found">Совпадений не найдено, создать новое?</string>
+  <string name="autofill_open_app">Открыть приложение</string>
+  <string name="autofill_vault_locked">Хранилище заблокировано</string>
+  <!-- Biometric prompts -->
+  <string name="biometric_store_key_title">Store Encryption Key</string>
+  <string name="biometric_store_key_subtitle">Authenticate to securely store your encryption key in the Android Keystore. This enables secure access to your vault.</string>
+  <string name="biometric_unlock_vault_title">Unlock Vault</string>
+  <string name="biometric_unlock_vault_subtitle">Authenticate to access your vault</string>
+</resources>

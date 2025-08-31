@@ -21,46 +21,46 @@
   </xsd:schema>
   <!-- Assistant messages -->
   <data name="GreatNowLetsSetupUsername">
-    <value>Great! Now, let's set up your username for AliasVault.</value>
+    <value>Großartig! Lass uns jetzt Deinen Nutzernamen für AliasVault festlegen.</value>
     <comment>Assistant message about setting up username</comment>
   </data>
   <data name="EnterUsernameInstructions">
-    <value>Please enter a username you'd like to use. This can be your email address or any unique name you prefer.</value>
+    <value>Bitte gib einen Benutzernamen ein, den Du verwenden möchtest. Das kann Deine E-Mail-Adresse oder ein anderer einzigartiger Name sein.</value>
     <comment>Instructions for entering username</comment>
   </data>
   <data name="RememberUsernameNote">
-    <value>Remember: This is what you'll use to log in later, so make sure it's something you'll remember!</value>
+    <value>Denke daran: Damit wirst Du Dich später anmelden, also wähle etwas, das Du Dir gut merken kannst!</value>
     <comment>Important note about remembering username</comment>
   </data>
   <!-- Form labels -->
   <data name="UsernameLabel">
-    <value>Username</value>
+    <value>Benutzername</value>
     <comment>Label for username input field</comment>
   </data>
   <data name="UsernamePlaceholder">
-    <value>Enter your desired username or email</value>
+    <value>Gib Deinen gewünschten Benutzernamen oder E-Mail-Adresse ein</value>
     <comment>Placeholder text for username input</comment>
   </data>
   <!-- Validation messages -->
   <data name="ValidatingUsernameMessage">
-    <value>Validating username...</value>
+    <value>Der Benutzername wird überprüft...</value>
     <comment>Message shown while validating username</comment>
   </data>
   <data name="UsernameAvailableMessage">
-    <value>Username is available!</value>
+    <value>Der Benutzername ist verfügbar!</value>
     <comment>Message shown when username is available</comment>
   </data>
   <data name="UsernameRequiredError">
-    <value>Username is required.</value>
+    <value>Der Benutzername ist erforderlich.</value>
     <comment>Error message when username is empty</comment>
   </data>
   <data name="ServerCommunicationError">
-    <value>An error occurred during communication with the AliasVault server.</value>
+    <value>Bei der Kommunikation mit dem AliasVault-Server ist ein Fehler aufgetreten.</value>
     <comment>Error message for server communication issues</comment>
   </data>
   <!-- Alt text -->
   <data name="AssistantAvatarAlt">
-    <value>AliasVault Assistant</value>
+    <value>AliasVault-Assistent</value>
     <comment>Alt text for assistant avatar image</comment>
   </data>
 </root>

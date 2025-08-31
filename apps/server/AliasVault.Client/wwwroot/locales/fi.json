@@ -1,0 +1,25 @@
+{
+  "loading": {
+    "title": "AliasVault käynnistyy",
+    "message": "Alustetaan turvallista ympäristöä. AliasVault asettaa yksityisyytesi etusijalle toimien täysin verkkoselaimessasi. Ensimmäinen käynnistyskerta voi kestää jonkin aikaa. ",
+    "refreshText": "",
+    "refreshButtonText": "Päivitä sivu"
+  },
+  "errors": {
+    "unhandledError": "On tapahtunut käsittelemätön virhe. Yritä ladata sivu uudelleen. Jos ongelma jatkuu, ota yhteyttä tukeen.",
+    "webAssemblyError": "AliasVault tarvitsee WebAssemblyn, jota käyttämäsi selain ei tue. Kokeile käyttää nykyaikaisempaa selainta, joka tukee WebAssemblyä. ",
+    "reloadPageText": "Lataa sivu uudelleen"
+  },
+  "quotes": {
+    "security": [
+      "Henkilöllisyytesi on arvoikkain voimavarasi. Suojaa sitä ainokaisenasi. ",
+      "Digitaalisessa maailmassa vahva salasana on sinun ensimmäinen puolustuslinja.",
+      "Turvallisuus ei ole tuote, vaan prosessi.",
+      "Turvallisimmassakin ketjussa heikoin lenkki on inhimillinen tekijä.",
+      "Turvallisuus on aina ylenpalttista, kunnes se ei riitä.",
+      "Luota, mutta vahvista - erityisesti verkossa.",
+      "Datasi on vain niin turvallista kuin heikoin salasanasi .",
+      "Turvallisin salasana on se, jota et pysty muistamaan. "
+    ]
+  }
+}

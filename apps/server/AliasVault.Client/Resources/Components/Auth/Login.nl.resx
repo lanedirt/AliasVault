@@ -115,11 +115,11 @@
     <comment>Link text for creating a new vault</comment>
   </data>
   <data name="LoginWithRecoveryCodeLink" xml:space="preserve">
-    <value>inloggen met een herstelcode</value>
+    <value>Log in met een herstelcode.</value>
     <comment>Link text for logging in with recovery code</comment>
   </data>
   <data name="LoginWithAuthenticatorLink" xml:space="preserve">
-    <value>inloggen met authenticator code</value>
+    <value>Log in met een authenticator code.</value>
     <comment>Link text for logging in with authenticator</comment>
   </data>
   <!-- Descriptions and help text -->
@@ -136,12 +136,12 @@
     <comment>Text before registration link</comment>
   </data>
   <data name="DontHaveAuthenticatorText" xml:space="preserve">
-    <value>Geen toegang tot je authenticator apparaat? Je kunt</value>
-    <comment>Text before recovery code link</comment>
+    <value>Geen toegang tot je authenticator apparaat?</value>
+    <comment>Question text about not having access to authenticator</comment>
   </data>
   <data name="RegainedAccessText" xml:space="preserve">
-    <value>Weer toegang tot je authenticator apparaat? Je kunt</value>
-    <comment>Text before authenticator login link</comment>
+    <value>Weer toegang tot je authenticator apparaat?</value>
+    <comment>Question text about regaining access to authenticator</comment>
   </data>
   <!-- Loading and status messages -->
   <data name="LoggingInMessage" xml:space="preserve">

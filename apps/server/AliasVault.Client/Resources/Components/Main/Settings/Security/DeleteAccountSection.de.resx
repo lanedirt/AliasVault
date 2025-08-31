@@ -59,15 +59,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Delete account</value>
+    <value>Konto löschen</value>
     <comment>Section title</comment>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Permanently delete your account and all associated data. This action cannot be undone.</value>
+    <value>Nachfolgend kannst Du Dein Konto und alle zugehörigen Daten unwiderruflich löschen. Diese Aktion kann nicht rückgängig gemacht werden.</value>
     <comment>Warning description for account deletion</comment>
   </data>
   <data name="DeleteButton" xml:space="preserve">
-    <value>Delete Account</value>
+    <value>Konto löschen</value>
     <comment>Button to delete account</comment>
   </data>
 </root>

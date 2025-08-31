@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">AliasVault</string>
+  <string name="autofill_service_description" translatable="true">AliasVault 自动填充</string>
+  <string name="aliasvault_icon">AliasVault 图标</string>
+  <!-- AutofillService strings -->
+  <string name="autofill_failed_to_retrieve">获取失败，请打开应用</string>
+  <string name="autofill_no_match_found">未找到匹配项，是否新建？</string>
+  <string name="autofill_open_app">打开应用</string>
+  <string name="autofill_vault_locked">保险库已锁定</string>
+  <!-- Biometric prompts -->
+  <string name="biometric_store_key_title">存储加密密钥</string>
+  <string name="biometric_store_key_subtitle">请进行身份验证，以便将你的加密密钥安全存储至 Android 密钥库中，这将确保你能安全访问保险库。</string>
+  <string name="biometric_unlock_vault_title">解锁保险库</string>
+  <string name="biometric_unlock_vault_subtitle">验证身份以访问你的保险库</string>
+</resources>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Importa / Esporta</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="PageDescription" xml:space="preserve">
+    <value>In questa pagina puoi importare ed esportare la tua casseforte.</value>
+    <comment>Page description</comment>
+  </data>
+  <data name="ImportSectionTitle" xml:space="preserve">
+    <value>Importa le password</value>
+    <comment>Import section title</comment>
+  </data>
+  <data name="ImportSectionDescription" xml:space="preserve">
+    <value>Seleziona un servizio da cui importare. Se si utilizza un servizio che non è elencato qui e si desidera vederlo supportato, si prega di sollevare un problema su &lt;a href="https://github.com/lanedirt/AliasVault/issues" target="_blank" class="text-primary-500 hover:text-primary-700"&gt;GitHub&lt;/a&gt; o contattarci.</value>
+    <comment>Import section description with HTML link</comment>
+  </data>
+  <data name="ExportSectionTitle" xml:space="preserve">
+    <value>Esporta cassaforte</value>
+    <comment>Export section title</comment>
+  </data>
+  <data name="ExportSectionDescription" xml:space="preserve">
+    <value>Se si desidera esportare le proprie credenziali AliasVault su un altro server AliasVault (ad es. dal cloud al self-hosted o viceversa) o ad un altro servizio, è possibile farlo qui. Nota che tutte le esportazioni non sono cifrate per cui memorizzale in un luogo sicuro ed eliminale quando non ne hai più bisogno.</value>
+    <comment>Export section description</comment>
+  </data>
+  <data name="ExportCsvButton" xml:space="preserve">
+    <value>Esporta la cassaforte in un file CSV non cifrato</value>
+    <comment>Button to export as CSV</comment>
+  </data>
+  <data name="ExportSqliteButton" xml:space="preserve">
+    <value>Esporta la cassaforte in un file SQLite non cifrato</value>
+    <comment>Button to export as SQLite</comment>
+  </data>
+  <data name="ExportConfirmTitle" xml:space="preserve">
+    <value>Esporta cassaforte</value>
+    <comment>Export confirmation dialog title</comment>
+  </data>
+  <data name="ExportWarningMessage" xml:space="preserve">
+    <value>Attenzione: Esportare la cassaforte in un file non cifrato esporrà tutte le password e le informazioni sensibili in testo semplice. Fallo solo su computer affidabili e assicurarti di:
+
+• Conservare il file esportato in una posizione sicura
+• Eliminare il file quando non ne hai più bisogno
+• Non condividere mai il file esportato con altri
+
+Sei sicuro di voler continuare con l'esportazione?</value>
+    <comment>Export warning confirmation message</comment>
+  </data>
+  <data name="ResetVaultSectionTitle" xml:space="preserve">
+    <value>Reimposta Cassaforte</value>
+    <comment>Reset vault section title</comment>
+  </data>
+  <data name="ResetVaultSectionDescription" xml:space="preserve">
+    <value>Questa opzione ti permette di svuotare completamente la tua cassaforte mantenendo il tuo account e gli alias e-mail. Usa questa funzione se desideri  ricominciare da capo dopo aver importato i dati da un altro gestore di password o se desideri cancellare tutte le credenziali esistenti per ricominciare.</value>
+    <comment>Reset vault section description</comment>
+  </data>
+</root>

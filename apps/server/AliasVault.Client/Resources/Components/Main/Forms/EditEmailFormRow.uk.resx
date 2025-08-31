@@ -83,7 +83,7 @@
     <comment>Title for public email domains section</comment>
   </data>
   <data name="PublicEmailDescription" xml:space="preserve">
-    <value>Anonymous but limited privacy. Accessible to anyone that knows the address.</value>
+    <value>Anonymous but limited privacy. Email content is readable by anyone that knows the address.</value>
     <comment>Description of public email domains</comment>
   </data>
 </root>
