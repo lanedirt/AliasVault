@@ -220,16 +220,9 @@ body {
   color: #ffffff;
 }
 
-/* Search Container */
-.av-search-container {
-  position: relative;
-  flex: 2;
-  min-width: 0px;
-}
-
 /* Search Input */
 .av-search-input {
-  flex: 2;
+  flex: 1;
   border-radius: 4px;
   background: #374151;
   color: #e5e7eb;
@@ -238,25 +231,13 @@ body {
   border: 1px solid #4b5563;
   outline: none;
   line-height: 1;
-  text-align: center;
   padding: 8px 12px;
   padding-right: 0;
-  margin-right: 8px;
 }
 
-.av-search-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+.av-search-input::placeholder {
   color: #bdbebe;
-  font-size: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  opacity: 1;
 }
 
 .av-search-input:focus {
