@@ -578,6 +578,8 @@ export default function LoginScreen() : React.ReactNode {
                       keyboardType="numeric"
                       maxLength={6}
                       placeholderTextColor={colors.textMuted}
+                      multiline={false}
+                      numberOfLines={1}
                     />
                   </View>
                   <View style={styles.buttonContainer}>
@@ -629,6 +631,8 @@ export default function LoginScreen() : React.ReactNode {
                       autoCapitalize="none"
                       autoCorrect={false}
                       placeholderTextColor={colors.textMuted}
+                      multiline={false}
+                      numberOfLines={1}
                     />
                   </View>
                   <Text style={styles.label}>{t('auth.password')}</Text>
@@ -648,6 +652,8 @@ export default function LoginScreen() : React.ReactNode {
                       placeholderTextColor={colors.textMuted}
                       autoCorrect={false}
                       autoCapitalize="none"
+                      multiline={false}
+                      numberOfLines={1}
                     />
                   </View>
                   <TouchableOpacity

@@ -162,6 +162,9 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
       fontSize: 16,
       fontWeight: '500',
     },
+    valueContainer: {
+      flex: 1,
+    },
   });
 
   return (
@@ -183,11 +186,11 @@ const FormInputCopyToClipboard: React.FC<FormInputCopyToClipboardProps> = ({
         />
       )}
       <View style={styles.inputContent}>
-        <View>
+        <View style={styles.valueContainer}>
           <Text style={styles.label}>
             {label}
           </Text>
-          <Text style={styles.value}>
+          <Text style={styles.value} numberOfLines={1} ellipsizeMode="tail">
             {displayValue}
           </Text>
         </View>

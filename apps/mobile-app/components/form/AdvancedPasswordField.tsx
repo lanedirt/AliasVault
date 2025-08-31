@@ -411,6 +411,8 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                     style={styles.previewInput}
                     value={previewPassword}
                     editable={false}
+                    multiline={false}
+                    numberOfLines={1}
                   />
                   <TouchableOpacity
                     style={styles.refreshButton}
@@ -531,6 +533,8 @@ const AdvancedPasswordFieldComponent = forwardRef<AdvancedPasswordFieldRef, Adva
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 secureTextEntry={!showPassword}
+                multiline={false}
+                numberOfLines={1}
                 {...props}
               />
 

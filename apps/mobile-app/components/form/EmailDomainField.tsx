@@ -320,6 +320,8 @@ export const EmailDomainField: React.FC<EmailDomainFieldProps> = ({
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
+          multiline={false}
+          numberOfLines={1}
         />
 
         {!isCustomDomain && (
