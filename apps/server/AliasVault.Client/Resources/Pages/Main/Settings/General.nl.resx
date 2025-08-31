@@ -116,7 +116,7 @@
     <comment>Title for clipboard settings section</comment>
   </data>
   <data name="ClipboardClearSecondsLabel">
-    <value>Automatisch klembord legen na kopiëren</value>
+    <value>Automatisch klembord wissen na kopiëren</value>
     <comment>Label for clipboard clear seconds setting</comment>
   </data>
   <data name="ClipboardClearSecondsDescription">
