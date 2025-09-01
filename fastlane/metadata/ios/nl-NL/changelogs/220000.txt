@@ -1,0 +1,4 @@
+- Nieuwe talen toegevoegd: Duits, Fins, Italiaans en Chinees (Vereenvoudigd)
+- Automatisch klembord wissen functionaliteit
+- E-mail domein keuze component toegevoegd
+- Verbeterde instructies voor self-hosted setups
