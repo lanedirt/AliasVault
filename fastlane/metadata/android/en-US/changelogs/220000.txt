@@ -1,0 +1,5 @@
+- Added new languages: German, Finnish, Italian and Chinese (Simplified)
+- Add automatic clipboard clear
+- Add email domain chooser
+- Improved instructions for self-hosted setups
+- Prevent input field height from changing when longer values are entered

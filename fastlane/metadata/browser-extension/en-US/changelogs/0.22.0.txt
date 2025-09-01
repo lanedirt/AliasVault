@@ -1,0 +1,7 @@
+- Added new languages: German, Finnish, Italian and Chinese (Simplified)
+- Add automatic clipboard clear
+- Add auto-lock timeout
+- Add email domain chooser
+- Improved autofill behavior
+- Improved security with additional protection against clickjacking
+- Improved instructions for self-hosted setups
