@@ -326,7 +326,7 @@
     "clipboardClear5Seconds": "Nach 5 Sekunden löschen",
     "clipboardClear10Seconds": "Nach 10 Sekunden löschen",
     "clipboardClear15Seconds": "Nach 15 Sekunden löschen",
-    "autoLockTimeout": "Auto-lock Timeout",
+    "autoLockTimeout": "Sperr-Timeout",
     "autoLockTimeoutDescription": "Tresor bei Inaktivität automatisch sperren",
     "autoLockTimeoutHelp": "Der Tresor wird erst nach dem angegebenen Zeitraum der Inaktivität gesperrt (keine Nutzung von Autofill oder Öffnen des Erweiterungs-Popups). Der Tresor wird immer gesperrt, wenn der Browser geschlossen wird, unabhängig von dieser Einstellung.",
     "autoLockNever": "Niemals",
