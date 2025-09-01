@@ -326,7 +326,7 @@
     "clipboardClear5Seconds": "Cancella dopo 5 secondi",
     "clipboardClear10Seconds": "Cancella dopo 10 secondi",
     "clipboardClear15Seconds": "Cancella dopo 15 secondi",
-    "autoLockTimeout": "Timeout blocco automatico",
+    "autoLockTimeout": "Timeout Blocco Automatico",
     "autoLockTimeoutDescription": "Blocca automaticamente la cassaforte dopo un periodo di inattività",
     "autoLockTimeoutHelp": "La cassaforte si bloccherà solo dopo il periodo specificato di inattività (nessun utilizzo di riempimento automatico o estensione popup aperto). La cassaforte si bloccherà sempre quando il browser è chiuso, indipendentemente da questa impostazione.",
     "autoLockNever": "Mai",

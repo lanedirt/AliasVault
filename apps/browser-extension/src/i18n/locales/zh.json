@@ -326,7 +326,7 @@
     "clipboardClear5Seconds": "5秒后清除",
     "clipboardClear10Seconds": "10 秒后清除",
     "clipboardClear15Seconds": "15分钟后清除",
-    "autoLockTimeout": "超时自动锁定",
+    "autoLockTimeout": "自动锁定超时时间",
     "autoLockTimeoutDescription": "无操作一段时间后自动锁定保险库",
     "autoLockTimeoutHelp": "保险库仅在达到指定的无操作时长后才会锁定（未使用自动填充功能或未打开扩展程序弹窗）。无论此设置如何，关闭浏览器时保险库始终会锁定。",
     "autoLockNever": "从不",

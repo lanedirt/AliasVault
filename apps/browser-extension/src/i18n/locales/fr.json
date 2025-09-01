@@ -326,7 +326,7 @@
     "clipboardClear5Seconds": "Clear after 5 seconds",
     "clipboardClear10Seconds": "Clear after 10 seconds",
     "clipboardClear15Seconds": "Clear after 15 seconds",
-    "autoLockTimeout": "Auto-lock timeout",
+    "autoLockTimeout": "Auto-lock Timeout",
     "autoLockTimeoutDescription": "Automatically lock the vault after a period of inactivity",
     "autoLockTimeoutHelp": "The vault will only lock after the specified period of inactivity (no autofill usage or extension popup opened). The vault will always lock when the browser is closed, regardless of this setting.",
     "autoLockNever": "Never",
