@@ -25,12 +25,12 @@ public static class AppInfo
     /// <summary>
     /// Gets the minor version number.
     /// </summary>
-    public const int VersionMinor = 21;
+    public const int VersionMinor = 22;
 
     /// <summary>
     /// Gets the patch version number.
     /// </summary>
-    public const int VersionPatch = 2;
+    public const int VersionPatch = 0;
 
     /// <summary>
     /// Gets the minimum supported AliasVault client version. Normally the minimum client version is the same
