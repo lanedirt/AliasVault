@@ -326,7 +326,7 @@
     "clipboardClear5Seconds": "Tyhjennä 5 sekunnin jälkeen",
     "clipboardClear10Seconds": "Tyhjennä 10 sekunnin jälkeen",
     "clipboardClear15Seconds": "Tyhjennä 15 sekunnin jälkeen",
-    "autoLockTimeout": "Auto-lock Timeout",
+    "autoLockTimeout": "Automaattisen lukituksen aikakatkaisu",
     "autoLockTimeoutDescription": "Lukitse holvi automaattisesti käyttämättä jäämisen jälkeen",
     "autoLockTimeoutHelp": "Holvi lukittuu vain määritellyn käyttöajan jälkeen (ei automaattisen täytön käyttöä tai laajennuksen ponnahdusikkunaa auki). Holvi lukittuu aina, kun selain on suljettu, tästä asetuksesta riippumatta.",
     "autoLockNever": "Ei koskaan",
