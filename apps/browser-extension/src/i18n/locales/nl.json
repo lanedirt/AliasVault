@@ -326,7 +326,7 @@
     "clipboardClear5Seconds": "Wis na 5 seconden",
     "clipboardClear10Seconds": "Wis na 10 seconden",
     "clipboardClear15Seconds": "Wis na 15 seconden",
-    "autoLockTimeout": "Auto-lock Timeout",
+    "autoLockTimeout": "Automatisch vergrendelen",
     "autoLockTimeoutDescription": "Vergrendel de vault automatisch na inactiviteit",
     "autoLockTimeoutHelp": "De vault zal alleen vergrendelen na de opgegeven periode van inactiviteit (geen automatisch invullen of extensie geopend). De vault wordt altijd vergrendeld wanneer de browser wordt afgesloten, ongeacht deze instelling.",
     "autoLockNever": "Nooit",
