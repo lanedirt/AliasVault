@@ -8,26 +8,28 @@
     }
     else
     {
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Hours24.ToString("N0")</h4>
             </div>
-            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days3.ToString("N0")</h4>
             </div>
-            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days7.ToString("N0")</h4>
             </div>
-            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 30 days</p>
                 <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@RegistrationStats.Days30.ToString("N0")</h4>
             </div>
         </div>
     }
 </div>
+
+@inject NavigationManager NavigationManager
 
 @code {
     private bool IsLoading { get; set; } = true;
@@ -68,5 +70,10 @@
         public int Days3 { get; set; }
         public int Days7 { get; set; }
         public int Days30 { get; set; }
+    }
+
+    private void NavigateToUsers()
+    {
+        NavigationManager.NavigateTo("/users");
     }
 }

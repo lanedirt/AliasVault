@@ -3,7 +3,7 @@
 @inherits MainBase
 
 <div class="mb-4">
-    <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
+    <ResponsivePaginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
     <SortableTable Columns="@_tableColumns" SortColumn="@SortColumn" SortDirection="@SortDirection" OnSortChanged="HandleSortChanged">
         @foreach (var job in JobList)

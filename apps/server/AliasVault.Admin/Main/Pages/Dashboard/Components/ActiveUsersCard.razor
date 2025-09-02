@@ -8,29 +8,29 @@
     }
     else
     {
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 24 hours</p>
                 <div class="flex items-baseline gap-2">
                     <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last24Hours</h4>
                     <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users">(@UserStats.ReturningLast24Hours)</span>
                 </div>
             </div>
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 3 days</p>
                 <div class="flex items-baseline gap-2">
                     <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last3Days</h4>
                     <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users">(@UserStats.ReturningLast3Days)</span>
                 </div>
             </div>
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 7 days</p>
                 <div class="flex items-baseline gap-2">
                     <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last7Days</h4>
                     <span class="text-sm text-gray-600 dark:text-gray-400" title="Returning users">(@UserStats.ReturningLast7Days)</span>
                 </div>
             </div>
-            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors" @onclick="NavigateToUsers">
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last 30 days</p>
                 <div class="flex items-baseline gap-2">
                     <h4 class="text-2xl font-bold text-gray-900 dark:text-white">@UserStats.Last30Days</h4>
@@ -40,6 +40,8 @@
         </div>
     }
 </div>
+
+@inject NavigationManager NavigationManager
 
 @code {
     private bool IsLoading { get; set; } = true;
@@ -119,5 +121,10 @@
         public int ReturningLast3Days { get; set; }
         public int ReturningLast7Days { get; set; }
         public int ReturningLast30Days { get; set; }
+    }
+
+    private void NavigateToUsers()
+    {
+        NavigationManager.NavigateTo("/users");
     }
 }
