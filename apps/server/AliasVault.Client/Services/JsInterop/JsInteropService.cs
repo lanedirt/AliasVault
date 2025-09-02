@@ -390,8 +390,6 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
                 await InitializeAsync();
             }
 
-            Console.WriteLine($"Generating username for identity: {identity.FirstName} {identity.LastName} {identity.BirthDate} {identity.Gender} {identity.NickName}");
-
             var generatorInstance = await _identityGeneratorModule!.InvokeAsync<IJSObjectReference>("CreateUsernameEmailGenerator");
             var result = await generatorInstance.InvokeAsync<string>("generateUsername", identity);
             return result;
