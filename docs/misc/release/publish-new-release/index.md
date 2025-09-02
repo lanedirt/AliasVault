@@ -55,6 +55,29 @@ The creation of the new release tag will cause the `install.sh` script to see th
 ### Publish new Docker Images
 The creation of the new release tag will automatically trigger the GitHub Actions workflow `Publish Docker Images` which will build the docker images and push them to the GitHub Container Registry. After publishing, the images will then be available for the installation script to pull during the update. Do take note that this publish step may take up to 15 minutes to complete. Between the creation of the release tag and the completion of the publish step, the installation script will not be able to pull the new images (yet) and can throw errors, this is expected. After the publish is completed, users can update their self-hosted installation by following the [update guide](/installation/update)
 
+#### To locally build and publish the all-in-one Docker image:
+GitHub Actions has had issues in the past with building the all-in-one Docker image for arm64 because of unknown timeouts. To locally build for both amd64 and arm64 and push manually, run the following:
+
+**Docker Hub**
+```bash
+# Login to Docker Hub
+docker login
+
+# Build and push all-in-one image
+# Note: replace 0.22.0 below with the actual tag of the version that you're building and pushing
+docker buildx build --platform linux/amd64,linux/arm64/v8 -f dockerfiles/all-in-one/Dockerfile -t aliasvault/aliasvault:0.22.0 -t aliasvault/aliasvault:latest --push .
+```
+
+**Ghcr.io**
+```bash
+# Login to ghcr.io
+docker login ghcr.io
+
+# Build and push all-in-one image
+# Note: replace 0.22.0 below with the actual tag of the version that you're building and pushing
+docker buildx build --platform linux/amd64,linux/arm64/v8 -f dockerfiles/all-in-one/Dockerfile -t ghcr.io/lanedirt/aliasvault:0.22.0 -t ghcr.io/lanedirt/aliasvault:latest --push .
+```
+
 ## Publish new browser extension version
 The GitHub Actions workflow `Browser Extension Build` will build the browser extension(s) and publish the archive to the GitHub Actions Artifacts page and also upload the archives to the release.
 
