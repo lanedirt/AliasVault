@@ -21,7 +21,7 @@
 @if (IsInitialized)
 {
     <div class="px-4">
-        <Paginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
+        <ResponsivePaginator CurrentPage="CurrentPage" PageSize="PageSize" TotalRecords="TotalRecords" OnPageChanged="HandlePageChanged" />
 
        <div class="mb-3 flex space-x-4">
             <div class="flex w-full">
@@ -108,7 +108,7 @@ else
     private string _searchTerm = string.Empty;
     private string _lastSearchTerm = string.Empty;
     private CancellationTokenSource? _searchCancellationTokenSource;
-    
+
     private string SearchTerm
     {
         get => _searchTerm;

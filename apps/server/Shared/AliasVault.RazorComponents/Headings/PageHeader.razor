@@ -1,16 +1,16 @@
 <div class="grid grid-cols-1 px-4 pt-6 xl:grid-cols-3 xl:gap-4 dark:bg-gray-900">
     <div class="mb-4 col-span-full xl:mb-2">
         <Breadcrumb BreadcrumbItems="BreadcrumbItems" />
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <H1>@Title</H1>
             @if (CustomActions != null)
             {
-                <div class="flex items-center space-x-3">
+                <div class="flex flex-wrap items-center gap-2">
                     @CustomActions
                 </div>
             }
         </div>
-        <p class="text-sm text-gray-600 dark:text-gray-400">@Description</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">@Description</p>
     </div>
 </div>
 

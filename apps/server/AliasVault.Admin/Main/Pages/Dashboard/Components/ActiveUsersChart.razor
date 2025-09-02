@@ -3,7 +3,7 @@
 @using AliasVault.Shared.Server.Services
 @inject ServerSettingsService SettingsService
 
-<div class="col-span-2 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800 max-h-[500px]">
+<div class="md:col-span-2 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800 max-h-[500px]">
     @if (IsLoading)
     {
         <LoadingIndicator />
@@ -81,49 +81,49 @@
         TotalDailyUserCounts = new List<DailyUserCount>();
         NewUserRegistrations = new List<DailyUserCount>();
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        
+
         // Define the date range (defaults to amount of days in auth log retention, with a maximum of 90 days)
         var endDate = DateTime.UtcNow.Date;
         var startDate = endDate.AddDays(-DaysToShow);
-        
+
         // Get total active users (all users who logged in based on auth logs)
         var totalUsersByDay = await dbContext.AuthLogs
             .Where(l => l.Timestamp >= startDate && l.Timestamp < endDate && l.IsSuccess && l.Username != "admin")
             .GroupBy(x => x.Timestamp.Date)
             .Select(g => new { Day = g.Key, Count = g.Select(x => x.Username).Distinct().Count() })
             .ToListAsync();
-        
+
         // Get new user registrations by day
         var newUsersByDay = await dbContext.AliasVaultUsers
             .Where(u => u.CreatedAt >= startDate && u.CreatedAt < endDate && u.UserName != "admin")
             .GroupBy(u => u.CreatedAt.Date)
             .Select(g => new { Day = g.Key, Count = g.Count() })
             .ToListAsync();
-        
+
         // Fill in the results for all days
         for (int i = 0; i < DaysToShow; i++)
         {
             // Subtract 1 day to avoid showing the current day as those numbers are not complete yet.
-            var day = endDate.AddDays(-i - 1); 
-            
+            var day = endDate.AddDays(-i - 1);
+
             var totalActiveCount = totalUsersByDay.FirstOrDefault(d => d.Day == day)?.Count ?? 0;
             var registeredUsersCount = newUsersByDay.FirstOrDefault(d => d.Day == day)?.Count ?? 0;
 
             // Calculate the number of returning users by subtracting the number of users registered that day from the total active users.
             var returningUsersCount = totalActiveCount - registeredUsersCount;
-            
+
             DailyUserCounts.Add(new DailyUserCount
             {
                 Date = day,
                 Count = returningUsersCount
             });
-            
+
             TotalDailyUserCounts.Add(new DailyUserCount
             {
                 Date = day,
                 Count = totalActiveCount
             });
-            
+
             NewUserRegistrations.Add(new DailyUserCount
             {
                 Date = day,

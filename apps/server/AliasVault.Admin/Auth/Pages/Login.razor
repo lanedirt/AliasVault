@@ -109,7 +109,6 @@ else
         if (result.Succeeded)
         {
             await AuthLoggingService.LogAuthEventSuccessAsync(Input.UserName, AuthEventType.Login);
-            Logger.LogInformation("User logged in.");
             NavigationService.RedirectTo(ReturnUrl ?? "./");
         }
         else if (result.RequiresTwoFactor)
