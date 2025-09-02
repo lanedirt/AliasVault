@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
+import BiometricSetup from '@/entrypoints/popup/components/BiometricSetup';
 import LanguageSwitcher from '@/entrypoints/popup/components/LanguageSwitcher';
+import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import { BIOMETRIC_ENABLED_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import PlatformUtility from '@/utils/PlatformUtility';
 
 import { storage } from '#imports';
 
@@ -58,11 +61,16 @@ const createUrlSchema = (t: (key: string) => string): Yup.ObjectSchema<{apiUrl: 
  */
 const AuthSettings: React.FC = () => {
   const { t } = useTranslation();
+  const authContext = useAuth();
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [customUrl, setCustomUrl] = useState<string>('');
   const [customClientUrl, setCustomClientUrl] = useState<string>('');
   const [isGloballyEnabled, setIsGloballyEnabled] = useState<boolean>(true);
   const [errors, setErrors] = useState<{ apiUrl?: string; clientUrl?: string }>({});
+  const [isBiometricsAvailable, setIsBiometricsAvailable] = useState<boolean>(false);
+  const [isBiometricsEnabled, setIsBiometricsEnabled] = useState<boolean>(false);
+  const [showBiometricSetup, setShowBiometricSetup] = useState<boolean>(false);
+  const [biometricName, setBiometricName] = useState<string>('');
   const { setIsInitialLoading } = useLoading();
 
   const urlSchema = createUrlSchema(t);
@@ -99,6 +107,26 @@ const AuthSettings: React.FC = () => {
 
     loadStoredSettings();
   }, [setIsInitialLoading]);
+  
+  // Check if biometric authentication is available and enabled
+  useEffect(() => {
+    const checkBiometrics = async (): Promise<void> => {
+      try {
+        const available = await authContext.isBiometricsAvailable();
+        setIsBiometricsAvailable(available);
+
+        if (available) {
+          const enabled = await authContext.isBiometricsEnabled();
+          setIsBiometricsEnabled(enabled);
+          setBiometricName(authContext.getBiometricDisplayName());
+        }
+      } catch (error) {
+        console.error('Error checking biometric authentication:', error);
+      }
+    };
+
+    checkBiometrics();
+  }, [authContext]);
 
   /**
    * Handle option change
@@ -170,6 +198,47 @@ const AuthSettings: React.FC = () => {
 
     setIsGloballyEnabled(newGloballyEnabled);
   };
+  
+  /**
+   * Toggle biometric authentication
+   */
+  const toggleBiometrics = async (): Promise<void> => {
+    if (isBiometricsEnabled) {
+      // Disable biometric authentication
+      const success = await authContext.disableBiometrics();
+      if (success) {
+        setIsBiometricsEnabled(false);
+      }
+    } else {
+      // Show biometric setup
+      setShowBiometricSetup(true);
+    }
+  };
+  
+  /**
+   * Handle biometric setup completion
+   */
+  const handleBiometricSetupComplete = async (): Promise<void> => {
+    setShowBiometricSetup(false);
+    setIsBiometricsEnabled(true);
+  };
+  
+  /**
+   * Handle biometric setup cancellation
+   */
+  const handleBiometricSetupCancel = (): void => {
+    setShowBiometricSetup(false);
+  };
+
+  // Show biometric setup if requested
+  if (showBiometricSetup) {
+    return (
+      <BiometricSetup
+        onSetupComplete={handleBiometricSetupComplete}
+        onCancel={handleBiometricSetupCancel}
+      />
+    );
+  }
 
   return (
     <div className="p-4">
@@ -251,6 +320,30 @@ const AuthSettings: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Biometric Authentication Settings Section */}
+      {isBiometricsAvailable && (
+        <div className="mb-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {t('settings.biometricEnabled', { biometric: biometricName })}
+            </p>
+            <button
+              onClick={toggleBiometrics}
+              className={`px-4 py-2 rounded-md transition-colors ${
+                isBiometricsEnabled
+                  ? 'bg-green-200 text-green-800 hover:bg-green-300 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
+                  : 'bg-red-200 text-red-800 hover:bg-red-300 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
+              }`}
+            >
+              {isBiometricsEnabled ? t('common.enabled', 'Enabled') : t('common.disabled', 'Disabled')}
+            </button>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t('settings.biometricHelp', { biometric: biometricName })}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="text-center text-gray-400 dark:text-gray-600">
         {t('settings.version')}: {AppInfo.VERSION}
