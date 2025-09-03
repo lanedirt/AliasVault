@@ -174,10 +174,10 @@ jobs:
       - name: Check local docker-compose.yml for :latest tags
         run: |
           # Check for explicit version tags instead of :latest
-          if grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml; then
+          if grep -E "ghcr\.io/aliasvault/[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml; then
             echo "❌ Error: docker-compose.yml contains explicit version tags instead of :latest"
             echo "Found the following explicit versions:"
-            grep -E "ghcr\.io/lanedirt/aliasvault-[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml
+            grep -E "ghcr\.io/aliasvault/[^:]+:[0-9]+\.[0-9]+\.[0-9]+" docker-compose.yml
             echo ""
             echo "All AliasVault images in docker-compose.yml must use ':latest' tags, not explicit versions."
             echo "Please update docker-compose.yml to use ':latest' for all AliasVault images."
