@@ -18,8 +18,8 @@ Building from source requires more resources:
 ## Steps
 1. Clone the repository
 ```bash
-git clone https://github.com/lanedirt/AliasVault.git
-cd AliasVault
+git clone https://github.com/aliasvault/aliasvault.git
+cd aliasvault
 ```
 2. Make the build script executable and run it. This will create the .env file, build the Docker images locally from source, and start the AliasVault containers. Follow the on-screen prompts to configure AliasVault.
 ```bash

@@ -19,12 +19,12 @@ This guide explains how to build and install the AliasVault Firefox extension fr
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/lanedirt/AliasVault.git
+git clone https://github.com/aliasvault/aliasvault.git
 ```
 
 2. Navigate to the Browser Extension directory:
 ```bash
-cd AliasVault/apps/browser-extension
+cd aliasvault/apps/browser-extension
 ```
 
 3. Install the required dependencies:

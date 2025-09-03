@@ -36,8 +36,8 @@ This guide will help you set up AliasVault for development on Windows using WSL 
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/lanedirt/AliasVault.git
-   cd AliasVault
+   git clone https://github.com/aliasvault/aliasvault.git
+   cd aliasvault
    ```
 2. **Configure WSL**
    - Open WSL terminal
@@ -136,6 +136,6 @@ If you experience WSL-related issues:
 ## Support
 
 If you encounter any issues not covered in this guide, please:
-1. Check the [GitHub Issues](https://github.com/lanedirt/AliasVault/issues)
+1. Check the [GitHub Issues](https://github.com/aliasvault/aliasvault/issues)
 2. Search for existing solutions
 3. Create a new issue if needed
