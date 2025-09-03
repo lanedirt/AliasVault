@@ -31,10 +31,10 @@ Follow these steps to manually install AliasVault on your own server.
 1. **Clone the git repository**
    ```bash
    # Clone repository
-   git clone https://github.com/lanedirt/AliasVault.git
+   git clone https://github.com/aliasvault/aliasvault.git
 
    # Navigate to the AliasVault directory
-   cd AliasVault
+   cd aliasvault
    ```
 
 2. **Create required directories**
@@ -136,4 +136,4 @@ For more detailed troubleshooting information, please refer to the full [trouble
 
 ## FAQ
 ### Why does AliasVault use its own reverse proxy?
-AliasVault requires precise routing between its client, API, and admin interfaces. These are structured under `/`, `/api`, and `/admin`. A unified nginx reverse proxy ensures that all AliasVault's containers are accessible under the same hostname and path structure. If you use your own reverse proxy, you must replicate this logic exactly. See the [nginx.conf](https://raw.githubusercontent.com/lanedirt/AliasVault/refs/heads/main/apps/server/nginx.conf) configuration that's used by the official container for reference.
+AliasVault requires precise routing between its client, API, and admin interfaces. These are structured under `/`, `/api`, and `/admin`. A unified nginx reverse proxy ensures that all AliasVault's containers are accessible under the same hostname and path structure. If you use your own reverse proxy, you must replicate this logic exactly. See the [nginx.conf](https://raw.githubusercontent.com/aliasvault/aliasvault/refs/heads/main/apps/server/nginx.conf) configuration that's used by the official container for reference.

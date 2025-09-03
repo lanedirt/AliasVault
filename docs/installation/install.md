@@ -27,7 +27,7 @@ To get AliasVault up and running quickly, run the install script to pull pre-bui
 1. Download the install script to a directory of your choice. All AliasVault files and directories will be created in this directory.
 ```bash
 # Download the install script
-curl -L -o install.sh https://github.com/lanedirt/AliasVault/releases/latest/download/install.sh
+curl -L -o install.sh https://github.com/aliasvault/aliasvault/releases/latest/download/install.sh
 ```
 
 2. Make the install script executable.

@@ -18,7 +18,7 @@ nav_order: 3
 </details>
 
 ## Before You Begin
-You can see the latest available version of AliasVault on [GitHub](https://github.com/lanedirt/AliasVault/releases).
+You can see the latest available version of AliasVault on [GitHub](https://github.com/aliasvault/aliasvault/releases).
 
 {: .warning }
 Before updating, it's recommended to backup your database and other important data. You can do this by making

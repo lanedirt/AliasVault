@@ -24,12 +24,12 @@ This guide explains how to build and install the AliasVault iOS app from source 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/lanedirt/AliasVault.git
+git clone https://github.com/aliasvault/aliasvault.git
 ```
 
 2. Navigate to the mobile app directory:
 ```bash
-cd AliasVault/apps/mobile-app
+cd aliasvault/apps/mobile-app
 ```
 
 3. Install JavaScript dependencies:

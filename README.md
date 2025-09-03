@@ -1,8 +1,8 @@
 # <img src="https://github.com/user-attachments/assets/933c8b45-a190-4df6-913e-b7c64ad9938b" width="35" alt="AliasVault"> AliasVault
 AliasVault is a privacy-first password and email alias manager. Create unique identities, strong passwords, and random email aliases for every website you use. Fully end-to-end encrypted, with a built-in email server and zero third-party dependencies.
 
-[<img src="https://img.shields.io/github/v/release/lanedirt/AliasVault?include_prereleases&logo=github&label=Release">](https://github.com/lanedirt/AliasVault/releases)
-[![.NET E2E Tests (with Sharding)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/lanedirt/AliasVault/actions/workflows/dotnet-e2e-tests.yml)
+[<img src="https://img.shields.io/github/v/release/aliasvault/aliasvault?include_prereleases&logo=github&label=Release">](https://github.com/aliasvault/aliasvault/releases)
+[![.NET E2E Tests (with Sharding)](https://github.com/aliasvault/aliasvault/actions/workflows/dotnet-e2e-tests.yml/badge.svg)](https://github.com/aliasvault/aliasvault/actions/workflows/dotnet-e2e-tests.yml)
 [<img src="https://img.shields.io/sonar/quality_gate/lanedirt_AliasVault?server=https%3A%2F%2Fsonarcloud.io&label=Sonarcloud&logo=sonarcloud">](https://sonarcloud.io/summary/new_code?id=lanedirt_AliasVault)
 [<img src="https://badges.crowdin.net/aliasvault/localized.svg">](https://crowdin.com/project/aliasvault)
 [<img alt="Discord" src="https://img.shields.io/discord/1309300619026235422?logo=discord&logoColor=%237289da&label=Discord&color=%237289da">](https://discord.gg/DsaXMTEtpF)
@@ -78,7 +78,7 @@ This method uses pre-built Docker images and works on minimal hardware specifica
 
 ```bash
 # Download install script from latest stable release
-curl -L -o install.sh https://github.com/lanedirt/AliasVault/releases/latest/download/install.sh
+curl -L -o install.sh https://github.com/aliasvault/aliasvault/releases/latest/download/install.sh
 
 # Make install script executable and run it. This will create the .env file, pull the Docker images, and start the AliasVault containers.
 chmod +x install.sh
@@ -133,7 +133,7 @@ Core features that are being worked on:
 - [ ] Support for FIDO2/WebAuthn hardware keys and passkeys
 - [ ] Adding support for family/team sharing (organization features)
 
-👉 [View the full AliasVault roadmap here](https://github.com/lanedirt/AliasVault/issues/731)
+👉 [View the full AliasVault roadmap here](https://github.com/aliasvault/aliasvault/issues/731)
 
 ### Got feedback or ideas?
 Feel free to open an issue or join our [Discord](https://discord.gg/DsaXMTEtpF)! Contributions are warmly welcomed—whether in feature development, testing, or spreading the word. Get in touch on Discord if you're interested in contributing.

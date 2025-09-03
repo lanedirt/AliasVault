@@ -75,7 +75,7 @@ docker login ghcr.io
 
 # Build and push all-in-one image
 # Note: replace 0.22.0 below with the actual tag of the version that you're building and pushing
-docker buildx build --platform linux/amd64,linux/arm64/v8 -f dockerfiles/all-in-one/Dockerfile -t ghcr.io/lanedirt/aliasvault:0.22.0 -t ghcr.io/lanedirt/aliasvault:latest --push .
+docker buildx build --platform linux/amd64,linux/arm64/v8 -f dockerfiles/all-in-one/Dockerfile -t ghcr.io/aliasvault/aliasvault:0.22.0 -t ghcr.io/aliasvault/aliasvault:latest --push .
 ```
 
 ## Publish new browser extension version

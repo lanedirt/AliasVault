@@ -22,7 +22,7 @@
           "wellKnown": "https://www.aliasvault.net/.well-known/funding.json"
         },
         "repositoryUrl": {
-          "url": "https://github.com/lanedirt/AliasVault",
+          "url": "https://github.com/aliasvault/aliasvault",
           "wellKnown": ""
         },
         "licenses": [
