@@ -1,7 +1,7 @@
 {
 	"settings": {
 		"documentationRules": {
-			"companyName": "lanedirt",
+			"companyName": "aliasvault",
             "xmlHeader": true,
             "copyrightText": "Copyright (c) {companyName}. All rights reserved.\nLicensed under the {licenseName} license. See {licenseFile} file in the project root for full license information.",
 			"variables": {
