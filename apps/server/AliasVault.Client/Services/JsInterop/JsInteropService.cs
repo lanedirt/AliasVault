@@ -612,17 +612,17 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         /// <summary>
         /// Gets the derived key.
         /// </summary>
-        public string? DerivedKey { get; init; }
+        public string? DerivedKey { get; }
 
         /// <summary>
         /// Gets the optional error message.
         /// </summary>
-        public string? Error { get; init; }
+        public string? Error { get; }
 
         /// <summary>
         /// Gets the optional additional error details.
         /// </summary>
-        public string? Message { get; init; }
+        public string? Message { get; }
     }
 
     /// <summary>
@@ -633,26 +633,26 @@ public sealed class JsInteropService(IJSRuntime jsRuntime)
         /// <summary>
         /// Gets the credential ID as a base64 string.
         /// </summary>
-        public string? CredentialId { get; init; }
+        public string? CredentialId { get; }
 
         /// <summary>
         /// Gets the salt as a base64 string.
         /// </summary>
-        public string? Salt { get; init; }
+        public string? Salt { get; }
 
         /// <summary>
         /// Gets the derived key as a base64 string.
         /// </summary>
-        public string? DerivedKey { get; init; }
+        public string? DerivedKey { get; }
 
         /// <summary>
         /// Gets the optional error message.
         /// </summary>
-        public string? Error { get; init; }
+        public string? Error { get; }
 
         /// <summary>
         /// Gets the optional additional error details.
         /// </summary>
-        public string? Message { get; init; }
+        public string? Message { get; }
     }
 }

@@ -82,12 +82,9 @@
     {
         // We retrieve any additional messages from the GlobalNotificationService that we do not yet have.
         var newMessages = GlobalNotificationService.GetMessagesForDisplay();
-        foreach (var message in newMessages)
+        foreach (var message in newMessages.Where(message => !Messages.Exists(m => m.Key == message.Key && m.Value == message.Value)))
         {
-            if (!Messages.Exists(m => m.Key == message.Key && m.Value == message.Value))
-            {
-                Messages.Add(message);
-            }
+            Messages.Add(message);
         }
 
         // Remove messages that are no longer in the GlobalNotificationService and have already been displayed.
