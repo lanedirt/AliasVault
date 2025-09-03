@@ -5,7 +5,7 @@
 REPO_OWNER="aliasvault"
 REPO_NAME="aliasvault"
 GITHUB_RAW_URL_REPO="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}"
-GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')/$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
+GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')"
 
 # Required files and directories
 REQUIRED_DIRS=(
@@ -1166,7 +1166,7 @@ generate_admin_password() {
     PASSWORD=$(openssl rand -base64 12)
 
     # Build locally if in build mode or if pre-built image is not available
-    if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null || ! docker pull ${GITHUB_CONTAINER_REGISTRY}-installcli:latest > /dev/null 2>&1; then
+    if grep -q "^DEPLOYMENT_MODE=build" "$ENV_FILE" 2>/dev/null || ! docker pull ${GITHUB_CONTAINER_REGISTRY}/installcli:latest > /dev/null 2>&1; then
         log_info "Building InstallCli locally..."
         if [ "$VERBOSE" = true ]; then
             if ! docker build -t installcli -f apps/server/Utilities/AliasVault.InstallCli/Dockerfile .; then
@@ -1192,7 +1192,7 @@ generate_admin_password() {
         fi
         HASH=$(docker run --rm installcli hash-password "$PASSWORD")
     else
-        HASH=$(docker run --rm ${GITHUB_CONTAINER_REGISTRY}-installcli:latest hash-password "$PASSWORD")
+        HASH=$(docker run --rm ${GITHUB_CONTAINER_REGISTRY}/installcli:latest hash-password "$PASSWORD")
     fi
 
     if [ -z "$HASH" ]; then
@@ -2481,13 +2481,13 @@ handle_install_version() {
     printf "${CYAN}ℹ Installing version: ${target_version}${NC}\n"
 
     images=(
-        "${GITHUB_CONTAINER_REGISTRY}-postgres:${target_version}"
-        "${GITHUB_CONTAINER_REGISTRY}-reverse-proxy:${target_version}"
-        "${GITHUB_CONTAINER_REGISTRY}-api:${target_version}"
-        "${GITHUB_CONTAINER_REGISTRY}-client:${target_version}"
-        "${GITHUB_CONTAINER_REGISTRY}-admin:${target_version}"
-        "${GITHUB_CONTAINER_REGISTRY}-smtp:${target_version}"
-        "${GITHUB_CONTAINER_REGISTRY}-task-runner:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/postgres:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/reverse-proxy:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/api:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/client:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/admin:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/smtp:${target_version}"
+        "${GITHUB_CONTAINER_REGISTRY}/task-runner:${target_version}"
     )
 
     for image in "${images[@]}"; do
