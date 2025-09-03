@@ -70,11 +70,13 @@ jobs:
               shell: powershell
               run: |
                   $scanner = "${{ github.workspace }}\.sonar\scanner\dotnet-sonarscanner"
+                  $duplicationExclusions = "**/AliasVault.Client/wwwroot/js/**,**/AliasVault.Admin/wwwroot/js/**"
+                  $sonarExclusions = "**/tailwind.css,**/__tests__/test-forms/*.html,**/dist/shared/**,**/*.sql"
                   if ('${{ github.event_name }}' -eq 'pull_request_target') {
-                      & $scanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="**/__tests__/test-forms/*.html,**/dist/shared/**,**/*.sql"
+                      & $scanner begin /k:"aliasvault_aliasvault" /o:"aliasvault" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="$sonarExclusions" /d:sonar.cpd.exclusions="$duplicationExclusions"
                   } else {
-                      & $scanner begin /k:"lanedirt_AliasVault" /o:"lanedirt" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="**/__tests__/test-forms/*.html,**/dist/shared/**,**/*.sql"
+                      & $scanner begin /k:"aliasvault_aliasvault" /o:"aliasvault" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Tests*.cs" /d:sonar.exclusions="$sonarExclusions" /d:sonar.cpd.exclusions="$duplicationExclusions"
                   }
                   dotnet build
                   dotnet test -c Release /p:CollectCoverage=true /p:CoverletOutput=coverage /p:CoverletOutputFormat=opencover --filter 'FullyQualifiedName!~AliasVault.E2ETests'
-                  & $scanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+                  & $scanner end /d:sonar.token="$env:SONAR_TOKEN"
