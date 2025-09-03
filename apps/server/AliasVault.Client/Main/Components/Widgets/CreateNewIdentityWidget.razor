@@ -217,6 +217,10 @@
     /// <summary>
     /// Bounding client rectangle returned from JavaScript.
     /// </summary>
+    /// <remarks>
+    /// Properties are populated via JavaScript interop deserialization.
+    /// SonarCloud warnings are suppressed as these are required for JS interop.
+    /// </remarks>
     private sealed class BoundingClientRect
     {
         public double Left { get; set; }

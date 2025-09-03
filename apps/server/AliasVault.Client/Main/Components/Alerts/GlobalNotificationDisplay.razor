@@ -71,23 +71,17 @@
         bool hasChanges = false;
 
         // Check for new messages
-        foreach (var message in newMessages)
+        foreach (var message in newMessages.Where(message => !Messages.Exists(m => m.Key == message.Key && m.Value == message.Value)))
         {
-            if (!Messages.Exists(m => m.Key == message.Key && m.Value == message.Value))
-            {
-                Messages.Add(message);
-                hasChanges = true;
-            }
+            Messages.Add(message);
+            hasChanges = true;
         }
 
         // Check for messages to remove
         var messagesToRemove = Messages.Where(m => !newMessages.Exists(nm => nm.Key == m.Key && nm.Value == m.Value)).ToList();
-        if (messagesToRemove.Any())
+        foreach (var message in messagesToRemove)
         {
-            foreach (var message in messagesToRemove)
-            {
-                Messages.Remove(message);
-            }
+            Messages.Remove(message);
             hasChanges = true;
         }
 
