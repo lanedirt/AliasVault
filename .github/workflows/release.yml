@@ -26,10 +26,6 @@ on:
         default: true
         type: boolean
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   upload-install-script:
     runs-on: ubuntu-latest
@@ -127,22 +123,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Convert repository name to lowercase
-        run: |
-          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
-      - name: Log in to the Container registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata for multi-container images
+      - name: Extract metadata for base tags
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
+          # Using a placeholder image name, we'll generate the actual tags per container
+          images: placeholder
           tags: |
             # For release events with latest tag (only for non-prerelease)
             type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.release.prerelease == false }}
@@ -157,18 +150,22 @@ jobs:
       - name: Generate tags for containers
         id: tags
         run: |
-          # Transform base tags to include suffixes for each container
+          # Extract just the tag values (without the image prefix)
           TAGS="${{ steps.meta.outputs.tags }}"
+          TAG_VALUES=$(echo "$TAGS" | sed 's|^[^:]*:||' | tr '\n' ' ')
 
-          # Generate tags for each container by replacing the base image name with suffixed versions
-          echo "postgres=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-postgres|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "api=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-api|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "client=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-client|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "admin=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-admin|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "reverse-proxy=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-reverse-proxy|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "smtp=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-smtp|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "task-runner=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-task-runner|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
-          echo "installcli=$(echo "$TAGS" | sed "s|${{ env.REPO_LOWER }}|${{ env.REPO_LOWER }}-installcli|g" | tr '\n' ',')" >> $GITHUB_OUTPUT
+          # Generate full image tags for each container
+          for container in postgres api client admin reverse-proxy smtp task-runner installcli; do
+            CONTAINER_TAGS=""
+            for tag in $TAG_VALUES; do
+              if [ -n "$CONTAINER_TAGS" ]; then
+                CONTAINER_TAGS="${CONTAINER_TAGS},"
+              fi
+              CONTAINER_TAGS="${CONTAINER_TAGS}ghcr.io/aliasvault/${container}:${tag}"
+            done
+            # Output the tags for each container
+            echo "${container//-/_}=${CONTAINER_TAGS}" >> $GITHUB_OUTPUT
+          done
 
       - name: Build and push Postgres image
         uses: docker/build-push-action@v5
@@ -267,10 +264,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Convert repository name to lowercase
-        run: |
-          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -289,7 +282,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ env.REPO_LOWER }}
+            ghcr.io/aliasvault/aliasvault
             aliasvault/aliasvault
           tags: |
             # For release events with latest tag (only for non-prerelease)
