@@ -290,7 +290,7 @@ check_connectivity() {
         printf "\b%c" "${spinstr:$i:1}"
         ((i = (i + 1) % 4))
 
-        if ! curl -s --connect-timeout 10 --max-time 30 "$url" > /dev/null 2>&1; then
+        if ! curl -Ls --connect-timeout 10 --max-time 30 "$url" > /dev/null 2>&1; then
             printf "\b ${RED}✗${NC}\n"
             log_error "Cannot reach $url. Please check your internet connection."
             return 1
@@ -938,7 +938,7 @@ get_latest_version() {
     local wait_time=1
 
     while [ $attempt -le $max_attempts ]; do
-        local latest_version=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
+        local latest_version=$(curl -Ls "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4)
 
         if [ -n "$latest_version" ]; then
             # Cache the version for this session
@@ -1002,7 +1002,7 @@ handle_docker_compose() {
 
         # First, check if the file exists by making a HEAD request
         local http_status
-        http_status=$(curl -s -o /dev/null -w "%{http_code}" "$download_url" 2>/dev/null)
+        http_status=$(curl -Ls -o /dev/null -w "%{http_code}" "$download_url" 2>/dev/null)
 
         if [ "$http_status" = "404" ]; then
             printf "\b ${RED}✗${NC}\n"
@@ -1017,7 +1017,7 @@ handle_docker_compose() {
             exit 1
         fi
 
-        if ! retry_command 3 2 curl -sSf "$download_url" -o "$temp_file"; then
+        if ! retry_command 3 2 curl -LsSf "$download_url" -o "$temp_file"; then
             printf "\b ${RED}✗${NC}\n"
             log_error "Failed to download $file from $download_url"
             log_error "Please check your internet connection and try again."
@@ -1051,7 +1051,7 @@ check_install_script_version() {
     # First, check if the install.sh file exists for this version
     local install_url="${GITHUB_RAW_URL_REPO}/${target_version}/install.sh"
     local http_status
-    http_status=$(curl -s -o /dev/null -w "%{http_code}" "$install_url" 2>/dev/null)
+    http_status=$(curl -Ls -o /dev/null -w "%{http_code}" "$install_url" 2>/dev/null)
 
     if [ "$http_status" = "404" ]; then
         printf "   > Install script not found for version ${target_version}. Continuing with current version.\n"
@@ -1059,7 +1059,7 @@ check_install_script_version() {
     fi
 
     # Get remote install.sh for target version
-    if ! curl -sSf "$install_url" -o "install.sh.tmp"; then
+    if ! curl -LsSf "$install_url" -o "install.sh.tmp"; then
         printf "${RED}> Failed to check install script version. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
         return 1
@@ -1106,7 +1106,7 @@ create_env_file() {
             # Check if .env.example exists for this version
             local env_example_url="${GITHUB_RAW_URL_REPO}/${latest_version}/.env.example"
             local http_status
-            http_status=$(curl -s -o /dev/null -w "%{http_code}" "$env_example_url" 2>/dev/null)
+            http_status=$(curl -Ls -o /dev/null -w "%{http_code}" "$env_example_url" 2>/dev/null)
 
             if [ "$http_status" = "404" ]; then
                 printf "\n  ${YELLOW}> .env.example not found for version ${latest_version}. Creating blank .env file.${NC}\n"
@@ -1114,7 +1114,7 @@ create_env_file() {
                 return 0
             fi
 
-            if curl -sSf "$env_example_url" -o "$ENV_EXAMPLE_FILE" > /dev/null 2>&1; then
+            if curl -LsSf "$env_example_url" -o "$ENV_EXAMPLE_FILE" > /dev/null 2>&1; then
                 printf "\n  ${GREEN}> .env.example downloaded successfully.${NC}\n"
             else
                 printf "\n  ${YELLOW}> Failed to download .env.example. Creating blank .env file.${NC}\n"
@@ -1488,13 +1488,13 @@ check_aliasvault_health() {
         local https_ok=false
 
         # Check HTTP port (should redirect to HTTPS)
-        if curl -s -o /dev/null -w "%{http_code}" "http://localhost:$http_port" 2>/dev/null | grep -q "301"; then
+        if curl -Ls -o /dev/null -w "%{http_code}" "http://localhost:$http_port" 2>/dev/null | grep -q "301"; then
             http_ok=true
         fi
 
         # Check HTTPS port (should return status page or main app)
         local https_status
-        https_status=$(curl -s -k -o /dev/null -w "%{http_code}" "https://localhost:$https_port" 2>/dev/null)
+        https_status=$(curl -Ls -k -o /dev/null -w "%{http_code}" "https://localhost:$https_port" 2>/dev/null)
         if [ "$https_status" = "200" ] || [ "$https_status" = "503" ]; then
             https_ok=true
         fi
@@ -2315,7 +2315,7 @@ check_install_script_update() {
         return 1
     fi
 
-    if ! curl -sSf "${GITHUB_RAW_URL_REPO}/${latest_version}/install.sh" -o "install.sh.tmp"; then
+    if ! curl -LsSf "${GITHUB_RAW_URL_REPO}/${latest_version}/install.sh" -o "install.sh.tmp"; then
         printf "${RED}> Failed to check for install script updates. Continuing with current version.${NC}\n"
         rm -f install.sh.tmp
         return 1
