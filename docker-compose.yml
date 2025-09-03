@@ -1,6 +1,6 @@
 services:
     postgres:
-        image: ghcr.io/lanedirt/aliasvault-postgres:latest
+        image: ghcr.io/aliasvault/postgres:latest
         volumes:
             - ./database/postgres:/var/lib/postgresql/data:rw
             - ./secrets:/secrets:ro
@@ -19,7 +19,7 @@ services:
             start_period: 10s
 
     client:
-        image: ghcr.io/lanedirt/aliasvault-client:latest
+        image: ghcr.io/aliasvault/client:latest
         volumes:
             - ./logs/msbuild:/apps/server/msbuild-logs:rw
         expose:
@@ -29,7 +29,7 @@ services:
             - .env
 
     api:
-        image: ghcr.io/lanedirt/aliasvault-api:latest
+        image: ghcr.io/aliasvault/api:latest
         expose:
             - "3001"
         volumes:
@@ -44,7 +44,7 @@ services:
                 condition: service_healthy
 
     admin:
-        image: ghcr.io/lanedirt/aliasvault-admin:latest
+        image: ghcr.io/aliasvault/admin:latest
         expose:
             - "3002"
         volumes:
@@ -59,7 +59,7 @@ services:
                 condition: service_healthy
 
     reverse-proxy:
-        image: ghcr.io/lanedirt/aliasvault-reverse-proxy:latest
+        image: ghcr.io/aliasvault/reverse-proxy:latest
         ports:
             - "${HTTP_PORT:-80}:80"
             - "${HTTPS_PORT:-443}:443"
@@ -77,7 +77,7 @@ services:
             - .env
 
     smtp:
-        image: ghcr.io/lanedirt/aliasvault-smtp:latest
+        image: ghcr.io/aliasvault/smtp:latest
         ports:
             - "${SMTP_PORT:-25}:25"
             - "${SMTP_TLS_PORT:-587}:587"
@@ -93,7 +93,7 @@ services:
                 condition: service_healthy
 
     task-runner:
-        image: ghcr.io/lanedirt/aliasvault-task-runner:latest
+        image: ghcr.io/aliasvault/task-runner:latest
         volumes:
             - ./database:/database:rw
             - ./logs:/logs:rw
