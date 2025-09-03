@@ -128,11 +128,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /**
-   * Check if biometric authentication is enabled.
+   * Check if biometric authentication is enabled and properly configured.
    */
   const isBiometricsEnabled = useCallback(async () : Promise<boolean> => {
     const enabled = await storage.getItem(BIOMETRIC_ENABLED_KEY) as string;
-    return enabled === 'true';
+    if (enabled !== 'true') {
+      return false;
+    }
+
+    // Check if all required data exists for biometric authentication
+    const username = await storage.getItem('local:username') as string;
+    const accessToken = await storage.getItem('local:accessToken') as string;
+    const refreshToken = await storage.getItem('local:refreshToken') as string;
+    const credentialRegistered = await WebAuthnUtility.isCredentialRegistered();
+    const masterKeyStored = await SecureKeyStorage.isMasterKeyStored();
+
+    return !!(username && accessToken && refreshToken && credentialRegistered && masterKeyStored);
   }, []);
 
   /**
