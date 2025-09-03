@@ -2,8 +2,8 @@
 # @version 0.22.0
 
 # Repository information used for downloading files and images from GitHub
-REPO_OWNER="lanedirt"
-REPO_NAME="AliasVault"
+REPO_OWNER="aliasvault"
+REPO_NAME="aliasvault"
 GITHUB_RAW_URL_REPO="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}"
 GITHUB_CONTAINER_REGISTRY="ghcr.io/$(echo "$REPO_OWNER" | tr '[:upper:]' '[:lower:]')/$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')"
 
