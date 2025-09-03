@@ -837,13 +837,9 @@ main() {
                 exit 1
             fi
 
-            # Check for and migrate secrets from .env to files if needed
-            if [ -f "$ENV_FILE" ]; then
-                if grep -q "^JWT_KEY=\|^DATA_PROTECTION_CERT_PASS=\|^POSTGRES_PASSWORD=\|^ADMIN_PASSWORD_HASH=" "$ENV_FILE" 2>/dev/null; then
-                    printf "${CYAN}ℹ Migrating secrets from .env to secret files...${NC}\n"
-                    migrate_secrets_to_files
-                fi
-            fi
+            # Run migrations
+            migrate_secrets_to_files # 0.22.0+
+            migrate_docker_image_urls # 0.23.0+
 
             # Additional checks for installation/build operations
             if [[ "$COMMAND" == "install" || "$COMMAND" == "build" || "$COMMAND" == "update" ]]; then
@@ -1259,9 +1255,28 @@ read_secret_from_file() {
 }
 
 # Function to migrate secrets from .env to files
+# Used when migrating from 0.21.0 or lower to 0.22.0+
 migrate_secrets_to_files() {
+    # Check if migration is needed
+    if [ ! -f "$ENV_FILE" ]; then
+        return 0
+    fi
+
+    # Check if any secrets exist in .env file
+    if ! grep -q "^JWT_KEY=\|^DATA_PROTECTION_CERT_PASS=\|^POSTGRES_PASSWORD=\|^ADMIN_PASSWORD_HASH=" "$ENV_FILE" 2>/dev/null; then
+        return 0
+    fi
+
+    printf "${CYAN}ℹ Migrating secrets from .env to secret files...${NC}\n"
+
     local migrated=false
     local confirm_overwrite=false
+
+    # Migrate PRIVATE_EMAIL_DOMAINS from DISABLED.TLD to empty string (v0.22.0+)
+    if grep -q "^PRIVATE_EMAIL_DOMAINS=DISABLED.TLD" "$ENV_FILE"; then
+        update_env_var "PRIVATE_EMAIL_DOMAINS" ""
+        printf "  Migrated PRIVATE_EMAIL_DOMAINS (DISABLED.TLD → empty string, v0.22.0+)\n"
+    fi
 
     # Check if any secret files already exist
     if [ -f "${SECRETS_DIR}/jwt_key" ] || [ -f "${SECRETS_DIR}/data_protection_cert_pass" ] ||
@@ -1328,11 +1343,11 @@ migrate_secrets_to_files() {
     fi
 
     if [ "$migrated" = true ]; then
-        printf "${GREEN}✓ Secrets have been migrated from .env to secret files${NC}\n"
+        printf "  ${GREEN}✓ Secrets have been migrated from .env to secret files${NC}\n"
         # Remove secrets from .env after successful migration
         remove_secrets_from_env
     elif [ "$confirm_overwrite" = false ]; then
-        printf "${CYAN}ℹ No secrets found in .env to migrate${NC}\n"
+        printf "  ${CYAN}ℹ No secrets found in .env to migrate${NC}\n"
     fi
 }
 
@@ -1397,7 +1412,7 @@ remove_secrets_from_env() {
     fi
 
     if [ "$removed" = true ]; then
-        printf "${GREEN}✓ Secrets have been removed from .env file${NC}\n"
+        printf "  ${GREEN}✓ Secrets have been removed from .env file${NC}\n"
     fi
 }
 
@@ -1410,6 +1425,38 @@ delete_env_var() {
         sed -i.bak "/^${key}=/d" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
         printf "  ${GREEN}> $key has been removed from $ENV_FILE.${NC}\n"
     fi
+}
+
+# Function to migrate Docker image URLs from old namespace to new namespace
+# Used when migrating from 0.22.0 or lower to 0.23.0+
+migrate_docker_image_urls() {
+    if [ ! -f "docker-compose.yml" ] || ! grep -q "ghcr.io/lanedirt/aliasvault-" "docker-compose.yml" 2>/dev/null; then
+        return 0
+    fi
+
+    printf "${CYAN}ℹ Migrating Docker image URLs to new official namespace aliasvault/*...${NC}\n"
+
+    # Process docker-compose.yml
+    if [ -f "docker-compose.yml" ] && grep -q "ghcr.io/lanedirt/aliasvault-" "docker-compose.yml"; then
+        # Create backup before modifying
+        cp docker-compose.yml "docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)"
+
+        # Update all image URLs
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-postgres:|ghcr.io/aliasvault/postgres:|g' docker-compose.yml
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-client:|ghcr.io/aliasvault/client:|g' docker-compose.yml
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-api:|ghcr.io/aliasvault/api:|g' docker-compose.yml
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-admin:|ghcr.io/aliasvault/admin:|g' docker-compose.yml
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-smtp:|ghcr.io/aliasvault/smtp:|g' docker-compose.yml
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-task-runner:|ghcr.io/aliasvault/task-runner:|g' docker-compose.yml
+        sed -i.tmp 's|ghcr.io/lanedirt/aliasvault-reverse-proxy:|ghcr.io/aliasvault/reverse-proxy:|g' docker-compose.yml
+
+        # Clean up temp file
+        rm -f docker-compose.yml.backup.*
+
+        printf "  ${GREEN}✓ Updated docker-compose.yml${NC}\n"
+    fi
+
+    printf "  ${GREEN}✓ Docker image URL migration completed${NC}\n"
 }
 
 # Function to print a success box
@@ -2947,8 +2994,6 @@ handle_ip_logging_configuration() {
 check_and_populate_env() {
     printf "${CYAN}ℹ Checking .env values...${NC} ${GREEN}✓${NC}\n"
 
-    # === Section 1: Initialize missing environment variables ===
-
     # SUPPORT_EMAIL
     if ! grep -q "^SUPPORT_EMAIL=" "$ENV_FILE"; then
         read -p "Enter server admin support email address that is shown on contact page (optional, press Enter to skip): " SUPPORT_EMAIL
@@ -2956,21 +3001,21 @@ check_and_populate_env() {
         printf "  Set SUPPORT_EMAIL\n"
     fi
 
-    # JWT_KEY - now stored in secret file
+    # JWT_KEY
     if [ ! -f "${SECRETS_DIR}/jwt_key" ] || [ -z "$(cat "${SECRETS_DIR}/jwt_key" 2>/dev/null)" ]; then
         JWT_KEY=$(openssl rand -base64 32)
         write_secret_to_file "jwt_key" "$JWT_KEY"
         printf "  Generated JWT_KEY\n"
     fi
 
-    # DATA_PROTECTION_CERT_PASS - now stored in secret file
+    # DATA_PROTECTION_CERT_PASS
     if [ ! -f "${SECRETS_DIR}/data_protection_cert_pass" ] || [ -z "$(cat "${SECRETS_DIR}/data_protection_cert_pass" 2>/dev/null)" ]; then
         CERT_PASS=$(openssl rand -base64 32)
         write_secret_to_file "data_protection_cert_pass" "$CERT_PASS"
         printf "  Generated DATA_PROTECTION_CERT_PASS\n"
     fi
 
-    # POSTGRES_PASSWORD - now stored in secret file
+    # POSTGRES_PASSWORD
     if [ ! -f "${SECRETS_DIR}/postgres_password" ] || [ -z "$(cat "${SECRETS_DIR}/postgres_password" 2>/dev/null)" ]; then
         POSTGRES_PASS=$(openssl rand -base64 32)
         write_secret_to_file "postgres_password" "$POSTGRES_PASS"
@@ -2988,28 +3033,23 @@ check_and_populate_env() {
         update_env_var "HTTP_PORT" "80"
         printf "  Set HTTP_PORT\n"
     fi
+
     # HTTPS_PORT
     if ! grep -q "^HTTPS_PORT=" "$ENV_FILE" || [ -z "$(grep "^HTTPS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "HTTPS_PORT" "443"
         printf "  Set HTTPS_PORT\n"
     fi
+
     # SMTP_PORT
     if ! grep -q "^SMTP_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "SMTP_PORT" "25"
         printf "  Set SMTP_PORT\n"
     fi
+
     # SMTP_TLS_PORT
     if ! grep -q "^SMTP_TLS_PORT=" "$ENV_FILE" || [ -z "$(grep "^SMTP_TLS_PORT=" "$ENV_FILE" | cut -d '=' -f2)" ]; then
         update_env_var "SMTP_TLS_PORT" "587"
         printf "  Set SMTP_TLS_PORT\n"
-    fi
-
-    # === Section 2: Migrations and upgrades for existing environment variables ===
-
-    # Migrate PRIVATE_EMAIL_DOMAINS from DISABLED.TLD to empty string (v0.22.0+)
-    if grep -q "^PRIVATE_EMAIL_DOMAINS=DISABLED.TLD" "$ENV_FILE"; then
-        update_env_var "PRIVATE_EMAIL_DOMAINS" ""
-        printf "  Migrated PRIVATE_EMAIL_DOMAINS (DISABLED.TLD → empty string, v0.22.0+)\n"
     fi
 }
 
