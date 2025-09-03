@@ -144,8 +144,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}
           tags: |
+            # For release events with latest tag (only for non-prerelease)
             type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.release.prerelease == false }}
-            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            # semver tags for releases (works for prerelease and normal release)
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' || github.ref_type == 'tag' }}
+            # For tags, use tag name
+            type=ref,event=tag,enable=${{ github.ref_type == 'tag' }}
+            # For branches, use branch name and branch name + short SHA for uniqueness
             type=ref,event=branch,enable=${{ github.ref_type == 'branch' }}
             type=raw,value={{branch}}-{{sha}},enable=${{ github.ref_type == 'branch' }}
 
@@ -290,7 +295,9 @@ jobs:
             # For release events with latest tag (only for non-prerelease)
             type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.release.prerelease == false }}
             # semver tags for releases (works for prerelease and normal release)
-            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' || github.ref_type == 'tag' }}
+            # For tags, use tag name
+            type=ref,event=tag,enable=${{ github.ref_type == 'tag' }}
             # For branches, use branch name and branch name + short SHA for uniqueness
             type=ref,event=branch,enable=${{ github.ref_type == 'branch' }}
             type=raw,value={{branch}}-{{sha}},enable=${{ github.ref_type == 'branch' }}

@@ -71,8 +71,6 @@
     [JSInvokable]
     public async Task OnClipboardStatusChange(string status)
     {
-        Console.WriteLine($"[ClipboardCountdownBar] Status changed to: {status}");
-
         // Ignore the test 'registered' status
         if (status == "registered")
         {
