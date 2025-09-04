@@ -29,11 +29,11 @@ async function createOffscreenDocument(): Promise<void> {
     // Check if offscreen document already exists
     if (chrome.runtime.getContexts) {
       const existingContexts = await chrome.runtime.getContexts({
-        contextTypes: ['OFFSCREEN_DOCUMENT'],
+        contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
         documentUrls: [chrome.runtime.getURL('offscreen.html')]
-      });
+      }) as chrome.runtime.ExtensionContext[];
 
-      if (existingContexts.length > 0) {
+      if (existingContexts && existingContexts.length > 0) {
         offscreenDocumentCreated = true;
         return;
       }

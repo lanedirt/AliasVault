@@ -12,6 +12,7 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
+  upgradeRequired: boolean;
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<SqliteClient>;
   storeEncryptionKey: (derivedKey: string) => Promise<void>;
   getEncryptionKey: () => Promise<string | null>;
@@ -43,6 +44,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * Database availability state. If true, the database is available. If false, the database is not available and needs to be unlocked or retrieved again from the API.
    */
   const [dbAvailable, setDbAvailable] = useState(false);
+
+  /**
+   * Upgrade required state. If true, the database needs to be upgraded.
+   */
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
 
   /**
    * Vault revision.
@@ -190,6 +196,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     sqliteClient,
     dbInitialized,
     dbAvailable,
+    upgradeRequired,
     initializeDatabase,
     storeEncryptionKey,
     getEncryptionKey,
@@ -199,7 +206,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     getVaultMetadata,
     setCurrentVaultRevisionNumber,
     hasPendingMigrations,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, storeEncryptionKey, getEncryptionKey, storeEncryptionKeyDerivationParams, getEncryptionKeyDerivationParams, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
+  }), [sqliteClient, dbInitialized, dbAvailable, upgradeRequired, initializeDatabase, storeEncryptionKey, getEncryptionKey, storeEncryptionKeyDerivationParams, getEncryptionKeyDerivationParams, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
 
   return (
     <DbContext.Provider value={contextValue}>

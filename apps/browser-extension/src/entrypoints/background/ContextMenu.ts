@@ -60,11 +60,13 @@ export function handleContextMenuClick(info: Browser.contextMenus.OnClickData, t
     if (tab?.id) {
       // Get confirm text translation.
       t('content.passwordCopiedToClipboard').then((message) => {
-        browser.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: copyPasswordToClipboard,
-          args: [message, password]
-        });
+        if (tab.id !== undefined) {
+          browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: copyPasswordToClipboard,
+            args: [message, password]
+          });
+        }
       });
     }
   } else if (info.menuItemId === "aliasvault-activate-form" && tab?.id) {
