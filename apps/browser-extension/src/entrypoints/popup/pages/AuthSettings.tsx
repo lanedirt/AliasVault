@@ -8,8 +8,7 @@ import { useAuth } from '@/entrypoints/popup/context/AuthContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 import { AppInfo } from '@/utils/AppInfo';
-import { BIOMETRIC_ENABLED_KEY, GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
-import PlatformUtility from '@/utils/PlatformUtility';
+import { GLOBAL_AUTOFILL_POPUP_ENABLED_KEY, DISABLED_SITES_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
 
 import { storage } from '#imports';
 
@@ -108,7 +107,9 @@ const AuthSettings: React.FC = () => {
     loadStoredSettings();
   }, [setIsInitialLoading]);
   
-  // Check if biometric authentication is available and enabled
+  /**
+   * Check if biometric authentication is available and enabled
+   */
   useEffect(() => {
     const checkBiometrics = async (): Promise<void> => {
       try {

@@ -4,7 +4,6 @@ import { sendMessage } from 'webext-bridge/popup';
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 
 import { BIOMETRIC_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
-import BiometricErrorHandler from '@/utils/BiometricErrorHandler';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import PlatformUtility from '@/utils/PlatformUtility';
 import SecureKeyStorage from '@/utils/SecureKeyStorage';
@@ -190,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error enabling biometric authentication:', error);
       return false;
     }
-  }, [isLoggedIn, username, dbContext, isBiometricsAvailable]);
+  }, [isLoggedIn, username, dbContext, isBiometricsAvailable, verifyPassword]);
 
   /**
    * Disable biometric authentication.

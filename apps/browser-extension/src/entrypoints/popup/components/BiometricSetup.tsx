@@ -57,7 +57,7 @@ const BiometricSetup: React.FC<{
       const encryptionKey = await SecureKeyStorage.retrieveMasterKey();
       if (!encryptionKey) {
         // This is the first time setting up, so we need to store the encryption key
-        const dbContext = (window as any).dbContext;
+        const dbContext = (window as { dbContext?: any }).dbContext;
         if (!dbContext) {
           throw new Error(t('auth.errors.databaseNotInitialized'));
         }
@@ -128,4 +128,3 @@ const BiometricSetup: React.FC<{
 };
 
 export default BiometricSetup;
-

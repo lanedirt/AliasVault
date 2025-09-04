@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface BiometricIconProps {
+interface IBiometricIconProps {
   size?: number;
   className?: string;
 }
@@ -8,7 +8,7 @@ interface BiometricIconProps {
 /**
  * Biometric authentication icon (fingerprint)
  */
-const BiometricIcon: React.FC<BiometricIconProps> = ({ size = 24, className = '' }) => {
+const BiometricIcon: React.FC<IBiometricIconProps> = ({ size = 24, className = '' }) => {
   return (
     <svg 
       width={size} 

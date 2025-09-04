@@ -117,8 +117,10 @@ export default class SecureKeyStorage {
         throw new Error('No WebAuthn credential found');
       }
 
-      // Use the credential ID as a seed for key derivation
-      // Convert the credential ID to bytes
+      /**
+       * Use the credential ID as a seed for key derivation
+       * Convert the credential ID to bytes
+       */
       const credentialIdBytes = new TextEncoder().encode(credentialId);
       
       // Create a consistent salt by hashing the credential ID
