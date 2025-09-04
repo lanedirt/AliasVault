@@ -175,7 +175,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.postgres }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault PostgreSQL
+            org.opencontainers.image.description=PostgreSQL database for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push API image
         uses: docker/build-push-action@v5
@@ -185,7 +188,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.api }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault API
+            org.opencontainers.image.description=REST API backend for AliasVault password and email alias manager. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push Client image
         uses: docker/build-push-action@v5
@@ -195,7 +201,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.client }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault Client
+            org.opencontainers.image.description=Blazor WebAssembly client UI for AliasVault with end-to-end encryption. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push Admin image
         uses: docker/build-push-action@v5
@@ -205,7 +214,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.admin }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault Admin
+            org.opencontainers.image.description=Admin portal for AliasVault server management. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push Reverse Proxy image
         uses: docker/build-push-action@v5
@@ -215,7 +227,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.reverse-proxy }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault Reverse Proxy
+            org.opencontainers.image.description=Nginx reverse proxy for AliasVault multi-container deployment. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push SMTP image
         uses: docker/build-push-action@v5
@@ -225,7 +240,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.smtp }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault SMTP Service
+            org.opencontainers.image.description=SMTP service for email alias functionality in AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push TaskRunner image
         uses: docker/build-push-action@v5
@@ -235,7 +253,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.task-runner }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault TaskRunner
+            org.opencontainers.image.description=Background task runner for AliasVault operations. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push InstallCli image
         uses: docker/build-push-action@v5
@@ -245,7 +266,10 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.tags.outputs.installcli }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault Install CLI
+            org.opencontainers.image.description=Installation and configuration CLI for AliasVault. Used by install.sh for setup and configuration, not deployed as part of the application stack
 
   build-and-push-docker-all-in-one:
     if: github.event_name == 'release' || inputs.build_all_in_one
@@ -303,4 +327,7 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault All-in-One
+            org.opencontainers.image.description=Self-contained AliasVault server including web app, with all services bundled using s6-overlay. Single container solution for easy deployment (see docs.aliasvault.net).
