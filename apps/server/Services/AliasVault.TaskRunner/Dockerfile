@@ -15,6 +15,14 @@ RUN dotnet publish "./AliasVault.TaskRunner.csproj" \
     /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/runtime:9.0 AS final
+
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault TaskRunner"
+LABEL org.opencontainers.image.description="Background task runner for AliasVault operations. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
+
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AliasVault.TaskRunner.dll"]

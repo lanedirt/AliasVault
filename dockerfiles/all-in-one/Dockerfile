@@ -53,6 +53,13 @@ RUN wget https://github.com/just-containers/s6-overlay/releases/download/v${S6_O
 # ============================================
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim
 
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault All-in-One"
+LABEL org.opencontainers.image.description="Self-contained AliasVault server including web app, with all services bundled using s6-overlay. Single container solution for easy deployment (see docs.aliasvault.net)."
+
 # Copy s6-overlay from downloader stage
 COPY --from=s6-downloader /*.tar.xz /tmp/
 

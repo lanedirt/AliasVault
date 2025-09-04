@@ -16,6 +16,14 @@ RUN dotnet publish "./AliasVault.Api.csproj" \
 
 # Final stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault API"
+LABEL org.opencontainers.image.description="REST API backend for AliasVault password and email alias manager. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
+
 WORKDIR /app
 COPY --from=build /app/publish .
 
