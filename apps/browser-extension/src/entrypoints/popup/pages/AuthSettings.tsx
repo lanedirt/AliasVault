@@ -111,6 +111,9 @@ const AuthSettings: React.FC = () => {
    * Check if biometric authentication is available and enabled
    */
   useEffect(() => {
+    /**
+     * Check if biometric authentication is available and enabled
+     */
     const checkBiometrics = async (): Promise<void> => {
       try {
         const available = await authContext.isBiometricsAvailable();

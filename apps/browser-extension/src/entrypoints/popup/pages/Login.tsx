@@ -22,7 +22,6 @@ import { AppInfo } from '@/utils/AppInfo';
 import BiometricErrorHandler from '@/utils/BiometricErrorHandler';
 import type { VaultResponse, LoginResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
-
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
 
 import ConversionUtility from '../utils/ConversionUtility';
@@ -158,6 +157,9 @@ const Login: React.FC = () => {
    * Check if biometric authentication is available and enabled
    */
   useEffect(() => {
+    /**
+     * Check if biometric authentication is available and enabled
+     */
     const checkBiometrics = async (): Promise<void> => {
       try {
         const available = await authContext.isBiometricsAvailable();
