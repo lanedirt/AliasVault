@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '@/entrypoints/popup/components/Button';
 import { BiometricIcon } from '@/entrypoints/popup/components/Icons/BiometricIcons';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
+import { useDb } from '@/entrypoints/popup/context/DbContext';
 import { useLoading } from '@/entrypoints/popup/context/LoadingContext';
 
 import BiometricErrorHandler from '@/utils/BiometricErrorHandler';
@@ -20,6 +21,7 @@ const BiometricSetup: React.FC<{
 }> = ({ onSetupComplete, onCancel }) => {
   const { t } = useTranslation();
   const { username } = useAuth();
+  const dbContext = useDb();
   const { showLoading, hideLoading } = useLoading();
   const [error, setError] = useState<string | null>(null);
   const biometricName = PlatformUtility.getBiometricDisplayName();
@@ -57,7 +59,6 @@ const BiometricSetup: React.FC<{
       const encryptionKey = await SecureKeyStorage.retrieveMasterKey();
       if (!encryptionKey) {
         // This is the first time setting up, so we need to store the encryption key
-        const dbContext = (window as { dbContext?: { getEncryptionKey: () => Promise<string | null> } }).dbContext;
         if (!dbContext) {
           throw new Error(t('auth.errors.databaseNotInitialized'));
         }

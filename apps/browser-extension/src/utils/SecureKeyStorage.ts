@@ -31,8 +31,7 @@ export default class SecureKeyStorage {
       }
 
       // Encrypt the master key with the derived key
-      const masterKeyBytes = Buffer.from(masterKey, 'base64');
-      const encryptedMasterKey = await EncryptionUtility.encryptData(masterKeyBytes, encryptionKey);
+      const encryptedMasterKey = await EncryptionUtility.symmetricEncrypt(masterKey, encryptionKey);
       
       // Store the encrypted master key
       await storage.setItem(ENCRYPTED_MASTER_KEY_KEY, encryptedMasterKey);
@@ -75,13 +74,13 @@ export default class SecureKeyStorage {
       }
 
       // Decrypt the master key
-      const decryptedMasterKey = await EncryptionUtility.decryptData(encryptedMasterKey, encryptionKey);
+      const decryptedMasterKey = await EncryptionUtility.symmetricDecrypt(encryptedMasterKey, encryptionKey);
       if (!decryptedMasterKey) {
         return null;
       }
 
-      // Convert the decrypted master key to base64
-      return Buffer.from(decryptedMasterKey).toString('base64');
+      // Return the decrypted master key (already a string)
+      return decryptedMasterKey;
     } catch (error) {
       console.error('Error retrieving master key:', error);
       return null;

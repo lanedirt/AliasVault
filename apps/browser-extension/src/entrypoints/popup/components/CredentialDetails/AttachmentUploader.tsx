@@ -6,6 +6,7 @@ import type { Attachment } from '@/utils/dist/shared/models/vault';
 type AttachmentUploaderProps = {
   attachments: Attachment[];
   onAttachmentsChange: (attachments: Attachment[]) => void;
+  originalAttachmentIds?: string[];
 }
 
 /**
