@@ -189,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error enabling biometric authentication:', error);
       return false;
     }
-  }, [isLoggedIn, username, dbContext, isBiometricsAvailable]);
+  }, [isLoggedIn, username, dbContext, isBiometricsAvailable, verifyPassword]);
 
   /**
    * Disable biometric authentication.

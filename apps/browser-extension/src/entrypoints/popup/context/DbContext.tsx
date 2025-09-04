@@ -48,7 +48,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /**
    * Upgrade required state. If true, the database needs to be upgraded.
    */
-  const [upgradeRequired, setUpgradeRequired] = useState(false);
+  const [upgradeRequired, _setUpgradeRequired] = useState(false);
 
   /**
    * Vault revision.

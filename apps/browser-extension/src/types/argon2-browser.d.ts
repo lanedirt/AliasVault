@@ -1,5 +1,5 @@
 declare module 'argon2-browser/dist/argon2-bundled.min.js' {
-  interface Argon2Options {
+  interface IArgon2Options {
     pass: string;
     salt: string;
     time: number;
@@ -9,15 +9,15 @@ declare module 'argon2-browser/dist/argon2-bundled.min.js' {
     type: number;
   }
 
-  interface Argon2Result {
+  interface IArgon2Result {
     hash: Uint8Array;
     hashHex: string;
   }
 
-  export function hash(options: Argon2Options): Promise<Argon2Result>;
+  export function hash(options: IArgon2Options): Promise<IArgon2Result>;
   
   const argon2: {
-    hash: (options: Argon2Options) => Promise<Argon2Result>;
+    hash: (options: IArgon2Options) => Promise<IArgon2Result>;
   };
   
   export default argon2;
