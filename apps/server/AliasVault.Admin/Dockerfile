@@ -25,7 +25,7 @@ LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
 LABEL org.opencontainers.image.vendor="AliasVault"
 LABEL org.opencontainers.image.licenses="AGPL-3.0"
 LABEL org.opencontainers.image.title="AliasVault Admin"
-LABEL org.opencontainers.image.description="Admin portal for AliasVault server management. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
+LABEL org.opencontainers.image.description="Admin portal for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
 
 WORKDIR /app
 COPY --from=build /app/publish .

@@ -179,6 +179,9 @@ jobs:
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault PostgreSQL
             org.opencontainers.image.description=PostgreSQL database for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault PostgreSQL
+            org.opencontainers.image.description=PostgreSQL database for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push API image
         uses: docker/build-push-action@v5
@@ -191,7 +194,10 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault API
-            org.opencontainers.image.description=REST API backend for AliasVault password and email alias manager. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+            org.opencontainers.image.description=REST API backend for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault API
+            org.opencontainers.image.description=REST API backend for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push Client image
         uses: docker/build-push-action@v5
@@ -204,7 +210,10 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault Client
-            org.opencontainers.image.description=Blazor WebAssembly client UI for AliasVault with end-to-end encryption. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+            org.opencontainers.image.description=Blazor WebAssembly client UI for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault Client
+            org.opencontainers.image.description=Blazor WebAssembly client UI for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push Admin image
         uses: docker/build-push-action@v5
@@ -217,7 +226,10 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault Admin
-            org.opencontainers.image.description=Admin portal for AliasVault server management. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+            org.opencontainers.image.description=Admin portal for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault Admin
+            org.opencontainers.image.description=Admin portal for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push Reverse Proxy image
         uses: docker/build-push-action@v5
@@ -230,7 +242,10 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault Reverse Proxy
-            org.opencontainers.image.description=Nginx reverse proxy for AliasVault multi-container deployment. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+            org.opencontainers.image.description=Nginx reverse proxy for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault Reverse Proxy
+            org.opencontainers.image.description=Nginx reverse proxy for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push SMTP image
         uses: docker/build-push-action@v5
@@ -243,7 +258,10 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault SMTP Service
-            org.opencontainers.image.description=SMTP service for email alias functionality in AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+            org.opencontainers.image.description=SMTP service for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault SMTP Service
+            org.opencontainers.image.description=SMTP service for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push TaskRunner image
         uses: docker/build-push-action@v5
@@ -256,7 +274,10 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.title=AliasVault TaskRunner
-            org.opencontainers.image.description=Background task runner for AliasVault operations. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+            org.opencontainers.image.description=Background task runner for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
+          annotations: |
+            org.opencontainers.image.title=AliasVault TaskRunner
+            org.opencontainers.image.description=Background task runner for AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)
 
       - name: Build and push InstallCli image
         uses: docker/build-push-action@v5
@@ -268,6 +289,9 @@ jobs:
           tags: ${{ steps.tags.outputs.installcli }}
           labels: |
             ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault Install CLI
+            org.opencontainers.image.description=Installation and configuration CLI for AliasVault. Used by install.sh for setup and configuration, not deployed as part of the application stack
+          annotations: |
             org.opencontainers.image.title=AliasVault Install CLI
             org.opencontainers.image.description=Installation and configuration CLI for AliasVault. Used by install.sh for setup and configuration, not deployed as part of the application stack
 
@@ -329,5 +353,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: |
             ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=AliasVault All-in-One
+            org.opencontainers.image.description=Self-contained AliasVault server including web app, with all services bundled using s6-overlay. Single container solution for easy deployment (see docs.aliasvault.net).
+          annotations: |
             org.opencontainers.image.title=AliasVault All-in-One
             org.opencontainers.image.description=Self-contained AliasVault server including web app, with all services bundled using s6-overlay. Single container solution for easy deployment (see docs.aliasvault.net).
