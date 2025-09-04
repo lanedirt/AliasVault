@@ -69,11 +69,6 @@ docker buildx build --platform linux/amd64,linux/arm64/v8 \
   -f dockerfiles/all-in-one/Dockerfile \
   -t aliasvault/aliasvault:0.22.0 \
   -t aliasvault/aliasvault:latest \
-  --label "org.opencontainers.image.source=https://github.com/aliasvault/aliasvault" \
-  --label "org.opencontainers.image.vendor=AliasVault" \
-  --label "org.opencontainers.image.licenses=AGPL-3.0" \
-  --label "org.opencontainers.image.title=AliasVault All-in-One" \
-  --label "org.opencontainers.image.description=Self-contained AliasVault server including web app, with all services bundled using s6-overlay. Single container solution for easy deployment (see docs.aliasvault.net)." \
   --push .
 ```
 
@@ -88,11 +83,6 @@ docker buildx build --platform linux/amd64,linux/arm64/v8 \
   -f dockerfiles/all-in-one/Dockerfile \
   -t ghcr.io/aliasvault/aliasvault:0.22.0 \
   -t ghcr.io/aliasvault/aliasvault:latest \
-  --label "org.opencontainers.image.source=https://github.com/aliasvault/aliasvault" \
-  --label "org.opencontainers.image.vendor=AliasVault" \
-  --label "org.opencontainers.image.licenses=AGPL-3.0" \
-  --label "org.opencontainers.image.title=AliasVault All-in-One" \
-  --label "org.opencontainers.image.description=Self-contained AliasVault server including web app, with all services bundled using s6-overlay. Single container solution for easy deployment (see docs.aliasvault.net)." \
   --push .
 ```
 

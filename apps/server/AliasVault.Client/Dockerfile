@@ -42,6 +42,14 @@ RUN dotnet publish "AliasVault.Client.csproj" \
 
 # Final stage
 FROM nginx:1.24.0 AS final
+
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault Client"
+LABEL org.opencontainers.image.description="Blazor WebAssembly client UI for AliasVault with end-to-end encryption. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
+
 WORKDIR /usr/share/nginx/html
 COPY --from=publish /app/publish/wwwroot .
 COPY /apps/server/AliasVault.Client/nginx.conf /etc/nginx/nginx.conf

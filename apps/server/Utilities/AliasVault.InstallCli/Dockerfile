@@ -17,6 +17,14 @@ RUN dotnet publish "apps/server/Utilities/AliasVault.InstallCli/AliasVault.Insta
     /p:UseAppHost=false
 
 FROM base AS final
+
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault Install CLI"
+LABEL org.opencontainers.image.description="Installation and configuration CLI for AliasVault. Used by install.sh for setup and configuration, not deployed as part of the application stack"
+
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AliasVault.InstallCli.dll"]

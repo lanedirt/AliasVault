@@ -1,5 +1,12 @@
 FROM nginx:alpine
 
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault Reverse Proxy"
+LABEL org.opencontainers.image.description="Nginx reverse proxy for AliasVault multi-container deployment. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
+
 # Install OpenSSL
 RUN apk add --no-cache openssl
 

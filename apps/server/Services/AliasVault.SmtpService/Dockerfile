@@ -17,6 +17,14 @@ RUN dotnet publish "./AliasVault.SmtpService.csproj" -c "$BUILD_CONFIGURATION" \
     /p:UseAppHost=false
 
 FROM base AS final
+
+# OCI Image Labels
+LABEL org.opencontainers.image.source="https://github.com/aliasvault/aliasvault"
+LABEL org.opencontainers.image.vendor="AliasVault"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL org.opencontainers.image.title="AliasVault SMTP Service"
+LABEL org.opencontainers.image.description="SMTP service for email alias functionality in AliasVault. Part of multi-container setup and can be deployed via install.sh (see docs.aliasvault.net)"
+
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AliasVault.SmtpService.dll"]
