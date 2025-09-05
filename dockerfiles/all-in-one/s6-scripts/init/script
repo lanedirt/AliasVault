@@ -154,37 +154,6 @@ else
     chmod 700 /database/postgres
 fi
 
-# Future: Database migrations could go here
-# log 1 "[init] Checking for database migrations..."
-# if [ -f /app/migrations/pending ]; then
-#     log 1 "[init] → Running database migrations..."
-#     # Run migration logic here
-# fi
-
-# Generate SSL certificates if needed
-if [ ! -f /certificates/ssl/cert.pem ] || [ ! -f /certificates/ssl/key.pem ]; then
-    log 0 ""
-    log 0 "[init] Generating SSL certificates..."
-    mkdir -p /certificates/ssl
-    if [ "$VERBOSITY" -ge 2 ]; then
-        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-            -keyout /certificates/ssl/key.pem \
-            -out /certificates/ssl/cert.pem \
-            -subj "/C=US/ST=State/L=City/O=AliasVault/CN=${HOSTNAME:-localhost}"
-    else
-        openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-            -keyout /certificates/ssl/key.pem \
-            -out /certificates/ssl/cert.pem \
-            -subj "/C=US/ST=State/L=City/O=AliasVault/CN=${HOSTNAME:-localhost}" \
-            >/dev/null 2>&1
-    fi
-    chmod 600 /certificates/ssl/key.pem
-    chmod 644 /certificates/ssl/cert.pem
-    log 0 "[init] Self-signed SSL certificates generated"
-else
-    log 0 "[init] ✅ Self-signed SSL certificates already exist"
-fi
-
 echo ""
 echo "[init] Waiting for all services to be ready... this can take a short while..."
 echo ""

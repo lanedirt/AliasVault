@@ -109,11 +109,8 @@ RUN apt-get update && \
         /app/taskrunner \
         /app/installcli \
         /database \
-        /certificates/ssl \
         /logs/postgres \
-        /etc/nginx/ssl \
         /var/run/postgresql \
-        /var/www/certbot \
         /etc/s6-overlay/s6-rc.d/user/contents.d
 
 # Copy built applications and all configuration files from builder stage
@@ -122,7 +119,7 @@ COPY --from=dotnet-builder /app /app
 # Copy configuration files and scripts directly to their destinations
 COPY dockerfiles/all-in-one/reset-admin-password.sh /usr/local/bin/reset-admin-password.sh
 COPY apps/server/AliasVault.Client/nginx.conf /app/client/nginx.conf
-COPY apps/server/nginx.conf /etc/nginx/nginx.conf
+COPY dockerfiles/all-in-one/config/nginx.conf /etc/nginx/nginx.conf
 COPY apps/server/status.html /usr/share/nginx/html/status.html
 COPY dockerfiles/all-in-one/s6-scripts /etc/s6-overlay/s6-rc.d/
 
@@ -131,9 +128,6 @@ RUN cp -r /app/installcli /usr/local/bin/aliasvault-cli && \
     chmod +x /usr/local/bin/aliasvault-cli/AliasVault.InstallCli \
              /usr/local/bin/reset-admin-password.sh && \
     ln -s /usr/local/bin/aliasvault-cli/AliasVault.InstallCli /usr/local/bin/aliasvault-cli.sh && \
-    sed -i 's/server client:3000/server localhost:3000/g; \
-            s/server api:3001/server localhost:3001/g; \
-            s/server admin:3002/server localhost:3002/g' /etc/nginx/nginx.conf && \
     find /etc/s6-overlay/s6-rc.d -type f \( -name "run" -o -name "up" -o -name "script" \) -exec chmod +x {} \; && \
     cd /etc/s6-overlay/s6-rc.d/user/contents.d && \
     touch init postgres api client admin smtp taskrunner nginx notification && \
@@ -153,8 +147,8 @@ ENV ALIASVAULT_VERBOSITY=0 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_VERBOSITY=0
 
-EXPOSE 80 443 25 587
-VOLUME ["/database", "/certificates", "/logs", "/secrets"]
+EXPOSE 80 25 587
+VOLUME ["/database", "/logs", "/secrets"]
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-    CMD curl -f -k https://localhost/api || exit 1
+    CMD curl -f http://localhost/api || exit 1
 ENTRYPOINT ["/init"]

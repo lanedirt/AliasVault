@@ -6,13 +6,11 @@ services:
 
     ports:
       - "80:80"
-      - "443:443"
       - "25:25"
       - "587:587"
 
     volumes:
       - ./database:/database
-      - ./certificates:/certificates
       - ./logs:/logs
       - ./secrets:/secrets
 
