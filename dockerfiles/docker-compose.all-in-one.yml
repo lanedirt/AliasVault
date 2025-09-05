@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   aliasvault:
     image: ghcr.io/aliasvault/aliasvault:latest
