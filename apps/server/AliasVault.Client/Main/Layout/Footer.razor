@@ -95,11 +95,15 @@
 
     /// <summary>
     /// Checks if the current URL is using HTTP and shows warning if needed.
+    /// Only shows warning for non-localhost hostnames since browsers allow crypto operations on localhost via HTTP.
     /// </summary>
     private void CheckHttpProtocol(object? sender, LocationChangedEventArgs? e)
     {
         var uri = new Uri(NavigationManager.Uri);
-        _isHttpWarning = !_httpWarningDismissed && uri.Scheme == "http";
+        var isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || 
+                         uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                         uri.Host.Equals("::1", StringComparison.OrdinalIgnoreCase);
+        _isHttpWarning = !_httpWarningDismissed && uri.Scheme == "http" && !isLocalhost;
         StateHasChanged();
     }
 
