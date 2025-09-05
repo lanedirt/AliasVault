@@ -18,24 +18,39 @@ COPY shared/ ./shared/
 
 # Install required .NET workloads and restore packages once for the entire solution
 WORKDIR /src/apps/server
+
+# Install workloads and restore packages once for the entire solution
 RUN dotnet workload install wasm-tools && \
     dotnet restore aliasvault.sln
 
-# Build all applications
+# Build each application in separate layers to avoid lock contention
+
+# Build API
 RUN dotnet publish AliasVault.Api/AliasVault.Api.csproj \
-        -c Release -o /app/api --no-restore && \
-    dotnet publish AliasVault.Client/AliasVault.Client.csproj \
-        -c Release -o /app/client --no-restore && \
-    dotnet publish AliasVault.Admin/AliasVault.Admin.csproj \
-        -c Release -o /app/admin --no-restore && \
-    dotnet publish Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj \
-        -c Release -o /app/smtp --no-restore && \
-    dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj \
-        -c Release -o /app/taskrunner --no-restore && \
-    dotnet publish Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj \
-        -c Release -o /app/installcli --no-restore && \
-    # Clean up .NET debug files and unnecessary files
-    find /app -name "*.pdb" -delete && \
+        -c Release -o /app/api --no-restore
+
+# Build Client (contains WASM which can be slow)
+RUN dotnet publish AliasVault.Client/AliasVault.Client.csproj \
+        -c Release -o /app/client --no-restore
+
+# Build Admin
+RUN dotnet publish AliasVault.Admin/AliasVault.Admin.csproj \
+        -c Release -o /app/admin --no-restore
+
+# Build SMTP Service
+RUN dotnet publish Services/AliasVault.SmtpService/AliasVault.SmtpService.csproj \
+        -c Release -o /app/smtp --no-restore
+
+# Build Task Runner
+RUN dotnet publish Services/AliasVault.TaskRunner/AliasVault.TaskRunner.csproj \
+        -c Release -o /app/taskrunner --no-restore
+
+# Build Install CLI
+RUN dotnet publish Utilities/AliasVault.InstallCli/AliasVault.InstallCli.csproj \
+        -c Release -o /app/installcli --no-restore
+
+# Clean up .NET debug files and unnecessary files
+RUN find /app -name "*.pdb" -delete && \
     find /app -name "*.xml" -not -name "*.deps.json" -delete && \
     find /app -name "*.Development.json" -delete && \
     find /app -name "web.config" -delete
