@@ -78,4 +78,12 @@
     <value>Tip: Use the g+l (go lock) keyboard shortcut to lock the vault.</value>
     <comment>Tip about keyboard shortcut for locking vault</comment>
   </data>
+  <data name="HttpsWarningTitle" xml:space="preserve">
+    <value>HTTPS Required</value>
+    <comment>Title for HTTPS warning banner</comment>
+  </data>
+  <data name="HttpsWarningMessage" xml:space="preserve">
+    <value>The AliasVault web app requires HTTPS for using browser crypto operations. Registering/logging in won't work over HTTP. Please switch to HTTPS and use a valid SSL certificate.</value>
+    <comment>Message explaining why HTTPS is required</comment>
+  </data>
 </root>

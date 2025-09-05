@@ -3,7 +3,23 @@
 # Get verbosity level (0=minimal, 1=normal, 2=verbose)
 VERBOSITY="${ALIASVAULT_VERBOSITY:-0}"
 
-echo "Starting Nginx reverse proxy (HTTP-only mode)..."
+# Copy certificates to nginx directory (they were created during init)
+mkdir -p /etc/nginx/ssl
+cp /certificates/ssl/* /etc/nginx/ssl/ 2>/dev/null || true
+
+# Create SSL configuration file
+cat > /etc/nginx/ssl.conf << "SSLEOF"
+ssl_certificate /etc/nginx/ssl/cert.pem;
+ssl_certificate_key /etc/nginx/ssl/key.pem;
+ssl_session_timeout 1d;
+ssl_session_cache shared:MozTLS:10m;
+ssl_session_tickets off;
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+ssl_prefer_server_ciphers off;
+SSLEOF
+
+echo "Starting Nginx reverse proxy..."
 
 # Set nginx error log level based on verbosity
 if [ "$VERBOSITY" -ge 2 ]; then

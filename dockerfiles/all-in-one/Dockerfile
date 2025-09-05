@@ -162,7 +162,7 @@ ENV ALIASVAULT_VERBOSITY=0 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
     S6_VERBOSITY=0
 
-EXPOSE 80 25 587
+EXPOSE 80 443 25 587
 VOLUME ["/database", "/logs", "/secrets"]
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD curl -f http://localhost/api || exit 1
