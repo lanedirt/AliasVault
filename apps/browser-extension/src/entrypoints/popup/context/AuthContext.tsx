@@ -3,7 +3,11 @@ import { sendMessage } from 'webext-bridge/popup';
 
 import { useDb } from '@/entrypoints/popup/context/DbContext';
 
-import { VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import { BIOMETRIC_ENABLED_KEY, VAULT_LOCKED_DISMISS_UNTIL_KEY } from '@/utils/Constants';
+import EncryptionUtility from '@/utils/EncryptionUtility';
+import PlatformUtility from '@/utils/PlatformUtility';
+import SecureKeyStorage from '@/utils/SecureKeyStorage';
+import WebAuthnUtility from '@/utils/WebAuthnUtility';
 
 import { storage } from '#imports';
 
@@ -17,6 +21,14 @@ type AuthContextType = {
   logout: (errorMessage?: string) => Promise<void>;
   globalMessage: string | null;
   clearGlobalMessage: () => void;
+  // Biometric authentication methods
+  isBiometricsAvailable: () => Promise<boolean>;
+  isBiometricsEnabled: () => Promise<boolean>;
+  enableBiometrics: (password: string) => Promise<boolean>;
+  disableBiometrics: () => Promise<boolean>;
+  authenticateWithBiometrics: () => Promise<string | null>;
+  getBiometricDisplayName: () => string;
+  verifyPassword: (password: string) => Promise<boolean>;
 }
 
 /**
@@ -107,6 +119,182 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setGlobalMessage(null);
   }, []);
 
+  /**
+   * Check if biometric authentication is available on the current device.
+   */
+  const isBiometricsAvailable = useCallback(async () : Promise<boolean> => {
+    return await PlatformUtility.isBiometricAuthSupported();
+  }, []);
+
+  /**
+   * Check if biometric authentication is enabled and properly configured.
+   */
+  const isBiometricsEnabled = useCallback(async () : Promise<boolean> => {
+    const enabled = await storage.getItem(BIOMETRIC_ENABLED_KEY) as string;
+    if (enabled !== 'true') {
+      return false;
+    }
+
+    // Check if all required data exists for biometric authentication
+    const username = await storage.getItem('local:username') as string;
+    const accessToken = await storage.getItem('local:accessToken') as string;
+    const refreshToken = await storage.getItem('local:refreshToken') as string;
+    const credentialRegistered = await WebAuthnUtility.isCredentialRegistered();
+    const masterKeyStored = await SecureKeyStorage.isMasterKeyStored();
+
+    return !!(username && accessToken && refreshToken && credentialRegistered && masterKeyStored);
+  }, []);
+
+  /**
+   * Enable biometric authentication.
+   * This will register a WebAuthn credential and store the encryption key securely.
+   * 
+   * @param password The user's password for verification
+   */
+  const enableBiometrics = useCallback(async (password: string) : Promise<boolean> => {
+    try {
+      // Check if biometric authentication is available
+      const available = await isBiometricsAvailable();
+      if (!available) {
+        return false;
+      }
+
+      // Check if the user is logged in
+      if (!isLoggedIn || !username) {
+        return false;
+      }
+      
+      // Verify the password
+      const isValid = await verifyPassword(password);
+      if (!isValid) {
+        return false;
+      }
+
+      // Get the encryption key from the database context
+      const encryptionKey = await dbContext?.getEncryptionKey();
+      if (!encryptionKey) {
+        return false;
+      }
+
+      // Store the encryption key securely
+      const success = await SecureKeyStorage.storeMasterKey(encryptionKey);
+      if (!success) {
+        return false;
+      }
+
+      // Set biometric authentication as enabled
+      await storage.setItem(BIOMETRIC_ENABLED_KEY, 'true');
+      return true;
+    } catch (error) {
+      console.error('Error enabling biometric authentication:', error);
+      return false;
+    }
+  }, [isLoggedIn, username, dbContext, isBiometricsAvailable, verifyPassword]);
+
+  /**
+   * Disable biometric authentication.
+   * This will remove the WebAuthn credential and the stored encryption key.
+   */
+  const disableBiometrics = useCallback(async () : Promise<boolean> => {
+    try {
+      // Remove the WebAuthn credential
+      await WebAuthnUtility.removeCredential();
+
+      // Remove the stored encryption key
+      await SecureKeyStorage.removeMasterKey();
+
+      // Set biometric authentication as disabled
+      await storage.setItem(BIOMETRIC_ENABLED_KEY, 'false');
+      return true;
+    } catch (error) {
+      console.error('Error disabling biometric authentication:', error);
+      return false;
+    }
+  }, []);
+
+  /**
+   * Authenticate with biometric authentication.
+   * This will use the WebAuthn credential to authenticate and retrieve the encryption key.
+   * 
+   * @returns The encryption key if authentication was successful, null otherwise
+   */
+  const authenticateWithBiometrics = useCallback(async () : Promise<string | null> => {
+    try {
+      // Check if biometric authentication is enabled
+      const enabled = await isBiometricsEnabled();
+      if (!enabled) {
+        return null;
+      }
+
+      // Check if a WebAuthn credential is registered
+      const credentialRegistered = await WebAuthnUtility.isCredentialRegistered();
+      if (!credentialRegistered) {
+        return null;
+      }
+
+      // Authenticate with WebAuthn
+      const authenticated = await WebAuthnUtility.authenticate();
+      if (!authenticated) {
+        return null;
+      }
+
+      // Retrieve the encryption key
+      const encryptionKey = await SecureKeyStorage.retrieveMasterKey();
+      return encryptionKey;
+    } catch (error) {
+      console.error('Error authenticating with biometrics:', error);
+      return null;
+    }
+  }, [isBiometricsEnabled]);
+
+  /**
+   * Get the biometric display name.
+   */
+  const getBiometricDisplayName = useCallback(() : string => {
+    return PlatformUtility.getBiometricDisplayName();
+  }, []);
+  
+  /**
+   * Verify the user's password.
+   * 
+   * @param password The password to verify
+   * @returns True if the password is valid, false otherwise
+   */
+  const verifyPassword = useCallback(async (password: string) : Promise<boolean> => {
+    try {
+      // Check if the user is logged in
+      if (!isLoggedIn || !username) {
+        return false;
+      }
+      
+      // Get the encryption key derivation parameters
+      const params = await dbContext?.getEncryptionKeyDerivationParams();
+      if (!params) {
+        return false;
+      }
+      
+      // Derive the key from the password
+      const derivedKey = await EncryptionUtility.deriveKeyFromPassword(
+        password,
+        params.salt,
+        params.encryptionType,
+        params.encryptionSettings
+      );
+      
+      // Convert to base64 for comparison
+      const derivedKeyBase64 = Buffer.from(derivedKey).toString('base64');
+      
+      // Get the stored encryption key
+      const storedKey = await dbContext?.getEncryptionKey();
+      
+      // Compare the keys
+      return derivedKeyBase64 === storedKey;
+    } catch (error) {
+      console.error('Error verifying password:', error);
+      return false;
+    }
+  }, [isLoggedIn, username, dbContext]);
+
   const contextValue = useMemo(() => ({
     isLoggedIn,
     isInitialized,
@@ -117,7 +305,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     globalMessage,
     clearGlobalMessage,
-  }), [isLoggedIn, isInitialized, username, initializeAuth, globalMessage, setAuthTokens, login, logout, clearGlobalMessage]);
+    isBiometricsAvailable,
+    isBiometricsEnabled,
+    enableBiometrics,
+    disableBiometrics,
+    authenticateWithBiometrics,
+    getBiometricDisplayName,
+    verifyPassword,
+  }), [
+    isLoggedIn, 
+    isInitialized, 
+    username, 
+    initializeAuth, 
+    globalMessage, 
+    setAuthTokens, 
+    login, 
+    logout, 
+    clearGlobalMessage,
+    isBiometricsAvailable,
+    isBiometricsEnabled,
+    enableBiometrics,
+    disableBiometrics,
+    authenticateWithBiometrics,
+    getBiometricDisplayName,
+    verifyPassword
+  ]);
 
   return (
     <AuthContext.Provider value={contextValue}>

@@ -5,6 +5,7 @@ type ButtonProps = {
   children: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
   variant?: 'primary' | 'secondary';
+  className?: string;
 };
 
 /**
@@ -14,7 +15,8 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   children,
   type = 'button',
-  variant = 'primary'
+  variant = 'primary',
+  className = ''
 }) => {
   const colorClasses = {
     primary: 'bg-primary-500 hover:bg-primary-600',
@@ -23,7 +25,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={`${colorClasses[variant]} text-white font-medium rounded-lg px-4 py-2 text-sm w-full`}
+      className={`${colorClasses[variant]} text-white font-medium rounded-lg px-4 py-2 text-sm w-full ${className}`}
       onClick={onClick}
       type={type}
     >

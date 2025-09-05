@@ -8,6 +8,12 @@ export const CLIPBOARD_CLEAR_TIMEOUT_KEY = 'local:aliasvault_clipboard_clear_tim
 export const AUTO_LOCK_TIMEOUT_KEY = 'local:aliasvault_auto_lock_timeout';
 export const AUTOFILL_MATCHING_MODE_KEY = 'local:aliasvault_autofill_matching_mode';
 
+// Biometric authentication constants
+export const BIOMETRIC_ENABLED_KEY = 'local:aliasvault_biometric_enabled';
+export const WEBAUTHN_CREDENTIAL_ID_KEY = 'local:aliasvault_webauthn_credential_id';
+export const WEBAUTHN_CHALLENGE_KEY = 'local:aliasvault_webauthn_challenge';
+export const ENCRYPTED_MASTER_KEY_KEY = 'local:aliasvault_encrypted_master_key';
+
 // TODO: store these settings in the actual vault when updating the datamodel for roadmap v1.0.
 export const LAST_CUSTOM_EMAIL_KEY = 'local:aliasvault_last_custom_email';
 export const LAST_CUSTOM_USERNAME_KEY = 'local:aliasvault_last_custom_username';

@@ -4,8 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import BiometricSetup from '@/entrypoints/popup/components/BiometricSetup';
 import Button from '@/entrypoints/popup/components/Button';
 import HeaderButton from '@/entrypoints/popup/components/HeaderButton';
+import { BiometricIcon } from '@/entrypoints/popup/components/Icons/BiometricIcons';
 import { HeaderIconType } from '@/entrypoints/popup/components/Icons/HeaderIcons';
 import LoginServerInfo from '@/entrypoints/popup/components/LoginServerInfo';
 import { useAuth } from '@/entrypoints/popup/context/AuthContext';
@@ -17,6 +19,7 @@ import { PopoutUtility } from '@/entrypoints/popup/utils/PopoutUtility';
 import SrpUtility from '@/entrypoints/popup/utils/SrpUtility';
 
 import { AppInfo } from '@/utils/AppInfo';
+import BiometricErrorHandler from '@/utils/BiometricErrorHandler';
 import type { VaultResponse, LoginResponse } from '@/utils/dist/shared/models/webapi';
 import EncryptionUtility from '@/utils/EncryptionUtility';
 import { ApiAuthError } from '@/utils/types/errors/ApiAuthError';
@@ -47,6 +50,10 @@ const Login: React.FC = () => {
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [clientUrl, setClientUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isBiometricsAvailable, setIsBiometricsAvailable] = useState(false);
+  const [isBiometricsEnabled, setIsBiometricsEnabled] = useState(false);
+  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
+  const [biometricName, setBiometricName] = useState('');
   const webApi = useWebApi();
   const srpUtil = new SrpUtility(webApi);
 
@@ -145,6 +152,99 @@ const Login: React.FC = () => {
       setHeaderButtons(null);
     };
   }, [setHeaderButtons]);
+
+  /**
+   * Check if biometric authentication is available and enabled
+   */
+  useEffect(() => {
+    /**
+     * Check if biometric authentication is available and enabled
+     */
+    const checkBiometrics = async (): Promise<void> => {
+      try {
+        const available = await authContext.isBiometricsAvailable();
+        setIsBiometricsAvailable(available);
+
+        if (available) {
+          const enabled = await authContext.isBiometricsEnabled();
+          setIsBiometricsEnabled(enabled);
+          setBiometricName(authContext.getBiometricDisplayName());
+        }
+      } catch (error) {
+        console.error('Error checking biometric authentication:', error);
+      }
+    };
+
+    checkBiometrics();
+  }, [authContext]);
+
+  /**
+   * Handle biometric authentication
+   */
+  const handleBiometricAuth = async (): Promise<void> => {
+    setError(null);
+    
+    try {
+      showLoading();
+      
+      // Authenticate with biometrics
+      const encryptionKey = await authContext.authenticateWithBiometrics();
+      if (!encryptionKey) {
+        hideLoading();
+        return;
+      }
+      
+      // Get the username from storage
+      const username = await storage.getItem('local:username') as string;
+      if (!username) {
+        setError(t('auth.errors.usernameNotFound'));
+        hideLoading();
+        return;
+      }
+      
+      // Get the access token and refresh token
+      const accessToken = await storage.getItem('local:accessToken') as string;
+      const refreshToken = await storage.getItem('local:refreshToken') as string;
+      
+      if (!accessToken || !refreshToken) {
+        setError(t('auth.errors.tokensNotFound'));
+        hideLoading();
+        return;
+      }
+      
+      // Initialize the database with the encryption key
+      await dbContext.storeEncryptionKey(encryptionKey);
+      
+      // Set auth tokens
+      await authContext.setAuthTokens(username, accessToken, refreshToken);
+      
+      // Login
+      await authContext.login();
+      
+      // Navigate to reinitialize page which will take care of the proper redirect
+      navigate('/reinitialize', { replace: true });
+      
+      hideLoading();
+    } catch (error) {
+      hideLoading();
+      setError(BiometricErrorHandler.getErrorMessage(error));
+    }
+  };
+
+  /**
+   * Handle biometric setup completion
+   */
+  const handleBiometricSetupComplete = async (): Promise<void> => {
+    setShowBiometricSetup(false);
+    setIsBiometricsEnabled(true);
+  };
+
+  /**
+   * Handle biometric setup cancellation
+   */
+  const handleBiometricSetupCancel = (): void => {
+    setShowBiometricSetup(false);
+  };
 
   /**
    * Handle submit
@@ -351,6 +451,16 @@ const Login: React.FC = () => {
     );
   }
 
+  // Show biometric setup if requested
+  if (showBiometricSetup) {
+    return (
+      <BiometricSetup
+        onSetupComplete={handleBiometricSetupComplete}
+        onCancel={handleBiometricSetupCancel}
+      />
+    );
+  }
+
   return (
     <div>
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-700 w-full shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -402,10 +512,32 @@ const Login: React.FC = () => {
             <span className="text-sm text-gray-700 dark:text-gray-200">{t('auth.rememberMe')}</span>
           </label>
         </div>
-        <div className="flex w-full">
+        <div className="flex flex-col w-full space-y-2">
           <Button type="submit">
             {t('auth.loginButton')}
           </Button>
+          
+          {isBiometricsAvailable && isBiometricsEnabled && (
+            <Button 
+              onClick={handleBiometricAuth}
+              variant="secondary"
+              className="flex items-center justify-center"
+            >
+              <BiometricIcon className="mr-2" size={20} />
+              {t('auth.loginWithBiometric', { biometric: biometricName })}
+            </Button>
+          )}
+          
+          {isBiometricsAvailable && !isBiometricsEnabled && (
+            <Button 
+              onClick={() => setShowBiometricSetup(true)}
+              variant="secondary"
+              className="flex items-center justify-center"
+            >
+              <BiometricIcon className="mr-2" size={20} />
+              {t('auth.setupBiometric', { biometric: biometricName })}
+            </Button>
+          )}
         </div>
       </form>
       <div className="text-center text-sm text-gray-600 dark:text-gray-400">

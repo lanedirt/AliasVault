@@ -12,9 +12,12 @@ type DbContextType = {
   sqliteClient: SqliteClient | null;
   dbInitialized: boolean;
   dbAvailable: boolean;
+  upgradeRequired: boolean;
   initializeDatabase: (vaultResponse: VaultResponse, derivedKey: string) => Promise<SqliteClient>;
   storeEncryptionKey: (derivedKey: string) => Promise<void>;
+  getEncryptionKey: () => Promise<string | null>;
   storeEncryptionKeyDerivationParams: (params: EncryptionKeyDerivationParams) => Promise<void>;
+  getEncryptionKeyDerivationParams: () => Promise<EncryptionKeyDerivationParams | null>;
   clearDatabase: () => void;
   getVaultMetadata: () => Promise<VaultMetadata | null>;
   setCurrentVaultRevisionNumber: (revisionNumber: number) => Promise<void>;
@@ -41,6 +44,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * Database availability state. If true, the database is available. If false, the database is not available and needs to be unlocked or retrieved again from the API.
    */
   const [dbAvailable, setDbAvailable] = useState(false);
+
+  /**
+   * Upgrade required state. If true, the database needs to be upgraded.
+   */
+  const [upgradeRequired, _setUpgradeRequired] = useState(false);
 
   /**
    * Vault revision.
@@ -154,10 +162,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   /**
+   * Get encryption key from background worker.
+   */
+  const getEncryptionKey = useCallback(async () : Promise<string | null> => {
+    return await sendMessage('GET_ENCRYPTION_KEY', {}, 'background') as string | null;
+  }, []);
+
+  /**
    * Store encryption key derivation params in background worker.
    */
   const storeEncryptionKeyDerivationParams = useCallback(async (params: EncryptionKeyDerivationParams) : Promise<void> => {
     await sendMessage('STORE_ENCRYPTION_KEY_DERIVATION_PARAMS', params, 'background');
+  }, []);
+
+  /**
+   * Get encryption key derivation params from background worker.
+   */
+  const getEncryptionKeyDerivationParams = useCallback(async () : Promise<EncryptionKeyDerivationParams | null> => {
+    return await sendMessage('GET_ENCRYPTION_KEY_DERIVATION_PARAMS', {}, 'background') as EncryptionKeyDerivationParams | null;
   }, []);
 
   /**
@@ -174,14 +196,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     sqliteClient,
     dbInitialized,
     dbAvailable,
+    upgradeRequired,
     initializeDatabase,
     storeEncryptionKey,
+    getEncryptionKey,
     storeEncryptionKeyDerivationParams,
+    getEncryptionKeyDerivationParams,
     clearDatabase,
     getVaultMetadata,
     setCurrentVaultRevisionNumber,
     hasPendingMigrations,
-  }), [sqliteClient, dbInitialized, dbAvailable, initializeDatabase, storeEncryptionKey, storeEncryptionKeyDerivationParams, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
+  }), [sqliteClient, dbInitialized, dbAvailable, upgradeRequired, initializeDatabase, storeEncryptionKey, getEncryptionKey, storeEncryptionKeyDerivationParams, getEncryptionKeyDerivationParams, clearDatabase, getVaultMetadata, setCurrentVaultRevisionNumber, hasPendingMigrations]);
 
   return (
     <DbContext.Provider value={contextValue}>
