@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Manual Setup
-parent: Advanced
-nav_order: 1
+parent: Self-hosting
+nav_order: 6
 ---
 
 # Manual Setup

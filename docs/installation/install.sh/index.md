@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Basic Install
-parent: Server Installation
+title: Install.sh
+parent: Self-hosting
 nav_order: 1
 ---
 
-# Basic Install
-The following guide will walk you through the steps to install AliasVault on your own server. Minimum experience with Docker and Linux is required.
+# Self-host via install.sh
+The following guide will walk you through the steps to install AliasVault on your own server using `install.sh`. Minimum experience with Docker and Linux is required. Estimated time: 5-15 minutes.
 
 {: .toc }
 * TOC
@@ -74,7 +74,7 @@ and then in the prompt choose option 2.
 
 ## 3. Email Server Setup
 
-AliasVault includes a built-in email server that allows you to generate email aliases on-the-fly for every website you use, and receive the and read the emails straight in AliasVault.
+AliasVault includes a built-in email server that allows you to generate email aliases on-the-fly for every website you use, and receive + read the emails straight in AliasVault.
 
 > **Note:**
 > If you skip this step, AliasVault will default to use public email domains offered by SpamOK. While this still works for creating aliases, it has privacy limitations. For complete privacy and control, we recommend setting up your own domain.

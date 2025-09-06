@@ -13,7 +13,7 @@ A self-hostable, end-to-end encrypted password manager with a built-in alias gen
 
 {: .fs-6 .fw-300 }
 
-[Server Installation](./installation/install){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Self-host installation](./installation/install){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [View on GitHub](https://github.com/aliasvault/aliasvault){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---

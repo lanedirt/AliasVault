@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Troubleshooting
-parent: Server Installation
+parent: Install.sh
 nav_order: 5
 ---
 

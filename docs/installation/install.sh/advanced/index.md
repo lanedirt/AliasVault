@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Advanced
-parent: Server Installation
-nav_order: 2
+parent: Install.sh
+nav_order: 4
 ---
 
 # Advanced Installation

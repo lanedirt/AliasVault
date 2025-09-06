@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Update
-parent: Server Installation
+parent: Install.sh
 nav_order: 3
 ---
 
