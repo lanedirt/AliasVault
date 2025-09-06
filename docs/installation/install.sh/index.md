@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Install.sh
+title: Installer Script (managed)
 parent: Self-hosting
 nav_order: 1
 ---
 
 # Self-host via install.sh
-The following guide will walk you through the steps to install AliasVault on your own server using `install.sh`. Minimum experience with Docker and Linux is required. Estimated time: 5-15 minutes.
+The following guide will walk you through the steps to install AliasVault on your own server using the AliasVault installer script: `install.sh`. Minimum experience with Docker and Linux is required. Estimated time: 5-15 minutes.
 
 {: .toc }
 * TOC

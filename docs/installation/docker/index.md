@@ -1,12 +1,12 @@
 ---
 layout: default
-title: All-In-One Docker Image
+title: Manual Setup (single container)
 parent: Self-hosting
 nav_order: 2
 ---
 
 # Self-host via All-In-One Docker image
-Instead of using the `install.sh` script with multi-docker container setup, AliasVault is also available as a standalone all-in-one container that uses `s6-overlay` to combine all AliasVault's services into one image for convenience. This setup is suitable for home and internal use.
+The following guide will walk you through the steps to install AliasVault via the All-In-One Docker container. This container uses `s6-overlay` to combine all AliasVault's services into one image for convenience. The only downside compared to the `install.sh` installer is that this version does NOT come with SSL support, so you'll have to make the container available through your own SSL proxy.
 
 **Prerequisites:**
 
